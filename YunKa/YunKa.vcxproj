@@ -19,13 +19,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v120_xp</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v120_xp</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -42,7 +42,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>../thirdlib/duilib;../thirdlib/zlib/include;../thirdlib/libcef;../thirdlib/libcurl/include;.\;$(IncludePath)</IncludePath>
-    <LibraryPath>../lib;../thirdlib/zlib/lib;../thirdlib/libcef/debug;../thirdlib/libcurl;$(LibraryPath)</LibraryPath>
+    <LibraryPath>../lib;$(LibraryPath)</LibraryPath>
     <OutDir>../bin</OutDir>
     <IntDir>../Build/Debug/</IntDir>
     <EmbedManifest>true</EmbedManifest>
@@ -51,7 +51,7 @@
     <LinkIncremental>false</LinkIncremental>
     <OutDir>../bin_r</OutDir>
     <IntDir>../Build/Release/</IntDir>
-    <IncludePath>../thirdlib/duilib;$(IncludePath)</IncludePath>
+    <IncludePath>../thirdlib/duilib;../thirdlib/zlib/include;../thirdlib/libcef;../thirdlib/libcurl/include;.\;$(IncludePath)</IncludePath>
     <LibraryPath>../lib_r;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -63,7 +63,10 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>./dui_ex;./ui;./ui_common;./auth;./log;./md5;./timer;./chat_manager;./utils;./http_load;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <PrecompiledHeaderOutputFile>../Build/$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <PrecompiledHeaderOutputFile>../Build/Debug/$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>../Build/Debug/</AssemblerListingLocation>
+      <ObjectFileName>../Build/Debug/</ObjectFileName>
+      <ProgramDataBaseFileName>../Build/Debug/</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -80,15 +83,20 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>./ui;./ui_common;./auth;./log;./md5;./timer;./chat_manager;./utils;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./dui_ex;./ui;./ui_common;./auth;./log;./md5;./timer;./chat_manager;./utils;./http_load;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <PrecompiledHeaderOutputFile>../Build/Release/$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>../Build/Release/</AssemblerListingLocation>
+      <ObjectFileName>../Build/Release/</ObjectFileName>
+      <ProgramDataBaseFileName>../Build/Release/</ProgramDataBaseFileName>
+      <AdditionalOptions>/D "_CRT_SECURE_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>duilib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libcef_dll_wrapper.lib;cef_sandbox.lib;libcef.lib;opengl32.lib;Riched20.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

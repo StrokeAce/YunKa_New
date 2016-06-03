@@ -177,7 +177,7 @@ bool CLogin::CheckLoginFlag(unsigned long uin, const string& strID, bool bCreate
 	if (!strID.empty())
 	{
 		char strName[MAX_256_LEN];
-		sprintf_s(strName, "_TQ_%s_", strID);
+		sprintf_s(strName, "_TQ_%s_", strID.c_str());
 
 		if (bCreate)
 		{

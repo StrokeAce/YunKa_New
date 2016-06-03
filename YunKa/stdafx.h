@@ -34,7 +34,6 @@ using namespace std;
 
 extern CGlobalSetting _globalSetting;
 
-
 using namespace DuiLib;
 
 #define lengthof(x) (sizeof(x)/sizeof(*x))
@@ -46,13 +45,13 @@ using namespace DuiLib;
 #   ifdef _UNICODE
 #       pragma comment(lib, "../lib/DuiLib.lib")
 #   else
-#       pragma comment(lib, "..\\..\\DuiLib\\Lib\\DuiLib_d.lib")
+#       pragma comment(lib, "../lib/DuiLib.lib")
 #   endif
 #else
 #   ifdef _UNICODE
-#       pragma comment(lib, "..\\..\\DuiLib\\Lib\\DuiLib_u.lib")
+#       pragma comment(lib, "../lib_r/DuiLib.lib")
 #   else
-#       pragma comment(lib, "..\\..\\DuiLib\\Lib\\DuiLib.lib")
+#       pragma comment(lib, "../lib_r/DuiLib.lib")
 #   endif
 #endif
 
