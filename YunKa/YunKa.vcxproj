@@ -1,0 +1,280 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{7FF54136-337D-4745-804F-B1D5AB465995}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>YunKa</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>../thirdlib/duilib;../thirdlib/zlib/include;../thirdlib/libcef;../thirdlib/libcurl/include;.\;$(IncludePath)</IncludePath>
+    <LibraryPath>../lib;../thirdlib/zlib/lib;../thirdlib/libcef/debug;../thirdlib/libcurl;$(LibraryPath)</LibraryPath>
+    <OutDir>../bin</OutDir>
+    <IntDir>../Build/Debug/</IntDir>
+    <EmbedManifest>true</EmbedManifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>../bin_r</OutDir>
+    <IntDir>../Build/Release/</IntDir>
+    <IncludePath>../thirdlib/duilib;$(IncludePath)</IncludePath>
+    <LibraryPath>../lib_r;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>./dui_ex;./ui;./ui_common;./auth;./log;./md5;./timer;./chat_manager;./utils;./http_load;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeaderOutputFile>../Build/$(TargetName).pch</PrecompiledHeaderOutputFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>libcef_dll_wrapper.lib;cef_sandbox.lib;libcef.lib;opengl32.lib;Riched20.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>./ui;./ui_common;./auth;./log;./md5;./timer;./chat_manager;./utils;</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>duilib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="auth\auth_client.h" />
+    <ClInclude Include="auth\auth_error.h" />
+    <ClInclude Include="auth\http_parse.h" />
+    <ClInclude Include="auth\sockbase.h" />
+    <ClInclude Include="cef_browser\binding_test.h" />
+    <ClInclude Include="cef_browser\bytes_write_handler.h" />
+    <ClInclude Include="cef_browser\cefclient.h" />
+    <ClInclude Include="cef_browser\cefclient_osr_dragdrop_win.h" />
+    <ClInclude Include="cef_browser\cefclient_osr_widget_win.h" />
+    <ClInclude Include="cef_browser\client_app.h" />
+    <ClInclude Include="cef_browser\client_handler.h" />
+    <ClInclude Include="cef_browser\client_renderer.h" />
+    <ClInclude Include="cef_browser\client_switches.h" />
+    <ClInclude Include="cef_browser\dialog_test.h" />
+    <ClInclude Include="cef_browser\dragdrop_events.h" />
+    <ClInclude Include="cef_browser\osrenderer.h" />
+    <ClInclude Include="cef_browser\performance.h" />
+    <ClInclude Include="cef_browser\performance_setup.h" />
+    <ClInclude Include="cef_browser\resource_util.h" />
+    <ClInclude Include="cef_browser\scheme_test.h" />
+    <ClInclude Include="cef_browser\string_util.h" />
+    <ClInclude Include="cef_browser\window_test.h" />
+    <ClInclude Include="chat_common\comdef.h" />
+    <ClInclude Include="chat_common\comenum.h" />
+    <ClInclude Include="chat_common\comfunc.h" />
+    <ClInclude Include="chat_common\comclt.h" />
+    <ClInclude Include="chat_common\comcom.h" />
+    <ClInclude Include="chat_common\comfloat.h" />
+    <ClInclude Include="chat_common\comform.h" />
+    <ClInclude Include="chat_common\commsg.h" />
+    <ClInclude Include="chat_common\comsrv.h" />
+    <ClInclude Include="chat_common\comtran.h" />
+    <ClInclude Include="chat_common\comobject.h" />
+    <ClInclude Include="chat_common\comstruct.h" />
+    <ClInclude Include="chat_common\wx_obj.h" />
+    <ClInclude Include="chat_manager\chat_history_msg.h" />
+    <ClInclude Include="chat_manager\chat_manager.h" />
+    <ClInclude Include="chat_manager\chat_visitor.h" />
+    <ClInclude Include="chat_manager\login.h" />
+    <ClInclude Include="chat_manager\socket.h" />
+    <ClInclude Include="http_load\http_unit.h" />
+    <ClInclude Include="json\autolink.h" />
+    <ClInclude Include="json\cJSON.h" />
+    <ClInclude Include="json\config.h" />
+    <ClInclude Include="json\features.h" />
+    <ClInclude Include="json\forwards.h" />
+    <ClInclude Include="json\json.h" />
+    <ClInclude Include="json\jsonext.h" />
+    <ClInclude Include="json\json_batchallocator.h" />
+    <ClInclude Include="json\reader.h" />
+    <ClInclude Include="json\value.h" />
+    <ClInclude Include="json\writer.h" />
+    <ClInclude Include="log\dirfileop.h" />
+    <ClInclude Include="log\winlog.h" />
+    <ClInclude Include="md5\md5.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="timer\timer.h" />
+    <ClInclude Include="ui\face_ctrl.h" />
+    <ClInclude Include="ui\face_list.h" />
+    <ClInclude Include="ui\face_sel_dlg.h" />
+    <ClInclude Include="ui\gif_image.h" />
+    <ClInclude Include="ui\IImageOle.h" />
+    <ClInclude Include="ui\login_wnd.h" />
+    <ClInclude Include="ui\main_frame.h" />
+    <ClInclude Include="ui\observer_impl_base.hpp" />
+    <ClInclude Include="ui\rich_edit_util.h" />
+    <ClInclude Include="ui\ui_crack.h" />
+    <ClInclude Include="ui\ui_menu.h" />
+    <ClInclude Include="ui\user_list.h" />
+    <ClInclude Include="ui\xml_document.h" />
+    <ClInclude Include="ui_common\common_utility.h" />
+    <ClInclude Include="ui_common\global_setting.h" />
+    <ClInclude Include="ui_common\global_setting_define.h" />
+    <ClInclude Include="ui_common\IImageOle.h" />
+    <ClInclude Include="ui_common\ole_helper.h" />
+    <ClInclude Include="ui_common\path.h" />
+    <ClInclude Include="ui_common\small_menu.h" />
+    <ClInclude Include="ui_common\utils.h" />
+    <ClInclude Include="utils\code_convert.h" />
+    <ClInclude Include="utils\convert.h" />
+    <ClInclude Include="utils\dbconnect.h" />
+    <ClInclude Include="utils\emlib.h" />
+    <ClInclude Include="utils\encrypt.h" />
+    <ClInclude Include="utils\error_info.h" />
+    <ClInclude Include="utils\lock.h" />
+    <ClInclude Include="utils\mutex.h" />
+    <ClInclude Include="utils\pack.h" />
+    <ClInclude Include="utils\tstring.h" />
+    <ClInclude Include="utils\zlib_stream.h" />
+    <ClInclude Include="YunKa.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="auth\auth_client.cpp" />
+    <ClCompile Include="auth\http_parse.cpp" />
+    <ClCompile Include="auth\sockbase.cpp" />
+    <ClCompile Include="cef_browser\binding_test.cpp" />
+    <ClCompile Include="cef_browser\bytes_write_handler.cpp" />
+    <ClCompile Include="cef_browser\cefclient.cpp" />
+    <ClCompile Include="cef_browser\cefclient_osr_dragdrop_win.cpp" />
+    <ClCompile Include="cef_browser\cefclient_osr_widget_win.cpp" />
+    <ClCompile Include="cef_browser\client_app.cpp" />
+    <ClCompile Include="cef_browser\client_app_delegates.cpp" />
+    <ClCompile Include="cef_browser\client_handler.cpp" />
+    <ClCompile Include="cef_browser\client_handler_win.cpp" />
+    <ClCompile Include="cef_browser\client_renderer.cpp" />
+    <ClCompile Include="cef_browser\client_switches.cpp" />
+    <ClCompile Include="cef_browser\dialog_test.cpp" />
+    <ClCompile Include="cef_browser\osrenderer.cpp" />
+    <ClCompile Include="cef_browser\performance.cpp" />
+    <ClCompile Include="cef_browser\performance_func.cpp" />
+    <ClCompile Include="cef_browser\resource_util_win.cpp" />
+    <ClCompile Include="cef_browser\scheme_test.cpp" />
+    <ClCompile Include="cef_browser\string_util.cpp" />
+    <ClCompile Include="cef_browser\window_test.cpp" />
+    <ClCompile Include="cef_browser\window_test_win.cpp" />
+    <ClCompile Include="chat_common\comfunc.cpp" />
+    <ClCompile Include="chat_common\comclt.cpp" />
+    <ClCompile Include="chat_common\comcom.cpp" />
+    <ClCompile Include="chat_common\comfloat.cpp" />
+    <ClCompile Include="chat_common\comform.cpp" />
+    <ClCompile Include="chat_common\comsrv.cpp" />
+    <ClCompile Include="chat_common\comobject.cpp" />
+    <ClCompile Include="chat_common\wx_obj.cpp" />
+    <ClCompile Include="chat_manager\chat_history_msg.cpp" />
+    <ClCompile Include="chat_manager\chat_manager.cpp" />
+    <ClCompile Include="chat_manager\chat_visitor.cpp" />
+    <ClCompile Include="chat_manager\login.cpp" />
+    <ClCompile Include="chat_manager\socket.cpp" />
+    <ClCompile Include="http_load\http_unit.cpp" />
+    <ClCompile Include="json\cJSON.c" />
+    <ClCompile Include="json\jsonext.cpp" />
+    <ClCompile Include="json\json_reader.cpp" />
+    <ClCompile Include="json\json_value.cpp" />
+    <ClCompile Include="json\json_writer.cpp" />
+    <ClCompile Include="log\winlog.cpp" />
+    <ClCompile Include="md5\md5.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="timer\timer.cpp" />
+    <ClCompile Include="ui\face_ctrl.cpp" />
+    <ClCompile Include="ui\face_list.cpp" />
+    <ClCompile Include="ui\face_sel_dlg.cpp" />
+    <ClCompile Include="ui\gif_image.cpp" />
+    <ClCompile Include="ui\login_wnd.cpp" />
+    <ClCompile Include="ui\main_frame.cpp" />
+    <ClCompile Include="ui\rich_edit_util.cpp" />
+    <ClCompile Include="ui\ui_crack.cpp" />
+    <ClCompile Include="ui\ui_menu.cpp" />
+    <ClCompile Include="ui\user_list.cpp" />
+    <ClCompile Include="ui\xml_document.cpp" />
+    <ClCompile Include="ui_common\common_utility.cpp" />
+    <ClCompile Include="ui_common\global_setting.cpp" />
+    <ClCompile Include="ui_common\ole_helper.cpp" />
+    <ClCompile Include="ui_common\path.cpp" />
+    <ClCompile Include="ui_common\small_menu.cpp" />
+    <ClCompile Include="ui_common\utils.cpp" />
+    <ClCompile Include="utils\code_convert.cpp" />
+    <ClCompile Include="utils\convert.cpp" />
+    <ClCompile Include="utils\encrypt.cpp" />
+    <ClCompile Include="utils\error_info.cpp" />
+    <ClCompile Include="utils\pack.cpp" />
+    <ClCompile Include="utils\tstring.cpp" />
+    <ClCompile Include="YunKa.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="YunKa.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="json\json_internalarray.inl" />
+    <None Include="json\json_internalmap.inl" />
+    <None Include="json\json_valueiterator.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="ui_common\ImageOleCtrl.lib" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
