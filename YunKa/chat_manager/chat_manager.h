@@ -387,9 +387,6 @@ public:
 
 	int SendLoginOff();
 
-	// 文字消息中的表情字符转换
-	void TransforFaceMsg(string& str);
-
 	// 微信消息的解析
 	WxMsgBase* ParseWxMsg(CWebUserObject* pWebUser, COM_FLOAT_CHATMSG& recv);
 

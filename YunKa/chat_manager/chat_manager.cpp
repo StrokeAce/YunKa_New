@@ -14,6 +14,8 @@
 #include <cctype>
 #include <algorithm>
 #include <process.h>
+#include <shlwapi.h>
+
 using namespace std;
 
 #define CLIENTVERSION	20000
@@ -1517,13 +1519,13 @@ int CChatManager::RecvFloatChatMsg(PACK_HEADER packhead, char *pRecvBuff, int le
 	{
 		std::string content = RecvInfo.strmsg;
 
-		bool isUrl = false;// PathIsURL(content.c_str());
+		bool isUrl = PathIsURLA(content.c_str());
 		if (isUrl && pWebUser->m_bIsFrWX)
 		{
 			content = "<a href=\"" + content + "\" target=\"blank\">" + content + "</a>";
 		}
 
-		TransforFaceMsg(content);
+		TransferStrToFace(content);
 		strncpy(RecvInfo.strmsg, content.c_str(), MAX_MSG_RECVLEN);
 	}
 
@@ -1637,9 +1639,8 @@ int CChatManager::RecvFloatChatMsg(PACK_HEADER packhead, char *pRecvBuff, int le
 		m_handlerMsgs->RecvMsg((IBaseObject*)pWebUser, msgFrom, GetMsgId(),	msgType, (MSG_DATA_TYPE)RecvInfo.nMsgDataType, 
 			RecvInfo.strmsg, GetTimeStringMDAndHMS(RecvInfo.tMsgTime), pAssistUser, msgContentWx, "");
 
-
 		// 同步更新关联词
-		//if (m_sysConfig->bAutoSearchKeyword)
+		//if (m_sysConfig->m_bAutoSearchKeyword)
 		{
 			//CUserObject *pUser = m_pFormKeyWord->GetCurSelUserOb();
 			//m_pFormKeyWord->ResetKeyWord((m_nOnLineStatus != STATUS_OFFLINE), pUser, RecvInfo.strmsg);
@@ -2832,50 +2833,6 @@ int CChatManager::SendTo_GetWebUserInfo(unsigned long webuserid, const char *cha
 	nError = SendPackTo(&SendInfo);
 
 	return nError;
-}
-
-void CChatManager::TransforFaceMsg(string& str)
-{
-	//char buf[8];
-	//std::string::size_type pos, n;
-	//const std::string *fs;
-	//const wx_face_t *face = wx_faces;
-	//for (int i = 0; i < _countof(wx_faces); ++i, ++face)
-	//{
-	//	for (pos = 0;;)
-	//	{
-	//		fs = &face->raw;
-	//		if (std::string::npos == (n = str.find(*fs, pos)))
-	//		{
-	//			fs = &face->enc;
-	//			if (face->enc.empty() || std::string::npos == (n = str.find(*fs, pos)))
-	//				break;
-	//		}
-	//		pos = n;
-	//		_itoa(i, buf, 10);
-	//		str.insert(pos, FACE_PREFIX);
-	//		pos += sizeof(FACE_PREFIX)-1;
-	//		str.insert(pos, m_initConfig.webpage_FaceImage);
-	//		pos += strlen(m_initConfig.webpage_FaceImage);
-	//		str.insert(pos, buf);
-	//		pos += strlen(buf);
-	//		str.replace(pos, fs->length(), FACE_ALT FACE_SUFFIX);
-	//		pos += sizeof(FACE_ALT FACE_SUFFIX) - 1;
-	//	}
-	//}
-
-	//// deal with android/ios emoji face
-	//int len = str.length() - 3;
-	//for (int i = 0; i < len; ++i)
-	//{
-	//	if (str[i] == -16 && str[i + 1] == -97)
-	//	{
-	//		str[i] = -18;
-	//		str[i + 1] = -112;
-	//		str[i + 2] = -116;
-	//		str.erase(i + 3, 1);
-	//	}
-	//}
 }
 
 WxMsgBase* CChatManager::ParseWxMsg(CWebUserObject* pWebUser, COM_FLOAT_CHATMSG& recvInfo)
@@ -4323,47 +4280,45 @@ const string& CChatManager::GetFaceStr(int id)
 string& CChatManager::TransferStrToFace(string& msg)
 {
 	char buf[8];
-	//std::string::size_type pos, n;
-	//const std::string *fs;
-	//const wx_face_t *face = wx_faces;
-	//for (int i = 0; i < _countof(wx_faces); ++i, ++face)
-	//{
-	//	for (pos = 0;;)
-	//	{
-	//		fs = &face->raw;
-	//		if (std::string::npos == (n = msg.find(*fs, pos)))
-	//		{
-	//			fs = &face->enc;
-	//			if (face->enc.empty()
-	//				|| std::string::npos == (n = msg.find(*fs, pos)))
-	//				break;
-	//		}
-	//		pos = n;
-	//		itoa(i, buf, 10);
-	//		msg.insert(pos, FACE_PREFIX);
-	//		pos += sizeof(FACE_PREFIX)-1;
-	//		msg.insert(pos, buf);
-	//		pos += strlen(buf);
-	//		msg.replace(pos, fs->length(), FACE_SUFFIX);
-	//		pos += sizeof(FACE_SUFFIX) - 1;
-	//	}
-	//}
+	std::string::size_type pos, n;
+	const std::string *fs;
+	const wx_face_t *face = wx_faces;
+	for (int i = 0; i < _countof(wx_faces); ++i, ++face)
+	{
+		for (pos = 0;;)
+		{
+			fs = &face->raw;
+			if (std::string::npos == (n = msg.find(*fs, pos)))
+			{
+				fs = &face->enc;
+				if (face->enc.empty()
+					|| std::string::npos == (n = msg.find(*fs, pos)))
+					break;
+			}
+			pos = n;
+			_itoa(i, buf, 10);
+			msg.insert(pos, FACE_PREFIX);
+			pos += sizeof(FACE_PREFIX)-1;
+			msg.insert(pos, buf);
+			pos += strlen(buf);
+			msg.replace(pos, fs->length(), FACE_SUFFIX);
+			pos += sizeof(FACE_SUFFIX) - 1;
+		}
+	}
 
-	//// deal with android/ios emoji face
-	//int len = msg.length() - 3;
-	//for (int i = 0; i < len; ++i)
-	//{
-	//	if (msg[i] == -16 && msg[i + 1] == -97)
-	//	{
-	//		msg[i] = -18;
-	//		msg[i + 1] = -112;
-	//		msg[i + 2] = -116;
-	//		msg.erase(i + 3, 1);
-	//	}
-	//}
-	//return msg;
-	string aa;
-	return aa;
+	// deal with android/ios emoji face
+	int len = msg.length() - 3;
+	for (int i = 0; i < len; ++i)
+	{
+		if (msg[i] == -16 && msg[i + 1] == -97)
+		{
+			msg[i] = -18;
+			msg[i + 1] = -112;
+			msg[i + 2] = -116;
+			msg.erase(i + 3, 1);
+		}
+	}
+	return msg;
 }
 
 

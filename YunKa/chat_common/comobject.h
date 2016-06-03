@@ -92,19 +92,13 @@ public:
 	int					m_nVisitorServerPort;		// web访客服务器端口
 	string				m_sStrRealServer;			// 真实登陆的服务器地址
 	int					m_nRealServerPort;			// 真实登陆的服务器端口
-
+	bool				m_bAutoSearchKeyword;
 	ListLoginedInfo		m_cLoginInfoList;			// 登陆过用户的列表
-
 	ListAlertInfo		m_cAlertInfoList;			// 提示音列表
-
 	list<string>		m_cServerAddressList;		// 服务器地址列表
-
 	list<string>		m_cKeyWordSearchList;		// 搜索过的关键字列表
-
 	list<string>		m_cForbidWebUserList;		// 被屏蔽的访客的编号列表
-
 	FILTER_USERDEFINE	m_cWebUserfilter;			// 过滤条件列表
-
 	int					m_nFilterType;				// 默认访客过滤条件序列，只对等待接待、访问中和已离开有效
 	bool				m_bAutoResp;				// 自动应答开关
 	string				m_sWellcomeMsg;				// 欢迎语
@@ -117,10 +111,8 @@ public:
 	string				m_sVisitorTimeoutCloseMsg;	// 回复语
 	bool				m_bAutoRespUnnormalStatus;	// 非正常在线自动应答开关
 	string				m_sUnnormalStatusMsg;		// 回复语
-
 	string				m_sInviteWords;				// 邀请语
 	list<string>		m_cInviteWordsList;			// 邀请语列表
-
 	int					m_nInviteType;				// 邀请类型
 	int					m_nKeywordsSort;			// 辅助应答分类栏序列
 	int					m_nKeywordsUser;			// 辅助应答所属栏序列
