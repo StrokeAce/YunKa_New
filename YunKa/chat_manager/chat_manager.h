@@ -102,6 +102,23 @@ public:
 	//************************************
 	virtual void ResultScreenCapture(string imagePath) = 0;
 
+	//************************************
+	// Method:    ResultInviteUser
+	// Qualifier: 邀请协助的结果
+	// Parameter: pWebUser 邀请协助会话的聊天访客
+	// Parameter: pUser 被邀请的协助者
+	// Parameter: bSuccess true 接受邀请,false 拒绝邀请
+	//************************************
+	virtual void ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, bool bSuccess) = 0;
+
+	//************************************
+	// Method:    ResultTransferUser
+	// Qualifier: 邀请转接的结果
+	// Parameter: pWebUser 转接会话中的聊天访客
+	// Parameter: pUser 被邀请的转接者
+	// Parameter: bSuccess true 接受转接,false 拒绝转接
+	//************************************
+	virtual void ResultTransferUser(CWebUserObject* pWebUser, CUserObject* pUser, bool bSuccess) = 0;
 };
 
 class CChatManager : public IBaseReceive
@@ -203,10 +220,29 @@ public:
 	// Parameter: pUser 邀请的坐席
 	// Parameter: bAccept 是否同意
 	//************************************
-	int SendTo_InviteUserResult(CWebUserObject* pWebUser, CUserObject* pUser, int result);
+	int SendTo_InviteUserResult(CWebUserObject* pWebUser, CUserObject* pUser, bool bAccept);
 
 	// 发起会话转接到其他坐席的请求
 	int SendTo_TransferUser(CWebUserObject* pWebUser, CUserObject* pUser);
+
+	//************************************
+	// Method:    SendTo_InviteUserResult
+	// Qualifier: 发送是否接受该坐席的会话转接
+	// Parameter: pWebUser 会话中访客
+	// Parameter: pUser 邀请的坐席
+	// Parameter: bAccept 是否同意
+	//************************************
+	int SendTo_TransferUserResult(CWebUserObject* pWebUser, CUserObject* pUser, bool bAccept);
+
+	//************************************
+	// Method:    StartRecordAudio
+	// Qualifier: 开始录音
+	//************************************
+	CODE_RECORD_AUDIO StartRecordAudio();
+
+	int StopRecordAudio();
+
+	int CancelRecordAudio();
 
 	// 获取上一次错误信息
 	string GetLastError();
@@ -395,7 +431,7 @@ public:
 	int SendLoginOff();
 
 	// 微信消息的解析
-	WxMsgBase* ParseWxMsg(CWebUserObject* pWebUser, COM_FLOAT_CHATMSG& recv);
+	WxMsgBase* ParseWxMsg(CWebUserObject* pWebUser, COM_FLOAT_CHATMSG& recv,CUserObject* pUser);
 
 	string GetMsgId();
 
@@ -429,6 +465,8 @@ public:
 	int GetFaceIndex(const char * faceStr);
 
 	const string& GetFaceStr(int id);
+
+	void Amr2Wav(string filePath);
 
 public:
 	int						m_nOnLineStatus;		// 是否在线,对于im服务器而言
@@ -469,5 +507,7 @@ public:
 	list<MSG_INFO*>			m_listEarlyMsg;			// 保存还未初始化访客对象之前收到的消息
 	int						m_nClientIndex;			// 访客的序列号，自增
 	HMODULE					m_hScreenDll;			// 截图句柄
+	string					m_audioPath;			// 正在录音文件的路径
+	bool					m_isRecording;			// 正在录音
 };
 

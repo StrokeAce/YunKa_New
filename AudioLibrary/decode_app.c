@@ -64,7 +64,7 @@ _declspec(dllexport) void AMRToWAV(char* amrID)
 }
 
 // 录制WAV格式的音频
-_declspec(dllexport) int StartRecordWAV(char* voicePath, char* voiceName)
+_declspec(dllexport) int StartRecordWAV(const char* voicePath, const char* voiceName)
 {
 	return Start_Record_WAV(voicePath, voiceName);
 }

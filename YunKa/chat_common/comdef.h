@@ -1084,12 +1084,6 @@ typedef std::list<void *>	PtrList;
 #define Request_Url_RestartSession "RestartSession"	// 重启二次会话
 #define Request_Url_AccessToken "AccessToken" // 获取微信公众号token
 
-
-// 录音操作的返回码
-#define CODE_AUDIO_SUCCESS 0 // 成功
-#define CODE_AUDIO_NO_DEVICE 1 // 没有录音设备
-#define CODE_AUDIO_FAIL 2 // 失败
-
 #define FACE_PREFIX "["
 #define FACE_SUFFIX ".gif]"
 

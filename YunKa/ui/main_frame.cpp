@@ -1765,12 +1765,10 @@ void CMainFrame::ShowMySelfSendMsg(string strMsg)
 	f_covet.Gb2312ToUTF_8(headPath, defaultHead.c_str(), defaultHead.length());
 
 	//组合消息
-	string msgTime = GetTimeStringMDAndHMS(0);
+	string msgTime = GetTimeByMDAndHMS(0);
 	string msgId = m_manager->GetMsgId();
 	sprintf(strJsCode, "AppendMsgToHistory('%d', '%d', '%s', '%s', '%s', '%lu', '%s', '%s', '%d'); ",
-		1,
-		1, name.c_str(), msgTime.c_str(), msg.c_str(), userId, headPath.c_str(), msgId, MSG_FROM_CLIENT);
-
+		1,1, name.c_str(), msgTime.c_str(), msg.c_str(), userId, headPath.c_str(), msgId, MSG_FROM_CLIENT);
 
 	if (m_pListMsgHandler.isLoaded)
 	{
@@ -1780,3 +1778,12 @@ void CMainFrame::ShowMySelfSendMsg(string strMsg)
 
 }
 
+void CMainFrame::ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, bool bSuccess)
+{
+
+}
+
+void CMainFrame::ResultTransferUser(CWebUserObject* pWebUser, CUserObject* pUser, bool bSuccess)
+{
+
+}

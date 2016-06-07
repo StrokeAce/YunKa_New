@@ -414,6 +414,7 @@ struct DOWNLOAD_INFO
 	void* pThis;				// 传该结构体参数的类对象指针
 	string filePath;			// 下载文件的路径
 	string downLoadUrl;			// 下载文件的url
+	string msgId;				// 消息id
 	CWebUserObject *pWebUser;	// 消息的来源用户
 	string time;				// 发送时间
 	CUserObject* pUser;			// 协助对象,可为空

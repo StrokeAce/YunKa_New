@@ -265,7 +265,7 @@ void CChatVisitor::SolveVisitorSCRIPTMSGModiName(char *pInitBuff)
 	}
 
 	char msg[MAX_256_LEN];
-	sprintf(msg, "%s 客服 %s(%u) 将访客名称改为 %s", GetTimeStringMDAndHMS(0), szKefuNmae, uKefu, newname);
+	sprintf(msg, "%s 客服 %s(%u) 将访客名称改为 %s", GetTimeByMDAndHMS(0), szKefuNmae, uKefu, newname);
 
 	strncpy(pWebUser->info.name, newname, MAX_USERNAME_LEN);
 	if (strlen(pWebUser->info.name) < 2)
@@ -300,7 +300,7 @@ void CChatVisitor::SolveVisitorSCRIPTMSGTalkBegin(char *pInitBuff)
 	}
 
 	char msg[MAX_256_LEN];
-	sprintf(msg, "%s 客服 %s(%u) 已与访客建立通话", GetTimeStringMDAndHMS(0), szKefuNmae, uKefu);
+	sprintf(msg, "%s 客服 %s(%u) 已与访客建立通话", GetTimeByMDAndHMS(0), szKefuNmae, uKefu);
 
 	//重绘
 	if (pkefu != NULL&&pkefu->m_bFriend)
@@ -342,7 +342,7 @@ void CChatVisitor::SolveVisitorSCRIPTMSGTalkEnd(char *pInitBuff)
 	}
 
 	char msg[MAX_256_LEN];
-	sprintf(msg, "%s 客服 %s(%u) 与访客的通话已结束", GetTimeStringMDAndHMS(0), szKefuNmae, uKefu);
+	sprintf(msg, "%s 客服 %s(%u) 与访客的通话已结束", GetTimeByMDAndHMS(0), szKefuNmae, uKefu);
 
 	pWebUser->cTalkedSatus = HASTALKED;
 	pWebUser->info.status = TALKSTATUS_NO;
@@ -422,7 +422,7 @@ void CChatVisitor::SolveVisitorSystemUp(char *pInitBuff)
 		g_VisitLog.WriteLog(C_LOG_TRACE, "SolveVisitorSystemUp sid=%s,nickname=%s, scriptflag=%s, visiturl=%s", 
 			webuser_upinfo.sid, webuser_upinfo.nickname, webuser_upinfo.scriptflag, webuser_upinfo.visiturl);
 		pWebUser->info.nameflag = nameflag;
-		pWebUser->m_onlinetime = ::GetCurrentLongTime();
+		pWebUser->m_onlinetime = ::GetTimeLong();
 		pWebUser->m_bIsShow = false;
 	}
 
@@ -880,7 +880,7 @@ void CChatVisitor::SolveWebUserOnlineTipsTail(CWebUserObject *pWebUser, WEBUSER_
 
 	char strTail[MAX_1024_LEN] = {0};
 
-	string stime = GetExtDateTimeFormatTime(0);
+	string stime = GetTimeByYMDAndHMS(0);
 
 	switch (pWebUser->nVisitFrom)
 	{

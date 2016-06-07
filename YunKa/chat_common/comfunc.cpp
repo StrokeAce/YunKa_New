@@ -424,7 +424,7 @@ WxObj* ParseWxJsonMsg(const char* msg)
 	return pwxobj;
 }
 
-string GetTimeStringMDAndHMS(unsigned long ntime)
+string GetTimeByMDAndHMS(unsigned long ntime)
 {
 	string stime = "";
 	char ctime[MAX_256_LEN];
@@ -512,7 +512,7 @@ string FullPath(string extPath)
 	return extPath;
 }
 
-unsigned long GetCurrentLongTime()
+unsigned long GetTimeLong()
 {
 	unsigned long ntime = 0;
 	time_t tt = time(NULL);
@@ -619,7 +619,7 @@ bool ParseSearchURLHostAndVar(string strurl, string &strHost, string &strVar)
 	return false;
 }
 
-std::string GetExtDateTimeFormatTime(unsigned long ntime)
+string GetTimeByYMDAndHMS(unsigned long ntime)
 {
 	string stime = "";
 	char ctime[MAX_256_LEN];
@@ -664,4 +664,16 @@ string GetApplyTypeString(int type)
 	default:
 		return "";
 	}
+}
+
+std::string GetTimeString()
+{
+	char stime[MAX_256_LEN];
+	time_t tt = time(NULL);
+	struct tm * ttm = localtime(&tt);
+	if (ttm != NULL)
+	{
+		sprintf(stime, "%d%d%d%d%d", ttm->tm_mon + 1, ttm->tm_mday, ttm->tm_hour, ttm->tm_min, ttm->tm_sec);
+	}
+	return stime;
 }

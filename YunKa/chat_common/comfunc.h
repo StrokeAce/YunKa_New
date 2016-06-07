@@ -47,9 +47,16 @@ void ConvertWidecharToChar(const WCHAR *pFrom, int len, char *pTo, int buflen, b
 WxObj* ParseWxJsonMsg(const char* msg);
 
 //获取时间, 格式：MM-DD HH:MM:SS
-string GetTimeStringMDAndHMS(unsigned long ntime);
+string GetTimeByMDAndHMS(unsigned long ntime);
 
-string GetExtDateTimeFormatTime(unsigned long ntime);
+//获取时间, 格式：YY-MM-DD HH:MM:SS
+string GetTimeByYMDAndHMS(unsigned long ntime);
+
+//获得当前的系统时间 YY-MM-DD HH:MM:SS
+unsigned long GetTimeLong();
+
+// MM-DD HH:MM:SS
+string GetTimeString();
 
 char *GetContentBetweenString(const char *str, const char *sstart, const char * send, char *content);
 
@@ -57,9 +64,6 @@ bool GetByte(unsigned int value, int index);
 unsigned int SetByte(unsigned int &source, int index, unsigned char ucvalue);
 
 string FullPath(string extPath);
-
-//获得当前的系统时间
-unsigned long GetCurrentLongTime();
 
 string GetMd5Str(const string str);
 

@@ -35,7 +35,7 @@ UINT g_timerid = -1;
 DWORD g_start_time = 0;
 FILE*fp;  //保存为文件，只是为了给另一份代码使用，
 
-int Start_Record_WAV(char* voicePath, char* voiceName)
+int Start_Record_WAV(const char* voicePath, const char* voiceName)
 {
 	memset(g_cFilePath, 0, sizeof(g_cFilePath));
 	memset(g_cVoicePath, 0, sizeof(g_cVoicePath));

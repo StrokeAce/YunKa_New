@@ -928,7 +928,7 @@ bool CWebUserObject::IsDisplay(CSysConfigFile *pConfig, unsigned long uid)
 
 	bool bDisplay = false;
 	int i;
-	unsigned long curtime = ::GetCurrentLongTime();
+	unsigned long curtime = ::GetTimeLong();
 
 	switch (pConfig->m_nFilterType)
 	{
@@ -1073,7 +1073,7 @@ void CWebUserObject::AddScriptFlag(char *scriptflag, char *url)
 	if (!ScriptFlagIsExist(scriptflag))
 	{
 		WEBUSER_URL_INFO* info = new WEBUSER_URL_INFO();
-		info->dwtime = GetCurrentLongTime();
+		info->dwtime = GetTimeLong();
 		info->url = url;
 		m_mapUrlAndScriptFlagOb.insert(MapWebUserFLag::value_type(scriptflag, info));
 	}

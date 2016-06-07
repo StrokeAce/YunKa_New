@@ -80,11 +80,19 @@ enum MSG_DATA_TYPE
 	MSG_DATA_TYPE_FILE		/**< 文件 */
 };
 
-enum
+enum CODE_CAPTURE
 {
 	CAPTURE_SAVE_TYPE_FILE = 0,		// 截图保存类型 0 文件形式保存 需要路径
 	CAPTURE_SAVE_TYPE_CLIPBOARD,	// 1 剪切板保存 无视路径
 	CAPTURE_SAVE_TYPE_BOTH			// 2 两种方式都保存 需要路径
+};
+
+// 录音操作的返回码
+enum CODE_RECORD_AUDIO
+{
+	CODE_AUDIO_SUCCESS=0,	// 成功
+	CODE_AUDIO_NO_DEVICE,	// 没有录音设备
+	CODE_AUDIO_FAIL			// 失败
 };
 
 #endif

@@ -129,7 +129,7 @@ struct WxMsgImage:public WxMsgBase
 
 	string PicUrl;		//  图片链接  
 	string MediaId;		//  图片消息媒体id，可以调用多媒体文件下载接口拉取数据。
-	string MediaUrl;	//MediaId媒体对应的url
+	string MediaUrl;	//	MediaId媒体对应的url
 	bool ParseFromJson(const Json::Value &os);   //从json格式文本中解析消息
 
 	bool ToSendJson(Json::Value &os) const;

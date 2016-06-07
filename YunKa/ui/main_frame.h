@@ -165,6 +165,10 @@ public:    //主界面消息回调
 
 		virtual void ResultScreenCapture(string imagePath);
 
+		virtual void ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, bool bSuccess);
+
+		virtual void ResultTransferUser(CWebUserObject* pWebUser, CUserObject* pUser, bool bSuccess);
+
 public:
 	//自己定义的操作函数
 	void OnBtnFont(TNotifyUI& msg);
