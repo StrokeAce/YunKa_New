@@ -493,6 +493,12 @@ void CMainFrame::InitLibcef(void)
 }
 
 
+void CMainFrame::SetHandler()
+{
+
+	m_manager->SetHandlerMsgs(this);
+
+}
 
 void CMainFrame::OnPrepare(TNotifyUI& msg)
 {
@@ -501,6 +507,7 @@ void CMainFrame::OnPrepare(TNotifyUI& msg)
 
 	//cef窗口
 	InitLibcef();
+
 
 
 	//聊天框中间栏按钮
@@ -1042,7 +1049,7 @@ void CMainFrame::OnBtnSendMessage(TNotifyUI& msg)
 void CMainFrame::SendMsgToGetList()
 {
 
-	m_manager->SetHandlerMsgs(this);
+
 
 	//先请求自己的信息 
 	m_mySelfInfo = m_manager->GetMySelfUserInfo();

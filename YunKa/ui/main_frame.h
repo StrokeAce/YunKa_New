@@ -211,6 +211,7 @@ public:
 	void CMainFrame::ShowRightFrameView(int index);
 	void CMainFrame::ShowClearMsg();
 	void CMainFrame::ChangeShowUserMsgWnd(unsigned long id);
+	void CMainFrame::SetHandler();
 
 	void AddToMsgList(CUserObject *pUser, string strMsg, string strTime, int userType = MSG_FROM_USER,
 		int msgType = MSG_TYPE_SYS, int msgDataType = MSG_DATA_TYPE_TEXT, string msgId = "");
@@ -225,6 +226,8 @@ protected:
 	void OnMaxBtn(TNotifyUI& msg);
 	void OnRestoreBtn(TNotifyUI& msg);
 	void OnMinBtn(TNotifyUI& msg);
+
+
 
 
 
