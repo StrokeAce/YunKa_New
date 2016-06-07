@@ -1054,10 +1054,7 @@ int CChatManager::RecvSrvStatusFrdOffline(PACK_HEADER packhead, char *pRecvBuff,
 				m_nOnLineStatusEx = STATUS_OFFLINE;
 			}
 
-
 			m_handlerMsgs->RecvOffline(pUser);
-
-
 		}
 	}
 
@@ -4728,7 +4725,7 @@ int CChatManager::SendToTransferUser(CUserObject *pAcceptUser, CWebUserObject *p
 
 void CChatManager::DownLoadFile(WxMsgBase* pWxMsg, CWebUserObject *pWebUser, CUserObject *pAssistUser)
 {
-	if (pWxMsg->MsgType == "image")
+	if (pWxMsg && pWxMsg->MsgType == "image")
 	{
 		string filePathName = FullPath("\\temp\\");
 		CCodeConvert convert;
