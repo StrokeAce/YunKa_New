@@ -2,7 +2,7 @@
 <Window>
   <Font name="Î¢ÈíÑÅºÚ" size="12" bold="false" default="true" />
   <Font name="Î¢ÈíÑÅºÚ" size="12" bold="true"/>
-  <Default name="Menu" value="inset=&quot;2,2,2,2&quot; itemtextpadding=&quot;30,0,0,0&quot; bkimage=&quot;res='121' restype='png' corner='30,8,8,8'&quot; hole=&quot;false&quot;" />
+    <Default name="Menu" value="inset=&quot;2,2,2,2&quot; itemtextpadding=&quot;30,0,0,0&quot; bkimage=&quot;file='menu\\menu_bk.png' restype='png' corner='30,8,8,8'&quot; hole=&quot;false&quot;" />
 
 
 	 <Menu>
