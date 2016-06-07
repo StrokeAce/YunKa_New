@@ -1533,7 +1533,7 @@ void CMainFrame::RecvAcceptChat(CUserObject* pUser, CWebUserObject* pWebUser)
 	char str[MAX_1024_LEN] = {0};
 	sprintf(str, "%s接受了%s邀请的对话", pUser->UserInfo.nickname, pWebUser->info.name);
 
-	string stime = GetTimeStringMDAndHMS(0);
+	//string stime = GetTimeByMDAndHMS
 	AddToMsgList(pWebUser, str, "");
 	
 
@@ -1813,8 +1813,6 @@ void CMainFrame::ShowMySelfSendMsg(string strMsg)
 	}
 
 }
-
-<<<<<<< .mine
 
 
 void CMainFrame::LoadBrowser(char* url)
@@ -2252,7 +2250,7 @@ void CMainFrame::ChangeShowUserMsgWnd(unsigned long id)
 	}
 	*/
 }
-=======
+
 void CMainFrame::ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, bool bSuccess)
 {
 
@@ -2262,4 +2260,3 @@ void CMainFrame::ResultTransferUser(CWebUserObject* pWebUser, CUserObject* pUser
 {
 
 }
->>>>>>> .r12
