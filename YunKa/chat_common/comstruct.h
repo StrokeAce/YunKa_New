@@ -83,6 +83,7 @@ typedef struct INIT_CONF
 	bool bZlibEnabled;					// 和visit服务器通信，客户端是否启用压缩
 	char query_history_records[256];	// 查询历史记录
 	char wechat_media_upload[256];		// 微信服务器媒体文件上传url
+	char wechat_media_url[256];			// 微信服务器媒体文件获取url
 	char wechat_static_map[256];		// 腾讯地图静态图url
 	char wechat_map_location[256];		// 腾讯地图地点标注url
 	char fileserver_media_download[256];// 文件服务器下载的微信服务器的媒体文件的url
@@ -402,9 +403,10 @@ struct UPLOAD_INFO
 {
 	void* pThis;				// 传该结构体参数的类对象指针
 	string filePath;			// 上传文件路径
-	unsigned long userId;		// 消息id
+	unsigned long userId;		// 用户id
 	MSG_DATA_TYPE msgDataType;	// 消息的数据类型
 	USER_TYPE userType;			// 消息接收用户类型
+	string msgId;				// 消息id
 };
 
 struct DOWNLOAD_INFO

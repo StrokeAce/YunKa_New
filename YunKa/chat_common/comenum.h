@@ -70,7 +70,7 @@ enum MSG_TYPE
 /** 消息数据类型 */
 enum MSG_DATA_TYPE
 {
-	MSG_DATA_TYPE_TEXT=1,		/**< 文字 */
+	MSG_DATA_TYPE_TEXT=1,	/**< 文字 */
 	MSG_DATA_TYPE_IMAGE,	/**< 图片 */
 	MSG_DATA_TYPE_VOICE,	/**< 语音 */
 	MSG_DATA_TYPE_VIDEO,	/**< 视频 */
@@ -78,6 +78,13 @@ enum MSG_DATA_TYPE
 	MSG_DATA_TYPE_LINK,		/**< 链接 */
 	MSG_DATA_TYPE_EVENT,	/**< 事件 */
 	MSG_DATA_TYPE_FILE		/**< 文件 */
+};
+
+enum
+{
+	CAPTURE_SAVE_TYPE_FILE = 0,		// 截图保存类型 0 文件形式保存 需要路径
+	CAPTURE_SAVE_TYPE_CLIPBOARD,	// 1 剪切板保存 无视路径
+	CAPTURE_SAVE_TYPE_BOTH			// 2 两种方式都保存 需要路径
 };
 
 #endif

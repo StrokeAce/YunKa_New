@@ -852,8 +852,10 @@ void CMainFrame::OnBtnFace(TNotifyUI& msg)
 
 void CMainFrame::OnBtnScreen(TNotifyUI& msg)
 {
-
-
+	if (m_manager)
+	{
+		m_manager->ScreenCapture(m_hMainWnd);
+	}
 }
 
 //选择表情后的处理
@@ -1689,8 +1691,10 @@ void CMainFrame::ResultSendMsg(string msgId, bool bSuccess)
 {
 }
 
+void CMainFrame::ResultScreenCapture(string imagePath)
+{
 
-
+}
 
 void CMainFrame::OnManagerButtonEvent(TNotifyUI& msg)
 {

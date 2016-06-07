@@ -95,7 +95,13 @@ public:
 	//************************************
 	virtual void ResultSendMsg(string msgId, bool bSuccess) = 0;
 
-	//virtual void Recv
+	//************************************
+	// Method:    ResultScreenCapture
+	// Qualifier: 截图的结果
+	// Parameter: imagePath 截图的保存位置，可能为空
+	//************************************
+	virtual void ResultScreenCapture(string imagePath) = 0;
+
 };
 
 class CChatManager : public IBaseReceive
@@ -145,8 +151,9 @@ public:
 	//************************************
 	// Method:    SendTo_Msg
 	// Qualifier: 发送一条消息
-	// Parameter: pUser 接收消息的对象
-	// Parameter: string msgId	消息id
+	// Parameter: userId 接收消息的对象的id
+	// Parameter: userType 接收对象的类型，坐席或访客
+	// Parameter: msgId	消息id
 	// Parameter: string msgDataType 数据类型
 	// Parameter: string msg 数据内容
 	//************************************
@@ -205,7 +212,7 @@ public:
 	string GetLastError();
 
 	// 截图
-	void ScreenCapture();
+	void ScreenCapture(HWND hWnd);
 	
 	// 退出，程序退出时调用
 	void Exit();
@@ -409,9 +416,11 @@ public:
 
 	CWebUserObject *GetWebUserObjectByScriptFlag(char *scriptflag);	
 
-	void UpLoadFile(unsigned long userId, USER_TYPE userType, string filePath, MSG_DATA_TYPE = MSG_DATA_TYPE_IMAGE);
+	void UpLoadFile(unsigned long userId, USER_TYPE userType, string msgId, string filePath,
+					MSG_DATA_TYPE = MSG_DATA_TYPE_IMAGE);
 
-	bool AfterUpload(unsigned long userId, USER_TYPE userType, string mediaID = "", MSG_DATA_TYPE = MSG_DATA_TYPE_IMAGE, string fileId = "", string filePath = "", string msgId = "");
+	void AfterUpload(unsigned long userId, USER_TYPE userType, string msgId, string mediaID = "",
+					MSG_DATA_TYPE = MSG_DATA_TYPE_IMAGE, string fileId = "", string filePath = "");
 
 	string& TransferFaceToStr(string& msg);
 
@@ -428,8 +437,6 @@ public:
 	CUserObject				m_userInfo;				// 登录用户的信息
 	CSysConfigFile*			m_sysConfig;			// 用户设置文件类
 	INIT_CONF				m_initConfig;			// 软件配置文件类
-
-public:
 	CLogin*					m_login;				// 登录处理类	
 	IHandlerLgoin*			m_handlerLogin;			// 登录消息接收接口
 	IHandlerMsgs*			m_handlerMsgs;			// 通信消息接收接口	
@@ -453,8 +460,7 @@ public:
 	int						m_nMyInfoIsGet;			// 是否我的信息已经获取到了
 	int						m_nSendPing;			// 心跳包发送的次数
 	int						m_nSendPingFail;		// 心跳包发送失败次数 
-	int						m_nLoginToVisitor;		// 尝试登录visit服务器的次数
-	 
+	int						m_nLoginToVisitor;		// 尝试登录visit服务器的次数	 
 	unsigned long			m_nNextInviteWebuserUid;// 邀请的访客信息
 	unsigned long			m_nNextInviteUid;		// 主动邀请的用户
 	MapWxTokens				m_mapTokens;			// 公众号token存储集合
@@ -462,5 +468,6 @@ public:
 	int						m_msgId;				// 消息id，自增
 	list<MSG_INFO*>			m_listEarlyMsg;			// 保存还未初始化访客对象之前收到的消息
 	int						m_nClientIndex;			// 访客的序列号，自增
+	HMODULE					m_hScreenDll;			// 截图句柄
 };
 
