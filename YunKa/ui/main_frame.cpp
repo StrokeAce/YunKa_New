@@ -992,7 +992,7 @@ void CMainFrame::ReplaceFaceId(string &msg)
 
 		StringReplace(url, "face.gif", facePath);
 		StringReplace(str, reStr, url);
-
+		StringReplace(str, "\\", "/");
 	} 
 
 	msg = str;
