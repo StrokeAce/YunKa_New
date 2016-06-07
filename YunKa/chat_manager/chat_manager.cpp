@@ -1885,6 +1885,8 @@ int CChatManager::RecvFloatChatMsg(PACK_HEADER packhead, char *pRecvBuff, int le
 		m_handlerMsgs->RecvMsg((IBaseObject*)pWebUser, msgFrom, GetMsgId(),	msgType, (MSG_DATA_TYPE)RecvInfo.nMsgDataType, 
 			RecvInfo.strmsg, GetTimeByMDAndHMS(RecvInfo.tMsgTime), pAssistUser, msgContentWx, "");
 
+		DownLoadFile(pWxMsg, pWebUser, pAssistUser);
+
 		// 同步更新关联词
 		//if (m_sysConfig->m_bAutoSearchKeyword)
 		{
@@ -3339,7 +3341,7 @@ void CChatManager::RecvComSendWorkBillMsg(unsigned long senduid, unsigned long r
 				pWebUser->talkuid = uTransuid;
 				char msg[MAX_256_LEN];
 				sprintf(msg, "访客 %s 转移到 %s", pWebUser->info.name, m_userInfo.UserInfo.nickname);
-				//m_pFormUser->MoveWebUserToUserTransferItem(pWebUser, m_pUserInfo);
+				//m_pFormUser->MoveWebUserToUserTransferItem(pWebUser, m_userInfo);
 				//m_tranferList[pWebUser->webuserid] = 0;
 				//KillTimer(TIMER_TRANS_TIMEOUT);
 				//SetTimer(TIMER_TRANS_TIMEOUT, 1000, NULL);
@@ -3359,7 +3361,7 @@ void CChatManager::RecvComSendWorkBillMsg(unsigned long senduid, unsigned long r
 			pWebUser->m_nWaitTimer = 0;
 			pWebUser->m_bConnected = true;
 
-			//int nRet = this->m_pFormUser->MoveWebUserToUserTalkItem(pWebUser, m_pUserInfo);
+			//int nRet = this->m_pFormUser->MoveWebUserToUserTalkItem(pWebUser, m_userInfo);
 			//if (nRet < 0)
 			//	m_pFormUser->m_TreeListUser.DeleteItemByLParam((LPARAM)pWebUser);
 			//else
@@ -3519,7 +3521,7 @@ int CChatManager::RecvComTransAnswer(unsigned long senduid, COM_SEND_MSG& RecvIn
 		//坐席同意后发送CLT_TRANSFERCLIENT包
 		strMsg = pWebUser->info.name;
 		strMsg = "对方同意您对访客[%s]的转接" + strMsg;
-		//SendTransferClinet(pAcceptUser, pWebUser, senduid);
+		SendToTransferUser(pAcceptUser, pWebUser, senduid);
 	}
 	else if ((int)strMsg.find("NO") >= 0)//拒绝转接
 	{
@@ -4201,12 +4203,12 @@ int CChatManager::SendTo_InviteWebUser(CWebUserObject *pWebUser, int type, strin
 	return nError;
 }
 
-int CChatManager::SendTo_InviteUser(CWebUserObject* pWebUser, CUserObject* pUser)
+int CChatManager::SendTo_InviteUser(CWebUserObject* pWebUser, CUserObject* pAcceptUser)
 {
 	int nError = 0;
 	COM_FLOAT_INVITEREQUEST SendInfo(VERSION, pWebUser->gpid);
 
-	SendInfo.uInviteUser = pUser->UserInfo.uid;
+	SendInfo.uInviteUser = pAcceptUser->UserInfo.uid;
 	SendInfo.sSecond = 0;
 
 	SendInfo.uAdminId = pWebUser->floatadminuid;
@@ -4221,9 +4223,49 @@ int CChatManager::SendTo_InviteUser(CWebUserObject* pWebUser, CUserObject* pUser
 	return nError;
 }
 
-int CChatManager::SendTo_TransferUser(CWebUserObject* pWebUser, CUserObject* pUser)
+int CChatManager::SendTo_TransferRequestUser(CWebUserObject* pWebUser, CUserObject* pAcceptUser)
 {
-	return 1;
+	int nError = 0;
+	if (pWebUser->m_bNewComm)
+	{
+		//等待应答会话转移
+		COM_FLOAT_TRANSREQUEST SendInfo(VERSION, pWebUser->gpid);
+		SendInfo.uAdminId = pWebUser->floatadminuid;
+		strcpy(SendInfo.chatid, pWebUser->chatid);
+		SendInfo.uWebuin = pWebUser->webuserid;
+		SendInfo.nTimeOutSecond = 0;
+		SendInfo.uToAdminId = 0;
+		SendInfo.uToKefu = pAcceptUser->UserInfo.uid;
+
+		g_WriteLog.WriteLog(C_LOG_TRACE, "发送等待应答访客转接请求[chatid:%s,acceptuid:%u,acceptname:%s,sendname:%s,senduid:%u]",
+			SendInfo.chatid, SendInfo.uToKefu, pAcceptUser->UserInfo.nickname, m_userInfo.UserInfo.nickname, m_userInfo.UserInfo.uid);
+
+		nError = SendPackTo(&SendInfo);
+	}
+	else
+	{
+		//一对一会话转移
+		//转接要改成先发送邀请，而不是直接转过去
+		COM_SEND_MSG SendInfo(VERSION);
+		char strMsg[MAX_256_LEN];
+		sprintf(strMsg, "%u|%s\n", m_userInfo.UserInfo.uid, m_userInfo.UserInfo.nickname);
+		SendInfo.msg.msgtype = MSG_TRANSFER_REQUEST;
+		SendInfo.msg.recvuin = pAcceptUser->UserInfo.uid;
+		SendInfo.msg.sendtime = GetTimeLong();
+		strncpy(SendInfo.msg.strmsg, strMsg, MAX_MSG_RECVLEN);
+		SendInfo.msg.bak = 0;
+		SendInfo.msg.seq = GetPackSeq();
+		SendInfo.version = VERSION;
+		SendInfo.msg.senduin = pWebUser->webuserid;//客服号码
+		strncpy(SendInfo.strChatid, pWebUser->chatid, MAX_CHATID_LEN);
+		strncpy(SendInfo.strRand, pWebUser->info.sid, MAX_WEBCLIENID_LEN);
+		strncpy(SendInfo.strThirdid, pWebUser->info.thirdid, MAX_THIRDID_LEN);
+		g_WriteLog.WriteLog(C_LOG_TRACE, "发送转接请求: recvuin:%u,senduin:%u", SendInfo.msg.recvuin, SendInfo.msg.senduin);
+
+		nError = SendPackTo(&SendInfo);
+	}
+
+	return nError;
 }
 
 int CChatManager::SendTo_InviteUserResult(CWebUserObject* pWebUser, CUserObject* pUser, bool result)
@@ -4653,4 +4695,56 @@ int CChatManager::CancelRecordAudio()
 	return 0;
 }
 
+int CChatManager::SendToTransferUser(CUserObject *pAcceptUser, CWebUserObject *pWebUser, unsigned long acceptuin /*= 0*/)
+{
+	int nError = 0;
+	CLT_TRANSFERCLIENT Info(VERSION);
+	if (pAcceptUser != NULL)
+	{
+		Info.recvinfo.id = pAcceptUser->UserInfo.uid;
+		strcpy(Info.recvinfo.name, pAcceptUser->UserInfo.nickname);
+	}
+	else
+	{
+		Info.recvinfo.id = acceptuin;
+	}
+
+	Info.clientinfo.id = pWebUser->webuserid;
+	strcpy(Info.clientinfo.name, pWebUser->info.name);
+	Info.sendinfo.id = m_userInfo.UserInfo.uid;
+	strcpy(Info.sendinfo.name, m_userInfo.UserInfo.nickname);
+	strcpy(Info.szChatId, pWebUser->chatid);
+	strcpy(Info.szRand, pWebUser->info.sid);
+	strcpy(Info.szThirdid, pWebUser->info.thirdid);
+
+	g_WriteLog.WriteLog(C_LOG_TRACE, "SendTransferClinet[chatid:%s, acceptuid:%u,acceptname:%s,Webname:%s,sendname:%s,senduid:%u]",
+		Info.szChatId, Info.recvinfo.id, Info.recvinfo.name, Info.clientinfo.name, Info.sendinfo.name, m_userInfo.UserInfo.uid);
+
+	Info.seq = GetPackSeq();
+	nError = SendPackTo(&Info);
+
+	return nError;
+}
+
+void CChatManager::DownLoadFile(WxMsgBase* pWxMsg, CWebUserObject *pWebUser, CUserObject *pAssistUser)
+{
+	if (pWxMsg->MsgType == "image")
+	{
+		string filePathName = FullPath("\\temp\\");
+		CCodeConvert convert;
+		DOWNLOAD_INFO* param = new DOWNLOAD_INFO();
+		param->pUser = pAssistUser;
+		param->pThis = this;
+		param->filePath = convert.URLEncode(filePathName.c_str());
+		param->downLoadUrl = ((WxMsgImage*)pWxMsg)->MediaUrl.c_str();
+		param->msgDataType = MSG_DATA_TYPE_IMAGE;
+		if (pAssistUser)
+		{
+			param->pUser = pAssistUser;
+		}
+		param->time = GetTimeLong();
+		param->pWebUser = pWebUser;
+		_beginthreadex(NULL, 0, DownLoadFileFromServerThread, (void*)param, 0, NULL);
+	}
+}
 

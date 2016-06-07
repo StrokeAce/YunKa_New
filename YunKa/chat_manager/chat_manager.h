@@ -211,7 +211,7 @@ public:
 	// Parameter: pWebUser 会话中的访客
 	// Parameter: pUser 邀请的坐席
 	//************************************
-	int SendTo_InviteUser(CWebUserObject* pWebUser, CUserObject* pUser);
+	int SendTo_InviteUser(CWebUserObject* pWebUser, CUserObject* pAcceptUser);
 
 	//************************************
 	// Method:    SendTo_InviteUserResult
@@ -223,7 +223,9 @@ public:
 	int SendTo_InviteUserResult(CWebUserObject* pWebUser, CUserObject* pUser, bool bAccept);
 
 	// 发起会话转接到其他坐席的请求
-	int SendTo_TransferUser(CWebUserObject* pWebUser, CUserObject* pUser);
+	int SendTo_TransferRequestUser(CWebUserObject* pWebUser, CUserObject* pAcceptUser);
+
+	int SendToTransferUser(CUserObject *pAcceptUser, CWebUserObject *pWebUser, unsigned long acceptuin = 0);
 
 	//************************************
 	// Method:    SendTo_InviteUserResult
@@ -454,6 +456,8 @@ public:
 
 	void UpLoadFile(unsigned long userId, USER_TYPE userType, string msgId, string filePath,
 					MSG_DATA_TYPE = MSG_DATA_TYPE_IMAGE);
+
+	void DownLoadFile(WxMsgBase* pWxMsg, CWebUserObject *pWebUser, CUserObject *pAssistUser);
 
 	void AfterUpload(unsigned long userId, USER_TYPE userType, string msgId, string mediaID = "",
 					MSG_DATA_TYPE = MSG_DATA_TYPE_IMAGE, string fileId = "", string filePath = "");
