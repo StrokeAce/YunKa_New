@@ -31,3 +31,19 @@ int CGlobalSetting::FindFileExist(WCHAR *str)
 
 	return PathFileExists(str);
 }
+
+
+void CGlobalSetting::GetCurTimeString(string &strFrom, string &strEnd, int nday)
+{
+
+	SYSTEMTIME t = { 0 };
+	GetLocalTime(&t);
+
+	//CTime ct1 = CTime::GetCurrentTime();
+	//CTime ct2 = ct1 - CTimeSpan(nday, 0, 0, 0);
+
+	//strFrom.Format("%04d-%02d-%02d", ct2.GetYear(), ct2.GetMonth(), ct2.GetDay());
+	//strEnd.Format("%04d-%02d-%02d", ct1.GetYear(), ct1.GetMonth(), ct1.GetDay());
+
+	return;
+}

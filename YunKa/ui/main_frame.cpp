@@ -10,6 +10,7 @@
 
 #include "chat_common\comfunc.h"
 #include "utils\code_convert.h"
+#include "menu_wnd.h"
 
 #include <WinUser.h>
 
@@ -24,11 +25,22 @@ CMainFrame::CMainFrame(CChatManager* manager) :m_manager(manager)
 	m_pSendEdit = NULL;
 
 	pOnlineNode = pWaitForStart = pMySelfeNode = NULL;
-	m_initType = -1;
 
 	m_recordWaitNumber = 0;
 
 	m_facePathUrl = "<IMG alt=\"\" src=\"face.gif\">";
+
+	m_rightRect = {0};
+
+	CCodeConvert f_covet;
+	string strTmp = "<html><head>";
+	strTmp += STRING_HTML_META;
+	strTmp += STRING_HTML_BASE;
+	strTmp += STRING_HTML_STYLE;
+	strTmp += "</head><body>";
+	strTmp += "<div><p><span style=\"font - size:16px; color:#cccccc\">无可显示信息</span></p><div></body>";
+	f_covet.Gb2312ToUTF_8(m_defaultUrlInfo, strTmp.c_str(), strTmp.length());
+	
 }
 
 
@@ -194,17 +206,26 @@ LRESULT CMainFrame::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 LRESULT CMainFrame::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
-	//bHandled = FALSE;
+
 	if (uMsg == ON_AFTER_CREATED)
 	{
-		m_pListMsgHandler.isCreated = true;
+		string msg = *(string*)wParam;
+
+		if (Handler_ListMsg == msg)
+		    m_pListMsgHandler.isCreated = true;
+
+		if (Handler_VisitorRelated == msg)
+		    m_pVisitorRelatedHandler.isCreated = true;
 	}
 	else if (uMsg == ON_AFTER_LOAD)
 	{
+		string msg = *(string*)wParam;
 
+		if (Handler_ListMsg == msg)
+		   m_pListMsgHandler.isLoaded = true;
 
-		m_pListMsgHandler.isLoaded = true;
-
+		if (Handler_VisitorRelated == msg)
+		    m_pVisitorRelatedHandler.isLoaded = true;
 	}
 
 
@@ -254,9 +275,8 @@ void CMainFrame::Notify(TNotifyUI& msg)
 	}
 	else if (_tcsicmp(msg.sType, _T("selectchanged")) == 0)
 	{
-		OnSelectedChanged(msg);
+		OnSelectChanged(msg);
 	}
-
 
 	else if (_tcsicmp(msg.sType, _T("itemactivate")) == 0)
 	{
@@ -268,6 +288,11 @@ void CMainFrame::Notify(TNotifyUI& msg)
 	{
 
 		OnItemClick(msg);
+	}
+
+	else if (_tcsicmp(msg.sType, _T("menu")) == 0)
+	{
+		OnItemRbClick(msg);
 	}
 
 	else if (_tcsicmp(msg.sType, _T("itemrclick")) == 0)
@@ -317,38 +342,11 @@ void CMainFrame::OnCloseBtn(TNotifyUI& msg)
 
 }
 
-#if 0
-
-LRESULT CMainFrame::OnSize(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
-{
-	TNotifyUI msg;
-#if 0
-	if (m_initType == 0)
-	{
-		if (wParam == 2) //最大化
-		{
-			OnMaxBtn(msg);
-		}
-
-		else if (wParam == 0) //还原
-		{
-			OnRestoreBtn(msg);
-		}
-	}
-#endif
-
-
-	return 0;
-}
-
-#endif
-
-
 
 void CMainFrame::MoveAndRestoreMsgWnd(int type)
 {
 	int leftWidth = 0;
-	RECT rc;
+	RECT rc = { 0 }, rect = {0};
 	RECT sysRect;
 	CDuiString formatString;
 
@@ -358,6 +356,10 @@ void CMainFrame::MoveAndRestoreMsgWnd(int type)
 	CControlUI *rightLayout = static_cast<CHorizontalLayoutUI*>(m_PaintManager.FindControl(_T("VerticalLayoutUI_RightFrame")));
 	CControlUI *ShowMsgWnd = static_cast<CHorizontalLayoutUI*>(m_PaintManager.FindControl(_T("HorizontalLayoutUI_ShowMsg")));
 
+	CControlUI *ShowRightWebWnd = static_cast<CHorizontalLayoutUI*>(m_PaintManager.FindControl(_T("right_tab")));
+
+
+	//m_pVisitorRelatedHandler.handler->CreateBrowser(this->m_hWnd, rect, "www.baidu.com", Handler_VisitorRelated);
 
 	if (type == 0) //max
 	{
@@ -378,6 +380,16 @@ void CMainFrame::MoveAndRestoreMsgWnd(int type)
 		rc = ShowMsgWnd->GetPos();
 		rc.right = rc.left + centerWidth - 2;
 		m_pListMsgHandler.handler->MoveBrowser(rc);
+
+		if (m_rightRect.left == 0)
+		    m_rightRect = ShowRightWebWnd->GetPos();
+
+		rect.left = rc.right + 4;
+		rect.right = sysRect.right - 4;
+		rect.top += m_rightRect.top;
+		rect.bottom = sysRect.bottom - 4;
+		m_pVisitorRelatedHandler.handler->MoveBrowser(rect);
+
 	}
 	else
 	{
@@ -387,6 +399,9 @@ void CMainFrame::MoveAndRestoreMsgWnd(int type)
 		rc = ShowMsgWnd->GetPos();
 		rc.right = rc.left + m_centerChatInfo.showMsgWidth;
 		m_pListMsgHandler.handler->MoveBrowser(rc);
+
+		//rc = ShowRightWebWnd->GetPos();
+		m_pVisitorRelatedHandler.handler->MoveBrowser(m_rightRect);
 	}
 }
 
@@ -420,6 +435,62 @@ void CMainFrame::OnMinBtn(TNotifyUI& msg)
 
 
 
+void CMainFrame::InitLibcef(void)
+{
+	//聊天窗口 初始化
+	m_pListMsgHandler.handler = NULL;
+	m_pListMsgHandler.handleName = Handler_ListMsg;
+	m_pListMsgHandler.isLoaded = false;
+	m_pListMsgHandler.isCreated = false;
+	m_pVisitorRelatedHandler.handler = NULL;
+	m_pVisitorRelatedHandler.handleName = Handler_VisitorRelated;
+	m_pVisitorRelatedHandler.isLoaded = false;
+	m_pVisitorRelatedHandler.isCreated = false;
+
+	//显示聊天内容的libcef窗口
+	m_pListMsgHandler.handler = new ClientHandler();
+	m_pListMsgHandler.handler->m_isDisplayRefresh = false;
+
+	m_pVisitorRelatedHandler.handler = new ClientHandler();
+	m_pVisitorRelatedHandler.handler->m_isDisplayRefresh = false;
+
+	if (!m_pListMsgHandler.isCreated)
+	{
+		string localUrl = GetCurrentPath();
+		localUrl += ("\\html\\list.html");
+		CCodeConvert f_covet;
+		string utfUrl;
+		f_covet.Gb2312ToUTF_8(utfUrl, localUrl.c_str(), localUrl.length());
+		//这里需要根据每个控件的位置  计算起始大小
+		//RECT rc = { 308, 144, 308 + 379, 399 + 144 };
+
+		CControlUI *ShowMsgWnd = static_cast<CHorizontalLayoutUI*>(m_PaintManager.FindControl(_T("HorizontalLayoutUI_ShowMsg")));
+
+		RECT rect, padRect;
+		rect = ShowMsgWnd->GetPos();
+		padRect = ShowMsgWnd->GetPadding();
+		int width = ShowMsgWnd->GetWidth();
+		int height = ShowMsgWnd->GetHeight();
+
+		m_pListMsgHandler.handler->CreateBrowser(this->m_hWnd, rect, utfUrl, Handler_ListMsg);
+		//m_pListMsgHandler.handler->CreateBrowser(this->m_hWnd, rect, "www.baidu.com", Handler_ListMsg);
+
+	}
+
+	if (!m_pVisitorRelatedHandler.isCreated)
+	{
+
+		CControlUI *ShowMsgWnd = static_cast<CHorizontalLayoutUI*>(m_PaintManager.FindControl(_T("right_tab")));
+
+		RECT rect, padRect;
+		rect = ShowMsgWnd->GetPos();
+		padRect = ShowMsgWnd->GetPadding();
+
+		m_pVisitorRelatedHandler.handler->CreateBrowser(this->m_hWnd, rect, "about:blank", Handler_VisitorRelated);
+	
+	}
+
+}
 
 
 
@@ -428,12 +499,9 @@ void CMainFrame::OnPrepare(TNotifyUI& msg)
 	CDuiString nameString = _T("");
 	CDuiString typeString[4] = { _T("对话中"), _T("转接中"), _T("邀请中"), _T("内部对话") };
 
+	//cef窗口
+	InitLibcef();
 
-	//聊天窗口 初始化
-	m_pListMsgHandler.handler = NULL;
-	m_pListMsgHandler.handleName = Handler_ListMsg;
-	m_pListMsgHandler.isLoaded = false;
-	m_pListMsgHandler.isCreated = false;
 
 	//聊天框中间栏按钮
 	m_pFontBtn = static_cast<CButtonUI*>(m_PaintManager.FindControl(_T("btnFont")));
@@ -467,8 +535,6 @@ void CMainFrame::OnPrepare(TNotifyUI& msg)
 			m_pManagerBtn[i].m_pManagerBtn->SetHotImage(str);
 			m_pManagerBtn[i].m_pManagerBtn->SetPushedImage(str);
 		}
-
-
 	}
 
 	//右下角小图标
@@ -515,37 +581,11 @@ void CMainFrame::OnPrepare(TNotifyUI& msg)
 	}
 #endif
 
-	//显示聊天内容的libcef窗口
-	m_pListMsgHandler.handler = new ClientHandler();
-	m_pListMsgHandler.handler->m_isDisplayRefresh = false;
-
-	if (!m_pListMsgHandler.isCreated)
-	{
-		string localUrl = GetCurrentPath();    
-		localUrl += ("\\html\\list.html");
-		CCodeConvert f_covet;
-		string utfUrl;
-		f_covet.Gb2312ToUTF_8(utfUrl, localUrl.c_str(), localUrl.length());
-		//这里需要根据每个控件的位置  计算起始大小
-		//RECT rc = { 308, 144, 308 + 379, 399 + 144 };
-
-		CControlUI *ShowMsgWnd = static_cast<CHorizontalLayoutUI*>(m_PaintManager.FindControl(_T("HorizontalLayoutUI_ShowMsg")));
-
-		RECT rect,padRect;
-		rect = ShowMsgWnd->GetPos();
-		padRect = ShowMsgWnd->GetPadding();
-		int width = ShowMsgWnd->GetWidth();
-		int height = ShowMsgWnd->GetHeight();
-
-		m_pListMsgHandler.handler->CreateBrowser(this->m_hWnd, rect, utfUrl, Handler_ListMsg);
-		//m_pListMsgHandler.handler->CreateBrowser(this->m_hWnd, rect, "www.baidu.com", Handler_ListMsg);
-
-	}
-
+	//发送按钮
 	m_pSendEdit = static_cast<CRichEditUI*>(m_PaintManager.FindControl(_T("richSend")));
 	m_pSendEdit->SetText(_T(""));
 	m_pSendEdit->SetFocus();
-
+	//richedit
 	IRichEditOleCallback2* pRichEditOleCallback2 = NULL;
 	HRESULT hr = ::CoCreateInstance(CLSID_ImageOle, NULL, CLSCTX_INPROC_SERVER,
 		__uuidof(IRichEditOleCallback2), (void**)&pRichEditOleCallback2);
@@ -562,7 +602,6 @@ void CMainFrame::OnPrepare(TNotifyUI& msg)
 	hr = ::RegisterDragDrop(m_hWnd, pdt);
 	pdt->Release();
 
-	m_initType = 0;
 
 	//请求坐席列表
 	SendMsgToGetList();
@@ -643,45 +682,35 @@ void CMainFrame::OnClick(TNotifyUI& msg)
 
 void CMainFrame::OnSelectChanged(TNotifyUI &msg)
 {
-
-	if (msg.pSender->GetName() == _T("optHall"))
-	{
-
-	}
-	else if (msg.pSender->GetName() == _T("optBroad"))
-	{
-	}
-
-}
-
-
-void CMainFrame::OnSelectedChanged(TNotifyUI &msg)
-{
 	WCHAR OptionBtnName[32] = { 0 };
 
-#if 0
+
+
 	CTabLayoutUI* pTabControl = static_cast<CTabLayoutUI*>(m_PaintManager.FindControl(_T("right_tab")));
-	int index = pTabControl->GetCurSel() + 1;
-
-	//这里因为右边屏幕 有7个option选项 
-	for (int i = 0; i < 7; i++)
+	//操作tab
+	if (pTabControl != NULL)
 	{
-		swprintf_s(OptionBtnName,_T("option_button_%d"),i+1);
+		int index = pTabControl->GetCurSel() + 1;
 
-		if (_tcsicmp(msg.pSender->GetName(), OptionBtnName) == 0)
+		//这里因为右边屏幕 有7个option选项 
+		for (int i = 0; i < 7; i++)
 		{
-			if (pTabControl && pTabControl->GetCurSel() != i )
-			{
-				pTabControl->SelectItem(i);
-				break;
+			swprintf_s(OptionBtnName, _T("option_button_%d"), i + 1);
 
+			if (_tcsicmp(msg.pSender->GetName(), OptionBtnName) == 0)
+			{
+				if (pTabControl && pTabControl->GetCurSel() != i)
+				{
+					pTabControl->SelectItem(i);
+					
+					break;
+				}
 			}
 		}
-
 	}
 
 
-#endif
+
 
 }
 
@@ -699,6 +728,12 @@ void CMainFrame::OnItemClick(TNotifyUI &msg)
 
 			if (id > 0)
 			{
+				//
+				if (m_checkId != id)//切换聊天对象显示 
+				{
+					ChangeShowUserMsgWnd(id);
+				}
+
 				m_checkId = id;
 				map<unsigned long, UserListUI::Node*>::iterator iter = m_waitVizitorMap.find(id);
 				if (iter != m_waitVizitorMap.end())
@@ -714,7 +749,11 @@ void CMainFrame::OnItemClick(TNotifyUI &msg)
 					m_pManagerBtn[4].m_pManagerBtn->SetNormalImage(m_pManagerBtn[4].pushedImage);
 					m_pManagerBtn[4].m_pManagerBtn->SetHotImage(m_pManagerBtn[4].hotImage);
 					m_pManagerBtn[4].m_pManagerBtn->SetPushedImage(m_pManagerBtn[4].pushedImage);
-				}		
+				}	
+
+
+
+
 			}
 		}
 	}
@@ -782,12 +821,30 @@ void CMainFrame::OnItemActive(TNotifyUI &msg)
 
 void CMainFrame::OnItemRbClick(TNotifyUI &msg)
 {
+	if (msg.pSender->GetName() == L"userlist")
+	{
+		CMenuWnd2* pMenu = new CMenuWnd2();
+		if (pMenu == NULL) { return; }
+		POINT pt = { msg.ptMouse.x, msg.ptMouse.y };
+		//::ClientToScreen(*this, &pt);
+		pMenu->Init(msg.pSender, pt);
 
+
+
+		//CMenuWnd* pMenu = new CMenuWnd(this->GetHWND());
+		//CPoint cpoint = msg.ptMouse;
+		//pMenu->SetPath(L"menutext.xml");
+
+		//pMenu->Init(NULL, _T(""), _T("xml"), cpoint);
+
+
+	}
 }
+
+
 
 void CMainFrame::OnItemSelect(TNotifyUI &msg)
 {
-
 
 
 }
@@ -1091,13 +1148,13 @@ void CMainFrame::AddHostUserList(UserListUI * ptr, CUserObject *user, int pos)
 
 	if (user->status == STATUS_OFFLINE) //离线
 	{
-		m_offlineNodeMap.insert(pair<unsigned int, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
+		m_offlineNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
 
 		pUserList->ExpandNode(pUserNameNode, false);
 	}
 	else  if (user->status == STATUS_ONLINE)     //在线
 	{
-		m_onlineNodeMap.insert(pair<unsigned int, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
+		m_onlineNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
 		pUserList->ExpandNode(pUserNameNode, true);
 	}
 
@@ -1141,7 +1198,7 @@ void CMainFrame::AddMyselfToList(UserListUI * ptr, CUserObject *user)
 	
 
 	//第一个主节点 显示 名称 在线状态
-	pUserNameNode = ptr->AddNode(nameString,0);
+	pUserNameNode = ptr->AddNode(nameString,user->UserInfo.uid);
 
 	taklString.Format(_T("{x 4}{i gameicons.png 18 10}{x 4}对话中"));
 	pUserTalkNode = pUserList->AddNode(taklString,0, pUserNameNode);
@@ -1232,12 +1289,12 @@ void CMainFrame::AddHostUserList(UserListUI * ptr, CUserObject *user)
 
 	if ( 1 /* user->status == STATUS_OFFLINE */)    //离线
 	{
-		m_offlineNodeMap.insert(pair<unsigned int, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
+		m_offlineNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
 
 	}
 	else  if (user->status == STATUS_ONLINE) //在线
 	{
-		m_onlineNodeMap.insert(pair<unsigned int, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
+		m_onlineNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
 		
 	}
 
@@ -1291,7 +1348,7 @@ void CMainFrame::RecvOnline(CUserObject* pUser)
 	{
 		//先删除当前的离线坐席 list 再添加上线的坐席状态
 
-		map<unsigned int, UserListUI::Node*>::iterator  iter = m_offlineNodeMap.find(pUser->UserInfo.uid);
+		map<unsigned long, UserListUI::Node*>::iterator  iter = m_offlineNodeMap.find(pUser->UserInfo.uid);
 		if (iter == m_offlineNodeMap.end())
 			return;
 
@@ -1328,7 +1385,7 @@ void CMainFrame::RecvOffline(CUserObject* pUser)
 	{
 		//先删除当前的在线 坐席 list   再添加离线的坐席状态
 
-		map<unsigned int, UserListUI::Node*>::iterator  iter = m_onlineNodeMap.find(pUser->UserInfo.uid);
+		map<unsigned long, UserListUI::Node*>::iterator  iter = m_onlineNodeMap.find(pUser->UserInfo.uid);
 		if (iter == m_onlineNodeMap.end())
 			return;
 
@@ -1399,7 +1456,7 @@ void CMainFrame::RecvChatInfo(CWebUserObject* pWebUser)
 	else if (pWebUser->onlineinfo.talkstatus = TALKSTATUS_TALK)
 	{
 
-		map<unsigned int, UserListUI::Node*>::iterator  iter = m_onlineNodeMap.find(pWebUser->info.uid);
+		map<unsigned long, UserListUI::Node*>::iterator  iter = m_onlineNodeMap.find(pWebUser->info.uid);
 		UserListUI::Node* tempNode = iter->second;
 		UserListUI::Node* child = NULL;
 		int num = tempNode->num_children();
@@ -1448,7 +1505,7 @@ void CMainFrame::RecvAcceptChat(CUserObject* pUser, CWebUserObject* pWebUser)
 	//1 先寻找 在线的坐席，2 在寻找离线坐席
 	else
 	{
-		map<unsigned int, UserListUI::Node*>::iterator iter2 = m_onlineNodeMap.find(pUser->UserInfo.uid);
+		map<unsigned long, UserListUI::Node*>::iterator iter2 = m_onlineNodeMap.find(pUser->UserInfo.uid);
 		if (iter2 == m_onlineNodeMap.end())
 		{
 			iter2 = m_offlineNodeMap.find(pUser->UserInfo.uid);
@@ -1471,62 +1528,42 @@ void CMainFrame::RecvAcceptChat(CUserObject* pUser, CWebUserObject* pWebUser)
 
 
 	//显示聊天界面内容
-	if (m_pListMsgHandler.isLoaded)
-	{
-		CefString strCode("ClearHistory();"), strUrl("");
-		m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->ExecuteJavaScript(strCode, strUrl, 0);
+	ShowClearMsg();
 
-	}
+	char str[MAX_1024_LEN] = {0};
+	sprintf(str, "%s接受了%s邀请的对话", pUser->UserInfo.nickname, pWebUser->info.name);
+
+	string stime = GetTimeStringMDAndHMS(0);
+	AddToMsgList(pWebUser, str, "");
+	
 
 #if 0
-	if (m_pListMsgHandler.isLoaded)
+	if (pWebUser->m_strMsgs.empty())
 	{
-		CefString strCode("ClearHistory();"), strUrl("");
-		m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->ExecuteJavaScript(strCode, strUrl, 0);
-
-		CString msgid;
-		if (isDisGroupMsg)
+		string msgid = m_manager->GetMsgId();
+		int len = strlen(pWebUser->info.name);
+		if (len > 0)
 		{
-			POSITION pos = this->m_strGroupMsgs.GetHeadPosition();
-			while (pos != NULL)
-			{
-				CefString msg(this->m_strGroupMsgs.GetNext(pos).msg);
-				m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->ExecuteJavaScript(msg, "", 0);
-			}
-		}
-		else
-		{
-			if (pUser->m_strMsgs.IsEmpty())
-			{
-				msgid = GetMsgId();
-				int len = strlen(pUser->UserInfo.nickname);
-				if (len > 0)
-				{
-					CCodeConvert f_covet;
-					CString msg = pUser->UserInfo.nickname;
-					msg += "的消息记录";
-					string name;
-					f_covet.Gb2312ToUTF_8(name, msg, len + 10);
-					ONE_MSG_INFO ongMsg;
-					ongMsg.msgId = msgid;
-					CString strJsCode;
-					strJsCode.Format("AppendMsgToHistory('%d','%d','%s','%s','%s','%s','%s','%s');",
-						MSG_TYPE_SYS, MSG_DATA_TYPE_TEXT, "", "", name.c_str(), "0", "unused", msgid);
-					ongMsg.msg = strJsCode;
-					pUser->m_strMsgs.AddTail(ongMsg);
-				}
-			}
+	
+			CCodeConvert f_covet;
+			string msg = pUser->UserInfo.nickname;
+			msg += "的消息记录";
+			string name;
+			f_covet.Gb2312ToUTF_8(name, msg.c_str(), msg.length());
+			ONE_MSG_INFO ongMsg;
+			ongMsg.msgId = msgid;
+			char strJsCode[MAX_256_LEN];
+			sprintf(strJsCode,"AppendMsgToHistory('%d','%d','%s','%s','%s','%s','%s','%s');",
+				/*系统提示消息 3 MSG_TYPE_SYS */3, MSG_DATA_TYPE_TEXT, "", "", name.c_str(), "0", "unused", msgid);
 
-			POSITION pos = pUser->m_strMsgs.GetHeadPosition();
-			while (pos != NULL)
-			{
-				CefString msg(pUser->m_strMsgs.GetNext(pos).msg);
-				m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->ExecuteJavaScript(msg, "", 0);
-			}
+			m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->ExecuteJavaScript(strJsCode, "", 0);
+			
 		}
+
+		
 	}
-
 #endif
+
 }
 
 void CMainFrame::RecvCloseChat(CWebUserObject* pWebUser)
@@ -1669,7 +1706,7 @@ void CMainFrame::RecvMsg(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, string msgId,
 	//组合消息
 	sprintf(strJsCode, "AppendMsgToHistory('%d', '%d', '%s', '%s', '%s', '%lu', '%s', '%s', '%d'); ",
 		msgType,
-		msgDataType, name.c_str(), msgTime.c_str(), msg.c_str(), userId, headPath.c_str(), msgId, msgFrom);
+		msgDataType, name.c_str(), msgTime.c_str(), msg.c_str(), userId, headPath.c_str(), msgId, 1);
 
 	if (m_pListMsgHandler.isLoaded)
 	{
@@ -1700,7 +1737,6 @@ void CMainFrame::OnManagerButtonEvent(TNotifyUI& msg)
 {
 	//CDuiString msgName = msg.pSender->GetName();
 	//int findPos = msgName.Find(_T("managerbutton_"));
-
 
 	//结束
 	if (msg.pSender->GetName() == _T("managerbutton_3"))
@@ -1778,6 +1814,445 @@ void CMainFrame::ShowMySelfSendMsg(string strMsg)
 
 }
 
+<<<<<<< .mine
+
+
+void CMainFrame::LoadBrowser(char* url)
+{
+	if (m_pVisitorRelatedHandler.isCreated)
+	{
+		if (m_pVisitorRelatedHandler.handler->GetBrowser())
+		{
+			if (url == NULL)
+			{
+				m_pVisitorRelatedHandler.handler->LoadString(m_defaultUrlInfo.c_str());
+			}
+			else
+			{
+				m_pVisitorRelatedHandler.handler->GetBrowser()->GetMainFrame()->LoadURL(url);
+			}
+		}
+	}
+	else
+	{
+		RECT rc = { 0, 0, 0, 0 };
+		if (url == NULL)
+		{
+			// 首次创建cef页面时就加载空页面的情况
+			m_pVisitorRelatedHandler.handler->CreateBrowser(this->m_hWnd, rc, "about:blank", Handler_VisitorRelated);
+		}
+		else
+		{
+			m_pVisitorRelatedHandler.handler->CreateBrowser(this->m_hWnd, rc, url, Handler_VisitorRelated);
+		}
+	}
+}
+
+
+void CMainFrame::ShowRightFrameView(int index)
+{
+	CWebUserObject *pWebUser = NULL;
+	string strFrom, strEnd;
+	string strUrl;
+
+	pWebUser = m_manager->GetWebUserObjectByUid(m_checkId);
+
+	if (m_checkId == 0 || pWebUser == NULL || !m_pVisitorRelatedHandler.isCreated)
+	{
+		LoadBrowser(NULL);
+		return;
+	}
+
+	int nTransFrom = -1;
+	if (pWebUser->m_bIsFrWX)
+	{
+		nTransFrom = 0;
+	}
+	else
+	{
+		nTransFrom = 1;
+	}
+
+	switch (index)
+	{
+	case TYPESELECT_INFO:
+		if (pWebUser->m_bIsGetInfo)
+		{
+			CCodeConvert f_covet;
+			string msg;
+			if (pWebUser->m_bIsFrWX)
+			{
+				// 微信用户信息
+				//CString html;
+				//CString content = CreateClientInfoHtml(pWebUser->m_pWxUserInfo);
+				//html.Format(Format_ClientInfo_Html, content, content.GetLength());
+				//f_covet.Gb2312ToUTF_8(msg, html, html.GetLength());
+			}
+			else
+			{
+				// web用户信息
+				f_covet.Gb2312ToUTF_8(msg, pWebUser->m_strInfoHtml.c_str(), pWebUser->m_strInfoHtml.length());
+			}
+			m_pVisitorRelatedHandler.handler->LoadString(msg.c_str());
+		}
+		else
+		{
+			m_pVisitorRelatedHandler.handler->LoadString(m_defaultUrlInfo.c_str());
+			if (pWebUser->m_bIsFrWX)
+			{
+				//m_pFrame->GetWxUserInfo(pWebUser->webuserid, pWebUser->chatid);
+			}
+		}
+		break;
+	case TYPESELECT_CLIENT:
+		_globalSetting.GetCurTimeString(strFrom, strEnd, 30);
+		//globalGetCurTimeString(strFrom, strEnd, 30);
+		if (m_manager->m_sysConfig->m_sStrServer == "tcp01.tq.cn" || m_manager->m_sysConfig->m_sStrServer == "211.151.52.48")//公网使用原来的链接
+		{
+
+		}	
+			//strURL.Format(pApp->m_InitConfig.visitorpage_visitortail, pWebUser->chatid, pWebUser->webuserid, pWebUser->info.sid, 0, nTransFrom, strFrom, strEnd,/*pWebUser->floatadminuid*/ pApp->m_UserInfo.UserInfo.uid);
+		else//公司内部使用新开发修改的链接
+			//strURL.Format(pApp->m_InitConfig.visitorpage_visitortail, pWebUser->chatid, pWebUser->info.sid, 0, nTransFrom);
+
+		break;
+	case TYPESELECT_CHATID:
+
+		//回话订单
+		//strURL.Format(pApp->m_InitConfig.visitorpage_visitorbill, pWebUser->chatid, pWebUser->webuserid, pWebUser->info.sid, 0, 0, strFrom, strEnd);
+
+		break;
+	case TYPESELECT_CLIENTINFO:
+
+		//客户信息
+		//if (pApp->m_SysConfig.strServer == "tcp01.tq.cn" || pApp->m_SysConfig.strServer == "211.151.52.48")
+		//	strURL.Format(pApp->m_InitConfig.visitorpage_visitorinfo, pWebUser->chatid, pWebUser->webuserid, pWebUser->info.sid, 0, 0, strFrom, strEnd, pWebUser->info.sid);
+		//else
+		//	strURL.Format(pApp->m_InitConfig.visitorpage_visitorinfo, pWebUser->chatid, "", 0, 0, strFrom, strEnd, pWebUser->info.thirdid, pWebUser->info.sid);
+
+
+		break;
+
+	case TYPESELECT_NOTICE:
+
+
+#if 0
+		//改成下订单
+		if (pWebUser->m_bIsFrWX)
+			strURL.Format(pApp->m_InitConfig.visitorpage_visitororder, pWebUser->chatid, pWebUser->webuserid, pWebUser->info.sid, 0, 0, strFrom, strEnd, pWebUser->info.thirdid, pWebUser->m_sWxAppid, 0);
+		else
+		{
+			CCodeConvert f_covet;
+			strTmp = "<html><head>";
+			strTmp += STRING_HTML_META;
+			strTmp += STRING_HTML_BASE;
+			strTmp += STRING_HTML_STYLE;
+			strTmp += "</head><body>";
+			strTmp += "<div><p><span style=\"font - size:16px; color:#cccccc\">目前仅支持微信用户下订单！</span></p><div></body>";
+			string msg;
+			f_covet.Gb2312ToUTF_8(msg, strTmp, strTmp.GetLength());
+			m_pVisitorRelatedHandler.handler->LoadString(msg.c_str());
+		}
+#endif
+
+
+		break;
+
+	case TYPESELECT_ORDER:
+
+		//查订单
+		//strURL.Format(pApp->m_InitConfig.visitorpage_visitororder, pWebUser->chatid, pWebUser->webuserid, pWebUser->info.sid, 0, 0, strFrom, strEnd, pWebUser->info.thirdid, pWebUser->m_sWxAppid, 1);
+
+
+		break;
+	default:
+		break;
+	}
+
+	if (strUrl.empty())
+	{
+		if (strUrl != "about:blank")
+		{
+			strUrl += "&token=";
+			//strURL += m_manager->GetAuthTokenString();
+		}
+
+		string url;
+		//CCodeConvert convert;
+		//g_WriteLog.WriteLog(C_LOG_TRACE, "OnEMTabDown--SelectType:%d,url:%s", cmd, strURL);
+		LoadBrowser((char*)strUrl.c_str());
+	}
+
+}
+
+void CMainFrame::ShowClearMsg()
+{
+	//显示聊天界面内容
+	if (m_pListMsgHandler.isLoaded)
+	{
+		CefString strCode("ClearHistory();"), strUrl("");
+		m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->ExecuteJavaScript(strCode, strUrl, 0);
+
+	}
+
+}
+
+
+
+
+
+void CMainFrame::AddToMsgList(CUserObject *pUser, string strMsg, string strTime,  int userType,
+	int msgType, int msgDataType, string msgId)
+{
+	string            headPath = "";
+	unsigned long     userId = 0;
+	CCodeConvert      f_covet;
+
+	char strJsCode[MAX_1024_LEN] = { 0 };
+	string  name, msg;
+
+
+	if (pUser == NULL)
+		return;
+	if (strMsg.length() == 0)
+	{
+		g_WriteLog.WriteLog(C_LOG_ERROR, "插入空的聊天记录");
+		return;
+	}
+
+	int urlPos = strMsg.find("用户头像地址:");
+	int urlPos1 = strMsg.find("user_headimgurl:");
+	int urlPos2 = strMsg.find(">立即评价</a>");
+	if (urlPos > -1 || urlPos1 > -1 || urlPos2 > -1)
+	{
+		return;
+	}
+
+	userId = pUser->UserInfo.uid;
+	string strName = pUser->UserInfo.nickname;
+	StringReplace(strName, "\\", "\\\\");
+	StringReplace(strName, "'", "&#039;");
+	StringReplace(strName, "\r\n", "<br>");
+	f_covet.Gb2312ToUTF_8(name, strName.c_str(), strName.length());
+
+	StringReplace(strMsg, "\\", "\\\\");
+	StringReplace(strMsg, "'", "&#039;");
+	StringReplace(strMsg, "\r\n", "<br>");
+
+	//这里需要把收到的内容做一下 还原
+	ReplaceFaceId(strMsg);
+	f_covet.Gb2312ToUTF_8(msg, strMsg.c_str(), strMsg.length());
+
+	if (headPath.empty())
+	{
+		// 没有取到头像时，显示默认头像
+		string defaultHead = FullPath("res\\headimages\\default.png");
+
+		StringReplace(defaultHead, "\\", "/");
+		f_covet.Gb2312ToUTF_8(headPath, defaultHead.c_str(), defaultHead.length());
+	}
+	//组合消息
+	sprintf(strJsCode, "AppendMsgToHistory('%d', '%d', '%s', '%s', '%s', '%lu', '%s', '%s', '%d'); ",
+		msgType,
+		msgDataType, name.c_str(), strTime.c_str(), msg.c_str(), userId, headPath.c_str(), msgId, userType);
+
+	if (m_pListMsgHandler.isLoaded)
+	{
+		CefString strCode(strJsCode), strUrl("");
+		m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->ExecuteJavaScript(strCode, strUrl, 0);
+	}
+
+}
+void CMainFrame::AddToMsgList(CWebUserObject *pWebUser, string strMsg, string strTime, int userType,
+	int msgType , int msgDataType , CUserObject* pUser , string msgId )
+{
+	string            headPath = "";
+	unsigned long     userId = 0;
+	CCodeConvert      f_covet;
+
+	char strJsCode[MAX_1024_LEN] = { 0 };
+	string  name, msg;
+
+
+	if (pWebUser == NULL)
+		return;
+	if (strMsg.length() == 0)
+	{
+		g_WriteLog.WriteLog(C_LOG_ERROR, "插入空的聊天记录");
+		return;
+	}
+
+	int urlPos = strMsg.find("用户头像地址:");
+	int urlPos1 = strMsg.find("user_headimgurl:");
+	int urlPos2 = strMsg.find(">立即评价</a>");
+	if (urlPos > -1 || urlPos1 > -1 || urlPos2 > -1)
+	{
+		return;
+	}
+
+	userId = pWebUser->webuserid;
+	string strName = pWebUser->info.name;
+	StringReplace(strName, "\\", "\\\\");
+	StringReplace(strName, "'", "&#039;");
+	StringReplace(strName, "\r\n", "<br>");
+	f_covet.Gb2312ToUTF_8(name, strName.c_str(), strName.length());
+
+	StringReplace(strMsg, "\\", "\\\\");
+	StringReplace(strMsg, "'", "&#039;");
+	StringReplace(strMsg, "\r\n", "<br>");
+
+	//这里需要把收到的内容做一下 还原
+	ReplaceFaceId(strMsg);
+	f_covet.Gb2312ToUTF_8(msg, strMsg.c_str(), strMsg.length());
+
+	// 微信用户发来的
+	if (pWebUser->m_bIsFrWX)
+	{
+		if (pWebUser->m_pWxUserInfo != NULL && !pWebUser->m_pWxUserInfo->headimgurl.empty())
+		{
+			headPath = pWebUser->m_pWxUserInfo->headimgurl;
+		}
+		else
+		{
+			// 当没有头像时，说明没有收到userinfo，主动去获取，包括token也去获取一次
+			//m_pFrame->GetWxUserInfoAndToken(pWebUser);
+		}
+	}
+
+	if (headPath.empty())
+	{
+		// 没有取到头像时，显示默认头像
+		string defaultHead = FullPath("res\\headimages\\default.png");
+
+		StringReplace(defaultHead, "\\", "/");
+		f_covet.Gb2312ToUTF_8(headPath, defaultHead.c_str(), defaultHead.length());
+	}
+	//组合消息
+	sprintf(strJsCode, "AppendMsgToHistory('%d', '%d', '%s', '%s', '%s', '%lu', '%s', '%s', '%d'); ",
+		msgType,
+		msgDataType, name.c_str(), strTime.c_str(), msg.c_str(), userId, headPath.c_str(), msgId, userType);
+
+	if (m_pListMsgHandler.isLoaded)
+	{
+		CefString strCode(strJsCode), strUrl("");
+		m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->ExecuteJavaScript(strCode, strUrl, 0);
+	}
+
+}
+
+
+void CMainFrame::ChangeShowUserMsgWnd(unsigned long id)
+{
+	map<unsigned long, UserListUI::Node*>::iterator iter = { 0, NULL };
+	UserListUI::Node*  tempNode = NULL;
+	CUserObject *pUser = NULL;
+	CWebUserObject *pWebUser = NULL;
+
+
+	if (m_checkId == id || id == 0)//切换聊天对象显示 
+		return;
+
+	pUser = m_manager->GetUserObjectByUid(id);
+
+	if (pUser == NULL)
+	{
+		pWebUser = m_manager->GetWebUserObjectByUid(id);
+
+		if (pWebUser == NULL)
+			return;
+	}
+	    
+
+
+	ShowClearMsg();
+
+	//先寻找是不是坐席
+	if (pUser != NULL) //坐席
+	{
+		
+		if (pUser->m_strMsgs.empty())
+		{
+			string msgid = m_manager->GetMsgId();
+			int len = strlen(pUser->UserInfo.nickname);
+			if (len > 0)
+			{
+
+				CCodeConvert f_covet;
+				string msg = pUser->UserInfo.nickname;
+				msg += "的消息记录";
+				AddToMsgList(pUser, msg,"");
+
+			}
+		}
+		else
+		{
+			list<ONE_MSG_INFO>::iterator iter = pUser->m_strMsgs.begin();
+
+			for (; iter != pUser->m_strMsgs.end(); iter++)
+			{
+				ONE_MSG_INFO msgInfo = *iter;
+				string msg = msgInfo.msg;
+				ReplaceFaceId(msg);
+				AddToMsgList(pUser, msgInfo.msg,"");
+
+			}
+		}
+
+
+	}
+	
+
+	else  //用户
+	{
+		if (pWebUser->m_strMsgs.empty())
+		{
+			string msgid = m_manager->GetMsgId();
+			int len = strlen(pWebUser->info.name);
+			if (len > 0)
+			{
+				CCodeConvert f_covet;
+				string msg = pWebUser->info.name;
+				msg += "的消息记录";
+				AddToMsgList(pWebUser, msg,"");
+
+			}
+		}
+		else
+		{
+			list<ONE_MSG_INFO>::iterator iter = pWebUser->m_strMsgs.begin();
+
+			for (; iter != pWebUser->m_strMsgs.end(); iter++)
+			{
+				ONE_MSG_INFO msgInfo = *iter;
+				string msg = msgInfo.msg;
+				ReplaceFaceId(msg);
+				AddToMsgList(pWebUser, msgInfo.msg, "");
+
+			}
+		}
+
+	}
+
+
+
+
+	/*
+	iter = m_onlineNodeMap.find(id);
+	if (iter != m_onlineNodeMap.end())
+	{
+		tempNode = iter->second;
+	}
+	else
+	{
+		iter = m_offlineNodeMap.find(id);
+		if (iter != m_offlineNodeMap.end())
+		{
+			tempNode = iter->second;
+		}
+	}
+	*/
+}
+=======
 void CMainFrame::ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, bool bSuccess)
 {
 
@@ -1787,3 +2262,4 @@ void CMainFrame::ResultTransferUser(CWebUserObject* pWebUser, CUserObject* pUser
 {
 
 }
+>>>>>>> .r12

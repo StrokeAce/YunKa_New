@@ -367,7 +367,7 @@ namespace DuiLib {
 
 				//CControlUI* pRoot = builder.Create(m_xml, m_sType.GetData(), &menuCallback, &m_pm);
 
-				CControlUI* pRoot = builder.Create(_T("menutest.xml"), (UINT)0, &menuCallback, &m_pm);
+				CControlUI* pRoot = builder.Create(m_xmlName.GetData(), (UINT)0, &menuCallback, &m_pm);
 				m_pm.AttachDialog(pRoot);
 
 #if defined(WIN32) && !defined(UNDER_CE)

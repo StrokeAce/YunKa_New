@@ -80,6 +80,12 @@ public:
 
 	BOOL Receive(ContextMenuParam param);
 
+
+	void SetPath(WCHAR *path)
+	{
+
+		m_xmlName = path;
+	}
 public:
 	HWND m_hParent;
 	POINT m_BasedPoint;
@@ -88,6 +94,8 @@ public:
     CPaintManagerUI m_pm;
     CMenuElementUI* m_pOwner;
     CMenuUI* m_pLayout;
+
+	CDuiString m_xmlName;
 };
 
 class CListContainerElementUI;

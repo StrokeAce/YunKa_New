@@ -19,6 +19,15 @@
 #define MAX_PATH_LENGTH           1024
 
 
+#define MSG_TYPE_SYS  3               //系统消息
+/** 聊天用户的类型区分 */
+#define  User_Type_Client 1 // 坐席用户
+#define  User_Type_Wx 2	// 微信用户
+#define  User_Type_Web 3 // 网页用户
+#define  User_Type_WxGroup 4 // 微信群用户
+
+
+
 typedef struct CONTROL_ATTR
 {
 	int centerFrameWitdh;
@@ -129,7 +138,6 @@ public:
 	virtual void OnMouseEnter(TNotifyUI& msg);
 	virtual void OnItemSelect(TNotifyUI &msg);
 
-	void OnSelectedChanged(TNotifyUI &msg);
 
 	void OnItemActive(TNotifyUI &msg);
 
@@ -198,6 +206,16 @@ public:
 	void CMainFrame::ReplaceFaceId(string &msg);
 	void CMainFrame::ShowMySelfSendMsg(string strMsg);
 	void CMainFrame::MoveAndRestoreMsgWnd(int type);
+	void CMainFrame::InitLibcef(void);
+	void CMainFrame::LoadBrowser(char* url);
+	void CMainFrame::ShowRightFrameView(int index);
+	void CMainFrame::ShowClearMsg();
+	void CMainFrame::ChangeShowUserMsgWnd(unsigned long id);
+
+	void AddToMsgList(CUserObject *pUser, string strMsg, string strTime, int userType = MSG_FROM_USER,
+		int msgType = MSG_TYPE_SYS, int msgDataType = MSG_DATA_TYPE_TEXT, string msgId = "");
+	void AddToMsgList(CWebUserObject *pWebUser, string strMsg, string strTime, int userType = User_Type_Wx,
+		int msgType = MSG_TYPE_SYS, int msgDataType = MSG_DATA_TYPE_TEXT, CUserObject* pUser = NULL, string msgId = "");
 
 protected:
 
@@ -213,8 +231,8 @@ protected:
 public:
 	CChatManager* m_manager;
     int	m_currentNumber;
-	map<unsigned int, UserListUI::Node*> m_onlineNodeMap;
-	map<unsigned int, UserListUI::Node*> m_offlineNodeMap;
+	map<unsigned long, UserListUI::Node*> m_onlineNodeMap;
+	map<unsigned long, UserListUI::Node*> m_offlineNodeMap;
 	UserListUI::Node* pOnlineNode ;
 	UserListUI::Node* pWaitForStart;
 	UserListUI::Node* pWaitForAccept;
@@ -227,7 +245,10 @@ public:
 
 	CONTROL_ATTR m_centerChatInfo;
 
-	int m_initType;
+	RECT m_rightRect;
+
+	string m_defaultUrlInfo;
+
 
 private:
 

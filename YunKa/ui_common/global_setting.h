@@ -19,7 +19,7 @@ public:
 	int CGlobalSetting::FindFileExist(WCHAR *str);
 
 
-
+	void CGlobalSetting::GetCurTimeString(string &strFrom, string &strEnd, int nday);
 	//用户名和密码
 	char m_userName[32];
 	char m_passWord[32];

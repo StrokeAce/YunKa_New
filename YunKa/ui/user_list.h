@@ -90,6 +90,7 @@ public:
 	{
 		if (!pControl) return false;
 		if (_tcscmp(pControl->GetClass(), _T("ListLabelElementUI")) != 0) return false;
+
 		return CListUI::Add(pControl);
 	}
 
@@ -97,6 +98,7 @@ public:
 	{
 		if (!pControl) return false;
 		if (_tcscmp(pControl->GetClass(), _T("ListLabelElementUI")) != 0) return false;
+
 		return CListUI::AddAt(pControl, iIndex);
 	}
 
@@ -249,6 +251,7 @@ public:
 			if (parent == _root) index = 0;
 			else index = parent->data()._pListElement->GetIndex() + 1;
 		}
+
 		if (!CListUI::AddAt(pListElement, index)) {
 			delete pListElement;
 			delete node;
@@ -317,6 +320,7 @@ public:
 			node = NULL;
 		}
 		parent->add_child(node);
+
 		return node;
 	}
 

@@ -330,6 +330,9 @@
     <ClInclude Include="chat_common\comenum.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="ui\menu_wnd.h">
+      <Filter>ui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

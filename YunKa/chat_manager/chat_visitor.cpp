@@ -319,6 +319,8 @@ void CChatVisitor::SolveVisitorSCRIPTMSGTalkBegin(char *pInitBuff)
 
 void CChatVisitor::SolveVisitorSCRIPTMSGTalkEnd(char *pInitBuff)
 {
+#if 0
+
 	CWebUserObject *pWebUser = NULL;
 	CUserObject *pTalkUser = NULL;
 	char sid[120] = { 0 };
@@ -347,6 +349,7 @@ void CChatVisitor::SolveVisitorSCRIPTMSGTalkEnd(char *pInitBuff)
 	pWebUser->cTalkedSatus = HASTALKED;
 	pWebUser->info.status = TALKSTATUS_NO;
 	pWebUser->talkuid = 0;
+#endif
 }
 
 void CChatVisitor::SolveVisitorSystemAdmin(char *pInitBuff)
