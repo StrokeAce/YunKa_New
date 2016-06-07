@@ -1142,7 +1142,7 @@ void CMainFrame::AddHostUserList(UserListUI * ptr, CUserObject *user, int pos)
 
 
 	//第一个主节点 显示 名称 在线状态  //pos  需要插入的位置
-	pUserNameNode = ptr->AddNode(nameString,0,pos);
+	pUserNameNode = ptr->AddNode(nameString, user->UserInfo.uid, pos);
 
 	taklString.Format(_T("{x 4}{i gameicons.png 18 10}{x 4}对话中"));
 	pUserTalkNode = pUserList->AddNode(taklString,0, pUserNameNode);
@@ -1713,7 +1713,7 @@ void CMainFrame::RecvMsg(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, string msgId,
 	//组合消息
 	sprintf(strJsCode, "AppendMsgToHistory('%d', '%d', '%s', '%s', '%s', '%lu', '%s', '%s', '%d'); ",
 		msgType,
-		msgDataType, name.c_str(), msgTime.c_str(), msg.c_str(), userId, headPath.c_str(), msgId, 1);
+		msgDataType, name.c_str(), msgTime.c_str(), msg.c_str(), userId, headPath.c_str(), msgId, msgDataType );
 
 	if (m_pListMsgHandler.isLoaded)
 	{
