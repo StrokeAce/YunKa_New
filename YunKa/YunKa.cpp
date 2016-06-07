@@ -61,6 +61,7 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	pLoginFrame->Create(NULL, _T(""), UI_WNDSTYLE_DIALOG, 0, 0, 0, 0, 0, NULL);
 	pLoginFrame->CenterWindow();
 
+	pWndFrame->SetHandler();
 	int result = pLoginFrame->ShowModal();
 
 	if (result == 1)
