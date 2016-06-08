@@ -2,6 +2,8 @@
 #include "comfunc.h"
 #include "http_unit.h"
 #include "tstring.h"
+#include "code_convert.h"
+#include "common_utility.h"
 #include  <io.h>
 #include <fstream>
 #include <process.h>
@@ -680,6 +682,11 @@ CUserObject::CUserObject()
 	m_bInnerTalk = false;
 	m_bKeywordsChange = false;
 	m_bKeywordsGet = false;
+	CCodeConvert convert;
+	string strPath;
+	strPath = FullPath("res\\headimage\\default.png");
+	StringReplace(strPath,"\\", "/");
+	convert.Gb2312ToUTF_8(m_headPath, strPath.c_str(), strPath.length());
 }
 
 CUserObject::~CUserObject()

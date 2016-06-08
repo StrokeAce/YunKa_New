@@ -8,6 +8,7 @@
 #include "../chat_common/comdef.h"
 #include "../chat_common/comstruct.h"
 #include "../chat_common/commsg.h"
+#include "../ui_common/common_utility.h"
 #include "chat_history_msg.h"
 #include "http_unit.h"
 #include "code_convert.h"
@@ -1135,7 +1136,7 @@ int CChatManager::RecvComSendMsg(PACK_HEADER packhead, char *pRecvBuff, int len)
 	COM_SEND_MSG RecvInfo(packhead.ver);
 	int nError = 0;
 	MSG_TYPE msgType = MSG_TYPE_NORMAL;
-	MSG_FROM_TYPE msgFrom = MSG_FROM_USER;
+	MSG_FROM_TYPE msgFrom = MSG_FROM_WEBUSER;
 	char msgTime[MAX_256_LEN];
 	CWebUserObject *pWebUser = NULL;
 	CUserObject *pUser = NULL;
@@ -1724,7 +1725,7 @@ int CChatManager::RecvFloatChatMsg(PACK_HEADER packhead, char *pRecvBuff, int le
 
 	int nError = 0;
 	MSG_TYPE msgType = MSG_TYPE_NORMAL;
-	MSG_FROM_TYPE msgFrom = MSG_FROM_USER;
+	MSG_FROM_TYPE msgFrom = MSG_FROM_WEBUSER;
 	WxMsgBase* msgContentWx = NULL;
 	CUserObject *pAssistUser = NULL;
 	CWebUserObject *pWebUser = NULL;
@@ -1879,7 +1880,12 @@ int CChatManager::RecvFloatChatMsg(PACK_HEADER packhead, char *pRecvBuff, int le
 			// 获取系统当前时间
 		}
 
-		m_handlerMsgs->RecvMsg((IBaseObject*)pWebUser, msgFrom, GetMsgId(),	msgType, (MSG_DATA_TYPE)RecvInfo.nMsgDataType, 
+		string msgId = GetMsgId();
+		
+		AddMsgToList((IBaseObject*)pWebUser, msgFrom, msgId, msgType, (MSG_DATA_TYPE)RecvInfo.nMsgDataType,
+			RecvInfo.strmsg, GetTimeByMDAndHMS(RecvInfo.tMsgTime), pAssistUser, msgContentWx);
+
+		m_handlerMsgs->RecvMsg((IBaseObject*)pWebUser, msgFrom, msgId, msgType, (MSG_DATA_TYPE)RecvInfo.nMsgDataType,
 			RecvInfo.strmsg, GetTimeByMDAndHMS(RecvInfo.tMsgTime), pAssistUser, msgContentWx, "");
 
 		DownLoadFile(pWxMsg, pWebUser, pAssistUser);
@@ -4743,5 +4749,129 @@ void CChatManager::DownLoadFile(WxMsgBase* pWxMsg, CWebUserObject *pWebUser, CUs
 		param->pWebUser = pWebUser;
 		_beginthreadex(NULL, 0, DownLoadFileFromServerThread, (void*)param, 0, NULL);
 	}
+}
+
+void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, string msgId, MSG_TYPE msgType, 
+	MSG_DATA_TYPE msgDataType,string msgContent, string msgTime, CUserObject* pAssistUser, WxMsgBase* msgContentWx)
+{
+	ONE_MSG_INFO ongMsg;
+	ongMsg.msgId = msgId;
+	string head = "unKnown";
+	string name = "unKnown";
+	string sName;
+	string sMsg;
+	char callJsMsg[MAX_2048_LEN];
+	CCodeConvert convert;
+
+	int urlPos = msgContent.find("用户头像地址:");
+	int urlPos1 = msgContent.find("user_headimgurl:");
+	int urlPos2 = msgContent.find(">立即评价</a>");
+
+	if (urlPos > -1 || urlPos1 > -1 || urlPos2 > -1)
+	{
+		// 过滤这条无用的用户信息消息
+	}
+	else
+	{
+	}
+	
+	if (pObj->m_nEMObType == OBJECT_WEBUSER)
+	{
+		CWebUserObject* pWebUser = (CWebUserObject*)pObj;
+
+		if (msgFrom == MSG_FROM_WEBUSER)
+		{
+			if (pWebUser->m_pWxUserInfo)
+			{
+				head = pWebUser->m_pWxUserInfo->headimgurl;
+			}
+			else
+			{
+				head = m_userInfo.m_headPath;
+			}
+			name = pWebUser->info.name;
+		}
+		else if (msgFrom == MSG_FROM_ASSIST)
+		{
+			head = pAssistUser->m_headPath;
+			name = pAssistUser->UserInfo.nickname;
+		}
+		else if (msgFrom == MSG_FROM_SELF)
+		{
+			head = m_userInfo.m_headPath;
+			name = m_userInfo.UserInfo.nickname;
+		}
+		else if (msgFrom == MSG_FROM_SYS)
+		{
+			head = "sys";
+			name = "sys";
+		}
+		else
+		{
+			g_WriteLog.WriteLog(C_LOG_ERROR, "AddMsgToList 消息来源错误");
+			return;
+		}
+
+		StringReplace(name,"\\", "\\\\");
+		StringReplace(name,"'", "&#039;");
+		StringReplace(name,"\r\n", "<br>");
+		convert.Gb2312ToUTF_8(sName, name.c_str(), name.length());
+
+		StringReplace(msgContent, "\\", "\\\\");
+		StringReplace(msgContent, "'", "&#039;");
+		StringReplace(msgContent, "\r\n", "<br>");
+		convert.Gb2312ToUTF_8(sMsg, msgContent.c_str(), msgContent.length());
+
+		ReplaceFaceId(sMsg);
+		
+		sprintf(callJsMsg, "AppendMsgToHistory('%d','%d','%s','%s','%s','%s','%s','%s');",
+			msgFrom, msgDataType, sName.c_str(), msgTime.c_str(), sMsg.c_str(), "0", head.c_str(), msgId.c_str());
+		ongMsg.msg = callJsMsg;
+
+		pWebUser->m_strMsgs.push_back(ongMsg);
+	}
+	else if (pObj->m_nEMObType == OBJECT_USER)
+	{
+		CUserObject* pUser = (CUserObject*)pObj;
+		if (msgFrom == MSG_FROM_CLIENT)
+		{
+			head = pUser->m_headPath;
+			name = pUser->UserInfo.nickname;
+		}
+		else if (msgFrom == MSG_FROM_SELF)
+		{
+			head = m_userInfo.m_headPath;
+			name = m_userInfo.UserInfo.nickname;
+		}
+		else if (msgFrom == MSG_FROM_SYS)
+		{
+			head = "sys";
+			name = "sys";
+		}
+		else
+		{
+			g_WriteLog.WriteLog(C_LOG_ERROR, "AddMsgToList 消息来源错误");
+			return;
+		}
+
+		StringReplace(name, "\\", "\\\\");
+		StringReplace(name, "'", "&#039;");
+		StringReplace(name, "\r\n", "<br>");
+		convert.Gb2312ToUTF_8(sName, name.c_str(), name.length());
+
+		StringReplace(msgContent, "\\", "\\\\");
+		StringReplace(msgContent, "'", "&#039;");
+		StringReplace(msgContent, "\r\n", "<br>");
+		convert.Gb2312ToUTF_8(sMsg, msgContent.c_str(), msgContent.length());
+
+		ReplaceFaceId(sMsg);
+
+		sprintf(callJsMsg, "AppendMsgToHistory('%d','%d','%s','%s','%s','%s','%s','%s');",
+			msgFrom, msgDataType, name.c_str(), msgTime.c_str(), msgContent.c_str(), "0", head.c_str(), msgId.c_str());
+		ongMsg.msg = callJsMsg;
+
+		pUser->m_strMsgs.push_back(ongMsg);
+	}
+	
 }
 

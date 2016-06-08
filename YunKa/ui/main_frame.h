@@ -213,7 +213,7 @@ public:
 	void CMainFrame::ChangeShowUserMsgWnd(unsigned long id);
 	void CMainFrame::SetHandler();
 
-	void AddToMsgList(CUserObject *pUser, string strMsg, string strTime, int userType = MSG_FROM_USER,
+	void AddToMsgList(CUserObject *pUser, string strMsg, string strTime, int userType = MSG_FROM_WEBUSER,
 		int msgType = MSG_TYPE_SYS, int msgDataType = MSG_DATA_TYPE_TEXT, string msgId = "");
 	void AddToMsgList(CWebUserObject *pWebUser, string strMsg, string strTime, int userType = User_Type_Wx,
 		int msgType = MSG_TYPE_SYS, int msgDataType = MSG_DATA_TYPE_TEXT, CUserObject* pUser = NULL, string msgId = "");

@@ -304,3 +304,38 @@ void StringReplace(string &curStr,string srcStr,string destStr)
 	}
 }
 
+void ReplaceFaceId(string &msg)
+{
+	string str = msg;
+	string url;
+	char getStr[32] = { 0 };
+
+	while (1)
+	{
+		url = "<IMG alt=\"\" src=\"face.gif\">";
+		int pos = str.find("[");
+
+
+		if (pos == -1)//没有找到 插入的图片 
+			break;
+
+
+		int end = str.find("]", pos);
+		if (end == -1)
+			break;
+		string idStr = str.substr(pos + 1, end - pos - 1);
+		string reStr = str.substr(pos, end - pos + 1);
+
+		string facePath = GetCurrentPath();
+		facePath += ("\\SkinRes\\Face\\");
+		facePath += idStr;
+
+		StringReplace(url, "face.gif", facePath);
+		StringReplace(str, reStr, url);
+		StringReplace(str, "\\", "/");
+	}
+
+	msg = str;
+
+}
+

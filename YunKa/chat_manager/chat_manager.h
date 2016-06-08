@@ -472,6 +472,9 @@ public:
 
 	void Amr2Wav(string filePath);
 
+	void AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, string msgId, MSG_TYPE msgType, MSG_DATA_TYPE msgDataType,
+		string msgContent, string msgTime = "", CUserObject* pAssistUser = NULL, WxMsgBase* msgContentWx = NULL);
+
 public:
 	int						m_nOnLineStatus;		// 是否在线,对于im服务器而言
 	int						m_nOnLineStatusEx;		// 是否在线,对于visit服务器而言

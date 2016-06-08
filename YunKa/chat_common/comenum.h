@@ -47,9 +47,10 @@ enum USER_STATUS
 enum MSG_FROM_TYPE
 {
 	MSG_FROM_CLIENT=1,	// 坐席用户
-	MSG_FROM_USER,		// 微信或web用户
+	MSG_FROM_WEBUSER,	// 微信或web用户
 	MSG_FROM_ASSIST,	// 协助对象
-	MSG_FROM_SYS		// 系统提示消息
+	MSG_FROM_SYS,		// 系统提示消息
+	MSG_FROM_SELF		// 本人
 };
 
 /** 发送消息接收用户区分 */
@@ -75,9 +76,9 @@ enum MSG_DATA_TYPE
 	MSG_DATA_TYPE_VOICE,	/**< 语音 */
 	MSG_DATA_TYPE_VIDEO,	/**< 视频 */
 	MSG_DATA_TYPE_LOCATION,	/**< 位置 */
+	MSG_DATA_TYPE_FILE,		/**< 文件 */
 	MSG_DATA_TYPE_LINK,		/**< 链接 */
-	MSG_DATA_TYPE_EVENT,	/**< 事件 */
-	MSG_DATA_TYPE_FILE		/**< 文件 */
+	MSG_DATA_TYPE_EVENT		/**< 事件 */	
 };
 
 enum CODE_CAPTURE

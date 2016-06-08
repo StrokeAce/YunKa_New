@@ -1650,7 +1650,7 @@ void CMainFrame::RecvMsg(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, string msgId,
 	if (msgFrom == MSG_FROM_CLIENT)
 	{
 	}
-	else if (msgFrom == MSG_FROM_USER)   //微信或者web用户
+	else if (msgFrom == MSG_FROM_WEBUSER)   //微信或者web用户
 	{
 
 		pWebUserObj = (CWebUserObject *)pObj;
@@ -1801,7 +1801,7 @@ void CMainFrame::ShowMySelfSendMsg(string strMsg)
 	string msgTime = GetTimeByMDAndHMS(0);
 	string msgId = m_manager->GetMsgId();
 	sprintf(strJsCode, "AppendMsgToHistory('%d', '%d', '%s', '%s', '%s', '%lu', '%s', '%s', '%d'); ",
-		1,1, name.c_str(), msgTime.c_str(), msg.c_str(), userId, headPath.c_str(), msgId, MSG_FROM_CLIENT);
+		5,1, name.c_str(), msgTime.c_str(), msg.c_str(), userId, headPath.c_str(), msgId, MSG_FROM_CLIENT);
 
 	if (m_pListMsgHandler.isLoaded)
 	{
@@ -2061,75 +2061,74 @@ void CMainFrame::AddToMsgList(CUserObject *pUser, string strMsg, string strTime,
 void CMainFrame::AddToMsgList(CWebUserObject *pWebUser, string strMsg, string strTime, int userType,
 	int msgType , int msgDataType , CUserObject* pUser , string msgId )
 {
-	string            headPath = "";
-	unsigned long     userId = 0;
-	CCodeConvert      f_covet;
+	//string            headPath = "";
+	//unsigned long     userId = 0;
+	//CCodeConvert      f_covet;
 
-	char strJsCode[MAX_1024_LEN] = { 0 };
-	string  name, msg;
+	//char strJsCode[MAX_1024_LEN] = { 0 };
+	//string  name, msg;
 
 
-	if (pWebUser == NULL)
-		return;
-	if (strMsg.length() == 0)
-	{
-		g_WriteLog.WriteLog(C_LOG_ERROR, "插入空的聊天记录");
-		return;
-	}
+	//if (pWebUser == NULL)
+	//	return;
+	//if (strMsg.length() == 0)
+	//{
+	//	g_WriteLog.WriteLog(C_LOG_ERROR, "插入空的聊天记录");
+	//	return;
+	//}
 
-	int urlPos = strMsg.find("用户头像地址:");
-	int urlPos1 = strMsg.find("user_headimgurl:");
-	int urlPos2 = strMsg.find(">立即评价</a>");
-	if (urlPos > -1 || urlPos1 > -1 || urlPos2 > -1)
-	{
-		return;
-	}
+	//int urlPos = strMsg.find("用户头像地址:");
+	//int urlPos1 = strMsg.find("user_headimgurl:");
+	//int urlPos2 = strMsg.find(">立即评价</a>");
+	//if (urlPos > -1 || urlPos1 > -1 || urlPos2 > -1)
+	//{
+	//	return;
+	//}
 
-	userId = pWebUser->webuserid;
-	string strName = pWebUser->info.name;
-	StringReplace(strName, "\\", "\\\\");
-	StringReplace(strName, "'", "&#039;");
-	StringReplace(strName, "\r\n", "<br>");
-	f_covet.Gb2312ToUTF_8(name, strName.c_str(), strName.length());
+	//userId = pWebUser->webuserid;
+	//string strName = pWebUser->info.name;
+	//StringReplace(strName, "\\", "\\\\");
+	//StringReplace(strName, "'", "&#039;");
+	//StringReplace(strName, "\r\n", "<br>");
+	//f_covet.Gb2312ToUTF_8(name, strName.c_str(), strName.length());
 
-	StringReplace(strMsg, "\\", "\\\\");
-	StringReplace(strMsg, "'", "&#039;");
-	StringReplace(strMsg, "\r\n", "<br>");
+	//StringReplace(strMsg, "\\", "\\\\");
+	//StringReplace(strMsg, "'", "&#039;");
+	//StringReplace(strMsg, "\r\n", "<br>");
 
-	//这里需要把收到的内容做一下 还原
-	ReplaceFaceId(strMsg);
-	f_covet.Gb2312ToUTF_8(msg, strMsg.c_str(), strMsg.length());
+	////这里需要把收到的内容做一下 还原
+	//ReplaceFaceId(strMsg);
+	//f_covet.Gb2312ToUTF_8(msg, strMsg.c_str(), strMsg.length());
 
-	// 微信用户发来的
-	if (pWebUser->m_bIsFrWX)
-	{
-		if (pWebUser->m_pWxUserInfo != NULL && !pWebUser->m_pWxUserInfo->headimgurl.empty())
-		{
-			headPath = pWebUser->m_pWxUserInfo->headimgurl;
-		}
-		else
-		{
-			// 当没有头像时，说明没有收到userinfo，主动去获取，包括token也去获取一次
-			//m_pFrame->GetWxUserInfoAndToken(pWebUser);
-		}
-	}
+	//// 微信用户发来的
+	//if (pWebUser->m_bIsFrWX)
+	//{
+	//	if (pWebUser->m_pWxUserInfo != NULL && !pWebUser->m_pWxUserInfo->headimgurl.empty())
+	//	{
+	//		headPath = pWebUser->m_pWxUserInfo->headimgurl;
+	//	}
+	//	else
+	//	{
+	//		// 当没有头像时，说明没有收到userinfo，主动去获取，包括token也去获取一次
+	//		//m_pFrame->GetWxUserInfoAndToken(pWebUser);
+	//	}
+	//}
 
-	if (headPath.empty())
-	{
-		// 没有取到头像时，显示默认头像
-		string defaultHead = FullPath("res\\headimages\\default.png");
+	//if (headPath.empty())
+	//{
+	//	// 没有取到头像时，显示默认头像
+	//	string defaultHead = FullPath("res\\headimages\\default.png");
 
-		StringReplace(defaultHead, "\\", "/");
-		f_covet.Gb2312ToUTF_8(headPath, defaultHead.c_str(), defaultHead.length());
-	}
-	//组合消息
-	sprintf(strJsCode, "AppendMsgToHistory('%d', '%d', '%s', '%s', '%s', '%lu', '%s', '%s', '%d'); ",
-		msgType,
-		msgDataType, name.c_str(), strTime.c_str(), msg.c_str(), userId, headPath.c_str(), msgId, userType);
+	//	StringReplace(defaultHead, "\\", "/");
+	//	f_covet.Gb2312ToUTF_8(headPath, defaultHead.c_str(), defaultHead.length());
+	//}
+	////组合消息
+	//sprintf(strJsCode, "AppendMsgToHistory('%d', '%d', '%s', '%s', '%s', '%lu', '%s', '%s', '%d'); ",
+	//	msgType,msgDataType, name.c_str(), strTime.c_str(), msg.c_str(), userId, headPath.c_str(), msgId, userType);
 
 	if (m_pListMsgHandler.isLoaded)
 	{
-		CefString strCode(strJsCode), strUrl("");
+		CefString strCode(strMsg), strUrl("");
 		m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->ExecuteJavaScript(strCode, strUrl, 0);
 	}
 
@@ -2156,80 +2155,36 @@ void CMainFrame::ChangeShowUserMsgWnd(unsigned long id)
 		if (pWebUser == NULL)
 			return;
 	}
-	    
-
 
 	ShowClearMsg();
 
 	//先寻找是不是坐席
 	if (pUser != NULL) //坐席
 	{
-		
-		if (pUser->m_strMsgs.empty())
+		list<ONE_MSG_INFO>::iterator iter = pUser->m_strMsgs.begin();
+
+		for (; iter != pUser->m_strMsgs.end(); iter++)
 		{
-			string msgid = m_manager->GetMsgId();
-			int len = strlen(pUser->UserInfo.nickname);
-			if (len > 0)
+			ONE_MSG_INFO msgInfo = *iter;
+			if (m_pListMsgHandler.isLoaded)
 			{
-
-				CCodeConvert f_covet;
-				string msg = pUser->UserInfo.nickname;
-				msg += "的消息记录";
-				AddToMsgList(pUser, msg,"");
-
+				CefString strCode(msgInfo.msg), strUrl("");
+				m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->ExecuteJavaScript(strCode, strUrl, 0);
 			}
 		}
-		else
-		{
-			list<ONE_MSG_INFO>::iterator iter = pUser->m_strMsgs.begin();
-
-			for (; iter != pUser->m_strMsgs.end(); iter++)
-			{
-				ONE_MSG_INFO msgInfo = *iter;
-				string msg = msgInfo.msg;
-				ReplaceFaceId(msg);
-				AddToMsgList(pUser, msgInfo.msg,"");
-
-			}
-		}
-
-
 	}
-	
-
 	else  //用户
 	{
-		if (pWebUser->m_strMsgs.empty())
+		list<ONE_MSG_INFO>::iterator iter = pWebUser->m_strMsgs.begin();
+
+		for (; iter != pWebUser->m_strMsgs.end(); iter++)
 		{
-			string msgid = m_manager->GetMsgId();
-			int len = strlen(pWebUser->info.name);
-			if (len > 0)
-			{
-				CCodeConvert f_covet;
-				string msg = pWebUser->info.name;
-				msg += "的消息记录";
-				AddToMsgList(pWebUser, msg,"");
+			ONE_MSG_INFO msgInfo = *iter;
+			CefString strCode(msgInfo.msg), strUrl("");
+			m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->ExecuteJavaScript(strCode, strUrl, 0);
 
-			}
 		}
-		else
-		{
-			list<ONE_MSG_INFO>::iterator iter = pWebUser->m_strMsgs.begin();
-
-			for (; iter != pWebUser->m_strMsgs.end(); iter++)
-			{
-				ONE_MSG_INFO msgInfo = *iter;
-				string msg = msgInfo.msg;
-				ReplaceFaceId(msg);
-				AddToMsgList(pWebUser, msgInfo.msg, "");
-
-			}
-		}
-
 	}
-
-
-
 
 	/*
 	iter = m_onlineNodeMap.find(id);

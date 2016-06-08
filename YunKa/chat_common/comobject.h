@@ -161,6 +161,7 @@ public:
 	bool m_bKeywordsChange;
 	bool m_bKeywordsGet;
 	string m_loadHeadUrl;
+	string m_headPath;
 
 public:
 	int	nTimer;  //¶¨Ê±Æ÷
