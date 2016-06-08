@@ -256,44 +256,46 @@ UILIB_RESOURCETYPE CMainFrame::GetResourceType() const
 void CMainFrame::Notify(TNotifyUI& msg)
 {
 
-	if (_tcsicmp(msg.sType, _T("windowinit")) == 0)
+	if (_tcsicmp(msg.sType, DUI_MSGTYPE_WINDOWINIT) == 0)
 	{
 		OnPrepare(msg);
 	}
-	else if (_tcsicmp(msg.sType, _T("killfocus")) == 0)
+	else if (_tcsicmp(msg.sType, DUI_MSGTYPE_KILLFOCUS) == 0)
 	{
 	}
 
-	else if (_tcsicmp(msg.sType, _T("click")) == 0)
+	else if (_tcsicmp(msg.sType, DUI_MSGTYPE_CLICK) == 0)
 	{
 		OnClick(msg);
 	}
 
-	else if (_tcsicmp(msg.sType, _T("timer")) == 0)
+	else if (_tcsicmp(msg.sType, DUI_MSGTYPE_TIMER) == 0)
 	{
 		return OnTimer(msg);
 	}
-	else if (_tcsicmp(msg.sType, _T("selectchanged")) == 0)
+	else if (_tcsicmp(msg.sType, DUI_MSGTYPE_SELECTCHANGED) == 0)
 	{
 		OnSelectChanged(msg);
 	}
 
-	else if (_tcsicmp(msg.sType, _T("itemactivate")) == 0)
+	else if (_tcsicmp(msg.sType, DUI_MSGTYPE_ITEMACTIVATE) == 0)
 	{
 		OnItemActive(msg);
 
 	}
 
-	else if (_tcsicmp(msg.sType, _T("itemselect")) == 0)
+	else if (_tcsicmp(msg.sType, DUI_MSGTYPE_MENU) == 0)
+	{
+		OnItemRbClick(msg);
+	}
+
+	else if (_tcsicmp(msg.sType, DUI_MSGTYPE_ITEMCLICK) == 0)
 	{
 
 		OnItemClick(msg);
 	}
 
-	else if (_tcsicmp(msg.sType, _T("menu")) == 0)
-	{
-		OnItemRbClick(msg);
-	}
+
 
 
 

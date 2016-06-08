@@ -85,7 +85,7 @@ void CLoginWnd::OnPrepare(TNotifyUI& msg)
 
 void CLoginWnd::Notify(TNotifyUI& msg)
 {
-	if (_tcsicmp(msg.sType, _T("windowinit")) == 0)
+	if (_tcsicmp(msg.sType, DUI_MSGTYPE_WINDOWINIT) == 0)
 	{
 		OnPrepare(msg);
 	}
