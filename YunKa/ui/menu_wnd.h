@@ -165,12 +165,17 @@ public:
         CWindowWnd::ShowWindow(bShow, bTakeFocus);
     }
 
+	void SetXMLPath(WCHAR *path)
+	{
+		m_xmlPath = path;
+	}
+
     LRESULT OnCreate(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
     {
         m_pm.Init(m_hWnd);
         CDialogBuilder builder;
 		//CDuiString path = GetCurrentPathW();
-		CDuiString path = L"menu\\menu_right.xml";
+		CDuiString path = m_xmlPath; // "menu\\menu_right.xml";
 		CControlUI* pRoot = builder.Create(path.GetData(), 0, NULL, &m_pm);
         ASSERT(pRoot && "Failed to parse XML");
         m_pm.AttachDialog(pRoot);
@@ -273,4 +278,6 @@ public:
     CControlUI* m_pOwner;
     POINT m_ptPos;
     CShadowWnd* m_pShadowWnd;
+
+	CDuiString m_xmlPath;
 };

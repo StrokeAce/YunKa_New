@@ -284,7 +284,7 @@ void CMainFrame::Notify(TNotifyUI& msg)
 
 	}
 
-	else if (_tcsicmp(msg.sType, _T("itemclick")) == 0)
+	else if (_tcsicmp(msg.sType, _T("itemselect")) == 0)
 	{
 
 		OnItemClick(msg);
@@ -295,11 +295,6 @@ void CMainFrame::Notify(TNotifyUI& msg)
 		OnItemRbClick(msg);
 	}
 
-	else if (_tcsicmp(msg.sType, _T("itemrclick")) == 0)
-	{
-
-		OnItemClick(msg);
-	}
 
 
 
@@ -834,6 +829,7 @@ void CMainFrame::OnItemRbClick(TNotifyUI &msg)
 		if (pMenu == NULL) { return; }
 		POINT pt = { msg.ptMouse.x, msg.ptMouse.y };
 		//::ClientToScreen(*this, &pt);
+		pMenu->SetXMLPath(L"menu\\menu_right.xml");
 		pMenu->Init(msg.pSender, pt);
 
 
@@ -1131,15 +1127,7 @@ void CMainFrame::AddHostUserList(UserListUI * ptr, CUserObject *user, int pos)
 
 	strTemp = AnsiToUnicode(user->UserInfo.nickname);
 
-	//{x 4}{i gameicons.png 18 3}{x 4} {x 4}{i gameicons.png 18 2}{x 4}
-	//nameString.Format(_T("{x 20}{i res\\headimage\\default.png 1 0}{x 20} %s %s"), strTemp.GetData(), onlineString);
-
-	//nameString.Format(_T("{x 4}{i gameicons.png 18 0}{x 4} %s %s"), strTemp.GetData(), onlineString);
-
 	nameString.Format(_T("{x 4}{i user_client.png 1 0}{x 4} %s %s"), strTemp.GetData(), onlineString);
-
-	
-
 
 	//第一个主节点 显示 名称 在线状态  //pos  需要插入的位置
 	pUserNameNode = ptr->AddNode(nameString, user->UserInfo.uid, pos);
