@@ -1802,7 +1802,7 @@ void CListLabelElementUI::DoEvent(TEventUI& event)
         return;
     }
 
-    if( event.Type == UIEVENT_BUTTONDOWN || event.Type == UIEVENT_RBUTTONDOWN )
+    if( event.Type == UIEVENT_BUTTONDOWN )// lxh 添加206-0608 区分鼠标左右按键处理 || event.Type == UIEVENT_RBUTTONDOWN )
     {
         if( IsEnabled() ) {
             m_pManager->SendNotify(this, DUI_MSGTYPE_ITEMCLICK);
@@ -1811,6 +1811,15 @@ void CListLabelElementUI::DoEvent(TEventUI& event)
         }
         return;
     }
+	else if (event.Type == UIEVENT_RBUTTONDOWN)
+	{
+		if (IsEnabled()) {
+			m_pManager->SendNotify(this, DUI_MSGTYPE_ITEMRCLICK);
+			Select();
+			Invalidate();
+		}
+		return;
+	}
     if( event.Type == UIEVENT_MOUSEMOVE ) 
     {
         return;
@@ -2256,7 +2265,7 @@ void CListContainerElementUI::DoEvent(TEventUI& event)
             return;
         }
     }
-    if( event.Type == UIEVENT_BUTTONDOWN || event.Type == UIEVENT_RBUTTONDOWN )
+    if( event.Type == UIEVENT_BUTTONDOWN ) // lxh 添加206-0608 区分鼠标左右按键处理 || event.Type == UIEVENT_RBUTTONDOWN )
     {
         if( IsEnabled() ){
             m_pManager->SendNotify(this, DUI_MSGTYPE_ITEMCLICK);
@@ -2265,6 +2274,15 @@ void CListContainerElementUI::DoEvent(TEventUI& event)
         }
         return;
     }
+	else if (event.Type == UIEVENT_RBUTTONDOWN)
+	{
+		if (IsEnabled()) {
+			m_pManager->SendNotify(this, DUI_MSGTYPE_ITEMRCLICK);
+			Select();
+			Invalidate();
+		}
+		return;
+	}
     if( event.Type == UIEVENT_BUTTONUP ) 
     {
         return;
