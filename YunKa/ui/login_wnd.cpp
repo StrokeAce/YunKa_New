@@ -99,7 +99,7 @@ void CLoginWnd::Notify(TNotifyUI& msg)
 		else if (msg.pSender == m_pCancelBtn || msg.pSender == m_pCloseBtn)
 		{
 			m_manager->Exit();
-			m_hLoginMenu.DeleteSmallIcon();
+			//m_hLoginMenu.DeleteSmallIcon();
 			PostQuitMessage(0);
 		}
 	}
@@ -168,8 +168,8 @@ LRESULT CLoginWnd::OnCreate(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHand
 
 
 
-	m_hLoginMenu.Init();
-	m_hLoginMenu.CreateSmallIcon(this->GetHWND(), DEFINE_SMALL_ICON_PATH);
+	//m_hLoginMenu.Init();
+	//m_hLoginMenu.CreateSmallIcon(this->GetHWND(), DEFINE_SMALL_ICON_PATH);
 
 
 
@@ -302,7 +302,7 @@ LRESULT CLoginWnd::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, 
 {
 
 
-	m_hLoginMenu.HandleCustomMessage(uMsg,wParam,lParam);
+	//m_hLoginMenu.HandleCustomMessage(uMsg,wParam,lParam);
 
 
 
@@ -348,7 +348,7 @@ void CLoginWnd::LoginProgress(int percent)
 	if (percent == 100)
 	{
 		//µÇÂ¼³É¹¦ 
-		m_hLoginMenu.DeleteSmallIcon();
+		//m_hLoginMenu.DeleteSmallIcon();
 		Close();
 	}
 	else if (percent < 0 || percent>100)  //·µ»ØÊ§°Ü

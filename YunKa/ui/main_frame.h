@@ -201,7 +201,7 @@ public:
 	void OnSendToAcceptChat(unsigned long webUserid);
 	void OnSendToReleaseChat(unsigned long webUserid);
 	void OnSendToCloseChat(unsigned long webUserid);
-
+	void CMainFrame::OnMenuEvent(CDuiString controlName);
 
 	void CMainFrame::ReplaceFaceId(string &msg);
 	void CMainFrame::ShowMySelfSendMsg(string strMsg);

@@ -1,7 +1,7 @@
 #include "../stdafx.h"
 #include "ui_crack.h"
 #include "ui_menu.h"
-
+#include "common_utility.h"
 
 namespace DuiLib {
 
@@ -144,10 +144,16 @@ namespace DuiLib {
 
 	BOOL CMenuWnd::Receive(ContextMenuParam param)
 	{
+		WCHAR *valueStr;
+
 		switch (param.wParam)
 		{
 		case 1:
-			Close();
+
+			valueStr = new WCHAR[64];
+			lstrcpyW(valueStr, param.name.GetData());
+			Close();	
+			::PostMessage((HWND)m_hParent, WM_MENU_START, (WPARAM)valueStr, 0);
 			break;
 		case 2:
 		{
@@ -393,11 +399,7 @@ namespace DuiLib {
 				rc.right = rc.left + szInit.cx;
 				rc.bottom = rc.top + szInit.cy;
 
-				//rc.left = 300;
-				//rc.top = 500;
-
-				//rc.right = 120;
-				//rc.bottom = 120;
+		
 
 				int nWidth = rc.GetWidth();
 				int nHeight = rc.GetHeight();
@@ -648,9 +650,13 @@ namespace DuiLib {
 				else
 				{
 					ContextMenuParam param;
+					memset(&param, 0, sizeof(ContextMenuParam));
 					param.hWnd = m_pManager->GetPaintWindow();
 					param.wParam = 1;
+					param.name = this->GetName();
+			
 					s_context_menu_observer.RBroadcast(param);
+		
 				}
 			}
 			return;

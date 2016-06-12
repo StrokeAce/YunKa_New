@@ -159,7 +159,6 @@ LRESULT CMainFrame::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 
 
-
 	if (uMsg == WM_MOUSEMOVE)
 		OnMouseMove(uMsg, wParam, lParam);
 
@@ -228,6 +227,15 @@ LRESULT CMainFrame::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
 		    m_pVisitorRelatedHandler.isLoaded = true;
 	}
 
+	if (uMsg == WM_MENU_START)
+	{ 
+		WCHAR *name = (WCHAR *)wParam;
+		CDuiString conName = name;
+		OnMenuEvent(conName);
+
+		delete []name;
+	}
+
 
 	m_frameSmallMenu.HandleCustomMessage(uMsg, wParam, lParam);
 
@@ -284,7 +292,7 @@ void CMainFrame::Notify(TNotifyUI& msg)
 
 	}
 
-	else if (_tcsicmp(msg.sType, DUI_MSGTYPE_MENU) == 0)
+	else if (_tcsicmp(msg.sType, DUI_MSGTYPE_ITEMRCLICK) == 0)
 	{
 		OnItemRbClick(msg);
 	}
@@ -785,39 +793,6 @@ void CMainFrame::OnItemActive(TNotifyUI &msg)
 				}
 			}
 
-			//list<CDuiString>::iterator iter;
-			//for (iter = m_waitVizitorList.begin(); iter != m_waitVizitorList.end(); iter++)
-			//{
-				//如果 点击的list是 等待列表里面的 做请求接受操作
-
-
-				/*
-				if (*iter == str)
-				{
-					pUserList->RemoveNode(node);
-
-					UserListUI::Node* addNode = pMySelfeNode->child(0);
-					pUserList->AddNode(str, uid,addNode);
-					pUserList->ExpandNode(addNode, true);
-
-					m_waitVizitorList.erase(iter);
-					break;
-				}
-				*/
-			//}
-
-#if 0
-			if (node->data()._level == 3)
-			{
-				COptionUI* pControl = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("roomswitch")));
-				if (pControl) {
-					CHorizontalLayoutUI* pH = static_cast<CHorizontalLayoutUI*>(m_PaintManager.FindControl(_T("roomswitchpanel")));
-					if (pH) pH->SetVisible(true);
-					pControl->SetText(node->parent()->parent()->data()._text);
-					pControl->Activate();
-				}
-			}
-#endif
 		}
 	}
 }
@@ -825,22 +800,84 @@ void CMainFrame::OnItemActive(TNotifyUI &msg)
 
 void CMainFrame::OnItemRbClick(TNotifyUI &msg)
 {
-	if (msg.pSender->GetName() == L"userlist")
+	CDuiString xmlPath = L"";
+
+	//if (msg.pSender->GetName() == L"userlist")
+	if (1)
 	{
+
+		//根据选择的对象不同 弹出相应的右键菜单
+		UserListUI::Node* node = (UserListUI::Node*)msg.pSender->GetTag();
+		//pUserList->ExpandNode(node,!node->data()._expand);
+		unsigned long uid = node->data()._uid;
+
+		//轮询查找 查找当前选择的 uid是 空 还是坐席 等待中的用户 等等
+		if (uid == 0) //既不是访客 也不是坐席
+		{
+			xmlPath = L"menu\\menu_right_2.xml";
+		}
+		else if (uid == m_mySelfInfo->UserInfo.uid) //自己的uid
+		{
+			xmlPath = L"menu\\menu_right_3.xml";
+		}
+
+		else
+		{
+			CWebUserObject *pWebUser = m_manager->GetWebUserObjectByUid(uid);//查找是不是webuser
+			if (pWebUser != NULL)
+			{
+				if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_REQUEST)
+				{
+					xmlPath = L"menu\\menu_right_1.xml";
+				}
+			}
+			else
+			{
+				CUserObject *pUser = m_manager->GetUserObjectByUid(uid);//查找是不是 坐席用户
+				if (pUser == NULL)
+					return;
+
+				if (pUser->status == STATUS_OFFLINE)
+				{
+					xmlPath = L"menu\\menu_right_4.xml";
+				}
+				else if (pUser->status == STATUS_ONLINE)
+				{
+					xmlPath = L"menu\\menu_right_5.xml";
+				}
+
+			}
+		}
+
+		if (!xmlPath.IsEmpty())
+		{
+			CMenuWnd* pMenu = new CMenuWnd(m_hMainWnd);
+			CPoint cpoint = msg.ptMouse;
+			pMenu->SetPath((WCHAR*)xmlPath.GetData());
+			pMenu->Init(NULL, _T(""), _T("xml"), cpoint);
+		}
+
+
+
+/*
 		CMenuWnd2* pMenu = new CMenuWnd2();
 		if (pMenu == NULL) { return; }
 		POINT pt = { msg.ptMouse.x, msg.ptMouse.y };
 		//::ClientToScreen(*this, &pt);
 		pMenu->SetXMLPath(L"menu\\menu_right.xml");
 		pMenu->Init(msg.pSender, pt);
+		*/
 
+		/*
+		CMenuWnd* pMenu = new CMenuWnd(m_hMainWnd);
+		CPoint cpoint = msg.ptMouse;
 
+		//cpoint.y -= 65;
+		//ClientToScreen(m_hMenuWnd, &cpoint);
+		pMenu->SetPath(L"menu\\menu_right_4.xml");
+		pMenu->Init(NULL, _T(""), _T("xml"), cpoint);
 
-		//CMenuWnd* pMenu = new CMenuWnd(this->GetHWND());
-		//CPoint cpoint = msg.ptMouse;
-		//pMenu->SetPath(L"menutext.xml");
-
-		//pMenu->Init(NULL, _T(""), _T("xml"), cpoint);
+*/
 
 
 	}
@@ -2154,5 +2191,37 @@ void CMainFrame::ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, 
 
 void CMainFrame::ResultTransferUser(CWebUserObject* pWebUser, CUserObject* pUser, bool bSuccess)
 {
+
+}
+
+//右键菜单的处理 根据控件的名字区分
+void CMainFrame::OnMenuEvent(CDuiString controlName)
+{
+	if (controlName.IsEmpty())
+		return;
+
+	if (controlName == L"menu_hide_main_wnd")
+	{
+
+	}
+	else if (controlName == L"menu_online")
+	{
+
+	}
+	else if (controlName == L"menu_busy")
+	{
+	}
+	else if (controlName == L"menu_leave")
+	{
+	}
+	else if (controlName == L"menu_logout")
+	{
+	}
+	else if (controlName == L"menu_quit")
+	{
+	}
+
+
+
 
 }

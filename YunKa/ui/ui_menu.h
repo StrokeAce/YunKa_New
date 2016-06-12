@@ -4,6 +4,7 @@
 #ifdef _MSC_VER
 #pragma once
 #endif
+#include "global_setting_define.h"
 
 #include "observer_impl_base.hpp"
 
@@ -16,6 +17,7 @@ struct ContextMenuParam
 	// 1: remove all
 	// 2: remove the sub menu
 	WPARAM wParam;
+	CDuiString name;
 	HWND hWnd;
 };
 
@@ -86,6 +88,9 @@ public:
 
 		m_xmlName = path;
 	}
+
+
+
 public:
 	HWND m_hParent;
 	POINT m_BasedPoint;

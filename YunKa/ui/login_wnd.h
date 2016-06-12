@@ -59,7 +59,7 @@ private:
 	CPaintManagerUI m_pm;
 
 
-	CSmallMenu m_hLoginMenu;
+	//CSmallMenu m_hLoginMenu;
 
 	CButtonUI * m_pLoginBtn, *m_pCancelBtn,*m_pCloseBtn;
 	CEditUI *pAccountEdit, *m_pPasswordEdit;
