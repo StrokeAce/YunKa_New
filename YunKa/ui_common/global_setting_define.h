@@ -9,6 +9,7 @@
 
 
 
+#define   WM_MENU_START                  WM_USER+300
 
 
 

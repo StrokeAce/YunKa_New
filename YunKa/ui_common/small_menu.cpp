@@ -68,7 +68,7 @@ void CSmallMenu::CreateMyAppMenu(POINT point)
 	CMenuWnd* pMenu = new CMenuWnd(m_hMenuWnd);
 	CPoint cpoint = point;
 
-	cpoint.y -= 65;
+	cpoint.y -= 180;
 	//ClientToScreen(m_hMenuWnd, &cpoint);
 	pMenu->SetPath(L"menu\\menutest.xml");
 	pMenu->Init(NULL, _T(""), _T("xml"), cpoint);
