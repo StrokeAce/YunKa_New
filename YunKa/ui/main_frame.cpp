@@ -1623,12 +1623,7 @@ void CMainFrame::RecvMsg(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, string msgId,
 {
 	CWebUserObject    *pWebUserObj = NULL;
 	CUserObject       *pUserObj = NULL;
-	string            headPath = "";
 	unsigned long     userId = 0;
-	CCodeConvert      f_covet;
-
-	char strJsCode[MAX_1024_LEN] = {0};
-	string  name,msg;
 
 
 	if (pObj == NULL)
@@ -1638,51 +1633,14 @@ void CMainFrame::RecvMsg(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, string msgId,
 		g_WriteLog.WriteLog(C_LOG_ERROR, "插入空的聊天记录");
 		return;
 	}
-
-	int urlPos = msgContent.find("用户头像地址:");
-	int urlPos1 = msgContent.find("user_headimgurl:");
-	int urlPos2 = msgContent.find(">立即评价</a>");
-	if (urlPos > -1 || urlPos1 > -1 || urlPos2 > -1)
-	{
-		return;
-	}
 	
 	if (msgFrom == MSG_FROM_CLIENT)
 	{
 	}
 	else if (msgFrom == MSG_FROM_WEBUSER)   //微信或者web用户
 	{
-
 		pWebUserObj = (CWebUserObject *)pObj;
-
 		userId = pWebUserObj->webuserid;
-		string strName = pWebUserObj->info.name;
-		StringReplace(strName, "\\", "\\\\");
-		StringReplace(strName,  "'", "&#039;");
-		StringReplace(strName, "\r\n", "<br>");
-		f_covet.Gb2312ToUTF_8(name, strName.c_str(), strName.length());
-
-		StringReplace(msgContent, "\\", "\\\\");
-		StringReplace(msgContent, "'", "&#039;");
-		StringReplace(msgContent, "\r\n", "<br>");
-
-		//这里需要把收到的内容做一下 还原
-		ReplaceFaceId(msgContent);
-		f_covet.Gb2312ToUTF_8(msg, msgContent.c_str(), msgContent.length());
-
-		// 微信用户发来的
-		if (pWebUserObj->m_bIsFrWX)
-		{
-			if (pWebUserObj->m_pWxUserInfo != NULL && !pWebUserObj->m_pWxUserInfo->headimgurl.empty())
-			{
-				headPath = pWebUserObj->m_pWxUserInfo->headimgurl;
-			}
-			else
-			{
-				// 当没有头像时，说明没有收到userinfo，主动去获取，包括token也去获取一次
-				//m_pFrame->GetWxUserInfoAndToken(pWebUser);
-			}
-		}
 	}
 
 	//如果收到的消息不是 当前所选用户的id的，暂时屏蔽，后面需要记录起来，等到选择到后显示出来
@@ -1691,23 +1649,9 @@ void CMainFrame::RecvMsg(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, string msgId,
 		return;
 	}
 
-
-	if (headPath.empty())
-	{
-		// 没有取到头像时，显示默认头像
-		string defaultHead = FullPath("res\\headimages\\default.png");
-
-		StringReplace(defaultHead, "\\", "/");
-		f_covet.Gb2312ToUTF_8(headPath, defaultHead.c_str(), defaultHead.length());
-	}
-	//组合消息
-	sprintf(strJsCode, "AppendMsgToHistory('%d', '%d', '%s', '%s', '%s', '%lu', '%s', '%s', '%d'); ",
-		msgType,
-		msgDataType, name.c_str(), msgTime.c_str(), msg.c_str(), userId, headPath.c_str(), msgId, msgDataType );
-
 	if (m_pListMsgHandler.isLoaded)
 	{
-		CefString strCode(strJsCode), strUrl("");
+		CefString strCode(msgContent), strUrl("");
 		m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->ExecuteJavaScript(strCode, strUrl, 0);
 	}
 
