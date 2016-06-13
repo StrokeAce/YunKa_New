@@ -12,6 +12,8 @@ using namespace std;
 
 #define BUFF_SIZE 1024 
 
+int gRecordFileAddNumber = 0;
+
 
 wchar_t *CA2U(const char* str, WCHAR *dest)
 {
@@ -339,3 +341,68 @@ void ReplaceFaceId(string &msg)
 
 }
 
+
+int ClearFile(char *fileType)
+{
+	WIN32_FIND_DATAA fileInfo;
+	HANDLE hFind;
+	DWORD fileSize;
+	WCHAR filePath[512] = { 0 };
+
+	string path = GetCurrentPath();
+	path += "\\temp\\";//*.txt";
+	path += fileType;
+	hFind = FindFirstFileA(path.c_str(), &fileInfo);
+	if (hFind == INVALID_HANDLE_VALUE)
+		return -1;
+
+	string fileName = GetCurrentPath();
+	fileName += "\\temp\\";
+	fileName += fileInfo.cFileName;
+	ANSIToUnicode(fileName.c_str(), filePath);
+	Sleep(50);
+	DeleteFile(filePath);
+
+	while (FindNextFileA(hFind, &fileInfo))
+	{
+		fileName = GetCurrentPath();
+		fileName += "\\logfile\\";
+		fileName += fileInfo.cFileName;
+		ANSIToUnicode(fileName.c_str(), filePath);
+		Sleep(50);
+		DeleteFile(filePath);
+	}
+
+	return 0;
+}
+
+void SetCopyFileName(char *str)
+{
+	char timeStr[1024] = {0};
+	SYSTEMTIME t = { 0 };
+	WCHAR name[1024] = {0};
+
+	gRecordFileAddNumber++;
+	if (gRecordFileAddNumber >= 100)
+		gRecordFileAddNumber = 0;
+
+	GetLocalTime(&t);
+	sprintf_s(timeStr, "%d%d%d%d%d%d%d.jpg",
+		t.wYear,
+		t.wMonth,
+		t.wDay,
+		t.wHour,
+		t.wMinute,
+		t.wSecond,
+		gRecordFileAddNumber);
+
+	string path = GetCurrentPath();
+	path += "\\temp\\";
+
+	ANSIToUnicode(path.c_str(),name);
+	CreateDirectory(name, NULL);
+
+	path += timeStr;
+
+	strcpy(str,path.c_str());
+}

@@ -35,6 +35,8 @@ extern void SplitStringA(char *pSrc, char chMark, std::vector<std::string> &vecS
 extern void SplitStringA(char *pSrc, char *chMark, std::vector<std::string> &vecStrings);
 
 
+extern void SetCopyFileName(char *str);
+extern int ClearFile(char *fileType);
 
 
 
