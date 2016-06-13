@@ -432,10 +432,14 @@ public:
 
 	int SendLoginOff();
 
+	void ClearDirectory(string dir);
+
 	// 微信消息的解析
 	WxMsgBase* ParseWxMsg(CWebUserObject* pWebUser, COM_FLOAT_CHATMSG& recv,CUserObject* pUser);
 
 	string GetMsgId();
+
+	string GetFileId();
 
 	void SaveEarlyMsg(MSG_INFO *pMsgInfo);
 
@@ -511,6 +515,7 @@ public:
 	MapWxTokens				m_mapTokens;			// 公众号token存储集合
 	MMutex					m_idLock;				// 生成消息id的锁
 	int						m_msgId;				// 消息id，自增
+	unsigned long			m_fileId;				// 文件id，自增
 	list<MSG_INFO*>			m_listEarlyMsg;			// 保存还未初始化访客对象之前收到的消息
 	int						m_nClientIndex;			// 访客的序列号，自增
 	HMODULE					m_hScreenDll;			// 截图句柄

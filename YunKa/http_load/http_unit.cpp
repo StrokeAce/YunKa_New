@@ -524,6 +524,8 @@ void CHttpLoad::Cleanup()
 bool CHttpLoad::SetHeadOptLoad(const string szUrl, const string szReffer, int requestType, void* szFilePath, string& szContent)
 {
 	curl_easy_setopt(m_curl, CURLOPT_URL, szUrl.c_str());
+	curl_easy_setopt(m_curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+	curl_easy_setopt(m_curl, CURLOPT_SSL_VERIFYHOST, FALSE);
 
 	if (!szReffer.empty())
 	{
@@ -576,7 +578,10 @@ size_t CHttpLoad::DownLoadFunc(char *data, size_t size, size_t nmemb, void* writ
 		return 0;
 	size_t len = size*nmemb;
 	FILE* pFile = (FILE*)writerData;
-	fwrite(data, size, nmemb, pFile);
+	if (pFile)
+	{
+		fwrite(data, size, nmemb, pFile);
+	}
 
 	return len;
 }

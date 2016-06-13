@@ -419,6 +419,7 @@ struct DOWNLOAD_INFO
 	string time;				// 发送时间
 	CUserObject* pUser;			// 协助对象,可为空
 	MSG_DATA_TYPE msgDataType;  // 消息的数据类型
+	MSG_FROM_TYPE msgFromType;	// 消息来源类型
 };
 
 typedef struct {

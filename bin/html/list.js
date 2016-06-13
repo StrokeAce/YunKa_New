@@ -151,15 +151,15 @@ function AppendMsgToHistory(msgFrom, msgType, sname, time, content, userId, head
 			}
 			else if(msgType == 2)
 			{
-				lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>"+sname+"&nbsp;<img class = 'head_image' src='"+ head + "'></div><div class='msg_send_image'>"+msgcontent+"</div></div>";
+			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;<img class = 'head_image' src='" + head + "'></div><div class='msg_send_image'><img style='border:1px #cdcdcb solid;' src='" + msgcontent + "' width=30%%></div></div>";
 			}
 			else if( msgType == 3)
 			{
-			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;<img class = 'head_image' src='" + head + "'></div><div class='msg_send_image'>" + msgcontent + "</div></div>";
+			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;<img class = 'head_image' src='" + head + "'></div><div class='msg_send_image'><audio controls = 'controls' src = '" + msgcontent + "' type = 'audio/mpeg' /></div></div>";
 			}
 			else if (msgType == 4)
 			{
-			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;<img class = 'head_image' src='" + head + "'></div><div class='msg_send_image'>" + msgcontent + "</div></div>";
+			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;<img class = 'head_image' src='" + head + "'></div><div class='msg_send_image'><video controls = 'controls' src = '" + msgcontent + " type = 'video/mp4'></video></div></div>";
 			}
 			else if ( msgType == 5)
 			{
@@ -182,15 +182,15 @@ function AppendMsgToHistory(msgFrom, msgType, sname, time, content, userId, head
 			}
 			else if(msgType == 2)
 			{
-				lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='"+ head +"' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;"+sname+"<font class='time'>"+time+"</font></div><div class='msg_recv_image'>"+msgcontent+"</div></div>";
+			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'><img style='border:1px #cdcdcb solid;' src='" + msgcontent + "' width=30%%></div></div>";
 			}
 			else if (msgType == 3)
 			{
-			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'>" + msgcontent + "</div></div>";
+			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'><audio controls = 'controls' src = '" + msgcontent + "' type = 'audio/mpeg' /></div></div>";
 			}
 			else if (msgType == 4)
 			{
-			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'>" + msgcontent + "</div></div>";
+			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'><video controls = 'controls' src = '" + msgcontent + " type = 'video/mp4'></video></div></div>";
 			}
 			else if (msgType == 5)
 			{

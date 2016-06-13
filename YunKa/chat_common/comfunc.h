@@ -79,4 +79,5 @@ int GetApplyTypeID(string stype);
 
 string GetApplyTypeString(int type);
 
+
 #endif
