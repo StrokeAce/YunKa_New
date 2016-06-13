@@ -202,6 +202,8 @@ public:
 	void OnSendToReleaseChat(unsigned long webUserid);
 	void OnSendToCloseChat(unsigned long webUserid);
 	void CMainFrame::OnMenuEvent(CDuiString controlName);
+	void CMainFrame::OnCtrlVEvent();
+	bool CMainFrame::SaveBitmapToFile(HBITMAP hbitmap, BITMAP bitmap, string lpFileName);
 
 	void CMainFrame::ReplaceFaceId(string &msg);
 	void CMainFrame::ShowMySelfSendMsg(string strMsg);
@@ -286,6 +288,7 @@ private:
 	unsigned long m_checkIdSelect;
 
 	string m_facePathUrl;
+
 
 
 };

@@ -15,6 +15,12 @@
 #include <WinUser.h>
 
 
+#include "jpeg_file/JpegFile.h"
+
+#include <GdiPlus.h>
+//using namespace Gdiplus;
+#pragma comment(lib, "gdiplus.lib")
+
 
 
 CMainFrame::CMainFrame(CChatManager* manager) :m_manager(manager)
@@ -41,6 +47,7 @@ CMainFrame::CMainFrame(CChatManager* manager) :m_manager(manager)
 	strTmp += "<div><p><span style=\"font - size:16px; color:#cccccc\">无可显示信息</span></p><div></body>";
 	f_covet.Gb2312ToUTF_8(m_defaultUrlInfo, strTmp.c_str(), strTmp.length());
 	
+
 }
 
 
@@ -172,12 +179,12 @@ LRESULT CMainFrame::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 //	if (uMsg == WM_LBUTTONDBLCLK)
 //		OnLButtonDblClk(uMsg, wParam, lParam);
 
-//	if ((m_pSendEdit != NULL) && m_pSendEdit->IsFocused()
-//		&& (uMsg == WM_KEYDOWN) && (wParam == 'V') && (lParam & VK_CONTROL))	// 发送消息框的Ctrl+V消息
-//	{
-//		m_pSendEdit->PasteSpecial(CF_TEXT);
-//		return TRUE;
-//	}
+	if ((m_pSendEdit != NULL) && m_pSendEdit->IsFocused()
+		&& (uMsg == WM_KEYDOWN) && (wParam == 'V') && (lParam & VK_CONTROL))	// 发送消息框的Ctrl+V消息
+	{
+		OnCtrlVEvent();
+		return TRUE;
+	}
 
 //	if (uMsg == WM_NOTIFY && EN_PASTE == ((LPNMHDR)lParam)->code)
 //	{
@@ -326,8 +333,6 @@ void CMainFrame::OnTimer(TNotifyUI& msg)
 		list<CUserObject* >::iterator  iter = m_upUser.begin();
 		for (; iter != m_upUser.end(); iter++)
 		{
-
-			//AddUserList(pUserList,*iter);
 
 			RecvOnline(*iter);
 
@@ -517,6 +522,7 @@ void CMainFrame::OnPrepare(TNotifyUI& msg)
 	//cef窗口
 	InitLibcef();
 
+	//ClearFile("*.jpg");
 
 
 	//聊天框中间栏按钮
@@ -992,7 +998,7 @@ BOOL CMainFrame::_RichEdit_InsertFace(CRichEditUI * pRichEdit, LPCTSTR lpszFileN
 		//if (pRichEdit == m_pRecvEdit)
 			//RichEdit_SetStartIndent(pTextServices, 300);
 		bRet = RichEdit_InsertFace(pTextServices, pTextHost,
-			lpszFileName, nFaceId, nFaceIndex, RGB(255, 255, 255), TRUE, 40);
+			lpszFileName, nFaceId, nFaceIndex, RGB(255, 255, 255), TRUE, 300);
 	}
 
 	if (pTextServices != NULL)
@@ -1381,6 +1387,7 @@ void CMainFrame::RecvUserStatus(CUserObject* pUser)
 // 坐席上线消息
 void CMainFrame::RecvOnline(CUserObject* pUser)
 {
+
 	int index = 0;
 	if (pUser->status == STATUS_ONLINE)  //当前坐席是离线状态 同时过来的状态是上线状态
 	{
@@ -1392,6 +1399,7 @@ void CMainFrame::RecvOnline(CUserObject* pUser)
 
 		UserListUI::Node* tempNode = iter->second;
 
+
 		//先删除
 		pUserList->RemoveNode(tempNode);
 		m_offlineNodeMap.erase(iter);
@@ -1400,11 +1408,14 @@ void CMainFrame::RecvOnline(CUserObject* pUser)
 		if (m_onlineNodeMap.size() > 0)
 		{
 			iter = m_onlineNodeMap.end();
+			iter--;
+
 			UserListUI::Node* mapNode = iter->second;
 			index = pUserList->GetNodeIndex(mapNode);
 		}
 		else
 			index = pUserList->GetNodeIndex(pMySelfeNode);
+
 
 		//再添加
 		AddHostUserList(pUserList, pUser, index);
@@ -2228,4 +2239,70 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 
 
 
+}
+
+
+
+
+
+void CMainFrame::OnCtrlVEvent()
+{
+	char fileName[MAX_1024_LEN]={0}; 
+	WCHAR WName[MAX_1024_LEN] = { 0 };
+
+	if (IsClipboardFormatAvailable(CF_BITMAP))
+	{
+		if (::OpenClipboard(this->GetHWND()))
+		{
+			//获得剪贴板数据 
+			HBITMAP handle = (HBITMAP)GetClipboardData(CF_BITMAP);
+			if (handle != NULL)
+            {
+				SetCopyFileName(fileName);
+
+				BITMAP bm; // 得到位图对象
+				GetObject(handle, sizeof(BITMAP), &bm);
+				SaveBitmapToFile(handle, bm, fileName);
+				::CloseClipboard(); // 关闭剪贴板
+			}
+
+			ANSIToUnicode(fileName,WName);
+			_RichEdit_InsertFace(m_pSendEdit, WName, 0, 0);
+
+		}
+	}
+	else if (IsClipboardFormatAvailable(CF_TEXT))
+	{
+	}
+
+
+}
+
+
+
+bool CMainFrame::SaveBitmapToFile(HBITMAP hbitmap,BITMAP bitmap, string lpFileName)
+{
+	int w = bitmap.bmWidth;
+	int h = bitmap.bmHeight;
+	DWORD dwCount = w * h;
+
+	byte * p = new byte[bitmap.bmWidthBytes * h];//申请内存保存位图数据ITMAP)m_hBitmap, bitmap.bmbitmap.bmBitss * h, p);
+	GetBitmapBits(hbitmap, bitmap.bmWidthBytes * h, p);
+
+	BYTE *lpBits = p;
+	for (int i = 0; i < dwCount; i++)
+	{
+		*(lpBits + i * 3 + 0) = *(p + i * 4 + 0);
+		*(lpBits + i * 3 + 1) = *(p + i * 4 + 1);
+		*(lpBits + i * 3 + 2) = *(p + i * 4 + 2);
+	}
+
+	// we swap red and blue for display, undo that.
+	int bb = JpegFile::BGRFromRGB((BYTE *)(lpBits), w, h);
+
+	// save RGB packed buffer to JPG
+	BOOL ok = JpegFile::RGBToJpegFile(lpFileName, lpBits, w, h, 1, 75);
+	delete[] p;
+
+	return true;
 }
