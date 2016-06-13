@@ -49,6 +49,9 @@
     <Filter Include="ui_common">
       <UniqueIdentifier>{ca5fa430-1fa7-4ff0-afa7-d93197535430}</UniqueIdentifier>
     </Filter>
+    <Filter Include="jpeg_file">
+      <UniqueIdentifier>{80746f84-b125-44ea-af80-3ac4df45f3f5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -333,6 +336,9 @@
     <ClInclude Include="ui\menu_wnd.h">
       <Filter>ui</Filter>
     </ClInclude>
+    <ClInclude Include="jpeg_file\Jpegfile.h">
+      <Filter>jpeg_file</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -544,6 +550,9 @@
     </ClCompile>
     <ClCompile Include="http_load\http_unit.cpp">
       <Filter>http_load</Filter>
+    </ClCompile>
+    <ClCompile Include="jpeg_file\Jpegfile.cpp">
+      <Filter>jpeg_file</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

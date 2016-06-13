@@ -71,7 +71,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libcef_dll_wrapper.lib;cef_sandbox.lib;libcef.lib;opengl32.lib;Riched20.lib;AudioLibrary.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libcef_dll_wrapper.lib;cef_sandbox.lib;libcef.lib;opengl32.lib;Riched20.lib;JpegLib.lib;AudioLibrary.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -144,6 +144,7 @@
     <ClInclude Include="chat_manager\login.h" />
     <ClInclude Include="chat_manager\socket.h" />
     <ClInclude Include="http_load\http_unit.h" />
+    <ClInclude Include="jpeg_file\Jpegfile.h" />
     <ClInclude Include="json\autolink.h" />
     <ClInclude Include="json\cJSON.h" />
     <ClInclude Include="json\config.h" />
@@ -235,6 +236,7 @@
     <ClCompile Include="chat_manager\login.cpp" />
     <ClCompile Include="chat_manager\socket.cpp" />
     <ClCompile Include="http_load\http_unit.cpp" />
+    <ClCompile Include="jpeg_file\Jpegfile.cpp" />
     <ClCompile Include="json\cJSON.c" />
     <ClCompile Include="json\jsonext.cpp" />
     <ClCompile Include="json\json_reader.cpp" />
