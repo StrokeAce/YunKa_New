@@ -283,6 +283,8 @@ private:
 
 	unsigned long m_checkId;
 
+	unsigned long m_checkIdSelect;
+
 	string m_facePathUrl;
 
 

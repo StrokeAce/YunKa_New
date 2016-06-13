@@ -292,14 +292,18 @@ void CMainFrame::Notify(TNotifyUI& msg)
 
 	}
 
-	else if (_tcsicmp(msg.sType, DUI_MSGTYPE_ITEMRCLICK) == 0)
+	else if (_tcsicmp(msg.sType, DUI_MSGTYPE_MENU) == 0)
 	{
 		OnItemRbClick(msg);
 	}
 
+	//else if (_tcsicmp(msg.sType, DUI_MSGTYPE_ITEMSELECT) == 0)
+	//{
+	//	OnItemClick(msg);
+	//}
+
 	else if (_tcsicmp(msg.sType, DUI_MSGTYPE_ITEMCLICK) == 0)
 	{
-
 		OnItemClick(msg);
 	}
 
@@ -729,6 +733,7 @@ void CMainFrame::OnSelectChanged(TNotifyUI &msg)
 
 void CMainFrame::OnItemClick(TNotifyUI &msg)
 {
+	m_checkIdSelect = 0;
 	UserListUI* pUserList = static_cast<UserListUI*>(m_PaintManager.FindControl(_T("userlist")));
 	if (pUserList->GetItemIndex(msg.pSender) != -1)
 	{
@@ -737,7 +742,7 @@ void CMainFrame::OnItemClick(TNotifyUI &msg)
 			UserListUI::Node* node = (UserListUI::Node*)msg.pSender->GetTag();
 			CDuiString str = node->data()._text;
 			unsigned long id = node->data()._uid;
-
+			m_checkIdSelect = id;
 			if (id > 0)
 			{
 				//
@@ -801,15 +806,14 @@ void CMainFrame::OnItemActive(TNotifyUI &msg)
 void CMainFrame::OnItemRbClick(TNotifyUI &msg)
 {
 	CDuiString xmlPath = L"";
+	unsigned long uid = m_checkIdSelect;
 
-	//if (msg.pSender->GetName() == L"userlist")
-	if (1)
+	if (msg.pSender->GetName() == L"userlist")
 	{
-
 		//根据选择的对象不同 弹出相应的右键菜单
-		UserListUI::Node* node = (UserListUI::Node*)msg.pSender->GetTag();
+		//UserListUI::Node* node = (UserListUI::Node*)msg.pSender->GetTag();
 		//pUserList->ExpandNode(node,!node->data()._expand);
-		unsigned long uid = node->data()._uid;
+		
 
 		//轮询查找 查找当前选择的 uid是 空 还是坐席 等待中的用户 等等
 		if (uid == 0) //既不是访客 也不是坐席
