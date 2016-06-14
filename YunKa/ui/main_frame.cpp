@@ -744,7 +744,7 @@ void CMainFrame::OnSelectChanged(TNotifyUI &msg)
 
 void CMainFrame::OnItemClick(TNotifyUI &msg)
 {
-	m_checkIdSelect = 0;
+	m_savedClickId = 0;
 	UserListUI* pUserList = static_cast<UserListUI*>(m_PaintManager.FindControl(_T("userlist")));
 	if (pUserList->GetItemIndex(msg.pSender) != -1)
 	{
@@ -753,16 +753,16 @@ void CMainFrame::OnItemClick(TNotifyUI &msg)
 			UserListUI::Node* node = (UserListUI::Node*)msg.pSender->GetTag();
 			CDuiString str = node->data()._text;
 			unsigned long id = node->data()._uid;
-			m_checkIdSelect = id;
+			m_savedClickId = id;
 			if (id > 0)
 			{
 				//
-				if (m_checkId != id)//切换聊天对象显示 
+				if (m_curSelectId != id)//切换聊天对象显示 
 				{
 					ChangeShowUserMsgWnd(id);
 				}
 
-				m_checkId = id;
+				m_curSelectId = id;
 				map<unsigned long, UserListUI::Node*>::iterator iter = m_waitVizitorMap.find(id);
 				if (iter != m_waitVizitorMap.end())
 				{
@@ -817,7 +817,9 @@ void CMainFrame::OnItemActive(TNotifyUI &msg)
 void CMainFrame::OnItemRbClick(TNotifyUI &msg)
 {
 	CDuiString xmlPath = L"";
-	unsigned long uid = m_checkIdSelect;
+	unsigned long uid = m_savedClickId;
+	CWebUserObject *pWebUser = NULL;
+	CUserObject *pUser = NULL;
 
 	if (msg.pSender->GetName() == L"userlist")
 	{
@@ -825,6 +827,8 @@ void CMainFrame::OnItemRbClick(TNotifyUI &msg)
 		//UserListUI::Node* node = (UserListUI::Node*)msg.pSender->GetTag();
 		//pUserList->ExpandNode(node,!node->data()._expand);
 		
+
+		CheckIdForUerOrWebuser(uid,&pWebUser,&pUser);
 
 		//轮询查找 查找当前选择的 uid是 空 还是坐席 等待中的用户 等等
 		if (uid == 0) //既不是访客 也不是坐席
@@ -838,7 +842,6 @@ void CMainFrame::OnItemRbClick(TNotifyUI &msg)
 
 		else
 		{
-			CWebUserObject *pWebUser = m_manager->GetWebUserObjectByUid(uid);//查找是不是webuser
 			if (pWebUser != NULL)
 			{
 				if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_REQUEST)
@@ -848,7 +851,6 @@ void CMainFrame::OnItemRbClick(TNotifyUI &msg)
 			}
 			else
 			{
-				CUserObject *pUser = m_manager->GetUserObjectByUid(uid);//查找是不是 坐席用户
 				if (pUser == NULL)
 					return;
 
@@ -1060,8 +1062,8 @@ void CMainFrame::OnBtnSendMessage(TNotifyUI& msg)
 	MSG_DATA_TYPE sendMsgType;
 
 	//如果当前选择的用户为 空 则不需要发送  测试时暂时屏蔽掉
-	sendUserType = GetSendUserType(m_checkId);
-	if (sendUserType == USER_TYPE_ERROR || m_checkId <= 0)
+	sendUserType = GetSendUserType(m_curSelectId);
+	if (sendUserType == USER_TYPE_ERROR || m_curSelectId <= 0)
 		return;
 
 	ITextServices * pTextServices = m_pSendEdit->GetTextServices();
@@ -1095,7 +1097,7 @@ void CMainFrame::OnBtnSendMessage(TNotifyUI& msg)
 	{
 	
 		//消息测试 暂时先只发给用户  坐席后续加上
-		m_manager->SendTo_Msg(m_checkId, sendUserType, msgId, MSG_DATA_TYPE_TEXT, sendMsgData);
+		m_manager->SendTo_Msg(m_curSelectId, sendUserType, msgId, MSG_DATA_TYPE_TEXT, sendMsgData);
 
 		ReplaceFaceId(sendMsgData);
 		//理论上只有发送消息成功 才在聊天界面显示  
@@ -1110,7 +1112,7 @@ void CMainFrame::OnBtnSendMessage(TNotifyUI& msg)
 	{
 		for (int i = 0; i < vecName.size(); i++)
 		{
-			m_manager->SendTo_Msg(m_checkId, sendUserType, msgId, MSG_DATA_TYPE_IMAGE, vecName[i]);
+			m_manager->SendTo_Msg(m_curSelectId, sendUserType, msgId, MSG_DATA_TYPE_IMAGE, vecName[i]);
 
 			sendMsgData = vecName[i];
 			//ReplaceImageId(sendMsgData);
@@ -1571,7 +1573,7 @@ void CMainFrame::RecvAcceptChat(CUserObject* pUser, CWebUserObject* pWebUser)
 		text = tempNode->data()._text;
 		uid = tempNode->data()._uid;
 		//当前选择 的用户就是 激活的用户
-		m_checkId = uid;
+		m_curSelectId = uid;
 	}
 	else
 		return;
@@ -1730,7 +1732,7 @@ void CMainFrame::RecvMsg(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, string msgId,
 	}
 
 	//如果收到的消息不是 当前所选用户的id的，暂时屏蔽，后面需要记录起来，等到选择到后显示出来
-	if (userId != m_checkId)
+	if (userId != m_curSelectId)
 	{
 		return;
 	}
@@ -1768,13 +1770,13 @@ void CMainFrame::OnManagerButtonEvent(TNotifyUI& msg)
 	//结束
 	if (msg.pSender->GetName() == _T("managerbutton_3"))
 	{
-		m_manager->SendTo_CloseChat(m_checkId, CHATCLOSE_USER);
+		m_manager->SendTo_CloseChat(m_curSelectId, CHATCLOSE_USER);
 
 	}
 	//释放会话
 	if (msg.pSender->GetName() == _T("managerbutton_7"))
 	{
-		m_manager->SendTo_ReleaseChat(m_checkId);
+		m_manager->SendTo_ReleaseChat(m_curSelectId);
 
 	}
 
@@ -1880,9 +1882,10 @@ void CMainFrame::ShowRightFrameView(int index)
 	string strFrom, strEnd;
 	string strUrl;
 
-	pWebUser = m_manager->GetWebUserObjectByUid(m_checkId);
+	//这里只判断 是不是访客用户 
+	pWebUser = m_manager->GetWebUserObjectByUid(m_curSelectId);
 
-	if (m_checkId == 0 || pWebUser == NULL || !m_pVisitorRelatedHandler.isCreated)
+	if (m_curSelectId == 0 || pWebUser == NULL || !m_pVisitorRelatedHandler.isCreated)
 	{
 		LoadBrowser(NULL);
 		return;
@@ -2173,18 +2176,15 @@ void CMainFrame::ChangeShowUserMsgWnd(unsigned long id)
 	CWebUserObject *pWebUser = NULL;
 
 
-	if (m_checkId == id || id == 0)//切换聊天对象显示 
+	if (m_curSelectId == id || id == 0)//切换聊天对象显示 
 		return;
 
-	pUser = m_manager->GetUserObjectByUid(id);
 
-	if (pUser == NULL)
-	{
-		pWebUser = m_manager->GetWebUserObjectByUid(id);
-
-		if (pWebUser == NULL)
-			return;
-	}
+	CheckIdForUerOrWebuser(id, &pWebUser, &pUser);
+	
+	if (pUser == NULL && pWebUser == NULL)
+		return;
+	
 
 	ShowClearMsg();
 
@@ -2425,15 +2425,17 @@ bool CMainFrame::SaveBitmapToFile(HBITMAP hbitmap,BITMAP bitmap, string lpFileNa
 USER_TYPE CMainFrame::GetSendUserType(unsigned long id)
 {
 	USER_TYPE type = USER_TYPE_CLIENT;
+	CUserObject *pUser = NULL;
+	CWebUserObject  *pWebUser = NULL;
 
 	if (id == 0)
 		return USER_TYPE_ERROR;
 
-	CUserObject *pUser = m_manager->GetUserObjectByUid(id);
+	CheckIdForUerOrWebuser(id,&pWebUser,&pUser);
+	//CUserObject *pUser = m_manager->GetUserObjectByUid(id);
 	if (pUser == NULL)
 	{
-		CWebUserObject  *pWebUser = m_manager->GetWebUserObjectByUid(id);
-
+		//CWebUserObject  *pWebUser = m_manager->GetWebUserObjectByUid(id);
 		if (pWebUser == NULL)
 		{
 			type = USER_TYPE_ERROR;
@@ -2450,4 +2452,18 @@ USER_TYPE CMainFrame::GetSendUserType(unsigned long id)
 	}
 
 	return type;
+}
+
+
+void CMainFrame::CheckIdForUerOrWebuser(unsigned long id,CWebUserObject **pWebUser,CUserObject **pUser)
+{
+
+
+	*pUser  = m_manager->GetUserObjectByUid(id);
+
+	if (*pUser == NULL)
+	{
+		*pWebUser = m_manager->GetWebUserObjectByUid(id);
+	}
+
 }

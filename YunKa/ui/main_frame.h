@@ -215,6 +215,7 @@ public:
 	void CMainFrame::ChangeShowUserMsgWnd(unsigned long id);
 	void CMainFrame::SetHandler();
 	USER_TYPE  CMainFrame::GetSendUserType(unsigned long id);
+	void CMainFrame::CheckIdForUerOrWebuser(unsigned long id, CWebUserObject **pWebUser, CUserObject **pUser);
 
 	void AddToMsgList(CUserObject *pUser, string strMsg, string strTime, int userType = MSG_FROM_WEBUSER,
 		int msgType = MSG_TYPE_SYS, int msgDataType = MSG_DATA_TYPE_TEXT, string msgId = "");
@@ -285,9 +286,9 @@ private:
 	UserListUI* pUserList;
 	CUserObject* m_mySelfInfo;
 
-	unsigned long m_checkId;
+	unsigned long m_curSelectId;
 
-	unsigned long m_checkIdSelect;
+	unsigned long m_savedClickId;
 
 	string m_facePathUrl;
 
