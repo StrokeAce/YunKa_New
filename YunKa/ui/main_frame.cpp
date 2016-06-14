@@ -1055,12 +1055,9 @@ void CMainFrame::OnBtnSendMessage(TNotifyUI& msg)
 	MSG_DATA_TYPE sendMsgType;
 
 	//如果当前选择的用户为 空 则不需要发送  测试时暂时屏蔽掉
-	//if (m_checkId <= 0)
-		//return;
-
 	sendUserType = GetSendUserType(m_checkId);
-	//if (sendUserType == USER_TYPE_ERROR)
-		//return;
+	if (sendUserType == USER_TYPE_ERROR || m_checkId <= 0)
+		return;
 
 	ITextServices * pTextServices = m_pSendEdit->GetTextServices();
 	tstring strText;
