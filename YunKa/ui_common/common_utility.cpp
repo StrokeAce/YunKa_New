@@ -12,7 +12,10 @@ using namespace std;
 
 #define BUFF_SIZE 1024 
 
+//这里设置 图片的index
 int gRecordFileAddNumber = 0;
+
+MapLongWCharData gSavedImageMap;
 
 
 wchar_t *CA2U(const char* str, WCHAR *dest)
@@ -342,6 +345,21 @@ void ReplaceFaceId(string &msg)
 }
 
 
+
+void ReplaceImageId(string &msg)
+{
+	string path = msg;
+
+	string str = "<IMG alt=\"\" src=\"face.jpg\">";
+	StringReplace(str, "face.jpg", path);
+	StringReplace(str, "\\", "/");
+
+	msg = str;
+
+}
+
+
+
 int ClearFile(char *fileType)
 {
 	WIN32_FIND_DATAA fileInfo;
@@ -405,4 +423,62 @@ void SetCopyFileName(char *str)
 	path += timeStr;
 
 	strcpy(str,path.c_str());
+}
+
+
+
+void GetEditImageData(WCHAR *msg, VectorStringData  &vecData)
+{
+	char inputStr[1024] = {0};
+	WCHAR getStrW[1024] = {0};
+	char getStrA[1024] = { 0 };
+
+	UnicodeToANSI(msg, inputStr);
+	string str = inputStr;
+	int start = 0;
+	vecData.clear();
+	while (1)
+	{
+		int pos = str.find("[", start);
+
+
+		if (pos == -1)//没有找到 插入的图片 
+			break;
+
+		int end = str.find("]", pos);
+		if (end == -1)
+			break;
+
+		start += end+1;
+		string idStr = str.substr(pos + 1, end - pos - 1);
+
+		int id = atoi(idStr.c_str());
+		if (id > 0)
+		{
+
+			MapLongWCharData::iterator iter = gSavedImageMap.find(id);
+			if (iter != gSavedImageMap.end())
+			{
+				lstrcpyW(getStrW, iter->second.c_str());
+
+				UnicodeToANSI(getStrW, getStrA);
+				vecData.push_back(getStrA);
+			
+			}
+
+		}
+
+	}
+
+}
+
+
+void SaveEditImageData(unsigned long id, WCHAR *name)
+{
+	gSavedImageMap.insert(pair<unsigned long, WCHAR *>(id, name));
+}
+
+void ClearEditImageData(unsigned long id, WCHAR *name)
+{
+	gSavedImageMap.clear();
 }

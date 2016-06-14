@@ -10,6 +10,13 @@
 #include <windows.h> 
 #include <locale.h> 
 #include <vector>
+#include <list>
+#include <map>
+
+typedef list<unsigned int > ListIntData;
+typedef list<string> ListStringData;
+typedef vector<string> VectorStringData;
+typedef map<unsigned long, wstring >  MapLongWCharData;
 
 
 
@@ -38,6 +45,10 @@ extern void SplitStringA(char *pSrc, char *chMark, std::vector<std::string> &vec
 extern void SetCopyFileName(char *str);
 extern int ClearFile(char *fileType);
 
+extern void GetEditImageData(WCHAR *msg, VectorStringData  &vecData);
+extern void SaveEditImageData(unsigned long id, WCHAR *name);
+extern void ClearEditImageData(unsigned long id, WCHAR *name);
 
+extern void ReplaceImageId(string &msg);
 
 #endif

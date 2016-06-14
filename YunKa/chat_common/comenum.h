@@ -56,9 +56,12 @@ enum MSG_FROM_TYPE
 /** 发送消息接收用户区分 */
 enum USER_TYPE
 {
+	
 	USER_TYPE_CLIENT=1,	// 坐席用户
 	USER_TYPE_WX,		// 微信用户
-	USER_TYPE_WEB		// 网页用户
+	USER_TYPE_WEB,		// 网页用户
+
+	USER_TYPE_ERROR = 10
 };
 
 /** 消息发送类型 */

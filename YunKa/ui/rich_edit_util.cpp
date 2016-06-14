@@ -874,6 +874,8 @@ BOOL RichEdit_InsertFace(ITextServices *pTextServices, ITextHost *pTextHost,
 	pImageOle->SetBgColor(clrBg);
 	pImageOle->SetAutoScale(bAutoScale, nReservedWidth);
 	pImageOle->LoadFromFile(bstrFileName);
+	//pImageOle->SaveAsFile(bstrFileName);
+	
 
 	hr = ::OleSetContainedObject(pOleObject, TRUE);
 
@@ -906,6 +908,89 @@ Ret0:
 
 	return SUCCEEDED(hr);
 }
+
+
+// 获取文本
+void RichEdit_GetText2(ITextServices * pTextServices, tstring& strText)
+{
+	REOBJECT reobject;
+	LONG nFaceId, nPos = 0;
+	tstring strOrgText, strTemp;
+	WCHAR fileName[1024] = {0};
+
+	IRichEditOle * pRichEditOle = RichEdit_GetOleInterface(pTextServices);
+	if (NULL == pRichEditOle)
+		return;
+
+	CHARRANGE chrg = { 0, RichEdit_GetWindowTextLength(pTextServices) };
+	RichEdit_GetTextRange(pTextServices, &chrg, strOrgText);
+
+	for (LONG i = 0; i < (int)strOrgText.size(); i++)
+	{
+		memset(&reobject, 0, sizeof(REOBJECT));
+		reobject.cbStruct = sizeof(REOBJECT);
+		reobject.cp = i;
+		HRESULT hr = pRichEditOle->GetObject(REO_IOB_USE_CP, &reobject, REO_GETOBJ_POLEOBJ);
+		if (SUCCEEDED(hr))
+		{
+			if (reobject.cp > 0 && reobject.cp > nPos)
+			{
+				strTemp = strOrgText.substr(nPos, reobject.cp - nPos);
+				Replace(strTemp, _T("/"), _T("//"));
+				strText += strTemp;
+			}
+			nPos = reobject.cp + 1;
+
+			if (NULL == reobject.poleobj)
+				continue;
+
+			if (CLSID_ImageOle == reobject.clsid)
+			{
+				IImageOle * pImageOle = NULL;
+				hr = reobject.poleobj->QueryInterface(__uuidof(IImageOle), (void**)&pImageOle);
+				if (SUCCEEDED(hr))
+				{
+					//pImageOle->GetFaceId(&nFaceId);
+					pImageOle->GetFaceIndex(&nFaceId);
+
+					//pImageOle->GetFileName((BSTR*)fileName);
+
+					if (nFaceId != -1 && nFaceId >= 1000)
+					{
+						TCHAR cBuf[32] = { 0 };
+						//wsprintf(cBuf, _T("/f[\"%d\"]"), nFaceId);
+
+						wsprintf(cBuf, _T("[%d]"), nFaceId);
+						strText += cBuf;
+					}
+					else
+					{
+						//strText += _T("/c[\"");
+						//BSTR bstrFileName = NULL;
+						//pImageOle->GetFileName(&bstrFileName);
+						//strText += bstrFileName;
+						//::SysFreeString(bstrFileName);
+						//strText += _T("\"]");
+
+						strText = L"";
+					}
+					pImageOle->Release();
+				}
+			}
+			reobject.poleobj->Release();
+		}
+	}
+
+	if (nPos < (int)strOrgText.size())
+	{
+		strTemp = strOrgText.substr(nPos);
+		Replace(strTemp, _T("/"), _T("//"));
+		strText += strTemp;
+	}
+
+	pRichEditOle->Release();
+}
+
 
 // 获取文本
 void RichEdit_GetText(ITextServices * pTextServices, tstring& strText)

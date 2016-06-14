@@ -205,8 +205,8 @@ public:
 	void CMainFrame::OnCtrlVEvent();
 	bool CMainFrame::SaveBitmapToFile(HBITMAP hbitmap, BITMAP bitmap, string lpFileName);
 
-	void CMainFrame::ReplaceFaceId(string &msg);
-	void CMainFrame::ShowMySelfSendMsg(string strMsg);
+//	void CMainFrame::ReplaceFaceId(string &msg);
+	void CMainFrame::ShowMySelfSendMsg(string strMsg, MSG_DATA_TYPE msgType);
 	void CMainFrame::MoveAndRestoreMsgWnd(int type);
 	void CMainFrame::InitLibcef(void);
 	void CMainFrame::LoadBrowser(char* url);
@@ -214,6 +214,7 @@ public:
 	void CMainFrame::ShowClearMsg();
 	void CMainFrame::ChangeShowUserMsgWnd(unsigned long id);
 	void CMainFrame::SetHandler();
+	USER_TYPE  CMainFrame::GetSendUserType(unsigned long id);
 
 	void AddToMsgList(CUserObject *pUser, string strMsg, string strTime, int userType = MSG_FROM_WEBUSER,
 		int msgType = MSG_TYPE_SYS, int msgDataType = MSG_DATA_TYPE_TEXT, string msgId = "");
@@ -244,6 +245,7 @@ public:
 	UserListUI::Node* pMySelfeNode;
 	map<unsigned long, UserListUI::Node*> m_waitVizitorMap;
 	map<unsigned long, UserListUI::Node*> m_allVisitorNodeMap;
+
 
 	list<CUserObject* > m_upUser;
 	unsigned int m_recordWaitNumber;
@@ -289,7 +291,7 @@ private:
 
 	string m_facePathUrl;
 
-
+	unsigned long m_savedImageIndex;
 
 };
 

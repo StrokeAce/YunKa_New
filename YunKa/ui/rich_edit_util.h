@@ -73,3 +73,5 @@ void RichEdit_ReplaceSel(ITextServices * pTextServices, LPCTSTR lpszNewText,	// 
 						 BOOL bBold, BOOL bItalic, BOOL bUnderLine, BOOL bIsLink, 
 						 int nStartIndent, BOOL bCanUndo = FALSE);
 BOOL RichEdit_GetImageOle(ITextServices * pTextServices, POINT pt, IImageOle** pImageOle);
+
+void RichEdit_GetText2(ITextServices * pTextServices, tstring& strText);

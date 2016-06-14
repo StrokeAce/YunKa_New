@@ -47,7 +47,7 @@ CMainFrame::CMainFrame(CChatManager* manager) :m_manager(manager)
 	strTmp += "<div><p><span style=\"font - size:16px; color:#cccccc\">无可显示信息</span></p><div></body>";
 	f_covet.Gb2312ToUTF_8(m_defaultUrlInfo, strTmp.c_str(), strTmp.length());
 	
-
+	m_savedImageIndex = 1000;
 }
 
 
@@ -998,7 +998,7 @@ BOOL CMainFrame::_RichEdit_InsertFace(CRichEditUI * pRichEdit, LPCTSTR lpszFileN
 		//if (pRichEdit == m_pRecvEdit)
 			//RichEdit_SetStartIndent(pTextServices, 300);
 		bRet = RichEdit_InsertFace(pTextServices, pTextHost,
-			lpszFileName, nFaceId, nFaceIndex, RGB(255, 255, 255), TRUE, 300);
+			lpszFileName, nFaceId, nFaceIndex, RGB(255, 255, 255), TRUE, 40);
 	}
 
 	if (pTextServices != NULL)
@@ -1009,6 +1009,7 @@ BOOL CMainFrame::_RichEdit_InsertFace(CRichEditUI * pRichEdit, LPCTSTR lpszFileN
 	return bRet;
 }
 
+#if 0
 void CMainFrame::ReplaceFaceId(string &msg)
 {
 	string str = msg;
@@ -1043,21 +1044,41 @@ void CMainFrame::ReplaceFaceId(string &msg)
 	msg = str;
 
 }
+#endif
 
 void CMainFrame::OnBtnSendMessage(TNotifyUI& msg)
 {
 	char getInput[MAX_1024_LEN] = {0};
 	string msgId = m_manager->GetMsgId();
 	string sendMsgData;
-	int sendMsgType = 0;
+	USER_TYPE sendUserType;
+	MSG_DATA_TYPE sendMsgType;
 
-	//如果当前选择的用户为 空 则不需要发送
+	//如果当前选择的用户为 空 则不需要发送  测试时暂时屏蔽掉
 	//if (m_checkId <= 0)
+		//return;
+
+	sendUserType = GetSendUserType(m_checkId);
+	//if (sendUserType == USER_TYPE_ERROR)
 		//return;
 
 	ITextServices * pTextServices = m_pSendEdit->GetTextServices();
 	tstring strText;
-	RichEdit_GetText(pTextServices, strText);
+	VectorStringData vecName;
+
+	RichEdit_GetText2(pTextServices, strText);
+	if (strText.length() > 0)
+	{
+		sendMsgType = MSG_DATA_TYPE_IMAGE;
+
+		GetEditImageData((WCHAR*)strText.c_str(), vecName);
+	}
+	else
+	{
+		sendMsgType = MSG_DATA_TYPE_TEXT;
+		RichEdit_GetText(pTextServices, strText);
+	}
+
 	pTextServices->Release();
 
 	if (strText.size() <= 0)
@@ -1068,25 +1089,36 @@ void CMainFrame::OnBtnSendMessage(TNotifyUI& msg)
 
 	UnicodeToANSI(strText.c_str(), getInput);
 	sendMsgData = getInput;
-
-
-	//sendMsgData = "<IMG alt=\"\" src=\"http://sysimages.tq.cn/clientimages/face_v1.0/images/0.gif\">";
-
-	//消息测试 暂时先只发给用户  坐席后续加上
-	m_manager->SendTo_Msg(m_checkId, USER_TYPE_WX, msgId, MSG_DATA_TYPE_TEXT, (char*)sendMsgData.c_str());
-
-	//理论上只有发送消息成功 才在聊天界面显示  
-	//暂时先添加在这里  后面再移到收到消息成功 的回调哪里
-	//显示 发送的消息
+	if (sendMsgType == MSG_DATA_TYPE_TEXT)
+	{
 	
-	//sendMsgData
+		//消息测试 暂时先只发给用户  坐席后续加上
+		m_manager->SendTo_Msg(m_checkId, sendUserType, msgId, MSG_DATA_TYPE_TEXT, sendMsgData);
 
-	//int faceId = atoi(getInput);
-	//m_faceSelDlg.GetFileNameById(faceId, strText);
+		ReplaceFaceId(sendMsgData);
+		//理论上只有发送消息成功 才在聊天界面显示  
+		//暂时先添加在这里  后面再移到收到消息成功 的回调哪里
+		//显示 发送的消息
 
 
-	ReplaceFaceId(sendMsgData);
-	ShowMySelfSendMsg(sendMsgData);
+		ShowMySelfSendMsg(sendMsgData, sendMsgType);
+	}
+
+	else if (sendMsgType == MSG_DATA_TYPE_IMAGE)
+	{
+		for (int i = 0; i < vecName.size(); i++)
+		{
+			m_manager->SendTo_Msg(m_checkId, sendUserType, msgId, MSG_DATA_TYPE_IMAGE, vecName[i]);
+
+			sendMsgData = vecName[i];
+			//ReplaceImageId(sendMsgData);
+
+			ShowMySelfSendMsg(sendMsgData, sendMsgType);
+		}
+
+	}
+
+
 }
 
 
@@ -1746,7 +1778,7 @@ void CMainFrame::OnManagerButtonEvent(TNotifyUI& msg)
 
 }
 
-void CMainFrame::ShowMySelfSendMsg(string strMsg)
+void CMainFrame::ShowMySelfSendMsg(string strMsg, MSG_DATA_TYPE msgType)
 {
 	string            headPath = "";
 	unsigned long     userId = 0;
@@ -1797,7 +1829,7 @@ void CMainFrame::ShowMySelfSendMsg(string strMsg)
 	string msgTime = GetTimeByMDAndHMS(0);
 	string msgId = m_manager->GetMsgId();
 	sprintf(strJsCode, "AppendMsgToHistory('%d', '%d', '%s', '%s', '%s', '%lu', '%s', '%s', '%d'); ",
-		5,1, name.c_str(), msgTime.c_str(), msg.c_str(), userId, headPath.c_str(), msgId, MSG_FROM_CLIENT);
+		MSG_FROM_SELF, msgType, name.c_str(), msgTime.c_str(), msg.c_str(), userId, headPath.c_str(), msgId, MSG_FROM_CLIENT);
 
 	if (m_pListMsgHandler.isLoaded)
 	{
@@ -2267,7 +2299,81 @@ void CMainFrame::OnCtrlVEvent()
 			}
 
 			ANSIToUnicode(fileName,WName);
-			_RichEdit_InsertFace(m_pSendEdit, WName, 0, 0);
+			_RichEdit_InsertFace(m_pSendEdit, WName, 0, m_savedImageIndex);
+
+			
+			//m_editImageMap.insert(pair<unsigned long, WCHAR *>(m_savedImageIndex, WName));
+			SaveEditImageData(m_savedImageIndex,WName);
+
+			m_savedImageIndex += 1;
+
+		}
+	}
+	else if (IsClipboardFormatAvailable(CF_TEXT))
+	{
+		m_pSendEdit->PasteSpecial(CF_TEXT);
+	}
+
+
+
+
+#if 0
+	if (IsClipboardFormatAvailable(CF_BITMAP))
+	{
+		if (::OpenClipboard(this->GetHWND()))
+		{
+			//获得剪贴板数据 
+			HBITMAP handle = (HBITMAP)GetClipboardData(CF_BITMAP);
+			if (handle != NULL)
+			{
+				//HDC hDC = ::GetDC(m_hWnd); // 获取设备环境句柄
+				//HDC hdcMem = CreateCompatibleDC(hDC); // 创建与设备相关的内存环境
+				//SelectObject(hdcMem, handle); // 选择对象
+				BITMAP bm; // 得到位图对象
+				GetObject(handle, sizeof(BITMAP), &bm);
+				SaveBitmapToFile(handle, bm, "E:\\YunKa\\test.jpg");
+
+				::CloseClipboard(); // 关闭剪贴板
+
+#if 0
+				HDC hDC = ::GetDC(m_hWnd); // 获取设备环境句柄
+				HDC hdcMem = CreateCompatibleDC(hDC); // 创建与设备相关的内存环境
+				SelectObject(hdcMem, handle); // 选择对象
+				SetMapMode(hdcMem, GetMapMode(hDC)); // 设置映射模式
+				BITMAP bm; // 得到位图对象
+				GetObject(handle, sizeof(BITMAP), &bm);
+				BitBlt(hDC, 0, 0, bm.bmWidth, bm.bmHeight, hdcMem, 0, 0, SRCCOPY); //位图复制
+				::ReleaseDC(m_hWnd, hDC); // 释放设备环境句柄
+				DeleteDC(hdcMem); // 删除内存环境
+				::CloseClipboard(); // 关闭剪贴板
+#endif
+			}
+
+
+#if 0
+
+			//获得剪贴板数据 
+			HBITMAP handle = (HBITMAP)GetClipboardData(CF_BITMAP);
+			CBitmap * bm = CBitmap::FromHandle(handle);
+			if (bm)
+			{
+				CString path = GetImageName();
+				SaveBitmapToFile(bm, path);
+				BITMAP map;
+				bm->GetBitmap(&map);
+				int width, height;
+				width = map.bmWidth;
+				height = map.bmHeight;
+				GetDisplaySize(width, height);
+				CString html;
+				html.Format("<img src=\"%s\" width=%d height=%d>", path, width, height);
+				this->InsertBuff(html, false);
+				DeleteObject(bm);
+			}
+			CloseClipboard();
+
+#endif
+
 
 		}
 	}
@@ -2275,6 +2381,12 @@ void CMainFrame::OnCtrlVEvent()
 	{
 	}
 
+
+	m_pSendEdit->PasteSpecial(CF_BITMAP);
+
+	//	m_pSendEdit->PasteSpecial(CF_TEXT);
+
+#endif
 
 }
 
@@ -2305,4 +2417,35 @@ bool CMainFrame::SaveBitmapToFile(HBITMAP hbitmap,BITMAP bitmap, string lpFileNa
 	delete[] p;
 
 	return true;
+}
+
+
+USER_TYPE CMainFrame::GetSendUserType(unsigned long id)
+{
+	USER_TYPE type = USER_TYPE_CLIENT;
+
+	if (id == 0)
+		return USER_TYPE_ERROR;
+
+	CUserObject *pUser = m_manager->GetUserObjectByUid(id);
+	if (pUser == NULL)
+	{
+		CWebUserObject  *pWebUser = m_manager->GetWebUserObjectByUid(id);
+
+		if (pWebUser == NULL)
+		{
+			type = USER_TYPE_ERROR;
+		}
+		else if(pWebUser->m_bIsFrWX)
+		{
+			type = USER_TYPE_WX;
+		}
+		else
+		{
+			type = USER_TYPE_WEB;
+		}
+
+	}
+
+	return type;
 }
