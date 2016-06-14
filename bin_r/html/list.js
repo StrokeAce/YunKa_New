@@ -18,11 +18,12 @@ function gwh() {//获取窗口高度
 }
 
 
-// 消息显示类型
-var MSGTYPE_SEND = '1'; // 发送的消息
-var MSGTYPE_RECV = '2'; // 接收的消息
-var MSGTYPE_PROMPT = '3'; // 系统提示
-var MSGTYPE_RECV_OTHER = '4'; // 接收的协助对象的消息
+// 消息来源类型
+var MSG_FROM_CLIENT = '1'; // 坐席发来
+var MSG_FROM_WEBUSER = '2'; // 访客发来
+var MSG_FROM_ASSIST = '3'; // 协助对象发来
+var MSG_FROM_SYS = '4'; // 系统消息
+var MSG_FROM_SELF = '5'; // 自己发送的
 var curscrolltop = 0;
 var msgindex = 0;
 var notifyindex = 0;
@@ -119,7 +120,7 @@ function AppendPromptUnreadMessage(content){
 }
 
 // 添加一条消息到消息记录
-function AppendMsgToHistory(toType, msgType, sname, time, content, userId, head, msgid, userType)
+function AppendMsgToHistory(msgFrom, msgType, sname, time, content, userId, head, msgid, userType)
 {
 	var lstmsg = document.createElement("div");
 	lstmsg.id = msgid;
@@ -138,9 +139,9 @@ function AppendMsgToHistory(toType, msgType, sname, time, content, userId, head,
 	msgcontent = TQGF.ReplaceStringToFace(msgcontent);
 	msgcontent = TQGF.FormatMsg(msgcontent);
 	
-	switch(toType) 
+	switch (msgFrom)
 	{
-		case MSGTYPE_SEND: 
+	    case MSG_FROM_SELF:
 		{
 			// 发送消息
 			head = head.replace(/\\/g, "\\\\");
@@ -148,27 +149,60 @@ function AppendMsgToHistory(toType, msgType, sname, time, content, userId, head,
 			{
 				lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>"+sname+"&nbsp;<img class = 'head_image' src='"+ head + "'></div><div class='msg_send_text'>"+msgcontent+"</div></div>";
 			}
-			else if(msgType == 2 || msgType == 3 || msgType == 4 || msgType == 5 || msgType == 6 || msgType == 7)
+			else if(msgType == 2)
 			{
-				lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>"+sname+"&nbsp;<img class = 'head_image' src='"+ head + "'></div><div class='msg_send_image'>"+msgcontent+"</div></div>";
+			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;<img class = 'head_image' src='" + head + "'></div><div class='msg_send_image'><img style='border:1px #cdcdcb solid;' src='" + msgcontent + "' width=30%%></div></div>";
+			}
+			else if( msgType == 3)
+			{
+			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;<img class = 'head_image' src='" + head + "'></div><div class='msg_send_image'><audio controls = 'controls' src = '" + msgcontent + "' type = 'audio/mpeg' /></div></div>";
+			}
+			else if (msgType == 4)
+			{
+			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;<img class = 'head_image' src='" + head + "'></div><div class='msg_send_image'><video controls = 'controls' src = '" + msgcontent + " type = 'video/mp4'></video></div></div>";
+			}
+			else if ( msgType == 5)
+			{
+			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;<img class = 'head_image' src='" + head + "'></div><div class='msg_send_image'>" + msgcontent + "</div></div>";
+			}
+			else if (msgType == 6)
+			{
+			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;<img class = 'head_image' src='" + head + "'></div><div class='msg_send_image'>" + msgcontent + "</div></div>";
 			}
 			break;
 		}
-		case MSGTYPE_RECV:
-		case MSGTYPE_RECV_OTHER:
+	    case MSG_FROM_WEBUSER:
+	    case MSG_FROM_ASSIST:
+	    case MSG_FROM_CLIENT:
 		{
 			// 接收消息
-			if(msgType == 1 || msgType == 8)
+			if(msgType == 1)
 			{
 				lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='"+ head +"' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;"+sname+"<font class='time'>"+time+"</font></div><div class='msg_recv_text'>"+msgcontent+"</div></div>";
 			}
-			else if(msgType == 2 || msgType == 3 || msgType == 4 || msgType == 5 || msgType == 6 || msgType == 7)
+			else if(msgType == 2)
 			{
-				lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='"+ head +"' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;"+sname+"<font class='time'>"+time+"</font></div><div class='msg_recv_image'>"+msgcontent+"</div></div>";
+			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'><img style='border:1px #cdcdcb solid;' src='" + msgcontent + "' width=30%%></div></div>";
+			}
+			else if (msgType == 3)
+			{
+			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'><audio controls = 'controls' src = '" + msgcontent + "' type = 'audio/mpeg' /></div></div>";
+			}
+			else if (msgType == 4)
+			{
+			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'><video controls = 'controls' src = '" + msgcontent + " type = 'video/mp4'></video></div></div>";
+			}
+			else if (msgType == 5)
+			{
+			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'>" + msgcontent + "</div></div>";
+			}
+			else if (msgType == 6)
+			{
+			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'>" + msgcontent + "</div></div>";
 			}
 		}
 			break;
-		case MSGTYPE_PROMPT:
+	    case MSG_FROM_SYS:
 		{
 			// 提示消息
 			lstmsg.innerHTML = "<div class='msg_sys'><span class = 'msg_sys_background'>"+msgcontent+"</span><br></div>";
@@ -179,7 +213,7 @@ function AppendMsgToHistory(toType, msgType, sname, time, content, userId, head,
 	}
 
 	$listbox.appendChild(lstmsg);
-  if (scrollToBottomFlag || toType == MSGTYPE_SEND || toType == MSGTYPE_PROMPT) 
+	if (scrollToBottomFlag || msgFrom == MSG_FROM_SELF || msgFrom == MSG_FROM_SYS)
   {
       scrollToBottomFlag = true;
       scrollViewToBottom();

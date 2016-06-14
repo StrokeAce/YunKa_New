@@ -13,6 +13,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ScreenCapture", "ScreenCapt
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AudioLibrary", "AudioLibrary\AudioLibrary.vcxproj", "{04016D9B-0D7B-4D96-908F-105001E6E381}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JpegLib", "YunKa\jpeglib\JpegLib.vcxproj", "{75782B9A-056B-4974-97CC-7D7187A8E703}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -72,6 +74,16 @@ Global
 		{04016D9B-0D7B-4D96-908F-105001E6E381}.UnicodeDebug|Win32.Build.0 = Debug|Win32
 		{04016D9B-0D7B-4D96-908F-105001E6E381}.UnicodeRelease|Win32.ActiveCfg = Release|Win32
 		{04016D9B-0D7B-4D96-908F-105001E6E381}.UnicodeRelease|Win32.Build.0 = Release|Win32
+		{75782B9A-056B-4974-97CC-7D7187A8E703}.Debug|Win32.ActiveCfg = Debug|Win32
+		{75782B9A-056B-4974-97CC-7D7187A8E703}.Debug|Win32.Build.0 = Debug|Win32
+		{75782B9A-056B-4974-97CC-7D7187A8E703}.Release|Win32.ActiveCfg = Release|Win32
+		{75782B9A-056B-4974-97CC-7D7187A8E703}.Release|Win32.Build.0 = Release|Win32
+		{75782B9A-056B-4974-97CC-7D7187A8E703}.Template|Win32.ActiveCfg = Release|Win32
+		{75782B9A-056B-4974-97CC-7D7187A8E703}.Template|Win32.Build.0 = Release|Win32
+		{75782B9A-056B-4974-97CC-7D7187A8E703}.UnicodeDebug|Win32.ActiveCfg = Debug|Win32
+		{75782B9A-056B-4974-97CC-7D7187A8E703}.UnicodeDebug|Win32.Build.0 = Debug|Win32
+		{75782B9A-056B-4974-97CC-7D7187A8E703}.UnicodeRelease|Win32.ActiveCfg = Release|Win32
+		{75782B9A-056B-4974-97CC-7D7187A8E703}.UnicodeRelease|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
