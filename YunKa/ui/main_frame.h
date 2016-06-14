@@ -210,7 +210,8 @@ public:
 	void CMainFrame::MoveAndRestoreMsgWnd(int type);
 	void CMainFrame::InitLibcef(void);
 	void CMainFrame::LoadBrowser(char* url);
-	void CMainFrame::ShowRightFrameView(int index);
+	void CMainFrame::ShowRightOptionFrameView(int index);
+	void CMainFrame::ShowOptionTab1FrameView();
 	void CMainFrame::ShowClearMsg();
 	void CMainFrame::ChangeShowUserMsgWnd(unsigned long id);
 	void CMainFrame::SetHandler();

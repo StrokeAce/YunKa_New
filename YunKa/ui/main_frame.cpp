@@ -730,6 +730,7 @@ void CMainFrame::OnSelectChanged(TNotifyUI &msg)
 				{
 					pTabControl->SelectItem(i);
 					
+					ShowRightOptionFrameView(i);
 					break;
 				}
 			}
@@ -1860,7 +1861,7 @@ void CMainFrame::LoadBrowser(char* url)
 			}
 		}
 	}
-	else
+	else 
 	{
 		RECT rc = { 0, 0, 0, 0 };
 		if (url == NULL)
@@ -1875,8 +1876,13 @@ void CMainFrame::LoadBrowser(char* url)
 	}
 }
 
+void CMainFrame::ShowOptionTab1FrameView()
+{
 
-void CMainFrame::ShowRightFrameView(int index)
+}
+
+
+void CMainFrame::ShowRightOptionFrameView(int index)
 {
 	CWebUserObject *pWebUser = NULL;
 	string strFrom, strEnd;
