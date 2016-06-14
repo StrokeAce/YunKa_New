@@ -165,7 +165,7 @@ public:    //主界面消息回调
 		virtual void RecvReleaseChat(CWebUserObject* pWebUser);
 
 		virtual void RecvMsg(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, string msgId, MSG_TYPE msgType, MSG_DATA_TYPE msgDataType, string msgContent,
-			string msgTime, CUserObject* pAssistUser, WxMsgBase* msgContentWx, string msgExt);
+			string msgTime, CUserObject* pAssistUser, WxMsgBase* msgContentWx, bool bSuccess);
 
 		virtual void ResultRecvMsg(string msgId, bool bSuccess);
 

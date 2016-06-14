@@ -13,7 +13,7 @@
 
 #define VALUE_VALID -500
 #define VALUE_BOLDER_REDUCE 5
-#define WM_CAPTURE_FINISHED (WM_USER + 699)
+#define WM_SCREEN_CAPTURE_SUCCED WM_USER+3200
 #define SAVE_TYPE_FILE 0
 #define SAVE_TYPE_CLIPBOARD 1
 #define SAVE_TYPE_BOTH 2
@@ -222,7 +222,7 @@ void ScreenCapDlg::SaveTo(CString strSaveFile, CString strExt)
 			saveSucess = image.Save(strSaveFile, Gdiplus::ImageFormatPNG);
 
 		if (saveSucess)
-			::SendMessage(m_hwnd, WM_CAPTURE_FINISHED, (WPARAM)strSaveFile.GetBuffer(), 0);
+			::SendMessage(m_hwnd, WM_SCREEN_CAPTURE_SUCCED, (WPARAM)strSaveFile.GetBuffer(), 0);
 	}
 
 	if (m_saveType == SAVE_TYPE_CLIPBOARD || m_saveType == SAVE_TYPE_BOTH)
@@ -235,7 +235,7 @@ void ScreenCapDlg::SaveTo(CString strSaveFile, CString strExt)
 
 			if (m_saveType == SAVE_TYPE_CLIPBOARD)
 			{
-				::SendMessage(m_hwnd, WM_CAPTURE_FINISHED, 0, 0);
+				::SendMessage(m_hwnd, WM_SCREEN_CAPTURE_SUCCED, 0, 0);
 			}
 		}
 	}

@@ -516,14 +516,12 @@ unsigned long GetTimeLong()
 {
 	unsigned long ntime = 0;
 	time_t tt = time(NULL);
-	struct tm * ttm = localtime(&tt);
-	if (ttm != NULL)
+	struct tm * stTime = localtime(&tt);
+	if (stTime != NULL)
 	{
-		char stime[MAX_256_LEN];
-		sprintf(stime, "%d%d%d%d%d", ttm->tm_mon + 1, ttm->tm_mday, ttm->tm_hour, ttm->tm_min, ttm->tm_sec);
-		ntime = atol(stime);
+		ntime = (long)_mkgmtime(stTime);  //转换成了unsigned long类型
 	}
-	return ntime;
+	return ntime;	
 }
 
 string GetMd5Str(const string str)
@@ -676,4 +674,18 @@ std::string GetTimeString()
 		sprintf(stime, "%d%d%d%d%d", ttm->tm_mon + 1, ttm->tm_mday, ttm->tm_hour, ttm->tm_min, ttm->tm_sec);
 	}
 	return stime;
+}
+
+unsigned long GetTimeLongByDHMS()
+{
+	unsigned long ntime = 0;
+	time_t tt = time(NULL);
+	struct tm * ttm = localtime(&tt);
+	if (ttm != NULL)
+	{
+		char stime[MAX_256_LEN];
+		sprintf(stime, "%d%d%d%d%d", ttm->tm_mon + 1, ttm->tm_mday, ttm->tm_hour, ttm->tm_min, ttm->tm_sec);
+		ntime = atol(stime);
+	}
+	return ntime;
 }

@@ -74,10 +74,10 @@ public:
 	// Parameter: msgTime 收到消息的时间
 	// Parameter: pAssistUser 协助对象，当消息为协助对象发来时，需要该参数
 	// Parameter: msgContentWx 微信消息，当非文字的微信消息时，需要该参数
-	// Parameter: msgExt 预留的参数
+	// Parameter: bSuccess 是否成功接收消息
 	//************************************
 	virtual void RecvMsg(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, string msgId, MSG_TYPE msgType, MSG_DATA_TYPE msgDataType, string msgContent,
-		string msgTime = "", CUserObject* pAssistUser = NULL, WxMsgBase* msgContentWx = NULL, string msgExt = "") = 0;
+		string msgTime = "", CUserObject* pAssistUser = NULL, WxMsgBase* msgContentWx = NULL, bool bSuccess = true) = 0;
 
 	//************************************
 	// Method:    ResultRecvMsg
@@ -461,7 +461,7 @@ public:
 	void UpLoadFile(unsigned long userId, USER_TYPE userType, string msgId, string filePath,
 					MSG_DATA_TYPE = MSG_DATA_TYPE_IMAGE);
 
-	void DownLoadFile(WxMsgBase* pWxMsg, CWebUserObject *pWebUser, CUserObject *pAssistUser);
+	void DownLoadFile(WxMsgBase* pWxMsg, CWebUserObject *pWebUser, CUserObject *pAssistUser, unsigned int time);
 
 	void AfterUpload(unsigned long userId, USER_TYPE userType, string msgId, string mediaID = "",
 					MSG_DATA_TYPE = MSG_DATA_TYPE_IMAGE, string fileId = "", string filePath = "");
@@ -477,7 +477,7 @@ public:
 	void Amr2Wav(string filePath);
 
 	void AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, string msgId, MSG_TYPE msgType, MSG_DATA_TYPE msgDataType,
-		string msgContent, string msgTime = "", CUserObject* pAssistUser = NULL, WxMsgBase* msgContentWx = NULL);
+		string msgContent, string msgTime = "", CUserObject* pAssistUser = NULL, WxMsgBase* msgContentWx = NULL, bool isSuccess=true);
 
 public:
 	int						m_nOnLineStatus;		// 是否在线,对于im服务器而言

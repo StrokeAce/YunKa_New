@@ -1707,7 +1707,7 @@ void CMainFrame::RecvReleaseChat(CWebUserObject* pWebUser)
 
 
 void CMainFrame::RecvMsg(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, string msgId, MSG_TYPE msgType, MSG_DATA_TYPE msgDataType, string msgContent,
-	string msgTime, CUserObject* pAssistUser, WxMsgBase* msgContentWx, string msgExt)
+	string msgTime, CUserObject* pAssistUser, WxMsgBase* msgContentWx, bool bSuccess)
 {
 	CWebUserObject    *pWebUserObj = NULL;
 	CUserObject       *pUserObj = NULL;

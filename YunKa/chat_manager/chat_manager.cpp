@@ -242,13 +242,12 @@ static UINT WINAPI DownLoadFileFromServerThread(void * para)
 			manager->Amr2Wav(decodePath.c_str());
 		}
 
-		manager->AddMsgToList((IBaseObject*)pWebUser, msgFrom, msgId, MSG_TYPE_NORMAL, msgDataType,
-			addPath, time, pUser, NULL);
+		manager->AddMsgToList((IBaseObject*)pWebUser, msgFrom, msgId, MSG_TYPE_NORMAL, msgDataType,addPath, time, pUser, NULL);
 		return true;
 	}
 	else
 	{
-		manager->m_handlerMsgs->ResultRecvMsg(msgId, false);
+		manager->m_handlerMsgs->RecvMsg((IBaseObject*)pWebUser, msgFrom, msgId, MSG_TYPE_NORMAL, msgDataType, addPath, time, pUser, NULL,false);
 	}
 	return false;
 }
@@ -3184,14 +3183,14 @@ WxMsgBase* CChatManager::ParseWxMsg(CWebUserObject* pWebUser, COM_FLOAT_CHATMSG&
 		{
 			//GetWxUserInfoAndToken(pWebUser);
 			msgBase = (WxMsgBase*)pwxobj;			
-			DownLoadFile(msgBase, pWebUser, pAssistUser);
+			DownLoadFile(msgBase, pWebUser, pAssistUser, recvInfo.tMsgTime);
 			delete pwxobj;
 			return NULL;
 		}
 		else if ("voice" == pwxobj->MsgType)
 		{
 			msgBase = (WxMsgBase*)pwxobj;
-			DownLoadFile(msgBase, pWebUser, pAssistUser);
+			DownLoadFile(msgBase, pWebUser, pAssistUser, recvInfo.tMsgTime);
 			delete pwxobj;
 			return NULL;
 		}
@@ -4804,7 +4803,7 @@ int CChatManager::SendToTransferUser(CUserObject *pAcceptUser, CWebUserObject *p
 	return nError;
 }
 
-void CChatManager::DownLoadFile(WxMsgBase* pWxMsg, CWebUserObject *pWebUser, CUserObject *pAssistUser)
+void CChatManager::DownLoadFile(WxMsgBase* pWxMsg, CWebUserObject *pWebUser, CUserObject *pAssistUser,  unsigned int time)
 {
 	if (pWxMsg && pWxMsg->MsgType == "image")
 	{
@@ -4823,7 +4822,7 @@ void CChatManager::DownLoadFile(WxMsgBase* pWxMsg, CWebUserObject *pWebUser, CUs
 			{
 				param->pUser = pAssistUser;
 			}
-			param->time = GetTimeByMDAndHMS(0);
+			param->time = GetTimeByMDAndHMS(time);
 			param->pWebUser = pWebUser;
 			param->msgId = GetMsgId();
 			param->msgFromType = MSG_FROM_WEBUSER;
@@ -4851,7 +4850,7 @@ void CChatManager::DownLoadFile(WxMsgBase* pWxMsg, CWebUserObject *pWebUser, CUs
 			{
 				param->pUser = pAssistUser;
 			}
-			param->time = GetTimeByMDAndHMS(0);
+			param->time = GetTimeByMDAndHMS(time);
 			param->pWebUser = pWebUser;
 			param->msgId = GetMsgId();
 			param->msgFromType = MSG_FROM_WEBUSER;
@@ -4864,7 +4863,8 @@ void CChatManager::DownLoadFile(WxMsgBase* pWxMsg, CWebUserObject *pWebUser, CUs
 }
 
 void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, string msgId, MSG_TYPE msgType, 
-	MSG_DATA_TYPE msgDataType,string msgContent, string msgTime, CUserObject* pAssistUser, WxMsgBase* msgContentWx)
+	MSG_DATA_TYPE msgDataType,string msgContent, string msgTime, CUserObject* pAssistUser,
+	WxMsgBase* msgContentWx,bool isSuccess )
 {
 	ONE_MSG_INFO ongMsg;
 	ongMsg.msgId = msgId;
@@ -4986,14 +4986,14 @@ void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, string
 	}
 	
 	m_handlerMsgs->RecvMsg(pObj, msgFrom, msgId, msgType, msgDataType,
-		callJsMsg, msgTime, pAssistUser, msgContentWx, "");
+		callJsMsg, msgTime, pAssistUser, msgContentWx, isSuccess);
 }
 
 string CChatManager::GetFileId()
 {
 	if (m_fileId == -1)
 	{
-		m_fileId = GetTimeLong();
+		m_fileId = GetTimeLongByDHMS();
 	}
 	char fileId[MAX_256_LEN];
 	sprintf(fileId, "%lu", m_fileId);

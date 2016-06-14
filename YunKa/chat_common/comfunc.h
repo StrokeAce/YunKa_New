@@ -55,6 +55,8 @@ string GetTimeByYMDAndHMS(unsigned long ntime);
 //获得当前的系统时间 YY-MM-DD HH:MM:SS
 unsigned long GetTimeLong();
 
+unsigned long GetTimeLongByDHMS();
+
 // MM-DD HH:MM:SS
 string GetTimeString();
 
