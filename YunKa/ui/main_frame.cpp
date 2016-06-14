@@ -213,7 +213,12 @@ LRESULT CMainFrame::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 LRESULT CMainFrame::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
 
-	if (uMsg == ON_AFTER_CREATED)
+	if (uMsg == WM_SCREEN_CAPTURE_SUCCED) //截图完成后的消息操作
+	{
+		OnCtrlVEvent();
+	}
+
+	else if (uMsg == ON_AFTER_CREATED)
 	{
 		string msg = *(string*)wParam;
 

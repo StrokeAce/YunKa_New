@@ -9,7 +9,9 @@
 
 
 
-#define   WM_MENU_START                  WM_USER+300
+#define   WM_MENU_START                  WM_USER+3000
+
+#define   WM_SCREEN_CAPTURE_SUCCED       WM_USER+3200
 
 
 
