@@ -482,3 +482,22 @@ void ClearEditImageData(unsigned long id, WCHAR *name)
 {
 	gSavedImageMap.clear();
 }
+
+// _T("%Y-%m-%d %H:%M:%S")
+char *FormatTime(time_t lTime, char *lpFmt)
+{
+	struct tm * lpTimeInfo;
+
+	lpTimeInfo = localtime(&lTime);
+
+	sprintf(lpFmt, "%d-%02d-%02d %02d:%02d:%02d",
+		lpTimeInfo->tm_year+1900,
+		lpTimeInfo->tm_mon+1,
+		lpTimeInfo->tm_mday,
+		lpTimeInfo->tm_hour,
+		lpTimeInfo->tm_min,
+		lpTimeInfo->tm_sec);
+
+
+	return lpFmt;
+}

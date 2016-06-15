@@ -15,6 +15,7 @@
 #include "user_list.h"
 
 
+
 #define MID_MANAGER_BUTTON_NUM    15
 #define MAX_PATH_LENGTH           1024
 
@@ -217,6 +218,8 @@ public:
 	void CMainFrame::SetHandler();
 	USER_TYPE  CMainFrame::GetSendUserType(unsigned long id);
 	void CMainFrame::CheckIdForUerOrWebuser(unsigned long id, CWebUserObject **pWebUser, CUserObject **pUser);
+	string CMainFrame::CreateClientInfoHtml(WxUserInfo* pWxUser);
+
 
 	void AddToMsgList(CUserObject *pUser, string strMsg, string strTime, int userType = MSG_FROM_WEBUSER,
 		int msgType = MSG_TYPE_SYS, int msgDataType = MSG_DATA_TYPE_TEXT, string msgId = "");

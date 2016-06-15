@@ -1,7 +1,6 @@
 ﻿#include "../stdafx.h"
 #include "main_frame.h"
 #include "login_wnd.h"
-#include "global_setting_define.h"
 #include "ui_menu.h"
 #include "ui_common/common_utility.h"
 
@@ -1487,6 +1486,7 @@ void CMainFrame::RecvOffline(CUserObject* pUser)
 		if (m_onlineNodeMap.size() > 0)
 		{
 			iter = m_onlineNodeMap.end();
+			iter--;
 
 			UserListUI::Node* mapNode = iter->second;
 			index = pUserList->GetNodeIndex(mapNode);
@@ -1785,13 +1785,10 @@ void CMainFrame::OnManagerButtonEvent(TNotifyUI& msg)
 
 void CMainFrame::ShowMySelfSendMsg(string strMsg, MSG_DATA_TYPE msgType)
 {
-	string            headPath = "";
 	unsigned long     userId = 0;
 	CCodeConvert      f_covet;
-	char tempStr[256] = {0};
 	char strJsCode[MAX_1024_LEN] = { 0 };
-	string  name, msg ;
-	string defaultHead;
+	string  name, msg;
 
 	if (strMsg.empty())
 	{
@@ -1799,14 +1796,7 @@ void CMainFrame::ShowMySelfSendMsg(string strMsg, MSG_DATA_TYPE msgType)
 		return;
 	}
 
-	int urlPos = strMsg.find("用户头像地址:");
-	int urlPos1 = strMsg.find("user_headimgurl:");
-	int urlPos2 = strMsg.find(">立即评价</a>");
-	if (urlPos > -1 || urlPos1 > -1 || urlPos2 > -1)
-	{
-		return;
-	}
-	string strName = m_mySelfInfo->UserInfo.nickname;	
+	string strName = m_mySelfInfo->UserInfo.nickname;
 	StringReplace(strName, "\\", "\\\\");
 	StringReplace(strName, "'", "&#039;");
 	StringReplace(strName, "\r\n", "<br>");
@@ -1817,24 +1807,11 @@ void CMainFrame::ShowMySelfSendMsg(string strMsg, MSG_DATA_TYPE msgType)
 	StringReplace(strMsg, "\r\n", "<br>");
 	f_covet.Gb2312ToUTF_8(msg, strMsg.c_str(), strMsg.length());
 
-	userId = m_mySelfInfo->UserInfo.uid;
-	defaultHead = FullPath("res\\headimage\\");
-	sprintf(tempStr,"%d.png",userId);
-	defaultHead += tempStr;
-
-	if (!_globalSetting.FindFileExist((char*)defaultHead.c_str()))
-	{
-		defaultHead = FullPath("res\\headimages\\default.png");
-	}
-
-	StringReplace(defaultHead, "\\", "/");
-	f_covet.Gb2312ToUTF_8(headPath, defaultHead.c_str(), defaultHead.length());
-
 	//组合消息
 	string msgTime = GetTimeByMDAndHMS(0);
 	string msgId = m_manager->GetMsgId();
 	sprintf(strJsCode, "AppendMsgToHistory('%d', '%d', '%s', '%s', '%s', '%lu', '%s', '%s', '%d'); ",
-		MSG_FROM_SELF, msgType, name.c_str(), msgTime.c_str(), msg.c_str(), userId, headPath.c_str(), msgId, MSG_FROM_CLIENT);
+		MSG_FROM_SELF, msgType, name.c_str(), msgTime.c_str(), msg.c_str(), userId, m_mySelfInfo->m_headPath.c_str(), msgId, MSG_FROM_CLIENT);
 
 	if (m_pListMsgHandler.isLoaded)
 	{
@@ -1887,6 +1864,11 @@ void CMainFrame::ShowRightOptionFrameView(int index)
 	CWebUserObject *pWebUser = NULL;
 	string strFrom, strEnd;
 	string strUrl;
+	CCodeConvert f_covet;
+	string msg;
+	char showMsg[1024] = {0};
+
+	string strURL;
 
 	//这里只判断 是不是访客用户 
 	pWebUser = m_manager->GetWebUserObjectByUid(m_curSelectId);
@@ -1896,7 +1878,6 @@ void CMainFrame::ShowRightOptionFrameView(int index)
 		LoadBrowser(NULL);
 		return;
 	}
-
 	int nTransFrom = -1;
 	if (pWebUser->m_bIsFrWX)
 	{
@@ -1907,116 +1888,111 @@ void CMainFrame::ShowRightOptionFrameView(int index)
 		nTransFrom = 1;
 	}
 
-	switch (index)
+	_globalSetting.GetCurTimeString(strFrom, strEnd, 7);
+	try
 	{
-	case TYPESELECT_INFO:
-		if (pWebUser->m_bIsGetInfo)
+		switch (index)
 		{
-			CCodeConvert f_covet;
-			string msg;
-			if (pWebUser->m_bIsFrWX)
+		case TYPESELECT_INFO:
+			if (pWebUser->m_bIsGetInfo)
 			{
-				// 微信用户信息
-				//CString html;
-				//CString content = CreateClientInfoHtml(pWebUser->m_pWxUserInfo);
-				//html.Format(Format_ClientInfo_Html, content, content.GetLength());
-				//f_covet.Gb2312ToUTF_8(msg, html, html.GetLength());
+				if (pWebUser->m_bIsFrWX)
+				{
+					// 微信用户信息
+					string content = CreateClientInfoHtml(pWebUser->m_pWxUserInfo);
+					f_covet.Gb2312ToUTF_8(msg, content.c_str(), content.length());
+				}
+				else
+				{
+					// web用户信息
+					f_covet.Gb2312ToUTF_8(msg, pWebUser->m_strInfoHtml.c_str(), pWebUser->m_strInfoHtml.length());
+				}
+				m_pVisitorRelatedHandler.handler->LoadString(msg);
 			}
 			else
 			{
-				// web用户信息
-				f_covet.Gb2312ToUTF_8(msg, pWebUser->m_strInfoHtml.c_str(), pWebUser->m_strInfoHtml.length());
+				m_pVisitorRelatedHandler.handler->LoadString(m_defaultUrlInfo.c_str());
+				if (pWebUser->m_bIsFrWX)
+				{
+					m_manager->SendGetWxUserInfo(pWebUser->webuserid, pWebUser->chatid);
+				}
 			}
-			m_pVisitorRelatedHandler.handler->LoadString(msg.c_str());
-		}
-		else
-		{
-			m_pVisitorRelatedHandler.handler->LoadString(m_defaultUrlInfo.c_str());
+			break;
+		case TYPESELECT_CLIENT:
+			_globalSetting.GetCurTimeString(strFrom, strEnd, 30);
+			if (m_manager->m_sysConfig->m_sStrServer == "tcp01.tq.cn" || m_manager->m_sysConfig->m_sStrServer == "211.151.52.48")//公网使用原来的链接
+			{
+				sprintf(showMsg, m_manager->m_initConfig.visitorpage_visitortail, pWebUser->chatid, pWebUser->webuserid, pWebUser->info.sid, 0, nTransFrom, strFrom.c_str(), strEnd.c_str(),/*pWebUser->floatadminuid*/ m_mySelfInfo->UserInfo.uid);		
+			}
+			else//公司内部使用新开发修改的链接
+			{	
+				sprintf(showMsg, m_manager->m_initConfig.visitorpage_visitortail, pWebUser->chatid, pWebUser->info.sid, 0, nTransFrom);
+				//strURL.Format(pApp->m_InitConfig.visitorpage_visitortail, pWebUser->chatid, pWebUser->info.sid, 0, nTransFrom);
+			}
+				strUrl = showMsg;
+				break;
+		case TYPESELECT_CHATID:
+			sprintf(showMsg, m_manager->m_initConfig.visitorpage_visitorbill, pWebUser->chatid, pWebUser->webuserid, pWebUser->info.sid, 0, 0, strFrom.c_str(), strEnd.c_str());
+			strUrl = showMsg;
+			break;
+		case TYPESELECT_CLIENTINFO:
+			//("http://vip.tq.cn/vip/visitorinfo.do?billid=%s&cuin=%lu&rand=%s&transtype=%d&transfrom=%lu&stime=%s&etime=%s")
+			//客户信息
+			if (m_manager->m_sysConfig->m_sStrServer == "tcp01.tq.cn" || m_manager->m_sysConfig->m_sStrServer == "211.151.52.48")
+				sprintf(showMsg, m_manager->m_initConfig.visitorpage_visitorinfo, pWebUser->chatid, pWebUser->webuserid, pWebUser->info.sid, 0, 0, strFrom.c_str(), strEnd.c_str(), pWebUser->info.sid);
+			else
+				sprintf(showMsg, m_manager->m_initConfig.visitorpage_visitorinfo, pWebUser->chatid, "", 0, 0, strFrom.c_str(), strEnd.c_str(), pWebUser->info.thirdid, pWebUser->info.sid);
+
+				//strURL.Format(pApp->m_InitConfig.visitorpage_visitorinfo, pWebUser->chatid, "", 0, 0, strFrom, strEnd, pWebUser->info.thirdid, pWebUser->info.sid);
+			strUrl = showMsg;
+			break;
+		case TYPESELECT_NOTICE:
+			//改成下订单
 			if (pWebUser->m_bIsFrWX)
 			{
-				//m_pFrame->GetWxUserInfo(pWebUser->webuserid, pWebUser->chatid);
+				sprintf(showMsg, m_manager->m_initConfig.visitorpage_visitororder, pWebUser->chatid, pWebUser->webuserid, pWebUser->info.sid, 0, 0, strFrom.c_str(), strEnd.c_str(), pWebUser->info.thirdid, pWebUser->m_sWxAppid, 0);
+				strUrl = showMsg;
+			}	
+			else
+			{
+				string strTmp = "<html><head>";
+				strTmp += STRING_HTML_META;
+				strTmp += STRING_HTML_BASE;
+				strTmp += STRING_HTML_STYLE;
+				strTmp += "</head><body>";
+				strTmp += "<div><p><span style=\"font - size:16px; color:#cccccc\">目前仅支持微信用户下订单！</span></p><div></body>";
+				f_covet.Gb2312ToUTF_8(msg, strTmp.c_str(), strTmp.length());
+				m_pVisitorRelatedHandler.handler->LoadString(msg);
 			}
-		}
-		break;
-	case TYPESELECT_CLIENT:
-		_globalSetting.GetCurTimeString(strFrom, strEnd, 30);
-		//globalGetCurTimeString(strFrom, strEnd, 30);
-		if (m_manager->m_sysConfig->m_sStrServer == "tcp01.tq.cn" || m_manager->m_sysConfig->m_sStrServer == "211.151.52.48")//公网使用原来的链接
-		{
+			break;
 
-		}	
-			//strURL.Format(pApp->m_InitConfig.visitorpage_visitortail, pWebUser->chatid, pWebUser->webuserid, pWebUser->info.sid, 0, nTransFrom, strFrom, strEnd,/*pWebUser->floatadminuid*/ pApp->m_UserInfo.UserInfo.uid);
-		else//公司内部使用新开发修改的链接
-			//strURL.Format(pApp->m_InitConfig.visitorpage_visitortail, pWebUser->chatid, pWebUser->info.sid, 0, nTransFrom);
-
-		break;
-	case TYPESELECT_CHATID:
-
-		//回话订单
-		//strURL.Format(pApp->m_InitConfig.visitorpage_visitorbill, pWebUser->chatid, pWebUser->webuserid, pWebUser->info.sid, 0, 0, strFrom, strEnd);
-
-		break;
-	case TYPESELECT_CLIENTINFO:
-
-		//客户信息
-		//if (pApp->m_SysConfig.strServer == "tcp01.tq.cn" || pApp->m_SysConfig.strServer == "211.151.52.48")
-		//	strURL.Format(pApp->m_InitConfig.visitorpage_visitorinfo, pWebUser->chatid, pWebUser->webuserid, pWebUser->info.sid, 0, 0, strFrom, strEnd, pWebUser->info.sid);
-		//else
-		//	strURL.Format(pApp->m_InitConfig.visitorpage_visitorinfo, pWebUser->chatid, "", 0, 0, strFrom, strEnd, pWebUser->info.thirdid, pWebUser->info.sid);
-
-
-		break;
-
-	case TYPESELECT_NOTICE:
-
-
-#if 0
-		//改成下订单
-		if (pWebUser->m_bIsFrWX)
-			strURL.Format(pApp->m_InitConfig.visitorpage_visitororder, pWebUser->chatid, pWebUser->webuserid, pWebUser->info.sid, 0, 0, strFrom, strEnd, pWebUser->info.thirdid, pWebUser->m_sWxAppid, 0);
-		else
-		{
-			CCodeConvert f_covet;
-			strTmp = "<html><head>";
-			strTmp += STRING_HTML_META;
-			strTmp += STRING_HTML_BASE;
-			strTmp += STRING_HTML_STYLE;
-			strTmp += "</head><body>";
-			strTmp += "<div><p><span style=\"font - size:16px; color:#cccccc\">目前仅支持微信用户下订单！</span></p><div></body>";
-			string msg;
-			f_covet.Gb2312ToUTF_8(msg, strTmp, strTmp.GetLength());
-			m_pVisitorRelatedHandler.handler->LoadString(msg.c_str());
-		}
-#endif
-
-
-		break;
-
-	case TYPESELECT_ORDER:
-
+		case TYPESELECT_ORDER:
 		//查订单
-		//strURL.Format(pApp->m_InitConfig.visitorpage_visitororder, pWebUser->chatid, pWebUser->webuserid, pWebUser->info.sid, 0, 0, strFrom, strEnd, pWebUser->info.thirdid, pWebUser->m_sWxAppid, 1);
+			//strURL.Format(pApp->m_InitConfig.visitorpage_visitororder, pWebUser->chatid, pWebUser->webuserid, pWebUser->info.sid, 0, 0, strFrom, strEnd, pWebUser->info.thirdid, pWebUser->m_sWxAppid, 1);
+			sprintf(showMsg, m_manager->m_initConfig.visitorpage_visitororder, pWebUser->chatid, pWebUser->webuserid, pWebUser->info.sid, 0, 0, strFrom.c_str(), strEnd.c_str(), pWebUser->info.thirdid, pWebUser->m_sWxAppid, 1);
+			strUrl = showMsg;
 
 
-		break;
-	default:
-		break;
+			break;
+		default:
+			break;
+		}
+
+	}
+	catch (...)
+	{
+		strURL.empty();
 	}
 
-	if (strUrl.empty())
+	if (!strUrl.empty())
 	{
 		if (strUrl != "about:blank")
 		{
 			strUrl += "&token=";
-			//strURL += m_manager->GetAuthTokenString();
+			strURL += m_manager->m_login->m_szAuthtoken;
 		}
-
-		string url;
-		//CCodeConvert convert;
-		//g_WriteLog.WriteLog(C_LOG_TRACE, "OnEMTabDown--SelectType:%d,url:%s", cmd, strURL);
 		LoadBrowser((char*)strUrl.c_str());
 	}
-
 }
 
 void CMainFrame::ShowClearMsg()
@@ -2472,4 +2448,178 @@ void CMainFrame::CheckIdForUerOrWebuser(unsigned long id,CWebUserObject **pWebUs
 		*pWebUser = m_manager->GetWebUserObjectByUid(id);
 	}
 
+}
+
+
+
+string CMainFrame::CreateClientInfoHtml(WxUserInfo* pWxUser)
+{
+	char itemFormat[1024] = "<tr><td colspan = 2 width = 100%%><LI><SPAN class = clientnamefont1>%s: </SPAN><SPAN class = clientfont1>%s</SPAN></LI></td></tr>";
+	string htmlContent = "信息未获取到";
+	char htmlitem[1024] = { 0 };
+
+	CCodeConvert vConvert;
+	string getInfo;
+
+	if (pWxUser != NULL)
+	{
+		htmlContent = "";
+		if (!pWxUser->nickname.empty())
+		{
+			if (pWxUser->LanguageType == LANGUAGE_UTF8)
+			{
+
+				vConvert.UTF_8ToAnsi(getInfo, pWxUser->nickname.c_str(), pWxUser->nickname.length());
+				sprintf(htmlitem, itemFormat, "昵称", getInfo.c_str());
+				htmlContent = htmlitem;
+			}
+			else
+			{
+				sprintf(htmlitem,itemFormat, "昵称", pWxUser->nickname.c_str());
+				htmlContent = htmlitem;
+			}
+		}
+
+		if (pWxUser->sex == 1)
+		{
+			sprintf(htmlitem,itemFormat, "性别", "男");
+			htmlContent += htmlitem;
+		}
+		else if (pWxUser->sex == 2)
+		{
+			sprintf(htmlitem,itemFormat, "性别", "女");
+			htmlContent += htmlitem;
+		}
+		else
+		{
+			sprintf(htmlitem,itemFormat, "性别", "未知");
+			htmlContent += htmlitem;
+		}
+
+		if (!pWxUser->country.empty())
+		{
+			if (pWxUser->LanguageType == LANGUAGE_UTF8)
+			{
+				vConvert.UTF_8ToAnsi(getInfo, pWxUser->country.c_str(), pWxUser->country.length());
+				sprintf(htmlitem, itemFormat, "国家", getInfo.c_str());
+				htmlContent += htmlitem;
+			}
+			else
+			{
+				sprintf(htmlitem, itemFormat, "国家", pWxUser->country.c_str());
+				htmlContent += htmlitem;
+			}
+		}
+		else
+		{
+			sprintf(htmlitem, itemFormat, "国家", "未知");
+			htmlContent += htmlitem;
+		}
+
+		if (!pWxUser->province.empty())
+		{
+			if (pWxUser->LanguageType == LANGUAGE_UTF8)
+			{
+				vConvert.UTF_8ToAnsi(getInfo, pWxUser->province.c_str(), pWxUser->province.length());
+				sprintf(htmlitem, itemFormat, "省份", getInfo.c_str());
+				htmlContent += htmlitem;
+			}
+			else
+			{
+				sprintf(htmlitem, itemFormat, "省份", pWxUser->province.c_str());
+				htmlContent += htmlitem;
+			}
+		}
+		else
+		{
+			sprintf(htmlitem, itemFormat, "省份", "未知");
+			htmlContent += htmlitem;
+		}
+
+		if (!pWxUser->city.empty())
+		{
+			if (pWxUser->LanguageType == LANGUAGE_UTF8)
+			{
+				vConvert.UTF_8ToAnsi(getInfo, pWxUser->city.c_str(), pWxUser->city.length());
+				sprintf(htmlitem, itemFormat, "城市",getInfo.c_str());
+				htmlContent += htmlitem;
+			}
+			else
+			{
+				sprintf(htmlitem, itemFormat, "城市", pWxUser->city.c_str());
+				htmlContent += htmlitem;
+			}
+		}
+		else
+		{
+			sprintf(htmlitem, itemFormat, "城市", "未知");
+			htmlContent += htmlitem;
+		}
+
+		{
+			char subscribe_time[256];
+			FormatTime(pWxUser->subscribe_time, subscribe_time);
+			sprintf(htmlitem, itemFormat, "关注时间", subscribe_time);
+			htmlContent += htmlitem;
+		}
+
+		if (!pWxUser->language.empty())
+		{
+			sprintf(htmlitem, itemFormat, "语言", pWxUser->language.c_str());
+			htmlContent += htmlitem;
+		}
+		else
+		{
+			sprintf(htmlitem, itemFormat, "语言", "未知");
+			htmlContent += htmlitem;
+		}
+
+		if (!pWxUser->openid.empty())
+		{
+			sprintf(htmlitem, itemFormat, "标识", pWxUser->openid.c_str());
+			htmlContent += htmlitem;
+		}
+		else
+		{
+			sprintf(htmlitem, itemFormat, "标识", "未知");
+			htmlContent += htmlitem;
+		}
+
+		if (!pWxUser->fromwxname.empty())
+		{
+			sprintf(htmlitem, itemFormat, "来源", pWxUser->fromwxname.c_str());
+			htmlContent += htmlitem;
+		}
+		else
+		{
+			sprintf(htmlitem, itemFormat, "来源", "未知");
+			htmlContent += htmlitem;
+		}
+		if (!pWxUser->ullCometimes >= 0)
+		{
+			char strCometimes[32] = {0};;
+			sprintf(strCometimes,"%u", pWxUser->ullCometimes);
+			sprintf(htmlitem, itemFormat, "来访次数", strCometimes);
+			htmlContent += htmlitem;
+		}
+		else
+		{
+			sprintf(htmlitem, itemFormat, "来访次数", "未知");
+			htmlContent += htmlitem;
+		}
+
+		if (!pWxUser->headimgurl.empty())
+		{
+			char itemFormat1[1024] = "<tr><td colspan = 2><LI><SPAN class = clientnamefont1>%s: </SPAN><br><img src=\"%s\" width = 320 height=320></td></tr>";
+		    sprintf(htmlitem, itemFormat1, "头像", pWxUser->headimgurl.c_str());
+			htmlContent += htmlitem;
+		}
+		else
+		{
+			sprintf(htmlitem, itemFormat, "头像", "未知");
+		}
+
+	}
+
+	return htmlContent;
 }

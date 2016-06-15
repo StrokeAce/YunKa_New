@@ -8,6 +8,7 @@
 #include "global_setting_define.h"
 
 
+
 class CGlobalSetting
 {
 public:
@@ -20,9 +21,20 @@ public:
 
 
 	void CGlobalSetting::GetCurTimeString(string &strFrom, string &strEnd, int nday);
+
+
+
+
+
+
+
+
+
+public:
 	//用户名和密码
 	char m_userName[32];
 	char m_passWord[32];
+
 
 };
 

@@ -51,4 +51,6 @@ extern void ClearEditImageData(unsigned long id, WCHAR *name);
 
 extern void ReplaceImageId(string &msg);
 
+extern char *FormatTime(time_t lTime, char *lpFmt);
+
 #endif
