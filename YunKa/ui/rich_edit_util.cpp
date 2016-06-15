@@ -981,6 +981,14 @@ void RichEdit_GetText2(ITextServices * pTextServices, tstring& strText)
 		}
 	}
 
+
+	if (strText.length() == 0)
+	{
+		pRichEditOle->Release();
+		return;
+	}
+	
+
 	if (nPos < (int)strOrgText.size())
 	{
 		strTemp = strOrgText.substr(nPos);
