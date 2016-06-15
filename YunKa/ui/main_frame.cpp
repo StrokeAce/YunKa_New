@@ -1495,9 +1495,19 @@ void CMainFrame::RecvOffline(CUserObject* pUser)
 			index = pUserList->GetNodeIndex(mapNode);
 		}
 		else
-		*/
 		index = pUserList->GetNodeIndex(pMySelfeNode);
+		*/
 
+		if (m_offlineNodeMap.size() > 0)
+		{
+			iter = m_offlineNodeMap.end();
+			iter--;
+
+			UserListUI::Node* mapNode = iter->second;
+			index = pUserList->GetNodeIndex(mapNode);
+		}
+		else
+		    index = pUserList->GetNodeIndex(pMySelfeNode);
 
 		//再添加
 		AddHostUserList(pUserList, pUser, index);
