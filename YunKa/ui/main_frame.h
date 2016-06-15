@@ -211,7 +211,7 @@ public:
 	void CMainFrame::MoveAndRestoreMsgWnd(int type);
 	void CMainFrame::InitLibcef(void);
 	void CMainFrame::LoadBrowser(char* url);
-	void CMainFrame::ShowRightOptionFrameView(int index);
+	void CMainFrame::ShowRightOptionFrameView(unsigned long id);
 	void CMainFrame::ShowOptionTab1FrameView();
 	void CMainFrame::ShowClearMsg();
 	void CMainFrame::ChangeShowUserMsgWnd(unsigned long id);
@@ -295,7 +295,7 @@ private:
 	unsigned long m_savedClickId;
 
 	string m_facePathUrl;
-
+	int  m_curSelectOptionBtn;
 	unsigned long m_savedImageIndex;
 
 };

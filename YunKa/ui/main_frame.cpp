@@ -47,6 +47,7 @@ CMainFrame::CMainFrame(CChatManager* manager) :m_manager(manager)
 	f_covet.Gb2312ToUTF_8(m_defaultUrlInfo, strTmp.c_str(), strTmp.length());
 	
 	m_savedImageIndex = 1000;
+	m_curSelectOptionBtn = 0;
 }
 
 
@@ -728,8 +729,8 @@ void CMainFrame::OnSelectChanged(TNotifyUI &msg)
 				if (pTabControl && pTabControl->GetCurSel() != i)
 				{
 					pTabControl->SelectItem(i);
-					
-					ShowRightOptionFrameView(i);
+					m_curSelectOptionBtn = i;
+					ShowRightOptionFrameView(m_curSelectId);
 					break;
 				}
 			}
@@ -759,10 +760,13 @@ void CMainFrame::OnItemClick(TNotifyUI &msg)
 				//
 				if (m_curSelectId != id)//切换聊天对象显示 
 				{
-					ChangeShowUserMsgWnd(id);
-				}
 
+					ChangeShowUserMsgWnd(id);
+
+					ShowRightOptionFrameView(id);
+				}
 				m_curSelectId = id;
+
 				map<unsigned long, UserListUI::Node*>::iterator iter = m_waitVizitorMap.find(id);
 				if (iter != m_waitVizitorMap.end())
 				{
@@ -1481,9 +1485,8 @@ void CMainFrame::RecvOffline(CUserObject* pUser)
 		m_onlineNodeMap.erase(iter);
 
 
-		//index = pUserList->GetNodeIndex(pMySelfeNode);// +pUserList->GetNodeIndex(pWaitForStart);
-
-		if (m_onlineNodeMap.size() > 0)
+	
+		/*if (m_onlineNodeMap.size() > 0)
 		{
 			iter = m_onlineNodeMap.end();
 			iter--;
@@ -1492,7 +1495,8 @@ void CMainFrame::RecvOffline(CUserObject* pUser)
 			index = pUserList->GetNodeIndex(mapNode);
 		}
 		else
-			index = pUserList->GetNodeIndex(pMySelfeNode);
+		*/
+		index = pUserList->GetNodeIndex(pMySelfeNode);
 
 
 		//再添加
@@ -1859,7 +1863,7 @@ void CMainFrame::ShowOptionTab1FrameView()
 }
 
 
-void CMainFrame::ShowRightOptionFrameView(int index)
+void CMainFrame::ShowRightOptionFrameView(unsigned long id)
 {
 	CWebUserObject *pWebUser = NULL;
 	string strFrom, strEnd;
@@ -1867,13 +1871,12 @@ void CMainFrame::ShowRightOptionFrameView(int index)
 	CCodeConvert f_covet;
 	string msg;
 	char showMsg[1024] = {0};
-
-	string strURL;
+	int index = m_curSelectOptionBtn;
 
 	//这里只判断 是不是访客用户 
-	pWebUser = m_manager->GetWebUserObjectByUid(m_curSelectId);
+	pWebUser = m_manager->GetWebUserObjectByUid(id);
 
-	if (m_curSelectId == 0 || pWebUser == NULL || !m_pVisitorRelatedHandler.isCreated)
+	if (id == 0 || pWebUser == NULL || !m_pVisitorRelatedHandler.isCreated)
 	{
 		LoadBrowser(NULL);
 		return;
@@ -1893,6 +1896,10 @@ void CMainFrame::ShowRightOptionFrameView(int index)
 	{
 		switch (index)
 		{
+		case TYPESELECT_MSG:
+
+			return;
+
 		case TYPESELECT_INFO:
 			if (pWebUser->m_bIsGetInfo)
 			{
@@ -1981,7 +1988,7 @@ void CMainFrame::ShowRightOptionFrameView(int index)
 	}
 	catch (...)
 	{
-		strURL.empty();
+		strUrl.empty();
 	}
 
 	if (!strUrl.empty())
@@ -1989,7 +1996,7 @@ void CMainFrame::ShowRightOptionFrameView(int index)
 		if (strUrl != "about:blank")
 		{
 			strUrl += "&token=";
-			strURL += m_manager->m_login->m_szAuthtoken;
+			strUrl += m_manager->m_login->m_szAuthtoken;
 		}
 		LoadBrowser((char*)strUrl.c_str());
 	}
