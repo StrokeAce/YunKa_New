@@ -21,7 +21,7 @@
 					<Button name="screenshotsbtn" width="20" height="20" maxheight="20" maxwidth="24" bkimage="file='mainframe\\icon_screenshots.png' dest='2,0,22,20'" hotimage="file='mainframe\\aio_toolbar_highligh.png' corner='3,3,3,3'" pushedimage="file='mainframe\\aio_toolbar_down.png' corner='3,3,3,3'"  />
 <Control width="5" />
 
- <Button name="voiceSendBtn" width="20" height="20" maxheight="20" maxwidth="24" bkimage="file='mainframe\\music.png' dest='0,0,20,20'" hotimage="file='mainframe\\aio_toolbar_highligh.png' corner='3,3,3,3'" pushedimage="file='mainframe\\aio_toolbar_down.png' corner='3,3,3,3'"  />
+ <Button name="voiceSendBtn" width="20" height="20" maxheight="20" maxwidth="24" bkimage="file='mainframe\\icon_voice.png' dest='0,0,20,20'" hotimage="file='mainframe\\aio_toolbar_highligh.png' corner='3,3,3,3'" pushedimage="file='mainframe\\aio_toolbar_down.png' corner='3,3,3,3'"  />
 					
 </HorizontalLayout>
 
