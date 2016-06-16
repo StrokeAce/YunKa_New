@@ -12,15 +12,17 @@
 
 <!--  中间按钮显示栏 -->
 <!--  HorizontalLayout height="25" bkcolor="#FFFCFCFC" -->
-<HorizontalLayout  name="HorizontalLayoutUI_MiddleButtonBar"   height="27" inset="2,3,2,4" bkimage="file='mainframe\\MidToolBarBg.png'">
+<HorizontalLayout  name="HorizontalLayoutUI_MiddleButtonBar"   height="27" inset="2,3,2,4"       bkimage="file='mainframe\\MidToolBarBg.png'">
 
 <Option name="btnFont" width="24" height="20" maxheight="20" maxwidth="24" bkimage="file='mainframe\\icon_font.png' dest='2,0,22,20'" hotimage="file='mainframe\\aio_toolbar_highligh.png' corner='3,3,3,3'" selectedimage="file='mainframe\\aio_toolbar_down.png' corner='3,3,3,3'"  />
 					<Control width="5"/>
           <Option name="btnFace" width="24" height="20" maxheight="20" maxwidth="24" bkimage="file='mainframe\\icon_face.png' dest='2,0,22,20'" hotimage="file='mainframe\\aio_toolbar_highligh.png' corner='3,3,3,3'" selectedimage="file='mainframe\\aio_toolbar_down.png' corner='3,3,3,3'"  />
 					<Control width="5"/>
 					<Button name="screenshotsbtn" width="20" height="20" maxheight="20" maxwidth="24" bkimage="file='mainframe\\icon_screenshots.png' dest='2,0,22,20'" hotimage="file='mainframe\\aio_toolbar_highligh.png' corner='3,3,3,3'" pushedimage="file='mainframe\\aio_toolbar_down.png' corner='3,3,3,3'"  />
+<Control width="5" />
 
-
+ <Button name="voiceSendBtn" width="20" height="20" maxheight="20" maxwidth="24" bkimage="file='mainframe\\music.png' dest='0,0,20,20'" hotimage="file='mainframe\\aio_toolbar_highligh.png' corner='3,3,3,3'" pushedimage="file='mainframe\\aio_toolbar_down.png' corner='3,3,3,3'"  />
+					
 </HorizontalLayout>
 
 <HorizontalLayout  name="HorizontalLayoutUI_InputRichEdit"  bkcolor="#FFFEFDFC"  inset="5,0,0,0" >
