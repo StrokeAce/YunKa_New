@@ -3,21 +3,17 @@
 #include "login_wnd.h"
 #include "ui_menu.h"
 #include "ui_common/common_utility.h"
-
 #include "IImageOle.h"
 #include "ole_helper.h"
-
 #include "chat_common\comfunc.h"
 #include "utils\code_convert.h"
 #include "menu_wnd.h"
-
 #include <WinUser.h>
-
-
 #include "jpeg_file/JpegFile.h"
 
 #include <GdiPlus.h>
-//using namespace Gdiplus;
+
+
 #pragma comment(lib, "gdiplus.lib")
 
 
@@ -226,7 +222,10 @@ LRESULT CMainFrame::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
 		    m_pListMsgHandler.isCreated = true;
 
 		if (Handler_VisitorRelated == msg)
-		    m_pVisitorRelatedHandler.isCreated = true;
+		{
+			m_pVisitorRelatedHandler.isCreated = true;
+			m_pVisitorRelatedHandler.handler->ShowBrowser(SW_HIDE);
+		}
 	}
 	else if (uMsg == ON_AFTER_LOAD)
 	{
@@ -236,7 +235,10 @@ LRESULT CMainFrame::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
 		   m_pListMsgHandler.isLoaded = true;
 
 		if (Handler_VisitorRelated == msg)
-		    m_pVisitorRelatedHandler.isLoaded = true;
+		{
+			m_pVisitorRelatedHandler.isLoaded = true;
+		}
+		   
 	}
 
 	if (uMsg == WM_MENU_START)
@@ -506,6 +508,8 @@ void CMainFrame::InitLibcef(void)
 		padRect = ShowMsgWnd->GetPadding();
 
 		m_pVisitorRelatedHandler.handler->CreateBrowser(this->m_hWnd, rect, "about:blank", Handler_VisitorRelated);
+
+		m_pVisitorRelatedHandler.handler->ShowBrowser(SW_HIDE);
 	
 	}
 
@@ -1883,6 +1887,14 @@ void CMainFrame::ShowRightOptionFrameView(unsigned long id)
 	char showMsg[1024] = {0};
 	int index = m_curSelectOptionBtn;
 
+	if (index == 0)
+	{
+		m_pVisitorRelatedHandler.handler->ShowBrowser(SW_HIDE);
+		return;
+	}
+
+	m_pVisitorRelatedHandler.handler->ShowBrowser(SW_SHOW);
+
 	//这里只判断 是不是访客用户 
 	pWebUser = m_manager->GetWebUserObjectByUid(id);
 
@@ -2640,3 +2652,5 @@ string CMainFrame::CreateClientInfoHtml(WxUserInfo* pWxUser)
 
 	return htmlContent;
 }
+
+
