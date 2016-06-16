@@ -22,7 +22,7 @@ CMainFrame::CMainFrame(CChatManager* manager) :m_manager(manager)
 {
 
 	//初始化
-	m_pFontBtn = m_pFaceBtn = m_pScreenBtn = pSendMsgBtn = NULL;
+	m_pFontBtn = m_pFaceBtn = m_pScreenBtn = pSendMsgBtn = m_pVoiceBtn = NULL;
 	m_pSendEdit = NULL;
 
 	pOnlineNode = pWaitForStart = pMySelfeNode = NULL;
@@ -175,11 +175,13 @@ LRESULT CMainFrame::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 //	if (uMsg == WM_LBUTTONDBLCLK)
 //		OnLButtonDblClk(uMsg, wParam, lParam);
 
-	if ((m_pSendEdit != NULL) && m_pSendEdit->IsFocused()
-		&& (uMsg == WM_KEYDOWN) && (wParam == 'V') && (lParam & VK_CONTROL))	// 发送消息框的Ctrl+V消息
+	if ((uMsg == WM_KEYDOWN) && (wParam == 'V') && (lParam & VK_CONTROL))	// 发送消息框的Ctrl+V消息	
 	{
-		OnCtrlVEvent();
-		return TRUE;
+		if ((m_pSendEdit != NULL) && m_pSendEdit->IsFocused())
+		{
+			OnCtrlVEvent();
+			return TRUE;
+		}
 	}
 
 //	if (uMsg == WM_NOTIFY && EN_PASTE == ((LPNMHDR)lParam)->code)
@@ -540,6 +542,8 @@ void CMainFrame::OnPrepare(TNotifyUI& msg)
 	m_pScreenBtn = static_cast<CButtonUI*>(m_PaintManager.FindControl(_T("screenshotsbtn")));
 	pSendMsgBtn = static_cast<CButtonUI*>(m_PaintManager.FindControl(_T("sendMsgBtn")));
 
+	m_pVoiceBtn = static_cast<CButtonUI*>(m_PaintManager.FindControl(_T("voiceSendBtn")));
+
 
 	//上层管理按钮 设置初始状态
 	for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
@@ -655,6 +659,8 @@ void CMainFrame::OnClick(TNotifyUI& msg)
 		OnBtnScreen(msg);
 	else  if (msg.pSender == pSendMsgBtn)
 		OnBtnSendMessage(msg);
+	else if (msg.pSender == m_pVoiceBtn)
+		OnBtnVoice(msg);
 
 	if (msg.pSender->GetName() == DEF_CLOSE_WND_BUTTON)
 	{
@@ -2654,3 +2660,9 @@ string CMainFrame::CreateClientInfoHtml(WxUserInfo* pWxUser)
 }
 
 
+
+void CMainFrame::OnBtnVoice(TNotifyUI& msg)
+{
+
+
+}

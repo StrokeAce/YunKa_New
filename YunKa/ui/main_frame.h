@@ -183,6 +183,7 @@ public:
 	void OnBtnFont(TNotifyUI& msg);
 	void OnBtnFace(TNotifyUI& msg);
 	void OnBtnScreen(TNotifyUI& msg);
+	void OnBtnVoice(TNotifyUI& msg);
 	void OnManagerButtonEvent(TNotifyUI& msg);
 	void OnFaceCtrlSel(UINT uMsg, WPARAM wParam, LPARAM lParam);
 	void OnBtnSendMessage(TNotifyUI& msg);
@@ -267,7 +268,7 @@ private:
 	CSmallMenu m_frameSmallMenu;
 
 
-	CButtonUI * m_pFontBtn, *m_pFaceBtn, *m_pScreenBtn, *pSendMsgBtn;
+	CButtonUI * m_pFontBtn, *m_pFaceBtn, *m_pScreenBtn, *pSendMsgBtn,*m_pVoiceBtn;
 	CFaceSelDlg m_faceSelDlg;
 	CFaceList  m_faceList;
 
@@ -275,8 +276,6 @@ private:
 	ManagerButtonStruct m_pManagerBtn[MID_MANAGER_BUTTON_NUM];
 
 	//CRichEditUI2    *m_pSendEdit;
-
-
 	CRichEditUI* m_pSendEdit;
 
 
