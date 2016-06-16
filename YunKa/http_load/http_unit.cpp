@@ -437,6 +437,7 @@ CleanUp:
 CHttpLoad::CHttpLoad()
 {
 	m_curl = NULL;
+	m_bSuccess = true;
 	Init();
 }
 
@@ -477,13 +478,18 @@ bool CHttpLoad::HttpLoad(const string& szUrl, const string& szReffer, int reques
 		
 	}
 
-	if (cret == CURLE_OK)
+	if (cret == CURLE_OK && m_bSuccess)
 	{
 		g_WriteLog.WriteLog(C_LOG_TRACE, "httpupload [success]:%s", szUrl.c_str());
 		return true;
 	}
 	else
 	{
+		if (resultCode.empty())
+		{
+			resultCode = m_errorCode;
+		}
+		
 		g_WriteLog.WriteLog(C_LOG_ERROR, "httpupload [failed]:%s", curl_easy_strerror(cret));
 		return false;
 	}
@@ -549,7 +555,8 @@ bool CHttpLoad::SetHeadOptLoad(const string szUrl, const string szReffer, int re
 		// ÏÂÔØ·½Ê½	
 		if (szFilePath)
 		{
-			curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, szFilePath);
+			m_filePath = szFilePath;
+			curl_easy_setopt(m_curl, CURLOPT_WRITEDATA, (void*)this);
 			curl_easy_setopt(m_curl, CURLOPT_WRITEFUNCTION, DownLoadFunc);
 		}
 		else
@@ -572,12 +579,21 @@ size_t CHttpLoad::WriteFunc(char *data, size_t size, size_t nmemb, void* writerD
 	return len;
 }
 
-size_t CHttpLoad::DownLoadFunc(char *data, size_t size, size_t nmemb, void* writerData)
+size_t CHttpLoad::DownLoadFunc(char *data, size_t size, size_t nmemb, void* pThis)
 {
-	if (writerData == NULL)
+	if (pThis == NULL)
 		return 0;
+
+	string sData = data;
+	int pos = sData.find("errcode");
+	if (pos > 0)
+	{
+		((CHttpLoad*)pThis)->m_bSuccess = false;
+		((CHttpLoad*)pThis)->m_errorCode = sData;
+	}
+	
 	size_t len = size*nmemb;
-	FILE* pFile = (FILE*)writerData;
+	FILE* pFile = (FILE*)((CHttpLoad*)pThis)->m_filePath;
 	if (pFile)
 	{
 		fwrite(data, size, nmemb, pFile);

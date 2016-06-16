@@ -265,7 +265,7 @@ void CChatVisitor::SolveVisitorSCRIPTMSGModiName(char *pInitBuff)
 	}
 
 	char msg[MAX_256_LEN];
-	sprintf(msg, "%s 客服 %s(%u) 将访客名称改为 %s", GetTimeByMDAndHMS(0), szKefuNmae, uKefu, newname);
+	sprintf(msg, "%s 客服 %s(%u) 将访客名称改为 %s", GetTimeByMDAndHMS(0).c_str(), szKefuNmae, uKefu, newname);
 
 	strncpy(pWebUser->info.name, newname, MAX_USERNAME_LEN);
 	if (strlen(pWebUser->info.name) < 2)
@@ -300,7 +300,7 @@ void CChatVisitor::SolveVisitorSCRIPTMSGTalkBegin(char *pInitBuff)
 	}
 
 	char msg[MAX_256_LEN];
-	sprintf(msg, "%s 客服 %s(%u) 已与访客建立通话", GetTimeByMDAndHMS(0), szKefuNmae, uKefu);
+	sprintf(msg, "%s 客服 %s(%u) 已与访客建立通话", GetTimeByMDAndHMS(0).c_str(), szKefuNmae, uKefu);
 
 	//重绘
 	if (pkefu != NULL&&pkefu->m_bFriend)

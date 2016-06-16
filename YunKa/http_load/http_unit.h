@@ -54,6 +54,7 @@ public:
 
 	bool Init();
 	void Cleanup();
+
 private:
 
 	bool SetHeadOptLoad(
@@ -69,6 +70,9 @@ private:
 
 private:
 	CURL *m_curl;
+	bool m_bSuccess;
+	void* m_filePath;
+	string m_errorCode;
 };
 
 #endif

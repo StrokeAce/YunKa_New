@@ -478,6 +478,10 @@ public:
 
 	void AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, string msgId, MSG_TYPE msgType, MSG_DATA_TYPE msgDataType,
 		string msgContent, string msgTime = "", CUserObject* pAssistUser = NULL, WxMsgBase* msgContentWx = NULL, bool isSuccess=true);
+	
+	string ReplaceToken(string srcStr, string replaceStr);
+
+	void AddToken(WxUserInfo* userInfo,string token);
 
 public:
 	int						m_nOnLineStatus;		// 是否在线,对于im服务器而言
@@ -504,7 +508,6 @@ public:
 	MapUsers				m_mapUsers;				// 协助对象的存储集合
 	MapWebUsers				m_mapWebUsers;			// 访客的存储集合
 	CUserObject				m_commUserInfo;			// 公用用户
-	int						m_myInfoIsGet;			// 是否我的信息已经获取到了	
 	CTimerManager*			m_timers;				// 定时器管理类
 	int						m_nMyInfoIsGet;			// 是否我的信息已经获取到了
 	int						m_nSendPing;			// 心跳包发送的次数
