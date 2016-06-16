@@ -20,7 +20,7 @@
 
 
 
-<HorizontalLayout name="right_tab_option_1"  inset="2,2,2,2" >
+<HorizontalLayout name="right_tab_option_1"  >
 
 <VerticalLayout>
 <HorizontalLayout height="170">
@@ -30,12 +30,14 @@
 
 
 
-	<Label name="show_type" text="所属" font="2"  float="true" pos="5, 50, 100, 70" />
-	<Combo name="right_type_2" float="true" pos="5, 71, 300, 93"  normalimage="file='login\\Combo_nor.bmp' corner='2,2,24,2'" hotimage="file='login\	\Combo_over.bmp' 	corner='2,2,24,2'" pushedimage="file='login\\Combo_over.bmp' corner='2,2,24,2'" textpadding="1,1,1,1" >
+	<Label name="show_type_2" text="所属" font="2"  float="true" pos="5, 50, 100, 70" />
+	<Combo name="right_type_2" float="true" pos="5, 71, 300, 93"  normalimage="file='login\\Combo_nor.bmp' corner='2,2,24,2'" 
+hotimage="file='login\\Combo_over.bmp' corner='2,2,24,2'" pushedimage="file='login\\Combo_over.bmp' corner='2,2,24,2'" textpadding="1,1,1,1" >
 	</Combo>
 
-	<Label name="show_type" text="查找"  font="2"  float="true" pos="5, 99, 100, 119" />
-	<Combo name="right_type_3" float="true" pos="5, 120, 300, 142"  normalimage="file='login\\Combo_nor.bmp' corner='2,2,24,2'" hotimage="file='login\	\Combo_over.bmp' 	corner='2,2,24,2'" pushedimage="file='login\\Combo_over.bmp' corner='2,2,24,2'" textpadding="1,1,1,1" >
+	<Label name="show_type_3" text="查找"  font="2"  float="true" pos="5, 99, 100, 119" />
+	<Combo name="right_type_3" float="true" pos="5, 120, 300, 142"  normalimage="file='login\\Combo_nor.bmp' corner='2,2,24,2'" 
+hotimage="file='login\\Combo_over.bmp' corner='2,2,24,2'" pushedimage="file='login\\Combo_over.bmp' corner='2,2,24,2'" textpadding="1,1,1,1" >
 	</Combo>
 
 
@@ -43,18 +45,46 @@
 
 </HorizontalLayout>
 
+<!--  快捷回复列表显示 -->
+<HorizontalLayout    bkimage="file='mainframe\\bg14.png'"  >  
 
-<HorizontalLayout     bkimage="file='mainbk.png'" >  <!--  快捷回复列表显示 -->
+<VerticalLayout inset="1,1,1,1" >
+<HorizontalLayout   bkcolor="#FFF8F8F8" >
+
+
+
 </HorizontalLayout>
-
 </VerticalLayout>
 
+</HorizontalLayout>
+
+
+
+
+
+</VerticalLayout>
 </HorizontalLayout> 
 
 
 
 
 <HorizontalLayout name="right_tab_option_2">
+
+</HorizontalLayout>
+<HorizontalLayout name="right_tab_option_3">
+
+</HorizontalLayout>
+<HorizontalLayout name="right_tab_option_4">
+
+</HorizontalLayout>
+<HorizontalLayout name="right_tab_option_5">
+
+</HorizontalLayout>
+<HorizontalLayout name="right_tab_option_6">
+
+</HorizontalLayout>
+
+<HorizontalLayout name="right_tab_option_7">
 
 </HorizontalLayout>
 
