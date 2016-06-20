@@ -67,8 +67,9 @@ void CSmallMenu::CreateMyAppMenu(POINT point)
 	//TrackPopupMenu(hMenu, TPM_LEFTALIGN, point.x, point.y - 5, 0, m_hMenuWnd, NULL);
 	CMenuWnd* pMenu = new CMenuWnd(m_hMenuWnd);
 	CPoint cpoint = point;
-
 	cpoint.y -= 180;
+
+
 	//ClientToScreen(m_hMenuWnd, &cpoint);
 	pMenu->SetPath(L"menu\\menutest.xml");
 	pMenu->Init(NULL, _T(""), _T("xml"), cpoint);
