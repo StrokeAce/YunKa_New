@@ -82,6 +82,9 @@ public:
 		_root->data()._level = -1;
 		_root->data()._expand = true;
 		_root->data()._pListElement = NULL;
+
+		m_listBKImage = _T("");
+		m_listName = _T("");
 	}
 
 	~UserListUI() { if (_root) delete _root; }
@@ -228,6 +231,18 @@ public:
 		for (int i = 0; i < node->data()._level; ++i) {
 			html_text += _T("<x 24>");
 		}
+
+
+
+		if (m_listName == _T("talklist"))
+		{
+			if (node->data()._level == 0 ) {
+				if (node->data()._expand) html_text += _T("<a><i tree_expand.png 2 1></a>");
+				else html_text += _T("<a><i tree_expand.png 2 0></a>");
+			}
+
+		}
+
 		//if (node->data()._level < 3) {
 		//	if (node->data()._expand) html_text += _T("<a><i tree_expand.png 2 1></a>");
 		//	else html_text += _T("<a><i tree_expand.png 2 0></a>");
@@ -239,8 +254,11 @@ public:
 		else if (node->data()._level == 1) pListElement->SetFixedHeight(24);
 		pListElement->SetTag((UINT_PTR)node);
 		if (node->data()._level == 0) {
-			pListElement->SetBkImage(_T("file='tree_top.png' corner='2,1,2,1' fade='100'"));
+			//pListElement->SetBkImage(_T("file='tree_top.png' corner='2,1,2,1' fade='100'"));
+			pListElement->SetBkImage(m_listBKImage.GetData());
 		}
+
+		pListElement->SetName(m_listName.GetData());
 
 		int index = 0;
 		if (parent->has_children()) {
@@ -286,6 +304,16 @@ public:
 		for (int i = 0; i < node->data()._level; ++i) {
 			html_text += _T("<x 24>");
 		}
+
+		if (m_listName == _T("talklist"))
+		{
+			if (node->data()._level == 0) {
+				if (node->data()._expand) html_text += _T("<a><i tree_expand.png 2 1></a>");
+				else html_text += _T("<a><i tree_expand.png 2 0></a>");
+			}
+
+		}
+
 		//if (node->data()._level < 3) {
 		//	if (node->data()._expand) html_text += _T("<a><i tree_expand.png 2 1></a>");
 		//	else html_text += _T("<a><i tree_expand.png 2 0></a>");
@@ -297,9 +325,10 @@ public:
 		else if (node->data()._level == 1) pListElement->SetFixedHeight(24);
 		pListElement->SetTag((UINT_PTR)node);
 		if (node->data()._level == 0) {
-			pListElement->SetBkImage(_T("file='tree_top.png' corner='2,1,2,1' fade='100'"));
+			//pListElement->SetBkImage(_T("file='tree_top.png' corner='2,1,2,1' fade='100'"));
+			pListElement->SetBkImage(m_listBKImage.GetData());
 		}
-
+		pListElement->SetName(m_listName.GetData());
 		int index = 0;
 		
 		/*
@@ -435,10 +464,15 @@ public:
 		for (int i = 0; i < node->data()._level; ++i) {
 			html_text += _T("<x 24>");
 		}
-		//if (node->data()._level < 3) {
-		//	if (node->data()._expand) html_text += _T("<a><i tree_expand.png 2 1></a>");
-		//	else html_text += _T("<a><i tree_expand.png 2 0></a>");
-		//}
+
+		if (m_listName == _T("talklist"))
+		{
+			if (node->data()._level == 0) {
+				if (node->data()._expand) html_text += _T("<a><i tree_expand.png 2 1></a>");
+				else html_text += _T("<a><i tree_expand.png 2 0></a>");
+			}
+		}
+		
 		html_text += node->data()._text;
 		node->data()._pListElement->SetText(html_text);
 
@@ -468,9 +502,21 @@ public:
 		return szExpander;
 	}
 
+
+	void SetListBKImage(WCHAR *str)
+	{
+		m_listBKImage = str;
+	}
+
+	void SetListName(WCHAR *str)
+	{
+		m_listName = str;
+	}
+
 private:
 	Node* _root;
-
+	CDuiString m_listName;
+	CDuiString m_listBKImage;
 	LONG m_dwDelayDeltaY;
 	DWORD m_dwDelayNum;
 	DWORD m_dwDelayLeft;

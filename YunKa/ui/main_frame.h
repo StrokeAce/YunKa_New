@@ -220,6 +220,8 @@ public:
 	USER_TYPE  CMainFrame::GetSendUserType(unsigned long id);
 	void CMainFrame::CheckIdForUerOrWebuser(unsigned long id, CWebUserObject **pWebUser, CUserObject **pUser);
 	string CMainFrame::CreateClientInfoHtml(WxUserInfo* pWxUser);
+	void CMainFrame::MoveAndRestoreRightFrameControl(int type); //0 max 1 retore
+	void CMainFrame::InitRightTalkList();
 
 
 	void AddToMsgList(CUserObject *pUser, string strMsg, string strTime, int userType = MSG_FROM_WEBUSER,
@@ -258,7 +260,8 @@ public:
 
 	CONTROL_ATTR m_centerChatInfo;
 
-	RECT m_rightRect;
+	RECT m_rightRectWnd;
+	RECT m_rightRectMax;
 
 	string m_defaultUrlInfo;
 
@@ -266,6 +269,9 @@ public:
 private:
 
 	CSmallMenu m_frameSmallMenu;
+
+	CEditUI *m_pRightCommonWordEdit, *m_pRightCommonTypeEdit , *m_pRightCommonFindEdit;
+	CComboUI *m_pRightCommonWordCombo, *m_pRightCommonTypeCombo , *m_pRightCommonFindCombo;
 
 
 	CButtonUI * m_pFontBtn, *m_pFaceBtn, *m_pScreenBtn, *pSendMsgBtn,*m_pVoiceBtn;
@@ -287,6 +293,7 @@ private:
 	HWND m_hMainWnd;
 
 	UserListUI* pUserList;
+	UserListUI* m_pTalkList;
 	CUserObject* m_mySelfInfo;
 
 	unsigned long m_curSelectId;

@@ -23,6 +23,9 @@ CMainFrame::CMainFrame(CChatManager* manager) :m_manager(manager)
 
 	//初始化
 	m_pFontBtn = m_pFaceBtn = m_pScreenBtn = pSendMsgBtn = m_pVoiceBtn = NULL;
+	m_pRightCommonWordCombo = m_pRightCommonTypeCombo = m_pRightCommonFindCombo = NULL;
+	m_pRightCommonWordEdit = m_pRightCommonTypeEdit=m_pRightCommonFindEdit = NULL;
+
 	m_pSendEdit = NULL;
 
 	pOnlineNode = pWaitForStart = pMySelfeNode = NULL;
@@ -31,7 +34,7 @@ CMainFrame::CMainFrame(CChatManager* manager) :m_manager(manager)
 
 	m_facePathUrl = "<IMG alt=\"\" src=\"face.gif\">";
 
-	m_rightRect = {0};
+	m_rightRectWnd = { 0 };
 
 	CCodeConvert f_covet;
 	string strTmp = "<html><head>";
@@ -64,8 +67,9 @@ CControlUI* CMainFrame::CreateControl(LPCTSTR pstrClass)
 
 	//if (_tcscmp(pstrClass, _T("RichEdit2")) == 0)
 	//	return new DuiLib2::CRichEditUI2;
-
 	
+	if (_tcscmp(pstrClass, _T("talklist")) == 0)
+		return new UserListUI;
 
 	if (_tcscmp(pstrClass, _T("UserList")) == 0) 
 		return new UserListUI;
@@ -125,6 +129,7 @@ LRESULT CMainFrame::OnSysCommand(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& 
 			if (pControl) pControl->SetVisible(true);
 			
 			MoveAndRestoreMsgWnd(0);
+			MoveAndRestoreRightFrameControl(0);
 		}
 		else {
 			CControlUI* pControl = static_cast<CControlUI*>(m_PaintManager.FindControl(_T("maxBtn")));
@@ -133,6 +138,7 @@ LRESULT CMainFrame::OnSysCommand(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& 
 			if (pControl) pControl->SetVisible(false);
 
 			MoveAndRestoreMsgWnd(1);
+			MoveAndRestoreRightFrameControl(1);
 		}
 	}
 
@@ -398,20 +404,21 @@ void CMainFrame::MoveAndRestoreMsgWnd(int type)
 		formatString.Format(_T("%d"), centerWidth);
 		centerLayout->SetAttribute(_T("width"), formatString);
 		formatString.Format(_T("%d"), rightWidth);
-		rightLayout->SetAttribute(_T("width"), formatString);
+		//rightLayout->SetAttribute(_T("width"), formatString);  //lxh 屏蔽掉 
 
 		rc = ShowMsgWnd->GetPos();
 		rc.right = rc.left + centerWidth - 2;
 		m_pListMsgHandler.handler->MoveBrowser(rc);
 
-		if (m_rightRect.left == 0)
-		    m_rightRect = ShowRightWebWnd->GetPos();
+		if (m_rightRectWnd.left == 0)
+			m_rightRectWnd = ShowRightWebWnd->GetPos();
 
 		rect.left = rc.right + 4;
 		rect.right = sysRect.right - 4;
-		rect.top += m_rightRect.top;
+		rect.top += m_rightRectWnd.top;
 		rect.bottom = sysRect.bottom - 4;
 		m_pVisitorRelatedHandler.handler->MoveBrowser(rect);
+		m_rightRectMax = rect;
 
 	}
 	else
@@ -424,7 +431,7 @@ void CMainFrame::MoveAndRestoreMsgWnd(int type)
 		m_pListMsgHandler.handler->MoveBrowser(rc);
 
 		//rc = ShowRightWebWnd->GetPos();
-		m_pVisitorRelatedHandler.handler->MoveBrowser(m_rightRect);
+		m_pVisitorRelatedHandler.handler->MoveBrowser(m_rightRectWnd);
 	}
 }
 
@@ -529,6 +536,7 @@ void CMainFrame::OnPrepare(TNotifyUI& msg)
 {
 	CDuiString nameString = _T("");
 	CDuiString typeString[4] = { _T("对话中"), _T("转接中"), _T("邀请中"), _T("内部对话") };
+	WCHAR  buf[128] = {0};
 
 	//cef窗口
 	InitLibcef();
@@ -543,6 +551,18 @@ void CMainFrame::OnPrepare(TNotifyUI& msg)
 	pSendMsgBtn = static_cast<CButtonUI*>(m_PaintManager.FindControl(_T("sendMsgBtn")));
 
 	m_pVoiceBtn = static_cast<CButtonUI*>(m_PaintManager.FindControl(_T("voiceSendBtn")));
+
+
+	m_pRightCommonWordCombo = static_cast<CComboUI*>(m_PaintManager.FindControl(_T("right_type_1")));
+	m_pRightCommonTypeCombo = static_cast<CComboUI*>(m_PaintManager.FindControl(_T("right_type_2")));
+	m_pRightCommonFindCombo = static_cast<CComboUI*>(m_PaintManager.FindControl(_T("right_type_3")));
+
+	m_pRightCommonWordEdit = static_cast<CEditUI*>(m_PaintManager.FindControl(_T("edit_right_type_1")));
+	m_pRightCommonTypeEdit = static_cast<CEditUI*>(m_PaintManager.FindControl(_T("edit_right_type_2")));
+	m_pRightCommonFindEdit = static_cast<CEditUI*>(m_PaintManager.FindControl(_T("edit_right_type_3")));
+
+	MoveAndRestoreRightFrameControl(1);
+		
 
 
 	//上层管理按钮 设置初始状态
@@ -582,10 +602,13 @@ void CMainFrame::OnPrepare(TNotifyUI& msg)
 
 	//左侧用户列表显示
     pUserList = static_cast<UserListUI*>(m_PaintManager.FindControl(_T("userlist")));
+	pUserList->SetListBKImage(_T("file = 'mainframe\\tree_top.png' corner = '2,1,2,1' fade = '100'"));
+	pUserList->SetListName(_T("userlist"));
 	pWaitForAccept = NULL;
 	pWaitForStart = pUserList->AddNode(_T("{x 4}{i gameicons.png 18 0}{x 4}等待开始"),0);
 	pWaitForAccept = pUserList->AddNode(_T("{x 4}{i gameicons.png 18 16}{x 4}等待应答"),0,pWaitForStart);
 
+	InitRightTalkList();
 
 #if 0	
 	UserListUI::Node* pCategoryNode = NULL;
@@ -727,7 +750,7 @@ void CMainFrame::OnSelectChanged(TNotifyUI &msg)
 	//操作tab
 	if (pTabControl != NULL)
 	{
-		int index = pTabControl->GetCurSel() + 1;
+		//int index = pTabControl->GetCurSel() + 1;
 
 		//这里因为右边屏幕 有7个option选项 
 		for (int i = 0; i < 7; i++)
@@ -756,55 +779,60 @@ void CMainFrame::OnSelectChanged(TNotifyUI &msg)
 void CMainFrame::OnItemClick(TNotifyUI &msg)
 {
 	m_savedClickId = 0;
-	UserListUI* pUserList = static_cast<UserListUI*>(m_PaintManager.FindControl(_T("userlist")));
-	if (pUserList->GetItemIndex(msg.pSender) != -1)
+
+	if (msg.pSender->GetName() == _T("userlist"))
 	{
-		if (_tcscmp(msg.pSender->GetClass(), _T("ListLabelElementUI")) == 0)
+		if (pUserList->GetItemIndex(msg.pSender) != -1)
 		{
-			UserListUI::Node* node = (UserListUI::Node*)msg.pSender->GetTag();
-			CDuiString str = node->data()._text;
-			unsigned long id = node->data()._uid;
-			m_savedClickId = id;
-			if (id > 0)
+			if (_tcscmp(msg.pSender->GetClass(), _T("ListLabelElementUI")) == 0)
 			{
-				//
-				if (m_curSelectId != id)//切换聊天对象显示 
+				UserListUI::Node* node = (UserListUI::Node*)msg.pSender->GetTag();
+				CDuiString str = node->data()._text;
+				unsigned long id = node->data()._uid;
+				m_savedClickId = id;
+				if (id > 0)
 				{
+					//
+					if (m_curSelectId != id)//切换聊天对象显示 
+					{
 
-					ChangeShowUserMsgWnd(id);
+						ChangeShowUserMsgWnd(id);
 
-					ShowRightOptionFrameView(id);
+						ShowRightOptionFrameView(id);
+					}
+					m_curSelectId = id;
+
+					map<unsigned long, UserListUI::Node*>::iterator iter = m_waitVizitorMap.find(id);
+					if (iter != m_waitVizitorMap.end())
+					{
+						m_pManagerBtn[0].m_pManagerBtn->SetNormalImage(m_pManagerBtn[0].pushedImage);
+						m_pManagerBtn[0].m_pManagerBtn->SetHotImage(m_pManagerBtn[0].hotImage);
+						m_pManagerBtn[0].m_pManagerBtn->SetPushedImage(m_pManagerBtn[0].pushedImage);
+
+						m_pManagerBtn[3].m_pManagerBtn->SetNormalImage(m_pManagerBtn[3].pushedImage);
+						m_pManagerBtn[3].m_pManagerBtn->SetHotImage(m_pManagerBtn[3].hotImage);
+						m_pManagerBtn[3].m_pManagerBtn->SetPushedImage(m_pManagerBtn[3].pushedImage);
+
+						m_pManagerBtn[4].m_pManagerBtn->SetNormalImage(m_pManagerBtn[4].pushedImage);
+						m_pManagerBtn[4].m_pManagerBtn->SetHotImage(m_pManagerBtn[4].hotImage);
+						m_pManagerBtn[4].m_pManagerBtn->SetPushedImage(m_pManagerBtn[4].pushedImage);
+					}
+
+
+
+
 				}
-				m_curSelectId = id;
-
-				map<unsigned long, UserListUI::Node*>::iterator iter = m_waitVizitorMap.find(id);
-				if (iter != m_waitVizitorMap.end())
-				{
-					m_pManagerBtn[0].m_pManagerBtn->SetNormalImage(m_pManagerBtn[0].pushedImage);
-					m_pManagerBtn[0].m_pManagerBtn->SetHotImage(m_pManagerBtn[0].hotImage);
-					m_pManagerBtn[0].m_pManagerBtn->SetPushedImage(m_pManagerBtn[0].pushedImage);
-
-					m_pManagerBtn[3].m_pManagerBtn->SetNormalImage(m_pManagerBtn[3].pushedImage);
-					m_pManagerBtn[3].m_pManagerBtn->SetHotImage(m_pManagerBtn[3].hotImage);
-					m_pManagerBtn[3].m_pManagerBtn->SetPushedImage(m_pManagerBtn[3].pushedImage);
-
-					m_pManagerBtn[4].m_pManagerBtn->SetNormalImage(m_pManagerBtn[4].pushedImage);
-					m_pManagerBtn[4].m_pManagerBtn->SetHotImage(m_pManagerBtn[4].hotImage);
-					m_pManagerBtn[4].m_pManagerBtn->SetPushedImage(m_pManagerBtn[4].pushedImage);
-				}	
-
-
-
-
 			}
 		}
 	}
+
+	
 }
 
 void CMainFrame::OnItemActive(TNotifyUI &msg)
 {
-	UserListUI* pUserList = static_cast<UserListUI*>(m_PaintManager.FindControl(_T("userlist")));
-	if (pUserList->GetItemIndex(msg.pSender) != -1)
+	//if (pUserList->GetItemIndex(msg.pSender) != -1)
+	if (msg.pSender->GetName() == _T("userlist"))
 	{
 		if (_tcscmp(msg.pSender->GetClass(), _T("ListLabelElementUI")) == 0) 
 		{
@@ -822,6 +850,16 @@ void CMainFrame::OnItemActive(TNotifyUI &msg)
 					OnSendToAcceptChat(uid);
 				}
 			}
+
+		}
+	}
+
+	else if (msg.pSender->GetName() == _T("talklist"))
+	{
+		if (_tcscmp(msg.pSender->GetClass(), _T("ListLabelElementUI")) == 0)
+		{
+			UserListUI::Node* node = (UserListUI::Node*)msg.pSender->GetTag();
+			m_pTalkList->ExpandNode(node, !node->data()._expand);
 
 		}
 	}
@@ -2653,7 +2691,6 @@ string CMainFrame::CreateClientInfoHtml(WxUserInfo* pWxUser)
 		{
 			sprintf(htmlitem, itemFormat, "头像", "未知");
 		}
-
 	}
 
 	return htmlContent;
@@ -2665,4 +2702,82 @@ void CMainFrame::OnBtnVoice(TNotifyUI& msg)
 {
 
 
+}
+
+
+//0 max 1 retore
+void CMainFrame::MoveAndRestoreRightFrameControl(int type)
+{
+	int width = 0;
+	CHorizontalLayoutUI   *m_hLayout = static_cast<CHorizontalLayoutUI*>(m_PaintManager.FindControl(_T("HorizontalLayout_RightFrameOption")));
+	
+	RECT rect = m_pRightCommonWordCombo->GetPos();
+	if (type == 1)
+		width = m_hLayout->GetWidth() - 10;
+	else
+		width = m_rightRectMax.right - m_rightRectMax.left - 15;
+
+	rect.right = rect.left + width;
+	m_pRightCommonWordCombo->SetPos(rect);
+
+	rect = m_pRightCommonTypeCombo->GetPos();
+	rect.right = rect.left + width;
+	m_pRightCommonTypeCombo->SetPos(rect);
+
+	rect = m_pRightCommonFindCombo->GetPos();
+	rect.right = rect.left + width;
+	m_pRightCommonFindCombo->SetPos(rect);
+
+}
+
+void CMainFrame::InitRightTalkList()
+{
+	m_pTalkList = static_cast<UserListUI*>(m_PaintManager.FindControl(_T("talklist")));
+
+	m_pTalkList->SetListName(_T("talklist"));
+
+	UserListUI::Node*  TalkList1 = m_pTalkList->AddNode(_T("早起签到"), 0);
+	UserListUI::Node*  TalkList2 = m_pTalkList->AddNode(_T("晚安签到"), 0);
+	UserListUI::Node*  TalkList3 = m_pTalkList->AddNode(_T("云咖平台回复语"), 0);
+	UserListUI::Node*  TalkList4 = m_pTalkList->AddNode(_T("顺风车"), 0);
+	UserListUI::Node*  TalkList5 = m_pTalkList->AddNode(_T("服务时间"), 0);
+	UserListUI::Node*  TalkList6 = m_pTalkList->AddNode(_T("八妹说"), 0);
+	UserListUI::Node*  TalkList7 = m_pTalkList->AddNode(_T("测试"), 0);
+
+	//以下数据作为测试数据 暂时显示 后面再修改 lxh
+	m_pTalkList->AddNode(_T("{x 12}早起签到成功回复语"),0, TalkList1);
+	m_pTalkList->AddNode(_T("{x 12}早起团报名链接"), 0, TalkList1);
+
+
+
+	m_pTalkList->AddNode(_T("{x 12}晚安签到中奖"), 0, TalkList2);
+	m_pTalkList->AddNode(_T("{x 12}晚安签到中奖1"), 0, TalkList2);
+	m_pTalkList->AddNode(_T("{x 12}晚安签到中奖2"), 0, TalkList2);
+	m_pTalkList->AddNode(_T("{x 12}晚安签到中奖3"), 0, TalkList2);
+	m_pTalkList->AddNode(_T("{x 12}晚安签到中奖4"), 0, TalkList2);
+	m_pTalkList->AddNode(_T("{x 12}晚安签到中奖5"), 0, TalkList2);
+	m_pTalkList->AddNode(_T("{x 12}晚安签到中奖6"), 0, TalkList2);
+	m_pTalkList->AddNode(_T("{x 12}晚安签到中奖7"), 0, TalkList2);
+	m_pTalkList->AddNode(_T("{x 12}晚安签到中奖8"), 0, TalkList2);
+	m_pTalkList->AddNode(_T("{x 12}晚安签到中奖9"), 0, TalkList2);
+	m_pTalkList->AddNode(_T("{x 12}晚安签到中奖10"), 0, TalkList2);
+
+	m_pTalkList->AddNode(_T("{x 12}云咖平台不能支持的回复"), 0, TalkList3);
+
+	m_pTalkList->AddNode(_T("{x 12}发送66顺风车的回复"), 0, TalkList4);
+	m_pTalkList->AddNode(_T("{x 12}发送66顺风车广告语"), 0, TalkList4);
+	m_pTalkList->AddNode(_T("{x 12}发送投票的回复"), 0, TalkList4);
+
+	m_pTalkList->AddNode(_T("{x 12}9588服务时间回复语"), 0, TalkList5);
+	m_pTalkList->AddNode(_T("{x 12}云咖9588服务时间回复语"), 0, TalkList5);
+
+	m_pTalkList->AddNode(_T("{x 12}八妹说的话"), 0, TalkList6);
+	m_pTalkList->AddNode(_T("{x 12}测试"), 0, TalkList7);
+
+	m_pTalkList->ExpandNode(TalkList2, false);
+	m_pTalkList->ExpandNode(TalkList3, false);	
+	m_pTalkList->ExpandNode(TalkList4, false);	
+	m_pTalkList->ExpandNode(TalkList5, false);	
+	m_pTalkList->ExpandNode(TalkList6, false);
+	m_pTalkList->ExpandNode(TalkList7, false);
 }
