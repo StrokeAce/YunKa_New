@@ -33,7 +33,7 @@ static UINT WINAPI UpLoadFileToWxServerThread(void * pUpLoadInfo)
 	CChatManager* pThis = (CChatManager*)upLoadInfo->pThis;
 	unsigned long userId = upLoadInfo->userId;
 	MSG_DATA_TYPE msgDataType = upLoadInfo->msgDataType;
-	USER_TYPE userType = upLoadInfo->userType;
+	MSG_RECV_TYPE userType = upLoadInfo->userType;
 	string msgId = upLoadInfo->msgId;
 	delete upLoadInfo;
 
@@ -144,7 +144,7 @@ static UINT WINAPI UpLoadFileToServerThread(void * pUpLoadInfo)
 	CChatManager* pThis = (CChatManager*)upLoadInfo->pThis;
 	unsigned long userId = upLoadInfo->userId;
 	MSG_DATA_TYPE msgDataType = upLoadInfo->msgDataType;
-	USER_TYPE userType = upLoadInfo->userType;
+	MSG_RECV_TYPE userType = upLoadInfo->userType;
 	delete upLoadInfo;
 
 	CHttpLoad httpLoad;
@@ -236,6 +236,12 @@ static UINT WINAPI DownLoadFileFromServerThread(void * para)
 		addPath = decodePath + ".wav";
 		StringReplace(addPath,"\\", "/");
 	}
+	else if (msgDataType == MSG_DATA_TYPE_VIDEO)
+	{
+		downPath = decodePath + ".mp4";
+		addPath = decodePath + ".mp4";
+		StringReplace(addPath, "\\", "/");
+	}
 	
 	if (httpLoad.HttpLoad(url, "", REQUEST_TYPE_GET, downPath, rs))
 	{
@@ -271,7 +277,7 @@ CChatManager::CChatManager()
 	m_handlerLogin = NULL;
 	m_handlerMsgs = NULL;
 	m_hScreenDll = NULL;
-	m_isRecording = false;
+	m_bRecording = false;
 	m_login = new CLogin();
 	m_login->m_manager = this;
 	m_nOnLineStatus = STATUS_OFFLINE;
@@ -2861,6 +2867,9 @@ CUserObject * CChatManager::GetUserObjectByUid(unsigned long id)
 void CChatManager::TimerProc(int timeId, LPVOID pThis)
 {
 	CChatManager* chat_manager = (CChatManager*)pThis;
+
+	if (chat_manager->m_bExit) return;
+
 	if (timeId == TIMER_NORMAL)
 	{
 		if (chat_manager->m_nOnLineStatus == STATUS_OFFLINE)
@@ -3176,23 +3185,23 @@ WxMsgBase* CChatManager::ParseWxMsg(CWebUserObject* pWebUser, COM_FLOAT_CHATMSG&
 		else if ("image" == pwxobj->MsgType)
 		{
 			//GetWxUserInfoAndToken(pWebUser);
-			msgBase = (WxMsgBase*)pwxobj;			
-			DownLoadFile(msgBase, pWebUser, pAssistUser, recvInfo.tMsgTime);
+			DownLoadFile(pWebUser, MSG_DATA_TYPE_IMAGE, ((WxMsgImage*)pwxobj)->MediaUrl, pAssistUser, recvInfo.tMsgTime, GetMsgId());
 			delete pwxobj;
 			return NULL;
 		}
 		else if ("voice" == pwxobj->MsgType)
 		{
 			msgBase = (WxMsgBase*)pwxobj;
-			DownLoadFile(msgBase, pWebUser, pAssistUser, recvInfo.tMsgTime);
+			DownLoadFile(pWebUser, MSG_DATA_TYPE_VOICE, ((WxMsgVoice*)pwxobj)->MediaUrl, pAssistUser, recvInfo.tMsgTime, GetMsgId());
 			delete pwxobj;
 			return NULL;
 		}
 		else if ("video" == pwxobj->MsgType || "shortvideo" == pwxobj->MsgType)
 		{
 			msgBase = (WxMsgBase*)pwxobj;
-			recvInfo.nMsgDataType = MSG_DATA_TYPE_VIDEO;
-			strcpy(recvInfo.strmsg, ((WxMsgImage*)pwxobj)->MediaUrl.c_str());
+			DownLoadFile(pWebUser, MSG_DATA_TYPE_VIDEO, ((WxMsgVideo*)pwxobj)->MediaUrl, pAssistUser, recvInfo.tMsgTime, GetMsgId());
+			delete pwxobj;
+			return NULL;
 		}
 		else if ("location" == pwxobj->MsgType)
 		{
@@ -3774,6 +3783,7 @@ void CChatManager::Exit()
 
 	if (m_timers)
 	{
+		m_timers->TimerClear();
 		delete m_timers;
 	}
 
@@ -4055,15 +4065,18 @@ int CChatManager::SendMsg(IBaseObject* pUser, const char *msg, int bak, char *sf
 	return nError;
 }
 
-int CChatManager::SendTo_Msg(unsigned long userId, USER_TYPE userType, string msgId, MSG_DATA_TYPE msgDataType, string msg)
+int CChatManager::SendTo_Msg(unsigned long userId, MSG_RECV_TYPE userType, string msgId, MSG_DATA_TYPE msgDataType, string msg)
 {
-	int nError = SYS_FAIL;
-	string sMsg = msg;
+	int nError = SYS_FAIL;	
 	if (userId <= 0 || msgId.empty() || msg.empty())
 	{
 		g_WriteLog.WriteLog(C_LOG_ERROR, "SendTo_Msg params error");
 		return nError;
 	}
+
+	string sMsg = msg;
+	StringReplace(msg, "\\", "/");
+
 	if (userType == OBJECT_USER)
 	{
 		CUserObject* pUser = GetUserObjectByUid(userId);
@@ -4153,13 +4166,17 @@ std::string CChatManager::GetLastError()
 	return "";
 }
 
-int CChatManager::ReSendTo_Msg(unsigned long webuserid, int userType, string msgId, int msgDataType, char * msg)
+int CChatManager::ReRecv_Msg(string url, MSG_FROM_TYPE msgFromUserType, string msgId, MSG_DATA_TYPE nMsgDataType,
+	unsigned long msgFromUserId, unsigned long assistUserId, unsigned long time)
 {
-	return 1;
-}
-
-int CChatManager::ReRecv_Msg(string msgId)
-{
+	CWebUserObject* pWebUser = NULL;
+	CUserObject* pUser = NULL;
+	CUserObject* pAssistUser = NULL;
+	if (msgFromUserType == MSG_FROM_WEBUSER)
+	{
+		pWebUser = GetWebUserObjectByUid(msgFromUserId);
+	}
+	DownLoadFile(pWebUser, nMsgDataType, url, pAssistUser, time, msgId);
 	return 1;
 }
 
@@ -4425,7 +4442,7 @@ int CChatManager::SendFloatMsg(CWebUserObject *pWebUser, const char *msg, char *
 	return nError;
 }
 
-void CChatManager::UpLoadFile(unsigned long userId, USER_TYPE userType, string msgId, string filePath, MSG_DATA_TYPE msgDataType)
+void CChatManager::UpLoadFile(unsigned long userId, MSG_RECV_TYPE userType, string msgId, string filePath, MSG_DATA_TYPE msgDataType)
 {
 	UPLOAD_INFO* upLoadInfo = new UPLOAD_INFO();
 	upLoadInfo->filePath = filePath;
@@ -4435,35 +4452,35 @@ void CChatManager::UpLoadFile(unsigned long userId, USER_TYPE userType, string m
 	upLoadInfo->userId = userId;
 	upLoadInfo->msgId = msgId;
 
-	if (userType != USER_TYPE_CLIENT)
+	if (userType != MSG_RECV_CLIENT)
 	{
 		CWebUserObject* pWebUser = GetWebUserObjectByUid(userId);
 		if (pWebUser == NULL) return;
 		if (pWebUser->m_bIsFrWX)
 		{
-			userType = USER_TYPE_WX;
+			userType = MSG_RECV_WX;
 		}	
 	}	
 
-	if (userType == USER_TYPE_WX)
+	if (userType == MSG_RECV_WX)
 	{
 		_beginthreadex(NULL, 0, UpLoadFileToWxServerThread, (void*)upLoadInfo, 0, NULL);
 	}
-	else if (userType == USER_TYPE_WEB || userType == USER_TYPE_CLIENT)
+	else if (userType == MSG_RECV_WEB || userType == MSG_RECV_CLIENT)
 	{
 		_beginthreadex(NULL, 0, UpLoadFileToServerThread, (void*)upLoadInfo, 0, NULL);
 	}
 }
 
-void CChatManager::AfterUpload(unsigned long userId, USER_TYPE userType, string msgId, string mediaID, MSG_DATA_TYPE msgDataType, string fileId, string filePath)
+void CChatManager::AfterUpload(unsigned long userId, MSG_RECV_TYPE userType, string msgId, string mediaID, MSG_DATA_TYPE msgDataType, string fileId, string filePath)
 {
 	CUserObject* pUser = NULL;
-	CWebUserObject* pWebUser = NULL;
-	if (userType == USER_TYPE_WX || userType == USER_TYPE_WEB)
+	CWebUserObject* pWebUser = NULL;	
+	if (userType == MSG_RECV_WX || userType == MSG_RECV_WEB)
 	{
 		pWebUser = GetWebUserObjectByUid(userId);
 	}
-	else if (userType == USER_TYPE_CLIENT)
+	else if (userType == MSG_RECV_CLIENT)
 	{
 		pUser = GetUserObjectByUid(userId);
 	}
@@ -4471,7 +4488,7 @@ void CChatManager::AfterUpload(unsigned long userId, USER_TYPE userType, string 
 	if (mediaID.empty())
 	{
 		// 上传失败处理,通知界面，文件发送失败
-		m_handlerMsgs->ResultSendMsg(msgId, false);
+		m_handlerMsgs->ResultSendMsg(msgId, false, userId, userType, msgDataType, filePath);
 		g_WriteLog.WriteLog(C_LOG_TRACE, "媒体文件消息发送失败");
 	}
 	else
@@ -4482,7 +4499,7 @@ void CChatManager::AfterUpload(unsigned long userId, USER_TYPE userType, string 
 		char fileServerMediaUrl[MAX_256_LEN];
 		if (msgDataType == MSG_DATA_TYPE_IMAGE)
 		{
-			if (userType == USER_TYPE_WX)
+			if (userType == MSG_RECV_WX)
 			{
 				if (!fileId.empty())
 				{
@@ -4501,7 +4518,7 @@ void CChatManager::AfterUpload(unsigned long userId, USER_TYPE userType, string 
 					delete imageObj;
 					if (SendMsg(pWebUser, msgSendTo.c_str(), 0, "JSON=WX") == SYS_SUCCESS)
 					{
-						m_handlerMsgs->ResultSendMsg(msgId, true);
+						m_handlerMsgs->ResultSendMsg(msgId);
 
 						AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SELF, msgId, MSG_TYPE_NORMAL ,
 							msgDataType, filePath,GetTimeByMDAndHMS(0),NULL,NULL);
@@ -4522,7 +4539,7 @@ void CChatManager::AfterUpload(unsigned long userId, USER_TYPE userType, string 
 					delete imageObj;
 					if (SendMsg(pWebUser, msgSendTo.c_str(), 0, "JSON=WX") == SYS_SUCCESS)
 					{
-						m_handlerMsgs->ResultSendMsg(msgId, true);
+						m_handlerMsgs->ResultSendMsg(msgId);
 
 						AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SELF, msgId, MSG_TYPE_NORMAL,
 							msgDataType, filePath, GetTimeByMDAndHMS(0), NULL, NULL);
@@ -4530,7 +4547,7 @@ void CChatManager::AfterUpload(unsigned long userId, USER_TYPE userType, string 
 				}
 
 			}
-			else if (userType == USER_TYPE_WEB)
+			else if (userType == MSG_RECV_WEB)
 			{
 				// 获取文件服务器文件路径format串
 				// 图片在文件服务器的url
@@ -4545,17 +4562,16 @@ void CChatManager::AfterUpload(unsigned long userId, USER_TYPE userType, string 
 				msgSendTo += "\" width=30%%></a>";
 				if (SendMsg(pWebUser, msgSendTo.c_str(), 0) == SYS_SUCCESS)
 				{
-					m_handlerMsgs->ResultSendMsg(msgId, true);
+					m_handlerMsgs->ResultSendMsg(msgId);
 				}
 			}
-			else if (userType == USER_TYPE_CLIENT)
+			else if (userType == MSG_RECV_CLIENT)
 			{
 				// 拼出该url串
 				sprintf(fileServerMediaUrl, m_initConfig.fileserver_media_fileid, mediaID.c_str());
 				if (SendMsg(pUser, fileServerMediaUrl, 0) == SYS_SUCCESS)
 				{
-					// 消息发送失败，重新发送
-					m_handlerMsgs->ResultSendMsg(msgId, true);
+					m_handlerMsgs->ResultSendMsg(msgId);
 				}
 			}
 		}
@@ -4563,7 +4579,7 @@ void CChatManager::AfterUpload(unsigned long userId, USER_TYPE userType, string 
 		{
 			CCodeConvert t_convert;
 			string wavFilePath = t_convert.URLDecodeALL((string)filePath);
-			if (userType == USER_TYPE_WX)
+			if (userType == MSG_RECV_WX)
 			{
 				if (!fileId.empty())
 				{
@@ -4581,7 +4597,7 @@ void CChatManager::AfterUpload(unsigned long userId, USER_TYPE userType, string 
 
 					if (SendMsg(pWebUser, msgSendTo.c_str(), 0, "JSON=WX") == SYS_SUCCESS)
 					{
-						m_handlerMsgs->ResultSendMsg(msgId, true);
+						m_handlerMsgs->ResultSendMsg(msgId);
 					}
 				}
 				else
@@ -4599,14 +4615,14 @@ void CChatManager::AfterUpload(unsigned long userId, USER_TYPE userType, string 
 					msgSendTo = json.toStyledString();
 					if (SendMsg(pWebUser, msgSendTo.c_str(), 0, "JSON=WX") == SYS_SUCCESS)
 					{
-						m_handlerMsgs->ResultSendMsg(msgId, true);
+						m_handlerMsgs->ResultSendMsg(msgId);
 					}
 				}
 			}
 		}
 		else if (msgDataType == MSG_DATA_TYPE_VIDEO)
 		{
-			if (userType == USER_TYPE_WX)
+			if (userType == MSG_RECV_WX)
 			{
 				// 上传成功
 				WxMsgVideo* videoObj = new WxMsgVideo("video");
@@ -4618,7 +4634,7 @@ void CChatManager::AfterUpload(unsigned long userId, USER_TYPE userType, string 
 				delete videoObj;
 				if (SendMsg(pWebUser, msgSendTo.c_str(), 0, "JSON=WX") == SYS_SUCCESS)
 				{
-					m_handlerMsgs->ResultSendMsg(msgId, true);
+					m_handlerMsgs->ResultSendMsg(msgId);
 				}
 			}
 		}
@@ -4742,36 +4758,56 @@ int CChatManager::SendTo_TransferUserResult(CWebUserObject* pWebUser, CUserObjec
 extern "C" _declspec(dllimport) int StopRecordWAV();
 extern "C" _declspec(dllimport) void CancelRecordWAV();
 extern "C" _declspec(dllimport) int StartRecordWAV(const char* voicePath,const char* voiceName); // 开始录制
-extern "C" _declspec(dllimport) void WAVToAMR(char* wavPath);
+extern "C" _declspec(dllimport) void WAVToAMR(const char* wavPath);
 
 CODE_RECORD_AUDIO CChatManager::StartRecordAudio()
 {
-	string voicePath = FullPath("temp\\");
-	string voiceName = GetTimeString();
-	m_audioPath = voicePath + voiceName;
-	string::size_type pos = 0;
-	string searchString("\\");
-	string replaceString("/");
-	while ((pos = m_audioPath.find(searchString, pos)) != string::npos)
+	if (!m_bRecording)
 	{
-		m_audioPath.replace(pos, searchString.size(), replaceString);
-		pos++;
+		string voicePath = FullPath("temp\\");
+		string voiceName = GetTimeString();
+		m_audioPath = voicePath + voiceName;
+		StringReplace(m_audioPath, "\\", "/");
+		CODE_RECORD_AUDIO bSuccess = (CODE_RECORD_AUDIO)StartRecordWAV(voicePath.c_str(), voiceName.c_str());
+		if (bSuccess == CODE_AUDIO_SUCCESS)
+			m_bRecording = true;
+		return bSuccess;
 	}
-	int bSuccess = StartRecordWAV(voicePath.c_str(), voiceName.c_str());
-	if (bSuccess == 0)
-		m_isRecording = true;
-	return (CODE_RECORD_AUDIO)bSuccess;
+	else
+	{
+		return CODE_AUDIO_IS_RECORDING;
+	}
 }
 
-int CChatManager::StopRecordAudio()
+CODE_RECORD_AUDIO CChatManager::SendRecordAudio(unsigned long userId, MSG_RECV_TYPE userType)
 {
-	return StopRecordWAV();
+	m_bRecording = false;
+	CODE_RECORD_AUDIO code = (CODE_RECORD_AUDIO)StopRecordWAV();
+
+	// 停止录制,并保存文件
+	if (StopRecordWAV() == CODE_AUDIO_LITTLE_TIME)
+	{
+		// 录音时间太短，录音无效
+		
+		return CODE_AUDIO_LITTLE_TIME;
+	}
+
+	// 转码
+	WAVToAMR(m_audioPath.c_str());
+
+	// 发送文件的路径url编码
+	CCodeConvert convert;
+	string encodeFilePath;
+	encodeFilePath = convert.URLEncode(m_audioPath.c_str());
+
+	UpLoadFile(userId, userType, GetMsgId(), encodeFilePath.c_str(), MSG_DATA_TYPE_VOICE);
+	return CODE_AUDIO_SUCCESS;
 }
 
-int CChatManager::CancelRecordAudio()
+void CChatManager::CancelRecordAudio()
 {
+	m_bRecording = false;
 	CancelRecordWAV();
-	return 0;
 }
 
 int CChatManager::SendToTransferUser(CUserObject *pAcceptUser, CWebUserObject *pWebUser, unsigned long acceptuin /*= 0*/)
@@ -4805,16 +4841,16 @@ int CChatManager::SendToTransferUser(CUserObject *pAcceptUser, CWebUserObject *p
 	return nError;
 }
 
-void CChatManager::DownLoadFile(WxMsgBase* pWxMsg, CWebUserObject *pWebUser, CUserObject *pAssistUser,  unsigned int time)
+void CChatManager::DownLoadFile(CWebUserObject *pWebUser, MSG_DATA_TYPE nMsgDataType, string url, CUserObject *pAssistUser, unsigned int time, string msgId)
 {
-	if (pWxMsg && pWxMsg->MsgType == "image")
+	if (nMsgDataType == MSG_DATA_TYPE_IMAGE)
 	{
 		string path = FullPath("temp\\") + GetFileId();
 		string fullPath = path + ".jpg";
 		if (!PathFileExistsA(fullPath.c_str()) && pWebUser && pWebUser->m_pWxUserInfo)
 		{
 			CCodeConvert convert;
-			string loadUrl = ((WxMsgImage*)pWxMsg)->MediaUrl.c_str();
+			string loadUrl = url;
 			DOWNLOAD_INFO* param = new DOWNLOAD_INFO();
 			param->pUser = NULL;
 			param->pThis = this;
@@ -4823,7 +4859,7 @@ void CChatManager::DownLoadFile(WxMsgBase* pWxMsg, CWebUserObject *pWebUser, CUs
 			if (iter != m_mapTokens.end())
 			{
 				// 重新拼url是将最新token替换上，防止下载图片无效
-				loadUrl = ReplaceToken(((WxMsgImage*)pWxMsg)->MediaUrl, iter->second);
+				loadUrl = ReplaceToken(url, iter->second);
 			}
 			else
 			{
@@ -4837,7 +4873,7 @@ void CChatManager::DownLoadFile(WxMsgBase* pWxMsg, CWebUserObject *pWebUser, CUs
 			}
 			param->time = GetTimeByMDAndHMS(time);
 			param->pWebUser = pWebUser;
-			param->msgId = GetMsgId();
+			param->msgId = msgId;
 			param->msgFromType = MSG_FROM_WEBUSER;
 			_beginthreadex(NULL, 0, DownLoadFileFromServerThread, (void*)param, 0, NULL);			
 		}
@@ -4846,18 +4882,29 @@ void CChatManager::DownLoadFile(WxMsgBase* pWxMsg, CWebUserObject *pWebUser, CUs
 			g_WriteLog.WriteLog(C_LOG_ERROR, "DownLoadFile 下载图片失败");
 		}
 	}
-	else if (pWxMsg && pWxMsg->MsgType == "voice" )
+	else if (nMsgDataType == MSG_DATA_TYPE_VOICE)
 	{
 		string path = FullPath("temp\\") + GetFileId();
 		string fullPath = path + ".amr";
-		if (!PathFileExistsA(fullPath.c_str()))
+		if (!PathFileExistsA(fullPath.c_str()) && pWebUser && pWebUser->m_pWxUserInfo)
 		{
 			CCodeConvert convert;
+			string loadUrl = url;
 			DOWNLOAD_INFO* param = new DOWNLOAD_INFO();
 			param->pUser = NULL;
 			param->pThis = this;
 			param->filePath = convert.URLEncode(path.c_str());
-			param->downLoadUrl = ((WxMsgImage*)pWxMsg)->MediaUrl.c_str();
+			MapWxTokens::iterator iter = m_mapTokens.find(pWebUser->m_pWxUserInfo->fromwxname);
+			if (iter != m_mapTokens.end())
+			{
+				// 重新拼url是将最新token替换上，防止下载图片无效
+				loadUrl = ReplaceToken(url, iter->second);
+			}
+			else
+			{
+				SendGetWxUserInfoAndToken(pWebUser);
+			}
+			param->downLoadUrl = loadUrl;
 			param->msgDataType = MSG_DATA_TYPE_VOICE;
 			if (pAssistUser)
 			{
@@ -4865,13 +4912,45 @@ void CChatManager::DownLoadFile(WxMsgBase* pWxMsg, CWebUserObject *pWebUser, CUs
 			}
 			param->time = GetTimeByMDAndHMS(time);
 			param->pWebUser = pWebUser;
-			param->msgId = GetMsgId();
+			param->msgId = msgId;
 			param->msgFromType = MSG_FROM_WEBUSER;
 			_beginthreadex(NULL, 0, DownLoadFileFromServerThread, (void*)param, 0, NULL);
 		}
 	}
-	else if (pWxMsg && pWxMsg->MsgType == "vedio" )
+	else if (nMsgDataType == MSG_DATA_TYPE_VIDEO)
 	{
+		string path = FullPath("temp\\") + GetFileId();
+		string fullPath = path + ".mp4";
+		if (!PathFileExistsA(fullPath.c_str()) && pWebUser && pWebUser->m_pWxUserInfo)
+		{
+			CCodeConvert convert;
+			string loadUrl = url;
+			DOWNLOAD_INFO* param = new DOWNLOAD_INFO();
+			param->pUser = NULL;
+			param->pThis = this;
+			param->filePath = convert.URLEncode(path.c_str());
+			MapWxTokens::iterator iter = m_mapTokens.find(pWebUser->m_pWxUserInfo->fromwxname);
+			if (iter != m_mapTokens.end())
+			{
+				// 重新拼url是将最新token替换上，防止下载图片无效
+				loadUrl = ReplaceToken(url, iter->second);
+			}
+			else
+			{
+				SendGetWxUserInfoAndToken(pWebUser);
+			}
+			param->downLoadUrl = loadUrl;
+			param->msgDataType = MSG_DATA_TYPE_VIDEO;
+			if (pAssistUser)
+			{
+				param->pUser = pAssistUser;
+			}
+			param->time = GetTimeByMDAndHMS(time);
+			param->pWebUser = pWebUser;
+			param->msgId = msgId;
+			param->msgFromType = MSG_FROM_WEBUSER;
+			_beginthreadex(NULL, 0, DownLoadFileFromServerThread, (void*)param, 0, NULL);
+		}
 	}
 }
 

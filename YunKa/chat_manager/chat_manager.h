@@ -93,7 +93,8 @@ public:
 	// Parameter: msgId 消息id
 	// Parameter: bSuccess 是否发送成功
 	//************************************
-	virtual void ResultSendMsg(string msgId, bool bSuccess) = 0;
+	virtual void ResultSendMsg(string msgId, bool bSuccess = true,unsigned long userId=0,MSG_RECV_TYPE userType= MSG_RECV_WX,
+								MSG_DATA_TYPE msgDataType= MSG_DATA_TYPE_IMAGE, string msg="") = 0;
 
 	//************************************
 	// Method:    ResultScreenCapture
@@ -174,13 +175,11 @@ public:
 	// Parameter: string msgDataType 数据类型
 	// Parameter: string msg 数据内容
 	//************************************
-	int SendTo_Msg(unsigned long userId, USER_TYPE userType, string msgId, MSG_DATA_TYPE msgDataType, string msg);
-
-	// 重新发送一条消息
-	int ReSendTo_Msg(unsigned long webuserid, int userType, string msgId, int msgDataType, char * msg);
+	int SendTo_Msg(unsigned long userId, MSG_RECV_TYPE userType, string msgId, MSG_DATA_TYPE msgDataType, string msg);
 
 	// 重新接收一条消息
-	int ReRecv_Msg(string msgId);
+	int ReRecv_Msg(string url, MSG_FROM_TYPE msgFromUserType, string msgId, MSG_DATA_TYPE nMsgDataType,
+		unsigned long msgFromUserId, unsigned long assistUserId, unsigned long time);
 
 	// 发起接受访客会话
 	int SendTo_AcceptChat(unsigned long webuserid);
@@ -242,9 +241,9 @@ public:
 	//************************************
 	CODE_RECORD_AUDIO StartRecordAudio();
 
-	int StopRecordAudio();
+	CODE_RECORD_AUDIO SendRecordAudio(unsigned long userId, MSG_RECV_TYPE userType);
 
-	int CancelRecordAudio();
+	void CancelRecordAudio();
 
 	// 获取上一次错误信息
 	string GetLastError();
@@ -458,12 +457,12 @@ public:
 
 	CWebUserObject *GetWebUserObjectByScriptFlag(char *scriptflag);	
 
-	void UpLoadFile(unsigned long userId, USER_TYPE userType, string msgId, string filePath,
+	void UpLoadFile(unsigned long userId, MSG_RECV_TYPE userType, string msgId, string filePath,
 					MSG_DATA_TYPE = MSG_DATA_TYPE_IMAGE);
 
-	void DownLoadFile(WxMsgBase* pWxMsg, CWebUserObject *pWebUser, CUserObject *pAssistUser, unsigned int time);
+	void DownLoadFile(CWebUserObject *pWebUser, MSG_DATA_TYPE nMsgDataType, string url, CUserObject *pAssistUser, unsigned int time,string msgId);
 
-	void AfterUpload(unsigned long userId, USER_TYPE userType, string msgId, string mediaID = "",
+	void AfterUpload(unsigned long userId, MSG_RECV_TYPE userType, string msgId, string mediaID = "",
 					MSG_DATA_TYPE = MSG_DATA_TYPE_IMAGE, string fileId = "", string filePath = "");
 
 	string& TransferFaceToStr(string& msg);
@@ -523,6 +522,6 @@ public:
 	int						m_nClientIndex;			// 访客的序列号，自增
 	HMODULE					m_hScreenDll;			// 截图句柄
 	string					m_audioPath;			// 正在录音文件的路径
-	bool					m_isRecording;			// 正在录音
+	bool					m_bRecording;			// 正在录音
 };
 

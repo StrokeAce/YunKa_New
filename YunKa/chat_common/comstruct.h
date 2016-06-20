@@ -341,7 +341,7 @@ struct LISTCHATINFO
 struct SEND_FILE_PARAMS
 {
 	unsigned long userId;	// 接收消息用户的id
-	int userType;			// 用户类型
+	int recvUserType;			// 用户类型
 };
 
 // 重新发送媒体文件时，接收对象的信息传参
@@ -349,7 +349,7 @@ struct RESEND_FILE_PARAMS
 {
 	unsigned long userId;		// 接收消息的用户id
 	string filaPath;			// 发送的文件路径
-	int userType;				// 接收文件的用户类型
+	int recvUserType;			// 接收文件的用户类型
 	string msgId;				// 消息的序列号
 	int msgDataType;			// 消息的数据类型
 };
@@ -357,14 +357,12 @@ struct RESEND_FILE_PARAMS
 // 重新接收媒体文件时，接收对象的信息传参
 struct RERECV_FILE_PARAMS
 {
-	string filaPath;			// 文件的存储路径
-	string url;					// 接收文件的url
-	int userType;				// 发送消息的用户类型
-	string msgId;				// 该消息的序列号
-	int msgDataType;			// 消息的数据类型
-	unsigned long userId;		// 发送消息的用户id
-	unsigned long webUserId;	// ??该结构体可优化
-	unsigned long groupUserId;
+	string url;						// 下载文件的url
+	int msgFromUserType;			// 发送消息的用户类型
+	string msgId;					// 该消息的序列号
+	int msgDataType;				// 消息的数据类型
+	unsigned long msgFromUserId;	// 发送消息的用户的id
+	unsigned long assistUserId;		// 协助对象的id
 };
 
 // 双击头像,切换聊天对象时，切换对象的信息传参
@@ -405,7 +403,7 @@ struct UPLOAD_INFO
 	string filePath;			// 上传文件路径
 	unsigned long userId;		// 用户id
 	MSG_DATA_TYPE msgDataType;	// 消息的数据类型
-	USER_TYPE userType;			// 消息接收用户类型
+	MSG_RECV_TYPE userType;		// 消息接收用户类型
 	string msgId;				// 消息id
 };
 

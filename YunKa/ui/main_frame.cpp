@@ -248,6 +248,10 @@ LRESULT CMainFrame::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
 		}
 		   
 	}
+	else if (uMsg == ON_JS_CALL_MFC)
+	{
+		JsCallMFC(wParam, lParam);
+	}
 
 	if (uMsg == WM_MENU_START)
 	{ 
@@ -1110,12 +1114,12 @@ void CMainFrame::OnBtnSendMessage(TNotifyUI& msg)
 	char getInput[MAX_1024_LEN] = {0};
 	string msgId = m_manager->GetMsgId();
 	string sendMsgData;
-	USER_TYPE sendUserType;
+	MSG_RECV_TYPE sendUserType;
 	MSG_DATA_TYPE sendMsgType;
 
 	//如果当前选择的用户为 空 则不需要发送  测试时暂时屏蔽掉
 	sendUserType = GetSendUserType(m_curSelectId);
-	if (sendUserType == USER_TYPE_ERROR || m_curSelectId <= 0)
+	if (sendUserType == MSG_RECV_ERROR || m_curSelectId <= 0)
 		return;
 
 	ITextServices * pTextServices = m_pSendEdit->GetTextServices();
@@ -1157,7 +1161,7 @@ void CMainFrame::OnBtnSendMessage(TNotifyUI& msg)
 		//显示 发送的消息
 
 
-		ShowMySelfSendMsg(sendMsgData, sendMsgType);
+		ShowMySelfSendMsg(sendMsgData, sendMsgType, msgId);
 	}
 
 	else if (sendMsgType == MSG_DATA_TYPE_IMAGE)
@@ -1169,7 +1173,7 @@ void CMainFrame::OnBtnSendMessage(TNotifyUI& msg)
 			sendMsgData = vecName[i];
 			//ReplaceImageId(sendMsgData);
 
-			ShowMySelfSendMsg(sendMsgData, sendMsgType);
+			ShowMySelfSendMsg(sendMsgData, sendMsgType, msgId);
 		}
 
 	}
@@ -1681,9 +1685,6 @@ void CMainFrame::RecvAcceptChat(CUserObject* pUser, CWebUserObject* pWebUser)
 	char str[MAX_1024_LEN] = {0};
 	sprintf(str, "%s接受了%s邀请的对话", pUser->UserInfo.nickname, pWebUser->info.name);
 
-	//string stime = GetTimeByMDAndHMS
-	AddToMsgList(pWebUser, str, "");
-	
 
 #if 0
 	if (pWebUser->m_strMsgs.empty())
@@ -1772,43 +1773,46 @@ void CMainFrame::RecvReleaseChat(CWebUserObject* pWebUser)
 void CMainFrame::RecvMsg(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, string msgId, MSG_TYPE msgType, MSG_DATA_TYPE msgDataType, string msgContent,
 	string msgTime, CUserObject* pAssistUser, WxMsgBase* msgContentWx, bool bSuccess)
 {
+	if (pObj == NULL || !m_pListMsgHandler.isLoaded)
+		return;
+
 	CWebUserObject    *pWebUserObj = NULL;
 	CUserObject       *pUserObj = NULL;
+	CUserObject       *pAssistObj = NULL;
 	unsigned long     userId = 0;
 
-
-	if (pObj == NULL)
-		return;
-	if (msgContent.length() == 0)
+	if (msgFrom == MSG_FROM_CLIENT || msgFrom == MSG_FROM_ASSIST)
 	{
-		g_WriteLog.WriteLog(C_LOG_ERROR, "插入空的聊天记录");
-		return;
+		pUserObj = (CUserObject *)pObj;
+		userId = pUserObj->UserInfo.uid;
 	}
-	
-	if (msgFrom == MSG_FROM_CLIENT)
-	{
-	}
-	else if (msgFrom == MSG_FROM_WEBUSER)   //微信或者web用户
+	else if (msgFrom == MSG_FROM_WEBUSER)
 	{
 		pWebUserObj = (CWebUserObject *)pObj;
 		userId = pWebUserObj->webuserid;
 	}
 
-	//如果收到的消息不是 当前所选用户的id的，暂时屏蔽，后面需要记录起来，等到选择到后显示出来
 	if (userId != m_curSelectId)
 	{
 		return;
 	}
 
-	if (m_pListMsgHandler.isLoaded)
+	if (msgContent.length() == 0)
+	{
+		g_WriteLog.WriteLog(C_LOG_ERROR, "插入空的聊天记录");
+		return;
+	}
+
+	if (bSuccess)
 	{
 		CefString strCode(msgContent), strUrl("");
 		m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->ExecuteJavaScript(strCode, strUrl, 0);
 	}
-
-
-
-
+	else
+	{
+		CefString strCode(msgContent), strUrl("");
+		m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->ExecuteJavaScript(strCode, strUrl, 0);
+	}
 }
 
 
@@ -1816,8 +1820,27 @@ void CMainFrame::ResultRecvMsg(string msgId, bool bSuccess)
 {
 }
 
-void CMainFrame::ResultSendMsg(string msgId, bool bSuccess)
+void CMainFrame::ResultSendMsg(string msgId, bool bSuccess, unsigned long userId, MSG_RECV_TYPE recvUserType,
+								MSG_DATA_TYPE msgDataType, string msg)
 {
+	char strCallJs[MAX_256_LEN];
+	if (bSuccess)
+	{
+		sprintf(strCallJs, "ResultSendMsg('%s_image','%d');", msgId.c_str(), bSuccess);
+	}
+	else
+	{
+		CCodeConvert convert;
+		string sImagePath;
+		string imagePath = FullPath("SkinRes\\mainframe\\");
+		StringReplace(imagePath, "\\", "/");
+		convert.Gb2312ToUTF_8(sImagePath, imagePath.c_str(), imagePath.length());
+		sprintf(strCallJs, "ResultSendMsg('%s','%d','%s','%s','%d','%d','%lu');", msgId.c_str(), bSuccess,
+			sImagePath.c_str(), msg.c_str(), recvUserType, msgDataType, userId);
+	}
+
+	CefString strCode(strCallJs), strUrl("");
+	m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->ExecuteJavaScript(strCode, strUrl, 0);
 }
 
 void CMainFrame::ResultScreenCapture(string imagePath)
@@ -1845,7 +1868,7 @@ void CMainFrame::OnManagerButtonEvent(TNotifyUI& msg)
 
 }
 
-void CMainFrame::ShowMySelfSendMsg(string strMsg, MSG_DATA_TYPE msgType)
+void CMainFrame::ShowMySelfSendMsg(string strMsg, MSG_DATA_TYPE msgType, string msgId)
 {
 	unsigned long     userId = 0;
 	CCodeConvert      f_covet;
@@ -1871,9 +1894,8 @@ void CMainFrame::ShowMySelfSendMsg(string strMsg, MSG_DATA_TYPE msgType)
 
 	//组合消息
 	string msgTime = GetTimeByMDAndHMS(0);
-	string msgId = m_manager->GetMsgId();
 	sprintf(strJsCode, "AppendMsgToHistory('%d', '%d', '%s', '%s', '%s', '%lu', '%s', '%s', '%d'); ",
-		MSG_FROM_SELF, msgType, name.c_str(), msgTime.c_str(), msg.c_str(), userId, m_mySelfInfo->m_headPath.c_str(), msgId, MSG_FROM_CLIENT);
+		MSG_FROM_SELF, msgType, name.c_str(), msgTime.c_str(), msg.c_str(), userId, m_mySelfInfo->m_headPath.c_str(), msgId.c_str(), MSG_FROM_CLIENT);
 
 	if (m_pListMsgHandler.isLoaded)
 	{
@@ -2079,149 +2101,6 @@ void CMainFrame::ShowClearMsg()
 	}
 
 }
-
-
-
-
-
-void CMainFrame::AddToMsgList(CUserObject *pUser, string strMsg, string strTime,  int userType,
-	int msgType, int msgDataType, string msgId)
-{
-	string            headPath = "";
-	unsigned long     userId = 0;
-	CCodeConvert      f_covet;
-
-	char strJsCode[MAX_1024_LEN] = { 0 };
-	string  name, msg;
-
-
-	if (pUser == NULL)
-		return;
-	if (strMsg.length() == 0)
-	{
-		g_WriteLog.WriteLog(C_LOG_ERROR, "插入空的聊天记录");
-		return;
-	}
-
-	int urlPos = strMsg.find("用户头像地址:");
-	int urlPos1 = strMsg.find("user_headimgurl:");
-	int urlPos2 = strMsg.find(">立即评价</a>");
-	if (urlPos > -1 || urlPos1 > -1 || urlPos2 > -1)
-	{
-		return;
-	}
-
-	userId = pUser->UserInfo.uid;
-	string strName = pUser->UserInfo.nickname;
-	StringReplace(strName, "\\", "\\\\");
-	StringReplace(strName, "'", "&#039;");
-	StringReplace(strName, "\r\n", "<br>");
-	f_covet.Gb2312ToUTF_8(name, strName.c_str(), strName.length());
-
-	StringReplace(strMsg, "\\", "\\\\");
-	StringReplace(strMsg, "'", "&#039;");
-	StringReplace(strMsg, "\r\n", "<br>");
-
-	//这里需要把收到的内容做一下 还原
-	ReplaceFaceId(strMsg);
-	f_covet.Gb2312ToUTF_8(msg, strMsg.c_str(), strMsg.length());
-
-	if (headPath.empty())
-	{
-		// 没有取到头像时，显示默认头像
-		string defaultHead = FullPath("res\\headimages\\default.png");
-
-		StringReplace(defaultHead, "\\", "/");
-		f_covet.Gb2312ToUTF_8(headPath, defaultHead.c_str(), defaultHead.length());
-	}
-	//组合消息
-	sprintf(strJsCode, "AppendMsgToHistory('%d', '%d', '%s', '%s', '%s', '%lu', '%s', '%s', '%d'); ",
-		msgType,
-		msgDataType, name.c_str(), strTime.c_str(), msg.c_str(), userId, headPath.c_str(), msgId, userType);
-
-	if (m_pListMsgHandler.isLoaded)
-	{
-		CefString strCode(strJsCode), strUrl("");
-		m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->ExecuteJavaScript(strCode, strUrl, 0);
-	}
-
-}
-void CMainFrame::AddToMsgList(CWebUserObject *pWebUser, string strMsg, string strTime, int userType,
-	int msgType , int msgDataType , CUserObject* pUser , string msgId )
-{
-	//string            headPath = "";
-	//unsigned long     userId = 0;
-	//CCodeConvert      f_covet;
-
-	//char strJsCode[MAX_1024_LEN] = { 0 };
-	//string  name, msg;
-
-
-	//if (pWebUser == NULL)
-	//	return;
-	//if (strMsg.length() == 0)
-	//{
-	//	g_WriteLog.WriteLog(C_LOG_ERROR, "插入空的聊天记录");
-	//	return;
-	//}
-
-	//int urlPos = strMsg.find("用户头像地址:");
-	//int urlPos1 = strMsg.find("user_headimgurl:");
-	//int urlPos2 = strMsg.find(">立即评价</a>");
-	//if (urlPos > -1 || urlPos1 > -1 || urlPos2 > -1)
-	//{
-	//	return;
-	//}
-
-	//userId = pWebUser->webuserid;
-	//string strName = pWebUser->info.name;
-	//StringReplace(strName, "\\", "\\\\");
-	//StringReplace(strName, "'", "&#039;");
-	//StringReplace(strName, "\r\n", "<br>");
-	//f_covet.Gb2312ToUTF_8(name, strName.c_str(), strName.length());
-
-	//StringReplace(strMsg, "\\", "\\\\");
-	//StringReplace(strMsg, "'", "&#039;");
-	//StringReplace(strMsg, "\r\n", "<br>");
-
-	////这里需要把收到的内容做一下 还原
-	//ReplaceFaceId(strMsg);
-	//f_covet.Gb2312ToUTF_8(msg, strMsg.c_str(), strMsg.length());
-
-	//// 微信用户发来的
-	//if (pWebUser->m_bIsFrWX)
-	//{
-	//	if (pWebUser->m_pWxUserInfo != NULL && !pWebUser->m_pWxUserInfo->headimgurl.empty())
-	//	{
-	//		headPath = pWebUser->m_pWxUserInfo->headimgurl;
-	//	}
-	//	else
-	//	{
-	//		// 当没有头像时，说明没有收到userinfo，主动去获取，包括token也去获取一次
-	//		//m_pFrame->GetWxUserInfoAndToken(pWebUser);
-	//	}
-	//}
-
-	//if (headPath.empty())
-	//{
-	//	// 没有取到头像时，显示默认头像
-	//	string defaultHead = FullPath("res\\headimages\\default.png");
-
-	//	StringReplace(defaultHead, "\\", "/");
-	//	f_covet.Gb2312ToUTF_8(headPath, defaultHead.c_str(), defaultHead.length());
-	//}
-	////组合消息
-	//sprintf(strJsCode, "AppendMsgToHistory('%d', '%d', '%s', '%s', '%s', '%lu', '%s', '%s', '%d'); ",
-	//	msgType,msgDataType, name.c_str(), strTime.c_str(), msg.c_str(), userId, headPath.c_str(), msgId, userType);
-
-	if (m_pListMsgHandler.isLoaded)
-	{
-		CefString strCode(strMsg), strUrl("");
-		m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->ExecuteJavaScript(strCode, strUrl, 0);
-	}
-
-}
-
 
 void CMainFrame::ChangeShowUserMsgWnd(unsigned long id)
 {
@@ -2477,14 +2356,14 @@ bool CMainFrame::SaveBitmapToFile(HBITMAP hbitmap,BITMAP bitmap, string lpFileNa
 }
 
 
-USER_TYPE CMainFrame::GetSendUserType(unsigned long id)
+MSG_RECV_TYPE CMainFrame::GetSendUserType(unsigned long id)
 {
-	USER_TYPE type = USER_TYPE_CLIENT;
+	MSG_RECV_TYPE type = MSG_RECV_CLIENT;
 	CUserObject *pUser = NULL;
 	CWebUserObject  *pWebUser = NULL;
 
 	if (id == 0)
-		return USER_TYPE_ERROR;
+		return MSG_RECV_ERROR;
 
 	CheckIdForUerOrWebuser(id,&pWebUser,&pUser);
 	//CUserObject *pUser = m_manager->GetUserObjectByUid(id);
@@ -2493,15 +2372,15 @@ USER_TYPE CMainFrame::GetSendUserType(unsigned long id)
 		//CWebUserObject  *pWebUser = m_manager->GetWebUserObjectByUid(id);
 		if (pWebUser == NULL)
 		{
-			type = USER_TYPE_ERROR;
+			type = MSG_RECV_ERROR;
 		}
 		else if(pWebUser->m_bIsFrWX)
 		{
-			type = USER_TYPE_WX;
+			type = MSG_RECV_WX;
 		}
 		else
 		{
-			type = USER_TYPE_WEB;
+			type = MSG_RECV_WEB;
 		}
 
 	}
@@ -2700,8 +2579,10 @@ string CMainFrame::CreateClientInfoHtml(WxUserInfo* pWxUser)
 
 void CMainFrame::OnBtnVoice(TNotifyUI& msg)
 {
-
-
+	char strJsCode[MAX_256_LEN];
+	sprintf(strJsCode, "StartRecordAudio(\"%lu\",\"%d\");", m_curSelectId, MSG_RECV_WX);
+	CefString strCode(strJsCode), strUrl("");
+	m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->ExecuteJavaScript(strCode, strUrl, 0);
 }
 
 
@@ -2780,4 +2661,57 @@ void CMainFrame::InitRightTalkList()
 	m_pTalkList->ExpandNode(TalkList5, false);	
 	m_pTalkList->ExpandNode(TalkList6, false);
 	m_pTalkList->ExpandNode(TalkList7, false);
+}
+
+void CMainFrame::JsCallMFC(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == JS_CALL_START_RECORD)
+	{
+		CODE_RECORD_AUDIO result = m_manager->StartRecordAudio();
+		if (result != CODE_AUDIO_SUCCESS)
+		{
+			string strJsCode = "CancelRecord();";
+			CefString strCode(strJsCode), strUrl("");
+			m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->ExecuteJavaScript(strCode, strUrl, 0);
+			return;
+		}
+	}
+	else if (wParam == JS_CALL_SEND_AUDIO)
+	{
+		SEND_FILE_PARAMS* sendFile = (SEND_FILE_PARAMS*)lParam;
+		unsigned long userId = sendFile->userId;
+		MSG_RECV_TYPE recvUserType = (MSG_RECV_TYPE)sendFile->recvUserType;
+		delete sendFile;
+		m_manager->SendRecordAudio(userId, recvUserType);
+	}
+	else if (wParam == JS_CALL_CANCEL_RECORD)
+	{
+		// 取消录制
+		m_manager->CancelRecordAudio();
+	}
+	else if (wParam == JS_CALL_RESEND_FILE)
+	{
+		RESEND_FILE_PARAMS* reSendFile = (RESEND_FILE_PARAMS*)lParam;
+		unsigned long userId = reSendFile->userId;
+		MSG_RECV_TYPE recvUserType = (MSG_RECV_TYPE)reSendFile->recvUserType;
+		string filaPath = reSendFile->filaPath;
+		MSG_DATA_TYPE msgDataType = (MSG_DATA_TYPE)reSendFile->msgDataType;
+		string msgId = reSendFile->msgId;
+		delete reSendFile;
+
+		m_manager->SendTo_Msg(userId, recvUserType, msgId, msgDataType, filaPath);
+	}
+	else if (wParam == JS_CALL_RERECV_FILE)
+	{
+		RERECV_FILE_PARAMS* reRecvParams = (RERECV_FILE_PARAMS*)lParam;
+		string url = reRecvParams->url;
+		MSG_FROM_TYPE msgFromUserType = (MSG_FROM_TYPE)reRecvParams->msgFromUserType;
+		string msgId = reRecvParams->msgId;
+		MSG_DATA_TYPE msgDataType = (MSG_DATA_TYPE)reRecvParams->msgDataType;
+		unsigned long msgFromUserId = reRecvParams->msgFromUserId;
+		unsigned long assistUserId = reRecvParams->assistUserId;
+		delete reRecvParams;
+
+		m_manager->ReRecv_Msg(url, msgFromUserType, msgId, msgDataType, msgFromUserId, assistUserId, 0);
+	}
 }

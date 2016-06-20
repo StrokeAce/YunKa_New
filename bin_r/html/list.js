@@ -190,7 +190,7 @@ function AppendMsgToHistory(msgFrom, msgType, sname, time, content, userId, head
 			}
 			else if (msgType == 4)
 			{
-			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'><video controls = 'controls' src = '" + msgcontent + " type = 'video/mp4'></video></div></div>";
+			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'><video controls = 'controls' src = '" + msgcontent + "' type = 'video/mp4'></video></div></div>";
 			}
 			else if (msgType == 5)
 			{

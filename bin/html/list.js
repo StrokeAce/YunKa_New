@@ -120,7 +120,7 @@ function AppendPromptUnreadMessage(content){
 }
 
 // 添加一条消息到消息记录
-function AppendMsgToHistory(msgFrom, msgType, sname, time, content, userId, head, msgid, userType)
+function AppendMsgToHistory(msgFrom, msgDataType, sname, time, content, userId, head, msgid, userType)
 {
 	var lstmsg = document.createElement("div");
 	lstmsg.id = msgid;
@@ -145,27 +145,27 @@ function AppendMsgToHistory(msgFrom, msgType, sname, time, content, userId, head
 		{
 			// 发送消息
 			head = head.replace(/\\/g, "\\\\");
-			if(msgType == 1)
+			if(msgDataType == 1)
 			{
-				lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>"+sname+"&nbsp;<img class = 'head_image' src='"+ head + "'></div><div class='msg_send_text'>"+msgcontent+"</div></div>";
+				lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>"+ sname +"&nbsp;<img class = 'head_image' src='"+ head + "'></div><div class='msg_send_text'>"+msgcontent+"</div></div>";
 			}
-			else if(msgType == 2)
+			else if(msgDataType == 2)
 			{
-			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;<img class = 'head_image' src='" + head + "'></div><div class='msg_send_image'><img style='border:1px #cdcdcb solid;' src='" + msgcontent + "' width=30%%></div></div>";
+			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;<img class = 'head_image' src='" + head + "'></div><div class='msg_send_image'><img id='" + msgid + "_image' class='wait_image' src='F:/YunKa/trunk/bin/SkinRes/mainframe/msg_wait.gif'><img class='msg_image' src='" + msgcontent + "'></div></div>";
 			}
-			else if( msgType == 3)
+			else if( msgDataType == 3)
 			{
 			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;<img class = 'head_image' src='" + head + "'></div><div class='msg_send_image'><audio controls = 'controls' src = '" + msgcontent + "' type = 'audio/mpeg' /></div></div>";
 			}
-			else if (msgType == 4)
+			else if (msgDataType == 4)
 			{
 			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;<img class = 'head_image' src='" + head + "'></div><div class='msg_send_image'><video controls = 'controls' src = '" + msgcontent + " type = 'video/mp4'></video></div></div>";
 			}
-			else if ( msgType == 5)
+			else if ( msgDataType == 5)
 			{
 			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;<img class = 'head_image' src='" + head + "'></div><div class='msg_send_image'>" + msgcontent + "</div></div>";
 			}
-			else if (msgType == 6)
+			else if (msgDataType == 6)
 			{
 			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;<img class = 'head_image' src='" + head + "'></div><div class='msg_send_image'>" + msgcontent + "</div></div>";
 			}
@@ -176,27 +176,34 @@ function AppendMsgToHistory(msgFrom, msgType, sname, time, content, userId, head
 	    case MSG_FROM_CLIENT:
 		{
 			// 接收消息
-			if(msgType == 1)
+			if(msgDataType == 1)
 			{
 				lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='"+ head +"' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;"+sname+"<font class='time'>"+time+"</font></div><div class='msg_recv_text'>"+msgcontent+"</div></div>";
 			}
-			else if(msgType == 2)
+			else if(msgDataType == 2)
 			{
-			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'><img style='border:1px #cdcdcb solid;' src='" + msgcontent + "' width=30%%></div></div>";
+			    if (content && typeof (content) != "undefined" && content != 0)
+			    {
+			        lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'><img class='msg_image' src='" + msgcontent + "'></div></div>";
+			    }
+			    else
+			    {
+			        lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'><img class='msg_image' src='F:/YunKa/trunk/bin/SkinRes/mainframe/recv_image_fail.jpg'><img id='" + msgid + "_image' class='wait_image' src='F:/YunKa/trunk/bin/SkinRes/mainframe/msg_wait.gif'></div></div>";
+			    }
 			}
-			else if (msgType == 3)
+			else if (msgDataType == 3)
 			{
 			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'><audio controls = 'controls' src = '" + msgcontent + "' type = 'audio/mpeg' /></div></div>";
 			}
-			else if (msgType == 4)
+			else if (msgDataType == 4)
 			{
-			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'><video controls = 'controls' src = '" + msgcontent + " type = 'video/mp4'></video></div></div>";
+			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'><video controls = 'controls' src = '" + msgcontent + "' type = 'video/mp4'></video></div></div>";
 			}
-			else if (msgType == 5)
+			else if (msgDataType == 5)
 			{
 			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'>" + msgcontent + "</div></div>";
 			}
-			else if (msgType == 6)
+			else if (msgDataType == 6)
 			{
 			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'>" + msgcontent + "</div></div>";
 			}
@@ -254,22 +261,22 @@ function StartRecordAudio(userId,userType)
 // 录音开始计时
 function StartTimer()
 {
-            /*setInterval() 间隔指定的毫秒数不停地执行指定的代码*/
-            timeforrecord=0;
-            bar=0;
-            myVar=setInterval(
-                    function()
-                    {
-                        if(timeforrecord<=60)
-                        {
-                            IncreaseTimer()
-                        }
-                        else
-                        {
-                           StopTimer()
-                        }
-                    }
-                    ,1000)
+    /*setInterval() 间隔指定的毫秒数不停地执行指定的代码*/
+    timeforrecord=0;
+    bar=0;
+    myVar=setInterval(
+            function()
+            {
+                if(timeforrecord<=60)
+                {
+                    IncreaseTimer()
+                }
+                else
+                {
+                    StopTimer()
+                }
+            }
+            ,1000)
 }
 
 // 计时每秒加1
@@ -284,7 +291,7 @@ function IncreaseTimer()
 // 停止计时
 function StopTimer()
 {
-		clearInterval(myVar);
+	clearInterval(myVar);
     $preview.innerHTML = "";
     window.RunMsgList('SendAudio',g_userId,g_userType);
 }
@@ -309,8 +316,8 @@ function CancelRecord()
 // 重新发送语音
 function ReSendFile(filePath,userType,msgId,msgDataType,userId) 
 {
-		document.getElementById(msgId).innerHTML = "";
-		window.RunMsgList('ReSendFile',filePath,userType,msgId,msgDataType,userId);
+	document.getElementById(msgId).innerHTML = "";
+	window.RunMsgList('ReSendFile',filePath,userType,msgId,msgDataType,userId);
 }
 
 // 重新接收语音 
@@ -324,12 +331,50 @@ function ReSendFile(filePath,userType,msgId,msgDataType,userId)
 // groupUserId 消息所属的群,群主的id
 function ReRecvFile(filePath,url,userType,msgId,msgDataType,userId,webUserId,groupUserId)
 {
-		document.getElementById(msgId).innerHTML = "";
-		window.RunMsgList('ReRecvFile',filePath,url,userType,msgId,msgDataType,userId,webUserId,groupUserId);
+	document.getElementById(msgId).innerHTML = "";
+	window.RunMsgList('ReRecvFile',filePath,url,userType,msgId,msgDataType,userId,webUserId,groupUserId);
 }
 
 function ReSendMsg(msgId,userId,userType,mediaID,msgDataType,fileId,filePath)
 {
-		document.getElementById(msgId).remove();
-		window.RunMsgList('ReSendMsg',msgId, userId, userType, mediaID, msgDataType, fileId, filePath);
+	document.getElementById(msgId).remove();
+	window.RunMsgList('ReSendMsg',msgId, userId, userType, mediaID, msgDataType, fileId, filePath);
+}
+
+function ResultSendMsg(msgId, bSuccess, imagePath, filePath, recvUserType, msgDataType, userId)
+{
+    if (bSuccess == '0')
+    {
+        var oImg = document.getElementById(msgId+"_image");
+        oImg.src = imagePath + "msg_fail.png";
+        oImg.onclick = function ()
+        {
+            window.RunMsgList('ReSendFile', filePath, recvUserType, msgId, msgDataType, userId);
+            oImg.src = imagePath + "msg_wait.gif";
+        }
+    }
+    else
+    {
+        var oImg = document.getElementById(msgId);
+        oImg.src = "";
+    }
+}
+
+function ResultRecvMsg(msgId, bSuccess, imagePath, filePath, msgFromType, msgDataType, userId)
+{
+    if (bSuccess == '0')
+    {
+        var oImg = document.getElementById(msgId + "_image");
+        oImg.src = imagePath + "msg_fail.png";
+        oImg.onclick = function ()
+        {
+            window.RunMsgList('ReRecvFile', url, msgFromType, msgId, msgDataType, msgFromUserId, assistUserId);
+            oImg.src = imagePath + "msg_wait.gif";
+        }
+    }
+    else
+    {
+        var oImg = document.getElementById(msgId);
+        oImg.src = "";
+    }
 }

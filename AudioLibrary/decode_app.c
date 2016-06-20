@@ -38,7 +38,7 @@ _declspec(dllexport) void RunAudio( char* amrID)
 }
 
 // 仅仅是转码
-_declspec(dllexport) void AMRToWAV(char* amrID)
+_declspec(dllexport) void AMRToWAV(const char* amrID)
 {
 	char wavPath[MAX_PATH];
 	ZeroMemory(wavPath, MAX_PATH);

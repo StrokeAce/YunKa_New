@@ -68,7 +68,7 @@ int Stop_Record_WAV()
 		// 超过1秒的音频才保存，否则算无效音频，不予保存
 		DWORD end_time = GetTickCount();
 		if (end_time - g_start_time < 1000)
-			return -1;
+			return 3;
 		else
 			SaveWav();
 	}

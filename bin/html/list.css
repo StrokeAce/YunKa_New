@@ -28,6 +28,8 @@ a { text-decoration:none; }
 .recv_name { color:#da4901; vertical-align:top;}
 .time { font-family:"Times New Roman", Times, serif; color:#999999; font-size:8pt; padding-left:5px; -webkit-user-select:none; vertical-align:top;}
 .head_image {-moz-user-select:none;width:30px;height:30px;}
+.msg_image{ width:30%;border:1px #cdcdcb solid;}
+.wait_image{ margin-right:20px;margin-left:20px;cursor:pointer;}
 .msg_send_text { 
 		height:auto;
 		margin-right:35px;

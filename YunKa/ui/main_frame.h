@@ -20,14 +20,6 @@
 #define MAX_PATH_LENGTH           1024
 
 
-#define MSG_TYPE_SYS  3               //系统消息
-/** 聊天用户的类型区分 */
-#define  User_Type_Client 1 // 坐席用户
-#define  User_Type_Wx 2	// 微信用户
-#define  User_Type_Web 3 // 网页用户
-#define  User_Type_WxGroup 4 // 微信群用户
-
-
 
 typedef struct CONTROL_ATTR
 {
@@ -161,22 +153,23 @@ public:    //主界面消息回调
 
 	virtual void RecvAcceptChat(CUserObject* pUser, CWebUserObject* pWebUser);
 
-		virtual void RecvCloseChat(CWebUserObject* pWebUser);
+	virtual void RecvCloseChat(CWebUserObject* pWebUser);
 
-		virtual void RecvReleaseChat(CWebUserObject* pWebUser);
+	virtual void RecvReleaseChat(CWebUserObject* pWebUser);
 
-		virtual void RecvMsg(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, string msgId, MSG_TYPE msgType, MSG_DATA_TYPE msgDataType, string msgContent,
-			string msgTime, CUserObject* pAssistUser, WxMsgBase* msgContentWx, bool bSuccess);
+	virtual void RecvMsg(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, string msgId, MSG_TYPE msgType, MSG_DATA_TYPE msgDataType, string msgContent,
+		string msgTime, CUserObject* pAssistUser, WxMsgBase* msgContentWx, bool bSuccess);
 
-		virtual void ResultRecvMsg(string msgId, bool bSuccess);
+	virtual void ResultRecvMsg(string msgId, bool bSuccess);
 
-		virtual void ResultSendMsg(string msgId, bool bSuccess);
+	virtual void ResultSendMsg(string msgId, bool bSuccess = true, unsigned long userId = 0, MSG_RECV_TYPE recvUserType = MSG_RECV_WX,
+		MSG_DATA_TYPE msgDataType = MSG_DATA_TYPE_IMAGE, string msg = "");
 
-		virtual void ResultScreenCapture(string imagePath);
+	virtual void ResultScreenCapture(string imagePath);
 
-		virtual void ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, bool bSuccess);
+	virtual void ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, bool bSuccess);
 
-		virtual void ResultTransferUser(CWebUserObject* pWebUser, CUserObject* pUser, bool bSuccess);
+	virtual void ResultTransferUser(CWebUserObject* pWebUser, CUserObject* pUser, bool bSuccess);
 
 public:
 	//自己定义的操作函数
@@ -208,7 +201,7 @@ public:
 	bool CMainFrame::SaveBitmapToFile(HBITMAP hbitmap, BITMAP bitmap, string lpFileName);
 
 //	void CMainFrame::ReplaceFaceId(string &msg);
-	void CMainFrame::ShowMySelfSendMsg(string strMsg, MSG_DATA_TYPE msgType);
+	void CMainFrame::ShowMySelfSendMsg(string strMsg, MSG_DATA_TYPE msgType, string msgId);
 	void CMainFrame::MoveAndRestoreMsgWnd(int type);
 	void CMainFrame::InitLibcef(void);
 	void CMainFrame::LoadBrowser(char* url);
@@ -217,17 +210,13 @@ public:
 	void CMainFrame::ShowClearMsg();
 	void CMainFrame::ChangeShowUserMsgWnd(unsigned long id);
 	void CMainFrame::SetHandler();
-	USER_TYPE  CMainFrame::GetSendUserType(unsigned long id);
+	MSG_RECV_TYPE  CMainFrame::GetSendUserType(unsigned long id);
 	void CMainFrame::CheckIdForUerOrWebuser(unsigned long id, CWebUserObject **pWebUser, CUserObject **pUser);
 	string CMainFrame::CreateClientInfoHtml(WxUserInfo* pWxUser);
 	void CMainFrame::MoveAndRestoreRightFrameControl(int type); //0 max 1 retore
 	void CMainFrame::InitRightTalkList();
 
-
-	void AddToMsgList(CUserObject *pUser, string strMsg, string strTime, int userType = MSG_FROM_WEBUSER,
-		int msgType = MSG_TYPE_SYS, int msgDataType = MSG_DATA_TYPE_TEXT, string msgId = "");
-	void AddToMsgList(CWebUserObject *pWebUser, string strMsg, string strTime, int userType = User_Type_Wx,
-		int msgType = MSG_TYPE_SYS, int msgDataType = MSG_DATA_TYPE_TEXT, CUserObject* pUser = NULL, string msgId = "");
+	void JsCallMFC(WPARAM wParam, LPARAM lParam);
 
 protected:
 

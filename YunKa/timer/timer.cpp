@@ -19,7 +19,7 @@ void CTimer::Run()
 		tickNow = ::GetTickCount();
 		if (tickNow - tickLastTime > m_interval)
 		{
-			if (m_handler)
+			if (m_handler != NULL && m_this != NULL && !m_stopFlag)
 			{
 				(*m_handler)(m_id, m_this);
 			}
@@ -60,13 +60,7 @@ CTimerManager::CTimerManager(TimerHandler func, LPVOID pThis)
 
 CTimerManager::~CTimerManager()
 {
-	map<int, CTimer*>::iterator iter = m_mapTimers.begin();
-	for (iter; iter != m_mapTimers.end();iter++)
-	{
-		iter->second->Stop();
-		delete iter->second;
-	}
-	m_mapTimers.clear();
+	TimerClear();
 }
 
 void CTimerManager::SetTimer(int time, int timerId)
@@ -89,4 +83,15 @@ void CTimerManager::KillTimer(int timerId)
 		delete iter->second;
 		m_mapTimers.erase(iter);
 	}
+}
+
+void CTimerManager::TimerClear()
+{
+	map<int, CTimer*>::iterator iter = m_mapTimers.begin();
+	for (iter; iter != m_mapTimers.end(); iter++)
+	{
+		iter->second->Stop();
+		delete iter->second;
+	}
+	m_mapTimers.clear();
 }

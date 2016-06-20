@@ -45,6 +45,8 @@ public:
 
 	void KillTimer(int timerId);
 
+	void TimerClear();
+
 private:
 	map<int, CTimer*>		m_mapTimers;
 	TimerHandler			m_handler;

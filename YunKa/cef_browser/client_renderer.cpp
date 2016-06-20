@@ -5,11 +5,10 @@
 
 #include <sstream>
 #include <string>
-
+#include "../chat_common/comdef.h"
 #include <include/cef_dom.h>
 #include <include/wrapper/cef_helpers.h>
 #include <include/wrapper/cef_message_router.h>
-#include "../Include/comdef.h"
 
 using namespace std;
 
@@ -34,7 +33,126 @@ public:
 		CefRefPtr<CefV8Value>& retval,
 		CefString& exception)
 	{
-		
+		if (name == "RunWebURL")
+		{
+			if (arguments.size() == 6 && arguments[0]->GetStringValue() == Js_Call_MFC_Func_RestartSession)
+			{
+				string value1(arguments[1]->GetStringValue());
+				string value2(arguments[2]->GetStringValue());
+				string value3(arguments[3]->GetStringValue());
+				string value4(arguments[4]->GetStringValue());
+				string value5(arguments[5]->GetStringValue());
+				string msg = "rand=" + value1 + "&clientid=" + value2 + "&clientuin=" + value3 + "&chatfrom=" + value4 + "&wxappid=" + value5;
+
+				CefRefPtr<CefProcessMessage> message =
+					CefProcessMessage::Create(kFocusedNodeChangedMessage);
+				message->GetArgumentList()->SetString(0, Js_Call_MFC_Func_RestartSession);
+				message->GetArgumentList()->SetString(1, msg);
+				m_browser->SendProcessMessage(PID_BROWSER, message);
+			}
+		}
+		else if (name == "RunMsgList")
+		{
+			if (arguments.size() == 1 && arguments[0]->GetStringValue() == Js_Call_MFC_Func_StartRecord)
+			{
+				CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create(kFocusedNodeChangedMessage);
+				message->GetArgumentList()->SetString(0, Js_Call_MFC_Func_StartRecord);
+				m_browser->SendProcessMessage(PID_BROWSER, message);
+			}
+			else if (arguments.size() == 1 && arguments[0]->GetStringValue() == Js_Call_MFC_Func_CancelRecord)
+			{
+				CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create(kFocusedNodeChangedMessage);
+				message->GetArgumentList()->SetString(0, Js_Call_MFC_Func_CancelRecord);
+				m_browser->SendProcessMessage(PID_BROWSER, message);
+			}
+			else if (arguments.size() == 2 && arguments[0]->GetStringValue() == Js_Call_MFC_Func_ViewDetails)
+			{
+				string url(arguments[1]->GetStringValue());
+				CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create(kFocusedNodeChangedMessage);
+				message->GetArgumentList()->SetString(0, Js_Call_MFC_Func_ViewDetails);
+				message->GetArgumentList()->SetString(1, url);
+				m_browser->SendProcessMessage(PID_BROWSER, message);
+			}
+			else if (arguments.size() == 3 && arguments[0]->GetStringValue() == Js_Call_MFC_Func_ChangeChatObject)
+			{
+				string userId(arguments[1]->GetStringValue());
+				string userType(arguments[2]->GetStringValue());
+
+				CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create(kFocusedNodeChangedMessage);
+				message->GetArgumentList()->SetString(0, Js_Call_MFC_Func_ChangeChatObject);
+				message->GetArgumentList()->SetString(1, userId);
+				message->GetArgumentList()->SetString(2, userType);
+				m_browser->SendProcessMessage(PID_BROWSER, message);
+			}
+			else if (arguments.size() == 3 && arguments[0]->GetStringValue() == Js_Call_MFC_Func_SendAudio)
+			{
+				string userId(arguments[1]->GetStringValue());
+				string userType(arguments[2]->GetStringValue());
+
+				CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create(kFocusedNodeChangedMessage);
+				message->GetArgumentList()->SetString(0, Js_Call_MFC_Func_SendAudio);
+				message->GetArgumentList()->SetString(1, userId);
+				message->GetArgumentList()->SetString(2, userType);
+				m_browser->SendProcessMessage(PID_BROWSER, message);
+			}
+			else if (arguments.size() == 6 && arguments[0]->GetStringValue() == Js_Call_MFC_Func_ReSendFile)
+			{
+				string filePath(arguments[1]->GetStringValue());
+				string userType(arguments[2]->GetStringValue());
+				string msgId(arguments[3]->GetStringValue());
+				string msgDataType(arguments[4]->GetStringValue());
+				string userId(arguments[5]->GetStringValue());
+
+				CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create(kFocusedNodeChangedMessage);
+				message->GetArgumentList()->SetString(0, Js_Call_MFC_Func_ReSendFile);
+				message->GetArgumentList()->SetString(1, filePath);
+				message->GetArgumentList()->SetString(2, userType);
+				message->GetArgumentList()->SetString(3, msgId);
+				message->GetArgumentList()->SetString(4, msgDataType);
+				message->GetArgumentList()->SetString(5, userId);
+				m_browser->SendProcessMessage(PID_BROWSER, message);
+			}
+			else if (arguments.size() == 8 && arguments[0]->GetStringValue() == Js_Call_MFC_Func_ReSendMsg)
+			{
+				string msgId(arguments[1]->GetStringValue());
+				string userId(arguments[2]->GetStringValue());
+				string userType(arguments[3]->GetStringValue());
+				string mediaId(arguments[4]->GetStringValue());
+				string msgDataType(arguments[5]->GetStringValue());
+				string fileId(arguments[6]->GetStringValue());
+				string filePath(arguments[7]->GetStringValue());
+
+				CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create(kFocusedNodeChangedMessage);
+				message->GetArgumentList()->SetString(0, Js_Call_MFC_Func_ReSendMsg);
+				message->GetArgumentList()->SetString(1, msgId);
+				message->GetArgumentList()->SetString(2, userId);
+				message->GetArgumentList()->SetString(3, userType);
+				message->GetArgumentList()->SetString(4, mediaId);
+				message->GetArgumentList()->SetString(5, msgDataType);
+				message->GetArgumentList()->SetString(6, fileId);
+				message->GetArgumentList()->SetString(7, filePath);
+				m_browser->SendProcessMessage(PID_BROWSER, message);
+			}
+			else if (arguments.size() == 7 && arguments[0]->GetStringValue() == Js_Call_MFC_Func_ReRecvFile)
+			{
+				string url(arguments[1]->GetStringValue());
+				string msgFromUserType(arguments[2]->GetStringValue());
+				string msgId(arguments[3]->GetStringValue());
+				string msgDataType(arguments[4]->GetStringValue());
+				string msgFromUserId(arguments[5]->GetStringValue());
+				string assistUserId(arguments[6]->GetStringValue());
+
+				CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create(kFocusedNodeChangedMessage);
+				message->GetArgumentList()->SetString(0, Js_Call_MFC_Func_ReRecvFile);
+				message->GetArgumentList()->SetString(1, url);
+				message->GetArgumentList()->SetString(2, msgFromUserType);
+				message->GetArgumentList()->SetString(3, msgId);
+				message->GetArgumentList()->SetString(4, msgDataType);
+				message->GetArgumentList()->SetString(5, msgFromUserId);
+				message->GetArgumentList()->SetString(6, assistUserId);
+				m_browser->SendProcessMessage(PID_BROWSER, message);
+			}
+		}
 		return true;
 	}
 

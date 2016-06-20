@@ -1,14 +1,14 @@
 // Copyright (c) 2013 The Chromium Embedded Framework Authors. All rights
 // reserved. Use of this source code is governed by a BSD-style license that
 // can be found in the LICENSE file.
-#include "StdAfx.h"
+
 #include <stdio.h>
 #include <algorithm>
 #include <set>
 #include <sstream>
 #include <vector>
 
-
+#include "../chat_common/comstruct.h"
 #include <include/base/cef_bind.h>
 #include <include/cef_browser.h>
 #include <include/cef_frame.h>
@@ -126,8 +126,141 @@ bool ClientHandler::OnProcessMessageReceived(
   std::string message_name = message->GetName();
   if (message_name == client_renderer::kFocusedNodeChangedMessage) 
   {
-	
-    return true;
+	  int count = message->GetArgumentList()->GetSize();
+	  if (count == 1)
+	  {
+		  std::string msg_param1 = message->GetArgumentList()->GetString(0);
+		  if (msg_param1 == Js_Call_MFC_Func_StartRecord)
+		  {
+			  PostMessage(m_hWnd, ON_JS_CALL_MFC, JS_CALL_START_RECORD, 0);
+		  }
+		  else if (msg_param1 == Js_Call_MFC_Func_CancelRecord)
+		  {
+			  PostMessage(m_hWnd, ON_JS_CALL_MFC, JS_CALL_CANCEL_RECORD, 0);
+		  }
+	  }
+	  else if (count == 2)
+	  {
+		  std::string msg_param1 = message->GetArgumentList()->GetString(0);
+		  std::string msg_param2 = message->GetArgumentList()->GetString(1);
+
+		  int nbuflen = msg_param2.size();
+		  char* msg_new = new char[nbuflen + 1];
+		  memset(msg_new, 0, nbuflen + 1);
+		  strcpy(msg_new, msg_param2.c_str());
+
+		  if (msg_param1 == Js_Call_MFC_Func_RestartSession)
+		  {
+			  PostMessage(m_hWnd, ON_JS_CALL_MFC, JS_CALL_RESTART_SESSION, (LPARAM)msg_new);
+		  }
+		  else if (msg_param1 == Js_Call_MFC_Func_ViewDetails)
+		  {
+			  PostMessage(m_hWnd, ON_JS_CALL_MFC, JS_CALL_VIEW_DETAILS, (LPARAM)msg_new);
+		  }
+		  else
+		  {
+			  delete[] msg_new;
+		  }
+	  }
+	  else if (count == 3)
+	  {
+		  std::string msg_param1 = message->GetArgumentList()->GetString(0);
+
+		  if (msg_param1 == Js_Call_MFC_Func_SendAudio)
+		  {
+			  std::string userId = message->GetArgumentList()->GetString(1);
+			  std::string userType = message->GetArgumentList()->GetString(2);
+
+			  SEND_FILE_PARAMS* sendFile = new SEND_FILE_PARAMS();
+			  sendFile->userId = strtoul(userId.c_str(), NULL, 0);
+			  sendFile->recvUserType = std::atoi(userType.c_str());
+
+			  PostMessage(m_hWnd, ON_JS_CALL_MFC, JS_CALL_SEND_AUDIO, (LPARAM)sendFile);
+		  }
+		  else if (msg_param1 == Js_Call_MFC_Func_ChangeChatObject)
+		  {
+			  std::string userId = message->GetArgumentList()->GetString(1);
+			  std::string userType = message->GetArgumentList()->GetString(2);
+
+			  SEND_FILE_PARAMS* sendFile = new SEND_FILE_PARAMS();
+			  sendFile->userId = strtoul(userId.c_str(), NULL, 0);
+			  sendFile->recvUserType = std::atoi(userType.c_str());
+
+			  PostMessage(m_hWnd, ON_JS_CALL_MFC, JS_CALL_CHANGE_CHAT_OBJECT, (LPARAM)sendFile);
+		  }
+	  }
+	  else if (count == 6)
+	  {
+		  std::string msg_param1 = message->GetArgumentList()->GetString(0);
+
+		  if (msg_param1 == Js_Call_MFC_Func_ReSendFile)
+		  {
+			  std::string filePath = message->GetArgumentList()->GetString(1);
+			  std::string userType = message->GetArgumentList()->GetString(2);
+			  std::string msgId = message->GetArgumentList()->GetString(3);
+			  std::string msgDataType = message->GetArgumentList()->GetString(4);
+			  std::string userId = message->GetArgumentList()->GetString(5);
+
+			  RESEND_FILE_PARAMS* resendFile = new RESEND_FILE_PARAMS();
+			  resendFile->filaPath = filePath.c_str();
+			  resendFile->recvUserType = std::atoi(userType.c_str());
+			  resendFile->msgId = msgId.c_str();
+			  resendFile->msgDataType = std::atoi(msgDataType.c_str());
+			  resendFile->userId = strtoul(userId.c_str(), NULL, 0);
+
+			  PostMessage(m_hWnd, ON_JS_CALL_MFC, JS_CALL_RESEND_FILE, (LPARAM)resendFile);
+		  }
+	  }
+	  else if (count == 8)
+	  {
+		  std::string msg_param1 = message->GetArgumentList()->GetString(0);
+
+		  if (msg_param1 == Js_Call_MFC_Func_ReSendMsg)
+		  {
+			  std::string msgId = message->GetArgumentList()->GetString(1);
+			  std::string userId = message->GetArgumentList()->GetString(2);
+			  std::string userType = message->GetArgumentList()->GetString(3);
+			  std::string mediaId = message->GetArgumentList()->GetString(4);
+			  std::string msgDataType = message->GetArgumentList()->GetString(5);
+			  std::string fileId = message->GetArgumentList()->GetString(6);
+			  std::string filePath = message->GetArgumentList()->GetString(7);
+
+			  RESEND_MSG_PARAMS* resendMsg = new RESEND_MSG_PARAMS();
+			  resendMsg->msgId = msgId.c_str();
+			  resendMsg->userId = strtoul(userId.c_str(), NULL, 0);
+			  resendMsg->userType = std::atoi(userType.c_str());
+			  resendMsg->mediaId = mediaId;
+			  resendMsg->msgDataType = std::atoi(msgDataType.c_str());
+			  resendMsg->fileId = fileId;
+			  resendMsg->filePath = filePath.c_str();
+
+			  PostMessage(m_hWnd, ON_JS_CALL_MFC, JS_CALL_RESEND_MSG, (LPARAM)resendMsg);
+		  }
+	  }
+	  else if (count == 7)
+	  {
+		  std::string msg_param1 = message->GetArgumentList()->GetString(0);
+
+		  if (msg_param1 == Js_Call_MFC_Func_ReRecvFile)
+		  {
+			  std::string url = message->GetArgumentList()->GetString(1);
+			  std::string msgFromUserType = message->GetArgumentList()->GetString(2);
+			  std::string msgId = message->GetArgumentList()->GetString(3);
+			  std::string msgDataType = message->GetArgumentList()->GetString(4);
+			  std::string msgFromUserId = message->GetArgumentList()->GetString(5);
+			  std::string assistUserId = message->GetArgumentList()->GetString(6);
+
+			  RERECV_FILE_PARAMS* reRecvFile = new RERECV_FILE_PARAMS();
+			  reRecvFile->url = url.c_str();
+			  reRecvFile->msgFromUserType = std::atoi(msgFromUserType.c_str());
+			  reRecvFile->msgId = msgId.c_str();
+			  reRecvFile->msgFromUserId = strtoul(msgFromUserId.c_str(), NULL, 0);
+			  reRecvFile->msgDataType = std::atoi(msgDataType.c_str());
+			  reRecvFile->assistUserId = strtoul(assistUserId.c_str(), NULL, 0);
+			  PostMessage(m_hWnd, ON_JS_CALL_MFC, JS_CALL_RERECV_FILE, (LPARAM)reRecvFile);
+		  }
+	  }
+	  return true;
   }
   return false;
 }

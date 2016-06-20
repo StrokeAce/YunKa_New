@@ -54,14 +54,12 @@ enum MSG_FROM_TYPE
 };
 
 /** 发送消息接收用户区分 */
-enum USER_TYPE
-{
-	
-	USER_TYPE_CLIENT=1,	// 坐席用户
-	USER_TYPE_WX,		// 微信用户
-	USER_TYPE_WEB,		// 网页用户
-
-	USER_TYPE_ERROR = 10
+enum MSG_RECV_TYPE
+{	
+	MSG_RECV_CLIENT = 1,// 坐席用户
+	MSG_RECV_WX,		// 微信用户
+	MSG_RECV_WEB,		// 网页用户
+	MSG_RECV_ERROR=10
 };
 
 /** 消息发送类型 */
@@ -96,7 +94,9 @@ enum CODE_RECORD_AUDIO
 {
 	CODE_AUDIO_SUCCESS=0,	// 成功
 	CODE_AUDIO_NO_DEVICE,	// 没有录音设备
-	CODE_AUDIO_FAIL			// 失败
+	CODE_AUDIO_FAIL,		// 失败
+	CODE_AUDIO_LITTLE_TIME,	// 时间太短
+	CODE_AUDIO_IS_RECORDING	// 正在录音
 };
 
 #endif
