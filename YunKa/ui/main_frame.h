@@ -20,6 +20,14 @@
 #define MAX_PATH_LENGTH           1024
 
 
+#define MSG_TYPE_SYS  3               //系统消息
+/** 聊天用户的类型区分 */
+#define  User_Type_Client 1 // 坐席用户
+#define  User_Type_Wx 2	// 微信用户
+#define  User_Type_Web 3 // 网页用户
+#define  User_Type_WxGroup 4 // 微信群用户
+
+
 
 typedef struct CONTROL_ATTR
 {
@@ -215,7 +223,7 @@ public:
 	string CMainFrame::CreateClientInfoHtml(WxUserInfo* pWxUser);
 	void CMainFrame::MoveAndRestoreRightFrameControl(int type); //0 max 1 retore
 	void CMainFrame::InitRightTalkList();
-
+	void CMainFrame::OnBtnSelectSendType(TNotifyUI& msg);
 	void JsCallMFC(WPARAM wParam, LPARAM lParam);
 
 protected:
@@ -292,6 +300,8 @@ private:
 	string m_facePathUrl;
 	int  m_curSelectOptionBtn;
 	unsigned long m_savedImageIndex;
+
+	int m_selectSendMsgType; //0 enter ;1 ctrl+enter
 
 };
 

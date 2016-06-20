@@ -47,6 +47,8 @@ CMainFrame::CMainFrame(CChatManager* manager) :m_manager(manager)
 	
 	m_savedImageIndex = 1000;
 	m_curSelectOptionBtn = 0;
+
+	m_selectSendMsgType = 0;
 }
 
 
@@ -733,6 +735,11 @@ void CMainFrame::OnClick(TNotifyUI& msg)
 
 	}
 
+	else  if (msg.pSender->GetName() == _T("sendMsgBtn_select"))
+	{
+		OnBtnSelectSendType(msg);
+	}
+
 
 	if (findPos >= 0)
 	{
@@ -926,6 +933,8 @@ void CMainFrame::OnItemRbClick(TNotifyUI &msg)
 		{
 			CMenuWnd* pMenu = new CMenuWnd(m_hMainWnd);
 			CPoint cpoint = msg.ptMouse;
+
+			ClientToScreen(this->m_hWnd, &cpoint);
 			pMenu->SetPath((WCHAR*)xmlPath.GetData());
 			pMenu->Init(NULL, _T(""), _T("xml"), cpoint);
 		}
@@ -2183,6 +2192,14 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 	if (controlName.IsEmpty())
 		return;
 
+	if (controlName == L"MenuElement_btn_send_select_1")
+	{
+	}
+	else if (controlName == L"MenuElement_btn_send_select_2")
+	{
+
+	}
+
 	if (controlName == L"menu_hide_main_wnd")
 	{
 
@@ -2713,5 +2730,25 @@ void CMainFrame::JsCallMFC(WPARAM wParam, LPARAM lParam)
 		delete reRecvParams;
 
 		m_manager->ReRecv_Msg(url, msgFromUserType, msgId, msgDataType, msgFromUserId, assistUserId, 0);
+	}
+}
+
+void CMainFrame::OnBtnSelectSendType(TNotifyUI& msg)
+{
+
+	CDuiString xmlPath = L"mainframe\\btn_send_menu.xml";
+
+	if (!xmlPath.IsEmpty())
+	{  
+		CMenuWnd* pMenu = new CMenuWnd(m_hMainWnd);
+		CPoint cpoint = msg.ptMouse;
+		cpoint.y -= 50;
+		//cpoint.x += 50;
+
+
+		//ScreenToClient(this->m_hWnd,&cpoint);
+		ClientToScreen(this->m_hWnd, &cpoint);
+		pMenu->SetPath((WCHAR*)xmlPath.GetData());
+		pMenu->Init(NULL, _T(""), _T("xml"), cpoint);
 	}
 }
