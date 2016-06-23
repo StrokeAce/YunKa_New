@@ -29,16 +29,16 @@ public:
 	virtual void RecvUserInfo(CUserObject* pWebUser) = 0;
 
 	// 收到一个会话消息
-	virtual void RecvChatInfo(CWebUserObject* pWebUser) = 0;
+	virtual void RecvChatInfo(CWebUserObject* pWebUser,CUserObject* pUser) = 0;
 
 	// 收到更新用户的在线状态
 	virtual void RecvUserStatus(CUserObject* pUser) = 0;
 
 	// 坐席上线消息
-	virtual void RecvOnline(CUserObject* pUser) = 0;
+	virtual void RecvOnline(IBaseObject* pObj) = 0;
 
 	// 坐席下线消息
-	virtual void RecvOffline(CUserObject* pUser) = 0;
+	virtual void RecvOffline(IBaseObject* pObj) = 0;
 
 	//************************************
 	// Method:    RecvAcceptChat
@@ -77,7 +77,7 @@ public:
 	// Parameter: bSuccess 是否成功接收消息
 	//************************************
 	virtual void RecvMsg(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, string msgId, MSG_TYPE msgType, MSG_DATA_TYPE msgDataType, string msgContent,
-		string msgTime = "", CUserObject* pAssistUser = NULL, WxMsgBase* msgContentWx = NULL, bool bSuccess = true) = 0;
+		string msgTime = "", CUserObject* pAssistUser = NULL, WxMsgBase* msgContentWx = NULL) = 0;
 
 	//************************************
 	// Method:    ResultRecvMsg
@@ -85,7 +85,8 @@ public:
 	// Parameter: msgId 消息id
 	// Parameter: bSuccess 是否接收成功
 	//************************************
-	virtual void ResultRecvMsg(string msgId, bool bSuccess) = 0;
+	virtual void ResultRecvMsg(string msgId, bool bSuccess, string url, unsigned long msgFromUserId,
+		unsigned long assistUserId, string filePath, MSG_FROM_TYPE msgFromType, MSG_DATA_TYPE msgDataType) = 0;
 
 	//************************************
 	// Method:    ResultSendMsg
@@ -104,6 +105,14 @@ public:
 	virtual void ResultScreenCapture(string imagePath) = 0;
 
 	//************************************
+	// Method:    RecvInviteUser
+	// Qualifier: 收到邀请协助的请求
+	// Parameter: pWebUser 邀请协助会话的聊天访客
+	// Parameter: pUser 被邀请的协助者
+	//************************************
+	virtual void RecvInviteUser(CWebUserObject* pWebUser, CUserObject* pUser) = 0;
+
+	//************************************
 	// Method:    ResultInviteUser
 	// Qualifier: 邀请协助的结果
 	// Parameter: pWebUser 邀请协助会话的聊天访客
@@ -111,6 +120,14 @@ public:
 	// Parameter: bSuccess true 接受邀请,false 拒绝邀请
 	//************************************
 	virtual void ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, bool bSuccess) = 0;
+
+	//************************************
+	// Method:    RecvTransferUser
+	// Qualifier: 收到邀请转接的请求
+	// Parameter: pWebUser 转接会话中的聊天访客
+	// Parameter: pUser 被邀请的转接者
+	//************************************
+	virtual void RecvTransferUser(CWebUserObject* pWebUser, CUserObject* pUser) = 0;
 
 	//************************************
 	// Method:    ResultTransferUser
@@ -235,21 +252,18 @@ public:
 	//************************************
 	int SendTo_TransferUserResult(CWebUserObject* pWebUser, CUserObject* pUser, bool bAccept);
 
-	//************************************
-	// Method:    StartRecordAudio
-	// Qualifier: 开始录音
-	//************************************
-	CODE_RECORD_AUDIO StartRecordAudio();
-
-	CODE_RECORD_AUDIO SendRecordAudio(unsigned long userId, MSG_RECV_TYPE userType);
-
-	void CancelRecordAudio();
-
 	// 获取上一次错误信息
 	string GetLastError();
 
 	// 截图
 	void ScreenCapture(HWND hWnd);
+
+	// 二次重启会话
+	void RestartSession(LPARAM lParam);
+
+	void FormatRequestUrl(string &strUrl,string strMsg);
+
+	bool CChatManager::RepickChatCon(string url, string& strRet, unsigned long &uin, string &strErrMsg);
 	
 	// 退出，程序退出时调用
 	void Exit();
@@ -475,9 +489,10 @@ public:
 
 	void Amr2Wav(string filePath);
 
-	void AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, string msgId, MSG_TYPE msgType, MSG_DATA_TYPE msgDataType,
-		string msgContent, string msgTime = "", CUserObject* pAssistUser = NULL, WxMsgBase* msgContentWx = NULL, bool isSuccess=true);
-	
+	void AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RECV_TYPE recvType,string msgId, MSG_TYPE msgType, MSG_DATA_TYPE msgDataType,
+					string msgContent="", string msgTime = "", CUserObject* pAssistUser = NULL, WxMsgBase* msgContentWx = NULL,
+					bool bSave = true,bool bNotify = true,bool bSuccess = true);
+
 	string ReplaceToken(string srcStr, string replaceStr);
 
 	void AddToken(WxUserInfo* userInfo,string token);
@@ -521,7 +536,5 @@ public:
 	list<MSG_INFO*>			m_listEarlyMsg;			// 保存还未初始化访客对象之前收到的消息
 	int						m_nClientIndex;			// 访客的序列号，自增
 	HMODULE					m_hScreenDll;			// 截图句柄
-	string					m_audioPath;			// 正在录音文件的路径
-	bool					m_bRecording;			// 正在录音
 };
 

@@ -90,8 +90,16 @@ void CTimerManager::TimerClear()
 	map<int, CTimer*>::iterator iter = m_mapTimers.begin();
 	for (iter; iter != m_mapTimers.end(); iter++)
 	{
-		iter->second->Stop();
-		delete iter->second;
+		iter->second->Stop();		
 	}
+
+	Sleep(200);
+
+	map<int, CTimer*>::iterator iterDelete = m_mapTimers.begin();
+	for (iterDelete; iterDelete != m_mapTimers.end(); iterDelete++)
+	{
+		delete iterDelete->second;
+	}
+
 	m_mapTimers.clear();
 }

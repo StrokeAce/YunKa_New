@@ -148,16 +148,16 @@ public:    //主界面消息回调
 
 
 	// 收到一个会话消息
-	virtual void RecvChatInfo(CWebUserObject* pWebUser);
+	virtual void RecvChatInfo(CWebUserObject* pWebUser, CUserObject* pUser);
 
 	// 收到更新用户的在线状态
 	virtual void RecvUserStatus(CUserObject* pUser);
 
 	// 坐席上线消息
-	virtual void RecvOnline(CUserObject* pUser);
+	virtual void RecvOnline(IBaseObject* pObj);
 
 	// 坐席下线消息
-	virtual void RecvOffline(CUserObject* pUser);
+	virtual void RecvOffline(IBaseObject* pObj);
 
 	virtual void RecvAcceptChat(CUserObject* pUser, CWebUserObject* pWebUser);
 
@@ -166,16 +166,21 @@ public:    //主界面消息回调
 	virtual void RecvReleaseChat(CWebUserObject* pWebUser);
 
 	virtual void RecvMsg(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, string msgId, MSG_TYPE msgType, MSG_DATA_TYPE msgDataType, string msgContent,
-		string msgTime, CUserObject* pAssistUser, WxMsgBase* msgContentWx, bool bSuccess);
+		string msgTime, CUserObject* pAssistUser, WxMsgBase* msgContentWx);
 
-	virtual void ResultRecvMsg(string msgId, bool bSuccess);
+	virtual void ResultRecvMsg(string msgId, bool bSuccess, string url, unsigned long msgFromUserId,
+		unsigned long assistUserId, string filePath, MSG_FROM_TYPE msgFromType, MSG_DATA_TYPE msgDataType);
 
 	virtual void ResultSendMsg(string msgId, bool bSuccess = true, unsigned long userId = 0, MSG_RECV_TYPE recvUserType = MSG_RECV_WX,
 		MSG_DATA_TYPE msgDataType = MSG_DATA_TYPE_IMAGE, string msg = "");
 
 	virtual void ResultScreenCapture(string imagePath);
 
+	virtual void RecvInviteUser(CWebUserObject* pWebUser, CUserObject* pUser);
+
 	virtual void ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, bool bSuccess);
+
+	virtual void RecvTransferUser(CWebUserObject* pWebUser, CUserObject* pUser);
 
 	virtual void ResultTransferUser(CWebUserObject* pWebUser, CUserObject* pUser, bool bSuccess);
 
@@ -226,6 +231,10 @@ public:
 	void CMainFrame::OnBtnSelectSendType(TNotifyUI& msg);
 	void JsCallMFC(WPARAM wParam, LPARAM lParam);
 
+	CODE_RECORD_AUDIO StartRecordAudio();
+
+	void CancelRecordAudio();
+
 protected:
 
 	void Notify(TNotifyUI& msg);
@@ -261,6 +270,8 @@ public:
 	RECT m_rightRectMax;
 
 	string m_defaultUrlInfo;
+	string		m_audioPath;			// 正在录音文件的路径
+	bool		m_bRecording;			// 正在录音
 
 
 private:

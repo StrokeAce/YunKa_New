@@ -308,6 +308,7 @@ void CChatVisitor::SolveVisitorSCRIPTMSGTalkBegin(char *pInitBuff)
 		pWebUser->cTalkedSatus = INTALKING;
 		pWebUser->info.status = TALKSTATUS_TALK;
 		pWebUser->talkuid = uKefu;
+		m_manager->m_handlerMsgs->RecvChatInfo(pWebUser, pkefu);
 	}
 	else
 	{
@@ -319,8 +320,6 @@ void CChatVisitor::SolveVisitorSCRIPTMSGTalkBegin(char *pInitBuff)
 
 void CChatVisitor::SolveVisitorSCRIPTMSGTalkEnd(char *pInitBuff)
 {
-#if 0
-
 	CWebUserObject *pWebUser = NULL;
 	CUserObject *pTalkUser = NULL;
 	char sid[120] = { 0 };
@@ -344,12 +343,13 @@ void CChatVisitor::SolveVisitorSCRIPTMSGTalkEnd(char *pInitBuff)
 	}
 
 	char msg[MAX_256_LEN];
-	sprintf(msg, "%s 客服 %s(%u) 与访客的通话已结束", GetTimeByMDAndHMS(0), szKefuNmae, uKefu);
+	sprintf(msg, "%s 客服 %s(%u) 与访客的通话已结束", GetTimeByMDAndHMS(0).c_str(), szKefuNmae, uKefu);
 
 	pWebUser->cTalkedSatus = HASTALKED;
 	pWebUser->info.status = TALKSTATUS_NO;
 	pWebUser->talkuid = 0;
-#endif
+
+	m_manager->m_handlerMsgs->RecvCloseChat(pWebUser);
 }
 
 void CChatVisitor::SolveVisitorSystemAdmin(char *pInitBuff)
@@ -481,6 +481,11 @@ void CChatVisitor::SolveVisitorSystemUp(char *pInitBuff)
 			str = pWebUser->info.name;
 			str += " 用户访问网页！";
 			break;
+		}
+
+		if (pWebUser->cTalkedSatus != INTALKING)
+		{
+			m_manager->m_handlerMsgs->RecvOnline(pWebUser);
 		}
 	}
 

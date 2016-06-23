@@ -47,7 +47,7 @@ CMainFrame::CMainFrame(CChatManager* manager) :m_manager(manager)
 	
 	m_savedImageIndex = 1000;
 	m_curSelectOptionBtn = 0;
-
+	m_bRecording = false;
 	m_selectSendMsgType = 0;
 }
 
@@ -1163,13 +1163,11 @@ void CMainFrame::OnBtnSendMessage(TNotifyUI& msg)
 	
 		//消息测试 暂时先只发给用户  坐席后续加上
 		m_manager->SendTo_Msg(m_curSelectId, sendUserType, msgId, MSG_DATA_TYPE_TEXT, sendMsgData);
-
-		ReplaceFaceId(sendMsgData);
+		
 		//理论上只有发送消息成功 才在聊天界面显示  
 		//暂时先添加在这里  后面再移到收到消息成功 的回调哪里
 		//显示 发送的消息
-
-
+		ReplaceFaceId(sendMsgData);
 		ShowMySelfSendMsg(sendMsgData, sendMsgType, msgId);
 	}
 
@@ -1486,100 +1484,106 @@ void CMainFrame::RecvUserStatus(CUserObject* pUser)
 }
 
 // 坐席上线消息
-void CMainFrame::RecvOnline(CUserObject* pUser)
+void CMainFrame::RecvOnline(IBaseObject* pObj)
 {
-
-	int index = 0;
-	if (pUser->status == STATUS_ONLINE)  //当前坐席是离线状态 同时过来的状态是上线状态
+	if (pObj->m_nEMObType == OBJECT_USER)
 	{
-		//先删除当前的离线坐席 list 再添加上线的坐席状态
-
-		map<unsigned long, UserListUI::Node*>::iterator  iter = m_offlineNodeMap.find(pUser->UserInfo.uid);
-		if (iter == m_offlineNodeMap.end())
-			return;
-
-		UserListUI::Node* tempNode = iter->second;
-
-
-		//先删除
-		pUserList->RemoveNode(tempNode);
-		m_offlineNodeMap.erase(iter);
-
-		//index += pUserList->GetNodeIndex(pWaitForStart);
-		if (m_onlineNodeMap.size() > 0)
+		CUserObject* pUser = (CUserObject*)pObj;
+		int index = 0;
+		if (pUser->status == STATUS_ONLINE)  //当前坐席是离线状态 同时过来的状态是上线状态
 		{
-			iter = m_onlineNodeMap.end();
-			iter--;
+			//先删除当前的离线坐席 list 再添加上线的坐席状态
 
-			UserListUI::Node* mapNode = iter->second;
-			index = pUserList->GetNodeIndex(mapNode);
+			map<unsigned long, UserListUI::Node*>::iterator  iter = m_offlineNodeMap.find(pUser->UserInfo.uid);
+			if (iter == m_offlineNodeMap.end())
+				return;
+
+			UserListUI::Node* tempNode = iter->second;
+
+
+			//先删除
+			pUserList->RemoveNode(tempNode);
+			m_offlineNodeMap.erase(iter);
+
+			//index += pUserList->GetNodeIndex(pWaitForStart);
+			if (m_onlineNodeMap.size() > 0)
+			{
+				iter = m_onlineNodeMap.end();
+				iter--;
+
+				UserListUI::Node* mapNode = iter->second;
+				index = pUserList->GetNodeIndex(mapNode);
+			}
+			else
+				index = pUserList->GetNodeIndex(pMySelfeNode);
+
+
+			//再添加
+			AddHostUserList(pUserList, pUser, index);
+
 		}
-		else
-			index = pUserList->GetNodeIndex(pMySelfeNode);
-
-
-		//再添加
-		AddHostUserList(pUserList, pUser, index);
-
 	}
+	
 
 
 
 }
 
 // 坐席下线消息
-void CMainFrame::RecvOffline(CUserObject* pUser)
+void CMainFrame::RecvOffline(IBaseObject* pObj)
 {
-	int index = 0;
-	if (pUser->status == STATUS_OFFLINE)  //当前坐席是在线状态 同时过来的状态是离线状态
+	if (pObj->m_nEMObType == OBJECT_USER)
 	{
-		//先删除当前的在线 坐席 list   再添加离线的坐席状态
-
-		map<unsigned long, UserListUI::Node*>::iterator  iter = m_onlineNodeMap.find(pUser->UserInfo.uid);
-		if (iter == m_onlineNodeMap.end())
-			return;
-
-		UserListUI::Node* tempNode = iter->second;
-
-		//先删除
-		pUserList->RemoveNode(tempNode);
-		m_onlineNodeMap.erase(iter);
-
-
-	
-		/*if (m_onlineNodeMap.size() > 0)
+		CUserObject* pUser = (CUserObject*)pObj;
+		int index = 0;
+		if (pUser->status == STATUS_OFFLINE)  //当前坐席是在线状态 同时过来的状态是离线状态
 		{
+			//先删除当前的在线 坐席 list   再添加离线的坐席状态
+
+			map<unsigned long, UserListUI::Node*>::iterator  iter = m_onlineNodeMap.find(pUser->UserInfo.uid);
+			if (iter == m_onlineNodeMap.end())
+				return;
+
+			UserListUI::Node* tempNode = iter->second;
+
+			//先删除
+			pUserList->RemoveNode(tempNode);
+			m_onlineNodeMap.erase(iter);
+
+
+
+			/*if (m_onlineNodeMap.size() > 0)
+			{
 			iter = m_onlineNodeMap.end();
 			iter--;
 
 			UserListUI::Node* mapNode = iter->second;
 			index = pUserList->GetNodeIndex(mapNode);
+			}
+			else
+			index = pUserList->GetNodeIndex(pMySelfeNode);
+			*/
+
+			if (m_offlineNodeMap.size() > 0)
+			{
+				iter = m_offlineNodeMap.end();
+				iter--;
+
+				UserListUI::Node* mapNode = iter->second;
+				index = pUserList->GetNodeIndex(mapNode);
+			}
+			else
+				index = pUserList->GetNodeIndex(pMySelfeNode);
+
+			//再添加
+			AddHostUserList(pUserList, pUser, index);
 		}
-		else
-		index = pUserList->GetNodeIndex(pMySelfeNode);
-		*/
-
-		if (m_offlineNodeMap.size() > 0)
-		{
-			iter = m_offlineNodeMap.end();
-			iter--;
-
-			UserListUI::Node* mapNode = iter->second;
-			index = pUserList->GetNodeIndex(mapNode);
-		}
-		else
-		    index = pUserList->GetNodeIndex(pMySelfeNode);
-
-		//再添加
-		AddHostUserList(pUserList, pUser, index);
 	}
-
-
 }
 
 
 
-void CMainFrame::RecvChatInfo(CWebUserObject* pWebUser)
+void CMainFrame::RecvChatInfo(CWebUserObject* pWebUser, CUserObject* pUser)
 {
 	CDuiString text;
 	WCHAR name[64] = { 0 };
@@ -1772,15 +1776,14 @@ void CMainFrame::RecvReleaseChat(CWebUserObject* pWebUser)
 
 	CWebUserObject *webuser = pWebUser;
 	webuser->onlineinfo.talkstatus = TALKSTATUS_REQUEST;
-	RecvChatInfo(pWebUser);
+	RecvChatInfo(pWebUser,NULL);
 
 	m_allVisitorNodeMap.erase(iter);
-
 }
 
 
 void CMainFrame::RecvMsg(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, string msgId, MSG_TYPE msgType, MSG_DATA_TYPE msgDataType, string msgContent,
-	string msgTime, CUserObject* pAssistUser, WxMsgBase* msgContentWx, bool bSuccess)
+	string msgTime, CUserObject* pAssistUser, WxMsgBase* msgContentWx)
 {
 	if (pObj == NULL || !m_pListMsgHandler.isLoaded)
 		return;
@@ -1812,21 +1815,34 @@ void CMainFrame::RecvMsg(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, string msgId,
 		return;
 	}
 
-	if (bSuccess)
-	{
-		CefString strCode(msgContent), strUrl("");
-		m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->ExecuteJavaScript(strCode, strUrl, 0);
-	}
-	else
-	{
-		CefString strCode(msgContent), strUrl("");
-		m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->ExecuteJavaScript(strCode, strUrl, 0);
-	}
+	CefString strCode(msgContent), strUrl("");
+	m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->ExecuteJavaScript(strCode, strUrl, 0);
 }
 
 
-void CMainFrame::ResultRecvMsg(string msgId, bool bSuccess)
+void CMainFrame::ResultRecvMsg(string msgId, bool bSuccess, string url, unsigned long msgFromUserId,
+	unsigned long assistUserId, string filePath, MSG_FROM_TYPE msgFromType, MSG_DATA_TYPE msgDataType)
 {
+	char strCallJs[MAX_1024_LEN];
+	if (bSuccess)
+	{
+		sprintf(strCallJs, "ResultRecvMsg('%s','%d','%s','unknown','%s','%d','%d','%lu','%lu');",
+			msgId.c_str(), bSuccess,url.c_str(), filePath.c_str(), msgFromType, msgDataType,msgFromUserId,assistUserId);
+	}
+	else
+	{
+		CCodeConvert convert;
+		string sImagePath;
+		string imagePath = FullPath("SkinRes\\mainframe\\");
+		StringReplace(imagePath, "\\", "/");
+		convert.Gb2312ToUTF_8(sImagePath, imagePath.c_str(), imagePath.length());
+		sprintf(strCallJs, "ResultRecvMsg('%s','%d','%s','%s','%s','%d','%d','%lu','%lu');",
+			msgId.c_str(), bSuccess,url.c_str(),sImagePath.c_str(), "", 
+			msgFromType, msgDataType, msgFromUserId,assistUserId);
+	}
+
+	CefString strCode(strCallJs), strUrl("");
+	m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->ExecuteJavaScript(strCode, strUrl, 0);
 }
 
 void CMainFrame::ResultSendMsg(string msgId, bool bSuccess, unsigned long userId, MSG_RECV_TYPE recvUserType,
@@ -1882,7 +1898,8 @@ void CMainFrame::ShowMySelfSendMsg(string strMsg, MSG_DATA_TYPE msgType, string 
 	unsigned long     userId = 0;
 	CCodeConvert      f_covet;
 	char strJsCode[MAX_1024_LEN] = { 0 };
-	string  name, msg;
+	char contentMsg[MAX_1024_LEN] = { 0 };
+	string  name, msg,imagePath;
 
 	if (strMsg.empty())
 	{
@@ -1901,10 +1918,26 @@ void CMainFrame::ShowMySelfSendMsg(string strMsg, MSG_DATA_TYPE msgType, string 
 	StringReplace(strMsg, "\r\n", "<br>");
 	f_covet.Gb2312ToUTF_8(msg, strMsg.c_str(), strMsg.length());
 
+	imagePath = FullPath("SkinRes\\mainframe\\msg_wait.gif");
+	StringReplace(imagePath, "\\", "/");
+
+	if (msgType == MSG_DATA_TYPE_IMAGE)
+	{
+		sprintf(contentMsg, "<img id=\"%s_image\" class=\"wait_image\" src=\"%s\"><img class=\"msg_image\" src=\"%s\">",
+			msgId.c_str(), imagePath.c_str(), strMsg.c_str());
+		msg = contentMsg;
+	}
+	else if (msgType == MSG_DATA_TYPE_VOICE)
+	{
+		sprintf(contentMsg, "<img id=\"%s_image\" class=\"wait_image\" src=\"%s\"><audio class=\"msg_voice\" controls=\"controls\" src=\"%s.wav\" type=\"audio/mpeg\"></audio>",
+			msgId.c_str(), imagePath.c_str(),m_audioPath.c_str());
+		msg = contentMsg;
+	}
+
 	//组合消息
 	string msgTime = GetTimeByMDAndHMS(0);
-	sprintf(strJsCode, "AppendMsgToHistory('%d', '%d', '%s', '%s', '%s', '%lu', '%s', '%s', '%d'); ",
-		MSG_FROM_SELF, msgType, name.c_str(), msgTime.c_str(), msg.c_str(), userId, m_mySelfInfo->m_headPath.c_str(), msgId.c_str(), MSG_FROM_CLIENT);
+	sprintf(strJsCode, "AppendMsgToHistory('%d', '%d', '%s', '%s', '%s', '%lu', '%s', '%s', '%s'); ",
+		MSG_FROM_SELF, msgType, name.c_str(), msgTime.c_str(), msg.c_str(), userId, m_mySelfInfo->m_headPath.c_str(), msgId.c_str(), imagePath.c_str());
 
 	if (m_pListMsgHandler.isLoaded)
 	{
@@ -2176,9 +2209,19 @@ void CMainFrame::ChangeShowUserMsgWnd(unsigned long id)
 	*/
 }
 
+void CMainFrame::RecvInviteUser(CWebUserObject* pWebUser, CUserObject* pUser)
+{
+	
+}
+
 void CMainFrame::ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, bool bSuccess)
 {
 
+}
+
+void CMainFrame::RecvTransferUser(CWebUserObject* pWebUser, CUserObject* pUser)
+{
+	
 }
 
 void CMainFrame::ResultTransferUser(CWebUserObject* pWebUser, CUserObject* pUser, bool bSuccess)
@@ -2592,7 +2635,8 @@ string CMainFrame::CreateClientInfoHtml(WxUserInfo* pWxUser)
 	return htmlContent;
 }
 
-
+extern "C" _declspec(dllimport) int StopRecordWAV();
+extern "C" _declspec(dllimport) void WAVToAMR(const char* wavPath);
 
 void CMainFrame::OnBtnVoice(TNotifyUI& msg)
 {
@@ -2684,7 +2728,7 @@ void CMainFrame::JsCallMFC(WPARAM wParam, LPARAM lParam)
 {
 	if (wParam == JS_CALL_START_RECORD)
 	{
-		CODE_RECORD_AUDIO result = m_manager->StartRecordAudio();
+		CODE_RECORD_AUDIO result = StartRecordAudio();
 		if (result != CODE_AUDIO_SUCCESS)
 		{
 			string strJsCode = "CancelRecord();";
@@ -2699,12 +2743,37 @@ void CMainFrame::JsCallMFC(WPARAM wParam, LPARAM lParam)
 		unsigned long userId = sendFile->userId;
 		MSG_RECV_TYPE recvUserType = (MSG_RECV_TYPE)sendFile->recvUserType;
 		delete sendFile;
-		m_manager->SendRecordAudio(userId, recvUserType);
+		
+		m_bRecording = false;
+		CODE_RECORD_AUDIO code = (CODE_RECORD_AUDIO)StopRecordWAV();
+
+		// 停止录制,并保存文件
+		if (StopRecordWAV() == CODE_AUDIO_LITTLE_TIME)
+		{
+			// 录音时间太短，录音无效
+			return;
+		}
+
+		// 转码
+		WAVToAMR(m_audioPath.c_str());
+
+		// 发送文件的路径url编码
+		CCodeConvert convert;
+		string encodeFilePath;
+		encodeFilePath = convert.URLEncode(m_audioPath.c_str());
+		string msgId = m_manager->GetMsgId();
+
+		string imagePath = FullPath("SkinRes\\mainframe\\msg_wait.gif");
+		StringReplace(imagePath, "\\", "/");
+
+		ShowMySelfSendMsg(m_audioPath + ".wav", MSG_DATA_TYPE_VOICE, msgId);
+
+		m_manager->SendTo_Msg(userId, MSG_RECV_WX, msgId, MSG_DATA_TYPE_VOICE, m_audioPath);
 	}
 	else if (wParam == JS_CALL_CANCEL_RECORD)
 	{
 		// 取消录制
-		m_manager->CancelRecordAudio();
+		CancelRecordAudio();
 	}
 	else if (wParam == JS_CALL_RESEND_FILE)
 	{
@@ -2731,6 +2800,34 @@ void CMainFrame::JsCallMFC(WPARAM wParam, LPARAM lParam)
 
 		m_manager->ReRecv_Msg(url, msgFromUserType, msgId, msgDataType, msgFromUserId, assistUserId, 0);
 	}
+}
+
+extern "C" _declspec(dllimport) void CancelRecordWAV();
+extern "C" _declspec(dllimport) int StartRecordWAV(const char* voicePath, const char* voiceName); // 开始录制
+
+CODE_RECORD_AUDIO CMainFrame::StartRecordAudio()
+{
+	if (!m_bRecording)
+	{
+		string voicePath = FullPath("temp\\");
+		string voiceName = GetTimeString();
+		m_audioPath = voicePath + voiceName;
+		StringReplace(m_audioPath, "\\", "/");
+		CODE_RECORD_AUDIO bSuccess = (CODE_RECORD_AUDIO)StartRecordWAV(voicePath.c_str(), voiceName.c_str());
+		if (bSuccess == CODE_AUDIO_SUCCESS)
+			m_bRecording = true;
+		return bSuccess;
+	}
+	else
+	{
+		return CODE_AUDIO_IS_RECORDING;
+	}
+}
+
+void CMainFrame::CancelRecordAudio()
+{
+	m_bRecording = false;
+	CancelRecordWAV();
 }
 
 void CMainFrame::OnBtnSelectSendType(TNotifyUI& msg)

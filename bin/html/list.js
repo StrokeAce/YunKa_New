@@ -120,7 +120,7 @@ function AppendPromptUnreadMessage(content){
 }
 
 // 添加一条消息到消息记录
-function AppendMsgToHistory(msgFrom, msgDataType, sname, time, content, userId, head, msgid, userType)
+function AppendMsgToHistory(msgFrom, msgDataType, sname, time, content, userId, head, msgid, image)
 {
 	var lstmsg = document.createElement("div");
 	lstmsg.id = msgid;
@@ -149,13 +149,9 @@ function AppendMsgToHistory(msgFrom, msgDataType, sname, time, content, userId, 
 			{
 				lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>"+ sname +"&nbsp;<img class = 'head_image' src='"+ head + "'></div><div class='msg_send_text'>"+msgcontent+"</div></div>";
 			}
-			else if(msgDataType == 2)
+			else if(msgDataType == 2 || msgDataType == 3)
 			{
-			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;<img class = 'head_image' src='" + head + "'></div><div class='msg_send_image'><img id='" + msgid + "_image' class='wait_image' src='F:/YunKa/trunk/bin/SkinRes/mainframe/msg_wait.gif'><img class='msg_image' src='" + msgcontent + "'></div></div>";
-			}
-			else if( msgDataType == 3)
-			{
-			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;<img class = 'head_image' src='" + head + "'></div><div class='msg_send_image'><audio controls = 'controls' src = '" + msgcontent + "' type = 'audio/mpeg' /></div></div>";
+			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;<img class = 'head_image' src='" + head + "'></div><div class='msg_send_image'>"+msgcontent+"</div></div>";
 			}
 			else if (msgDataType == 4)
 			{
@@ -178,34 +174,19 @@ function AppendMsgToHistory(msgFrom, msgDataType, sname, time, content, userId, 
 			// 接收消息
 			if(msgDataType == 1)
 			{
-				lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='"+ head +"' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;"+sname+"<font class='time'>"+time+"</font></div><div class='msg_recv_text'>"+msgcontent+"</div></div>";
+				lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='"+head+"'>&nbsp;"+sname+"<font class='time'>"+time+"</font></div><div class='msg_recv_text'>"+msgcontent+"</div></div>";
 			}
-			else if(msgDataType == 2)
+			else if(msgDataType == 2 || msgDataType == 3 || msgDataType == 4)
 			{
-			    if (content && typeof (content) != "undefined" && content != 0)
-			    {
-			        lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'><img class='msg_image' src='" + msgcontent + "'></div></div>";
-			    }
-			    else
-			    {
-			        lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'><img class='msg_image' src='F:/YunKa/trunk/bin/SkinRes/mainframe/recv_image_fail.jpg'><img id='" + msgid + "_image' class='wait_image' src='F:/YunKa/trunk/bin/SkinRes/mainframe/msg_wait.gif'></div></div>";
-			    }
-			}
-			else if (msgDataType == 3)
-			{
-			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'><audio controls = 'controls' src = '" + msgcontent + "' type = 'audio/mpeg' /></div></div>";
-			}
-			else if (msgDataType == 4)
-			{
-			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'><video controls = 'controls' src = '" + msgcontent + "' type = 'video/mp4'></video></div></div>";
+			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='"+head+"'>&nbsp;"+sname+"<font class='time'>"+time+"</font></div><div class='msg_recv_image'>"+msgcontent+"</div></div>";
 			}
 			else if (msgDataType == 5)
 			{
-			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'>" + msgcontent + "</div></div>";
+			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "'>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'>" + msgcontent + "</div></div>";
 			}
 			else if (msgDataType == 6)
 			{
-			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "' ondblclick=window.RunMsgList('ChangeChatObject','" + userId + "','" + userType + "')>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'>" + msgcontent + "</div></div>";
+			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "'>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'>" + msgcontent + "</div></div>";
 			}
 		}
 			break;
@@ -329,16 +310,24 @@ function ReSendFile(filePath,userType,msgId,msgDataType,userId)
 // userId 发消息的协助对象的id
 // webUserId 发消息的访客的id
 // groupUserId 消息所属的群,群主的id
-function ReRecvFile(filePath,url,userType,msgId,msgDataType,userId,webUserId,groupUserId)
+function ReRecvFile(url, msgFromType, msgId, msgDataType, msgFromUserId, assistUserId, imagePath)
 {
-	document.getElementById(msgId).innerHTML = "";
-	window.RunMsgList('ReRecvFile',filePath,url,userType,msgId,msgDataType,userId,webUserId,groupUserId);
+    var oImg = document.getElementById(msgId + "_image");
+    oImg.src = imagePath + "msg_wait.gif";
+    window.RunMsgList('ReRecvFile', url, msgFromType, msgId, msgDataType, msgFromUserId, assistUserId);
 }
 
 function ReSendMsg(msgId,userId,userType,mediaID,msgDataType,fileId,filePath)
 {
 	document.getElementById(msgId).remove();
 	window.RunMsgList('ReSendMsg',msgId, userId, userType, mediaID, msgDataType, fileId, filePath);
+}
+
+function ReSendFile(filePath, recvUserType, msgId, msgDataType, userId,imagePath)
+{
+    var oImg = document.getElementById(msgId + "_image");
+    oImg.src = imagePath + "msg_wait.gif";
+    window.RunMsgList('ReSendFile', filePath, recvUserType, msgId, msgDataType, userId);
 }
 
 function ResultSendMsg(msgId, bSuccess, imagePath, filePath, recvUserType, msgDataType, userId)
@@ -360,7 +349,7 @@ function ResultSendMsg(msgId, bSuccess, imagePath, filePath, recvUserType, msgDa
     }
 }
 
-function ResultRecvMsg(msgId, bSuccess, imagePath, filePath, msgFromType, msgDataType, userId)
+function ResultRecvMsg(msgId, bSuccess, url, imagePath, filePath, msgFromType, msgDataType, msgFromUserId, assistUserId)
 {
     if (bSuccess == '0')
     {
@@ -374,7 +363,9 @@ function ResultRecvMsg(msgId, bSuccess, imagePath, filePath, msgFromType, msgDat
     }
     else
     {
-        var oImg = document.getElementById(msgId);
-        oImg.src = "";
+        var oImgMsg = document.getElementById(msgId + "_msg");
+        oImgMsg.src = filePath;
+        var oImgFail = document.getElementById(msgId + "_image");
+        oImgFail.src = "";
     }
 }
