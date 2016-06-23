@@ -1703,7 +1703,7 @@ void CMainFrame::RecvChatInfo(CWebUserObject* pWebUser, CUserObject* pUser)
 
 	//先判断类型
 	//为接收的用户 在等待列表
-	if (pWebUser->onlineinfo.talkstatus = TALKSTATUS_REQUEST)
+	if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_REQUEST)
 	{
 		//添加等待列表
 
@@ -1730,21 +1730,31 @@ void CMainFrame::RecvChatInfo(CWebUserObject* pWebUser, CUserObject* pUser)
 
 	}
 	//已接收的在会话列表
-	else if (pWebUser->onlineinfo.talkstatus = TALKSTATUS_TALK)
+	else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_TALK)
 	{
 
-		map<unsigned long, UserListUI::Node*>::iterator  iter = m_onlineNodeMap.find(pWebUser->info.uid);
-		UserListUI::Node* tempNode = iter->second;
-		UserListUI::Node* child = NULL;
-		int num = tempNode->num_children();
-
-		for (int i = 0; i < num; i++)
+		//如果是自己的id 则加到自己下面
+		if (pUser->UserInfo.uid == m_mySelfInfo->UserInfo.uid)
 		{
-			child = tempNode->child(i);
+			UserListUI::Node* tempNode = pMySelfeNode->child(0);
+			pUserList->AddNode(text, pWebUser->webuserid, tempNode);
+			pUserList->ExpandNode(tempNode, true);
 		}
+		else //加到其他人列表底下
+		{
 
-		pUserList->AddNode(text, pWebUser->webuserid, child);
-		pUserList->ExpandNode(tempNode, true);
+			map<unsigned long, UserListUI::Node*>::iterator  iter = m_onlineNodeMap.find(pWebUser->info.uid);
+
+			if (iter == m_onlineNodeMap.end())
+				return;
+
+			UserListUI::Node* tempNode = iter->second;
+			UserListUI::Node* child = tempNode->child(0);
+
+			pUserList->AddNode(text, pWebUser->webuserid, child);
+			pUserList->ExpandNode(tempNode, true);
+
+		}
 	}
 
 }

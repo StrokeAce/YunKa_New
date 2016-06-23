@@ -36,9 +36,14 @@ void CSelectVisitorWnd::Notify(TNotifyUI& msg)
 
 	if (msg.sType == DUI_MSGTYPE_CLICK)
 	{
-		if (msg.pSender->GetName() == L"closeBtn_visitor")
+		if (msg.pSender->GetName() == L"closeBtn_visitor" || msg.pSender->GetName() == L"conformSelectVisotorBtn")
 		{
 			Close();
+		}
+
+		else if (msg.pSender->GetName() == L"conformSelectVisotorBtn")
+		{
+
 		}
 	}
 	if (msg.sType == DUI_MSGTYPE_ITEMSELECT)
