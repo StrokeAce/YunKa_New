@@ -17,6 +17,19 @@
 
 <HorizontalLayout  inset="2,2,2,0"  bkcolor="#FFF8F8F8">
 
+<VerticalLayout>
+
+</VerticalLayout>
+
+
+<VerticalLayout width="80">
+
+<Button name="conformSelectVisotorBtn" text="确定" float="true" pos="80, 10, 160, 35" tooltip="点击这里确定修改" normalimage="mainframe\\button_nor.bmp" hotimage="mainframe\\button_over.bmp" pushedimage="mainframe\\button_down.bmp" />
+
+<Button name="conformSelectVisotorBtn" text="取消" float="true" pos="200, 10, 280, 35" tooltip="点击这里取消修改" normalimage="mainframe\\button_nor.bmp" hotimage="mainframe\\button_over.bmp" pushedimage="mainframe\\button_down.bmp" />
+
+</VerticalLayout>
+
 
 
 </HorizontalLayout>
