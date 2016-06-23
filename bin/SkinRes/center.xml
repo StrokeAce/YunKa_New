@@ -14,14 +14,17 @@
 <!--  HorizontalLayout height="25" bkcolor="#FFFCFCFC" -->
 <HorizontalLayout  name="HorizontalLayoutUI_MiddleButtonBar"   height="27" inset="2,3,2,4"       bkimage="file='mainframe\\MidToolBarBg.png'">
 
-<Option name="btnFont" width="24" height="20" maxheight="20" maxwidth="24" bkimage="file='mainframe\\icon_font.png' dest='2,0,22,20'" hotimage="file='mainframe\\aio_toolbar_highligh.png' corner='3,3,3,3'" selectedimage="file='mainframe\\aio_toolbar_down.png' corner='3,3,3,3'"  />
-					<Control width="5"/>
+<!-- Option name="btnFont" width="24" height="20" maxheight="20" maxwidth="24" bkimage="file='mainframe\\icon_font.png' dest='2,0,22,20'" hotimage="file='mainframe\\aio_toolbar_highligh.png' corner='3,3,3,3'" selectedimage="file='mainframe\\aio_toolbar_down.png' corner='3,3,3,3'"  / -->
+					<Control width="10"/>
           <Option name="btnFace" width="24" height="20" maxheight="20" maxwidth="24" bkimage="file='mainframe\\icon_face.png' dest='2,0,22,20'" hotimage="file='mainframe\\aio_toolbar_highligh.png' corner='3,3,3,3'" selectedimage="file='mainframe\\aio_toolbar_down.png' corner='3,3,3,3'"  />
-					<Control width="5"/>
+					<Control width="10"/>
 					<Button name="screenshotsbtn" width="20" height="20" maxheight="20" maxwidth="24" bkimage="file='mainframe\\icon_screenshots.png' dest='2,0,22,20'" hotimage="file='mainframe\\aio_toolbar_highligh.png' corner='3,3,3,3'" pushedimage="file='mainframe\\aio_toolbar_down.png' corner='3,3,3,3'"  />
-<Control width="5" />
+<Control width="10" />
 
  <Button name="voiceSendBtn" width="20" height="20" maxheight="20" maxwidth="24" bkimage="file='mainframe\\icon_voice.png' dest='0,0,20,20'" hotimage="file='mainframe\\aio_toolbar_highligh.png' corner='3,3,3,3'" pushedimage="file='mainframe\\aio_toolbar_down.png' corner='3,3,3,3'"  />
+
+<Control width="10"/>
+ <Button name="fileSendBtn" width="20" height="20" maxheight="20" maxwidth="24" bkimage="file='mainframe\\icon_file.png' dest='0,0,20,20'" hotimage="file='mainframe\\aio_toolbar_highligh.png' corner='3,3,3,3'" pushedimage="file='mainframe\\aio_toolbar_down.png' corner='3,3,3,3'"  />
 					
 </HorizontalLayout>
 
@@ -40,7 +43,7 @@
 <VerticalLayout />
 
 <VerticalLayout width="110">
-<Button name="sendMsgBtn" text="发送" float="true" font="3" pos="0, 2,80, 34" tooltip="" normalimage="login\\button_nor.bmp" hotimage="login\\button_over.bmp" pushedimage="login\\button_down.bmp" />
+<Button name="sendMsgBtn" text="发送" float="true" font="3" pos="0, 2,80, 34" tooltip="" normalimage="mainframe\\button_nor.bmp" hotimage="mainframe\\button_over.bmp" pushedimage="mainframe\button_down.bmp" />
 
 
 <Button name="sendMsgBtn_select" text="" float="true" font="3" pos="80,13,100, 34"tooltip="" normalimage="mainframe\\btn_select.png" hotimage="mainframe\\btn_select.png" pushedimage="mainframe\\btn_select.png" />

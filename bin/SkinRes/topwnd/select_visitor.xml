@@ -48,6 +48,8 @@ pushedimage="file='login\\Combo_over.bmp' corner='2,2,24,2'" textpadding="1,1,1,
 
 <HorizontalLayout  height="40"    bkcolor="#FFF8F8F8">
 
+<Button name="cancelBtn" text="确定" float="true" pos="80, 10, 160, 35" tooltip="点击这里退出" normalimage="login\\button_nor.bmp" hotimage="login\\button_over.bmp" pushedimage="login\\button_down.bmp" />
+			<Button name="loginBtn" text="取消" float="true" pos="200, 10, 280, 35" tooltip="点击这里登录" normalimage="login\\button_nor.bmp" hotimage="login\\button_over.bmp" pushedimage="login\\button_down.bmp" />
 
 </HorizontalLayout>
 
