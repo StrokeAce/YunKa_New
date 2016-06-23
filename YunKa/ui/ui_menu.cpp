@@ -419,6 +419,14 @@ namespace DuiLib {
 				}
 
 				SetForegroundWindow(m_hWnd);
+
+				CLabelUI *control = static_cast<CLabelUI*>(m_pm.FindControl(m_ControlName));
+				if (control != NULL)
+				{
+					control->SetBkImage(m_ControlValue);
+					control->Invalidate();
+				}
+		
 				MoveWindow(m_hWnd, rc.left, rc.top, rc.GetWidth(), rc.GetHeight(), FALSE);
 				SetWindowPos(m_hWnd, HWND_TOPMOST, rc.left, rc.top, rc.GetWidth(), rc.GetHeight(), SWP_SHOWWINDOW);
 			}

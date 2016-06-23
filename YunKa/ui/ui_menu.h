@@ -89,6 +89,12 @@ public:
 		m_xmlName = path;
 	}
 
+	void SetAttrData(CDuiString name, CDuiString key)
+	{
+		m_ControlName = name;
+		m_ControlValue = key;
+	}
+
 
 
 public:
@@ -101,6 +107,10 @@ public:
     CMenuUI* m_pLayout;
 
 	CDuiString m_xmlName;
+
+
+	CDuiString m_ControlName;
+	CDuiString m_ControlValue;
 };
 
 class CListContainerElementUI;
