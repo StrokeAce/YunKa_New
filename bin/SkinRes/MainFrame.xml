@@ -61,7 +61,7 @@
 <!--VerticalLayout width="2" bkcolor="#FF45FE22" /-->
 <VerticalLayout width="4" name="VerticalLayoutUI_LeftLine1"  bkcolor="#FFD3E5F6" />
 
-<VerticalLayout>
+<VerticalLayout   name="VerticalLayoutUI_CenterRight_WebShow">
 <HorizontalLayout>
 <!-- 中间显示 聊天内容 -->
 <VerticalLayout name="VerticalLayoutUI_CenterFrame"    width="380"   bkcolor="#FFF8F8F8"  >
