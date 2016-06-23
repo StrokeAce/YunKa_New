@@ -191,6 +191,7 @@ public:
 	void OnBtnScreen(TNotifyUI& msg);
 	void OnBtnVoice(TNotifyUI& msg);
 	void OnManagerButtonEvent(TNotifyUI& msg);
+	void OnBtnSendFile(TNotifyUI& msg);
 	void OnFaceCtrlSel(UINT uMsg, WPARAM wParam, LPARAM lParam);
 	void OnBtnSendMessage(TNotifyUI& msg);
 

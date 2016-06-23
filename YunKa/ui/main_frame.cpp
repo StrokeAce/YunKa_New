@@ -786,6 +786,12 @@ void CMainFrame::OnClick(TNotifyUI& msg)
 	else if (msg.pSender == m_pVoiceBtn)
 		OnBtnVoice(msg);
 
+
+	if (msg.pSender->GetName() == _T("fileSendBtn"))
+	{
+		OnBtnSendFile(msg);
+	}
+
 	if (msg.pSender->GetName() == DEF_CLOSE_WND_BUTTON)
 	{
 		OnCloseBtn(msg);
@@ -3081,5 +3087,11 @@ void CMainFrame::HideWebBrowser()
 
 
 
+
+}
+
+
+void CMainFrame::OnBtnSendFile(TNotifyUI& msg)
+{
 
 }
