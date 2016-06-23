@@ -564,6 +564,12 @@
     <ClInclude Include="openssl\x509v3.h">
       <Filter>openssl</Filter>
     </ClInclude>
+    <ClInclude Include="ui\chat_inside_wnd.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\select_visitor_wnd.h">
+      <Filter>ui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -787,6 +793,12 @@
     </ClCompile>
     <ClCompile Include="openssl\applink.c">
       <Filter>openssl</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\chat_inside_wnd.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\select_visitor_wnd.cpp">
+      <Filter>ui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
