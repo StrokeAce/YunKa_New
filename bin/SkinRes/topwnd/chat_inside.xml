@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Window size="267,310"  caption="0,0,0,36"  roundcorner="4,4" >
+
+	<!-- 缺省样式 -->
+    <Include source="Default.xml" />
+
+<VerticalLayout inset="4,4,4,4" bkcolor="#FF60B1FE">
+
+<HorizontalLayout height="32" inset="2,2,2,0"  >
+    <Label text="选择在线的公司客服" font="10" width="200" />
+    <Control />
+
+    <Button name="closeBtn_chat" width="42" maxheight="18"     normalimage="file='frame_btn_close_normal.bmp' mask='#FFFF00FF'"     hotimage="file='frame_btn_close_hot.bmp' mask='#FFFF00FF'"     pushedimage="file='frame_btn_close_down.bmp' mask='#FFFF00FF'"/>
+
+</HorizontalLayout>
+
+
+<HorizontalLayout  inset="2,2,2,0"  bkcolor="#FFF8F8F8">
+
+
+
+</HorizontalLayout>
+
+
+
+		
+</VerticalLayout>
+</Window>
