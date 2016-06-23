@@ -254,17 +254,20 @@ LRESULT CLoginWnd::MessageHandler(UINT uMsg, WPARAM wParam, LPARAM lParam, bool&
 	if (uMsg == WM_KEYDOWN) {
 		if (wParam == VK_RETURN) {
 			CEditUI* pEdit = static_cast<CEditUI*>(m_pm.FindControl(DEF_ACCOUNT_ID_EDIT));
-			if (pEdit->GetText().IsEmpty()) pEdit->SetFocus();
+			if (pEdit->GetText().IsEmpty())
+				pEdit->SetFocus();
 			else {
 				pEdit = static_cast<CEditUI*>(m_pm.FindControl(DEF_PASSWORD_TEXT_EDIT));
 				if (pEdit->GetText().IsEmpty()) pEdit->SetFocus();
-				else Close();
+				else
+				{
+					OnLoginButton();
+				}
 			}
-			return true;
 		}
 		else if (wParam == VK_ESCAPE) {
 			//PostQuitMessage(0);
-			return true;
+
 		}
 
 	}
@@ -336,10 +339,19 @@ void CLoginWnd::OnLoginButton()
 	bool isKeepPwd = m_pSaveWordCheckBox->GetCheck();
 	bool isAutoLogin = m_pAuotoLoginCheckBox->GetCheck();
 
-		
+
+	if (strlen(_globalSetting.m_userName) == 0)
+	{
+		return;
+	}
+	else if (strlen(_globalSetting.m_passWord) == 0)
+	{
+		return;
+	}
+
+
+	m_pLoginBtn->SetEnabled(false);
 	StartLogin(_globalSetting.m_userName, _globalSetting.m_passWord, isAutoLogin, isKeepPwd);
-
-
 
 }
 
@@ -363,6 +375,7 @@ void CLoginWnd::StartLogin(string loginName, string password, bool isAutoLogin, 
 
 
 	m_manager->StartLogin(loginName, password, isAutoLogin, isKeepPwd);
+
 
 }
 	
