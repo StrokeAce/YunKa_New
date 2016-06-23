@@ -230,6 +230,8 @@ public:
 	void CMainFrame::InitRightTalkList();
 	void CMainFrame::OnBtnSelectSendType(TNotifyUI& msg);
 	void JsCallMFC(WPARAM wParam, LPARAM lParam);
+	void CMainFrame::ShowWebBrowser(char *url);
+	void CMainFrame::HideWebBrowser();
 
 	CODE_RECORD_AUDIO StartRecordAudio();
 
@@ -282,6 +284,8 @@ private:
 	CComboUI *m_pRightCommonWordCombo, *m_pRightCommonTypeCombo , *m_pRightCommonFindCombo;
 
 
+	RECT m_mainCenterAndRightRect;
+	CControlUI *m_MainCenterRightWND;
 	CButtonUI * m_pFontBtn, *m_pFaceBtn, *m_pScreenBtn, *pSendMsgBtn,*m_pVoiceBtn;
 	CFaceSelDlg m_faceSelDlg;
 	CFaceList  m_faceList;
@@ -294,7 +298,7 @@ private:
 
 
 	HandlerInfo m_pListMsgHandler; // 消息列表
-
+	HandlerInfo m_pWebURLHandler; // 访客历史 访客来电 访客留言 客户管理 统计分析 
 	HandlerInfo m_pVisitorRelatedHandler;;
 
 	CDuiString m_sendMsgString;
@@ -312,7 +316,7 @@ private:
 	int  m_curSelectOptionBtn;
 	unsigned long m_savedImageIndex;
 
-	int m_selectSendMsgType; //0 enter ;1 ctrl+enter
+
 
 };
 

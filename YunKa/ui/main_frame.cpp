@@ -10,6 +10,8 @@
 #include "menu_wnd.h"
 #include <WinUser.h>
 #include "jpeg_file/JpegFile.h"
+#include "chat_inside_wnd.h"
+#include "select_visitor_wnd.h"
 
 #include <GdiPlus.h>
 
@@ -24,8 +26,8 @@ CMainFrame::CMainFrame(CChatManager* manager) :m_manager(manager)
 	//初始化
 	m_pFontBtn = m_pFaceBtn = m_pScreenBtn = pSendMsgBtn = m_pVoiceBtn = NULL;
 	m_pRightCommonWordCombo = m_pRightCommonTypeCombo = m_pRightCommonFindCombo = NULL;
-	m_pRightCommonWordEdit = m_pRightCommonTypeEdit=m_pRightCommonFindEdit = NULL;
-
+	m_pRightCommonWordEdit = m_pRightCommonTypeEdit = m_pRightCommonFindEdit = NULL;
+	m_MainCenterRightWND = NULL;
 	m_pSendEdit = NULL;
 
 	pOnlineNode = pWaitForStart = pMySelfeNode = NULL;
@@ -48,7 +50,7 @@ CMainFrame::CMainFrame(CChatManager* manager) :m_manager(manager)
 	m_savedImageIndex = 1000;
 	m_curSelectOptionBtn = 0;
 	m_bRecording = false;
-	m_selectSendMsgType = 0;
+
 }
 
 
@@ -163,6 +165,10 @@ LRESULT CMainFrame::ResponseDefaultKeyEvent(WPARAM wParam)
 
 LRESULT CMainFrame::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	TNotifyUI msg = {};
+
+
+
     if (uMsg == WM_FACE_CTRL_SEL)
 	{
 
@@ -183,13 +189,62 @@ LRESULT CMainFrame::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 //	if (uMsg == WM_LBUTTONDBLCLK)
 //		OnLButtonDblClk(uMsg, wParam, lParam);
 
-	if ((uMsg == WM_KEYDOWN) && (wParam == 'V') && (lParam & VK_CONTROL))	// 发送消息框的Ctrl+V消息	
+	if (uMsg == WM_KEYDOWN) // 发送消息框的Ctrl+V消息	
 	{
-		if ((m_pSendEdit != NULL) && m_pSendEdit->IsFocused())
+        if ((wParam == 'V') && ::GetKeyState(VK_CONTROL) < 0)
 		{
-			OnCtrlVEvent();
-			return TRUE;
+			if ((m_pSendEdit != NULL) && m_pSendEdit->IsFocused())
+			{
+				OnCtrlVEvent();
+				return TRUE;
+			}
 		}
+
+		if (wParam == VK_RETURN  && ::GetKeyState(VK_CONTROL) > 0)   //m_manager->m_sysConfig->m_nKeySendType == 0)
+		{
+			 
+			if (m_manager->m_sysConfig->m_nKeySendType == 0)
+			{
+				if (m_pSendEdit != NULL && m_pSendEdit->IsFocused())
+				{
+					OnBtnSendMessage(msg);
+					return 0;
+				}
+			}
+			else if (m_manager->m_sysConfig->m_nKeySendType == 1)
+			{
+				if (m_pSendEdit != NULL && m_pSendEdit->IsFocused())
+				{
+					return __super::HandleMessage(uMsg, wParam, lParam);
+				}
+			}	
+		
+		}
+		if (wParam == VK_RETURN && ::GetKeyState(VK_CONTROL) < 0 ) 
+		{
+			if (m_pSendEdit != NULL && m_pSendEdit->IsFocused() && m_manager->m_sysConfig->m_nKeySendType == 1)
+			{
+				OnBtnSendMessage(msg);
+			}
+		}
+
+/*
+			if (m_controlKeyState == 0)
+
+
+
+			if (m_manager->m_sysConfig->m_nKeySendType == 0 && (m_pSendEdit != NULL) && m_pSendEdit->IsFocused())
+			    OnBtnSendMessage(msg);
+		}
+	
+		else  if (wParam == VK_RETURN && m_controlKeyState == 1)
+		{
+			if (m_manager->m_sysConfig->m_nKeySendType == 1 && (m_pSendEdit != NULL) && m_pSendEdit->IsFocused())
+				OnBtnSendMessage(msg);
+		}
+*/
+
+
 	}
 
 //	if (uMsg == WM_NOTIFY && EN_PASTE == ((LPNMHDR)lParam)->code)
@@ -231,10 +286,15 @@ LRESULT CMainFrame::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
 		if (Handler_ListMsg == msg)
 		    m_pListMsgHandler.isCreated = true;
 
-		if (Handler_VisitorRelated == msg)
+		else if (Handler_VisitorRelated == msg)
 		{
 			m_pVisitorRelatedHandler.isCreated = true;
 			m_pVisitorRelatedHandler.handler->ShowBrowser(SW_HIDE);
+		}
+		else if (Handler_WebUrl == msg)
+		{
+			m_pWebURLHandler.isCreated = true;
+			m_pWebURLHandler.handler->ShowBrowser(SW_HIDE);
 		}
 	}
 	else if (uMsg == ON_AFTER_LOAD)
@@ -244,9 +304,14 @@ LRESULT CMainFrame::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
 		if (Handler_ListMsg == msg)
 		   m_pListMsgHandler.isLoaded = true;
 
-		if (Handler_VisitorRelated == msg)
+		else if (Handler_VisitorRelated == msg)
 		{
 			m_pVisitorRelatedHandler.isLoaded = true;
+		}
+
+		else if (Handler_WebUrl == msg)
+		{
+			m_pWebURLHandler.isLoaded = true;
 		}
 		   
 	}
@@ -426,6 +491,15 @@ void CMainFrame::MoveAndRestoreMsgWnd(int type)
 		m_pVisitorRelatedHandler.handler->MoveBrowser(rect);
 		m_rightRectMax = rect;
 
+
+		rect.left = m_mainCenterAndRightRect.left;
+		rect.right = sysRect.right - 4;
+		rect.top = m_mainCenterAndRightRect.top;
+		rect.bottom = sysRect.bottom - 4;
+
+		m_pWebURLHandler.handler->MoveBrowser(rect);
+
+
 	}
 	else
 	{
@@ -438,6 +512,7 @@ void CMainFrame::MoveAndRestoreMsgWnd(int type)
 
 		//rc = ShowRightWebWnd->GetPos();
 		m_pVisitorRelatedHandler.handler->MoveBrowser(m_rightRectWnd);
+		m_pWebURLHandler.handler->MoveBrowser(m_mainCenterAndRightRect);
 	}
 }
 
@@ -478,10 +553,19 @@ void CMainFrame::InitLibcef(void)
 	m_pListMsgHandler.handleName = Handler_ListMsg;
 	m_pListMsgHandler.isLoaded = false;
 	m_pListMsgHandler.isCreated = false;
+	//右侧访客窗口
 	m_pVisitorRelatedHandler.handler = NULL;
 	m_pVisitorRelatedHandler.handleName = Handler_VisitorRelated;
 	m_pVisitorRelatedHandler.isLoaded = false;
 	m_pVisitorRelatedHandler.isCreated = false;
+
+	
+    // 访客历史 访客来电 访客留言 客户管理 统计分析
+	m_pWebURLHandler.handler = NULL;
+	m_pWebURLHandler.handleName = Handler_WebUrl;
+	m_pWebURLHandler.isLoaded = false;
+	m_pWebURLHandler.isCreated = false;
+
 
 	//显示聊天内容的libcef窗口
 	m_pListMsgHandler.handler = new ClientHandler();
@@ -489,6 +573,10 @@ void CMainFrame::InitLibcef(void)
 
 	m_pVisitorRelatedHandler.handler = new ClientHandler();
 	m_pVisitorRelatedHandler.handler->m_isDisplayRefresh = false;
+
+	m_pWebURLHandler.handler = new ClientHandler();
+	m_pWebURLHandler.handler->m_isDisplayRefresh = false;
+
 
 	if (!m_pListMsgHandler.isCreated)
 	{
@@ -524,8 +612,15 @@ void CMainFrame::InitLibcef(void)
 
 		m_pVisitorRelatedHandler.handler->CreateBrowser(this->m_hWnd, rect, "about:blank", Handler_VisitorRelated);
 
-		m_pVisitorRelatedHandler.handler->ShowBrowser(SW_HIDE);
-	
+		m_pVisitorRelatedHandler.handler->ShowBrowser(SW_HIDE);	
+	}
+
+	if (!m_pWebURLHandler.isCreated)
+	{
+		CControlUI *m_MainCenterRightWND = static_cast<CVerticalLayoutUI*>(m_PaintManager.FindControl(_T("VerticalLayoutUI_CenterRight_WebShow")));
+     	m_mainCenterAndRightRect = m_MainCenterRightWND->GetPos();
+		m_pWebURLHandler.handler->CreateBrowser(this->m_hWnd, m_mainCenterAndRightRect, "about:blank", Handler_WebUrl);
+		m_pWebURLHandler.handler->ShowBrowser(SW_HIDE);
 	}
 
 }
@@ -797,6 +892,9 @@ void CMainFrame::OnItemClick(TNotifyUI &msg)
 		{
 			if (_tcscmp(msg.pSender->GetClass(), _T("ListLabelElementUI")) == 0)
 			{
+				//显示 rightoption 和中间的聊天界面
+				HideWebBrowser();
+
 				UserListUI::Node* node = (UserListUI::Node*)msg.pSender->GetTag();
 				CDuiString str = node->data()._text;
 				unsigned long id = node->data()._uid;
@@ -1007,13 +1105,13 @@ void CMainFrame::OnBtnFace(TNotifyUI& msg)
 		{
 			m_faceSelDlg.Create(this->m_hWnd, NULL, WS_CHILD | WS_POPUP, WS_EX_TOOLWINDOW);
 
-			RECT rcBtn = m_pFaceBtn->GetPos();
-			::ClientToScreen(this->m_hWnd, (LPPOINT)&rcBtn);
 
+			CPoint cpoint = msg.ptMouse;
+			ClientToScreen(this->m_hWnd, &cpoint);
 			int cx = 432;
 		    int cy = 236;
-			int x = rcBtn.left - cx / 2;
-			int y = rcBtn.top - cy;
+			int x = cpoint.x - cx / 2;
+			int y = cpoint.y - cy-10;
 
 			::SetWindowPos((HWND)m_faceSelDlg, NULL, x, y, cx, cy, NULL);
 			::ShowWindow((HWND)m_faceSelDlg, SW_SHOW);
@@ -1024,6 +1122,14 @@ void CMainFrame::OnBtnFace(TNotifyUI& msg)
 	}
 	else
 	{
+		CPoint cpoint = msg.ptMouse;
+		ClientToScreen(this->m_hWnd, &cpoint);
+		int cx = 432;
+		int cy = 236;
+		int x = cpoint.x - cx / 2;
+		int y = cpoint.y - cy-10;
+
+		::SetWindowPos((HWND)m_faceSelDlg, NULL, x, y, cx, cy, NULL);
 		::ShowWindow((HWND)m_faceSelDlg, SW_SHOW);
 	}
 
@@ -1875,21 +1981,113 @@ void CMainFrame::ResultScreenCapture(string imagePath)
 
 void CMainFrame::OnManagerButtonEvent(TNotifyUI& msg)
 {
-	//CDuiString msgName = msg.pSender->GetName();
-	//int findPos = msgName.Find(_T("managerbutton_"));
+	char sURL[1024] = {0};
 
+	//接受
+	if (msg.pSender->GetName() == _T("managerbutton_1"))
+	{
+		
+
+	}
+
+	//转接
+	else if (msg.pSender->GetName() == _T("managerbutton_2"))
+	{
+
+
+	}
 	//结束
-	if (msg.pSender->GetName() == _T("managerbutton_3"))
+	else if (msg.pSender->GetName() == _T("managerbutton_3"))
 	{
 		m_manager->SendTo_CloseChat(m_curSelectId, CHATCLOSE_USER);
 
 	}
+
+	//屏蔽
+	else if (msg.pSender->GetName() == _T("managerbutton_4"))
+	{
+	}
+
+	//邀请评价
+	else if (msg.pSender->GetName() == _T("managerbutton_5"))
+	{
+	}
+
+
+	//筛选访客
+	else if (msg.pSender->GetName() == _T("managerbutton_6"))
+	{
+		CSelectVisitorWnd *dlg= new CSelectVisitorWnd();
+
+		dlg->Create(m_hWnd, _T(""), UI_WNDSTYLE_DIALOG, 0, 0, 0, 0, 0, NULL);
+		dlg->CenterWindow();
+		dlg->ShowModal();
+	}
+
 	//释放会话
-	if (msg.pSender->GetName() == _T("managerbutton_7"))
+	else if (msg.pSender->GetName() == _T("managerbutton_7"))
 	{
 		m_manager->SendTo_ReleaseChat(m_curSelectId);
 
 	}
+
+	//邀请协助
+	else if (msg.pSender->GetName() == _T("managerbutton_8"))
+	{
+
+
+	}
+	//内部对话
+	else if (msg.pSender->GetName() == _T("managerbutton_9"))
+	{
+		CChatInsideWnd *dlg = new CChatInsideWnd();
+
+		dlg->Create(m_hWnd, _T(""), UI_WNDSTYLE_DIALOG, 0, 0, 0, 0, 0, NULL);
+		dlg->CenterWindow();
+		dlg->ShowModal();
+
+	}
+	//访客历史
+	else if (msg.pSender->GetName() == _T("managerbutton_10"))
+	{
+
+		sprintf(sURL, "%s&token=%s", m_manager->m_initConfig.webpage_SvrMsg, m_manager->m_login->m_szAuthtoken);
+		ShowWebBrowser(sURL);
+	}
+
+
+	//访客来电
+	else if (msg.pSender->GetName() == _T("managerbutton_11"))
+	{
+
+		sprintf(sURL, "%s&kefu_uin=%lu&token=%s", m_manager->m_initConfig.webpage_querywebphone, m_mySelfInfo->UserInfo.uid, m_manager->m_login->m_szAuthtoken);
+		ShowWebBrowser(sURL);
+	}
+	//访客留言
+	else if (msg.pSender->GetName() == _T("managerbutton_12"))
+	{
+		sprintf(sURL, "%s&action=query&result=0&kefu_uin=%lu&token=%s", m_manager->m_initConfig.webpage_note, m_mySelfInfo->UserInfo.uid, m_manager->m_login->m_szAuthtoken);
+		ShowWebBrowser(sURL);
+	}
+	//客户管理
+	else if (msg.pSender->GetName() == _T("managerbutton_13"))
+	{
+		sprintf(sURL, "%s&token=%s", m_manager->m_initConfig.webpage_crm, m_manager->m_login->m_szAuthtoken);
+		ShowWebBrowser(sURL);
+	}
+	//统计分析
+	else if (msg.pSender->GetName() == _T("managerbutton_14"))
+	{
+		sprintf(sURL, "%s&token=%s", m_manager->m_initConfig.webpage_workbillurl, m_manager->m_login->m_szAuthtoken);
+		ShowWebBrowser(sURL);
+	}
+	//管理中心
+	else if (msg.pSender->GetName() == _T("managerbutton_15"))
+	{
+		sprintf(sURL, "%s&token=%s", m_manager->m_initConfig.webpage_mgmt, m_manager->m_login->m_szAuthtoken);
+		ShowWebBrowser(sURL);
+	}
+
 
 }
 
@@ -2235,12 +2433,16 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 	if (controlName.IsEmpty())
 		return;
 
-	if (controlName == L"MenuElement_btn_send_select_1")
+//选择 0 enter 发送消息 还是 1 CTRL enter 发送消息  
+	if (controlName == L"MenuElement_btn_send_menu_1")
 	{
+		if (m_manager->m_sysConfig->m_nKeySendType == 1)
+		    m_manager->m_sysConfig->m_nKeySendType = 0;
 	}
-	else if (controlName == L"MenuElement_btn_send_select_2")
+	else if (controlName == L"MenuElement_btn_send_menu_2")
 	{
-
+		if (m_manager->m_sysConfig->m_nKeySendType == 0)
+		    m_manager->m_sysConfig->m_nKeySendType  =  1;
 	}
 
 	if (controlName == L"menu_hide_main_wnd")
@@ -2840,12 +3042,44 @@ void CMainFrame::OnBtnSelectSendType(TNotifyUI& msg)
 		CMenuWnd* pMenu = new CMenuWnd(m_hMainWnd);
 		CPoint cpoint = msg.ptMouse;
 		cpoint.y -= 50;
-		//cpoint.x += 50;
-
-
-		//ScreenToClient(this->m_hWnd,&cpoint);
 		ClientToScreen(this->m_hWnd, &cpoint);
+		CDuiString path = GetCurrentPathW();
+		path += L"\\SkinRes\\menu\\check.png";
+		if (m_manager->m_sysConfig->m_nKeySendType == 0)
+		{
+			pMenu->SetAttrData(L"MenuElement_btn_send_select_1", path);
+		}
+		else
+		{
+			pMenu->SetAttrData(L"MenuElement_btn_send_select_2", path);
+		}
 		pMenu->SetPath((WCHAR*)xmlPath.GetData());
 		pMenu->Init(NULL, _T(""), _T("xml"), cpoint);
 	}
+}
+
+
+
+void CMainFrame::ShowWebBrowser(char *url)
+{
+
+	m_pListMsgHandler.handler->ShowBrowser(SW_HIDE);
+	m_pVisitorRelatedHandler.handler->ShowBrowser(SW_HIDE);
+
+	m_pWebURLHandler.handler->GetBrowser()->GetMainFrame()->LoadURL(url);
+	m_pWebURLHandler.handler->ShowBrowser(SW_SHOW);
+
+}
+
+void CMainFrame::HideWebBrowser()
+{
+
+	m_pWebURLHandler.handler->ShowBrowser(SW_HIDE);
+
+	m_pListMsgHandler.handler->ShowBrowser(SW_SHOW);
+	m_pVisitorRelatedHandler.handler->ShowBrowser(SW_SHOW);
+
+
+
+
 }
