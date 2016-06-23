@@ -4,7 +4,7 @@
 	<!-- 缺省样式 -->
     <Include source="Default.xml" />
 
-		<VerticalLayout inset="4,0,4,4" bkimage="file='bg0.png' corner='4,48,4,4'  mask='#FFFF00FF'" >
+		<VerticalLayout inset="4,0,4,4" bkimage="file='login\\bg.png' corner='4,48,4,4'  mask='#FFFF00FF'" >
 		<HorizontalLayout height="32" inset="2,2,2,0">
 			<Label text="登录" width="80" />
 			<Control />
