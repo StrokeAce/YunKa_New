@@ -570,6 +570,9 @@
     <ClInclude Include="ui\select_visitor_wnd.h">
       <Filter>ui</Filter>
     </ClInclude>
+    <ClInclude Include="chat_common\markup.h">
+      <Filter>chat_common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -799,6 +802,9 @@
     </ClCompile>
     <ClCompile Include="ui\select_visitor_wnd.cpp">
       <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="chat_common\markup.cpp">
+      <Filter>chat_common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

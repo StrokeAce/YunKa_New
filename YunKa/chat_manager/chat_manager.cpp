@@ -1167,8 +1167,6 @@ int CChatManager::RecvSrvStatusUserForm(PACK_HEADER packhead, char *pRecvBuff, i
 
 int CChatManager::RecvFloatShareList(PACK_HEADER packhead, char *pRecvBuff, int len)
 {
-	SendTo_GetListChatInfo();
-
 	COM_FLOAT_SHARELIST RecvInfo(packhead.ver);
 	int nError = 0;
 	CUserObject *pUser = NULL;
@@ -4580,7 +4578,7 @@ void CChatManager::AfterUpload(unsigned long userId, MSG_RECV_TYPE userType, str
 		// 上传成功处理	
 		Json::Value json;
 		string msgSendTo;
-		char fileServerMediaUrl[MAX_256_LEN];
+		char fileServerMediaUrl[MAX_512_LEN];
 		if (msgDataType == MSG_DATA_TYPE_IMAGE)
 		{
 			if (userType == MSG_RECV_WX)
@@ -4638,13 +4636,11 @@ void CChatManager::AfterUpload(unsigned long userId, MSG_RECV_TYPE userType, str
 				sprintf(fileServerMediaUrl, "%s%s", m_initConfig.fileserver_media_upload, mediaID.c_str());
 
 				// 生成发送给web的消息
-				msgSendTo = "<span style=\"font-size:10pt; color:#000000; font-family:微软雅黑\">";
-				msgSendTo += "收到一个图片（点击查看原图）<br></span><a href = \"";
-				msgSendTo += fileServerMediaUrl;
-				msgSendTo += "\" target=\"blank\"><img src=\"";
-				msgSendTo += fileServerMediaUrl;
-				msgSendTo += "\" width=30%%></a>";
-				if (SendMsg(pWebUser, msgSendTo.c_str(), 0) == SYS_SUCCESS)
+				char sSendTo[MAX_1024_LEN];
+				sprintf(sSendTo, "<span style=\"font-size:10pt; color:#000000; font-family:微软雅黑\">\
+						收到一个图片（点击查看原图）<br></span><a href = \"%s\" target=\"blank\"><img \
+						src=\"%s\" width=30%%></a>", fileServerMediaUrl, fileServerMediaUrl);
+				if (SendMsg(pWebUser, sSendTo, 0) == SYS_SUCCESS)
 				{
 					m_handlerMsgs->ResultSendMsg(msgId);
 				}
@@ -4653,7 +4649,9 @@ void CChatManager::AfterUpload(unsigned long userId, MSG_RECV_TYPE userType, str
 			{
 				// 拼出该url串
 				sprintf(fileServerMediaUrl, m_initConfig.fileserver_media_fileid, mediaID.c_str());
-				if (SendMsg(pUser, fileServerMediaUrl, 0) == SYS_SUCCESS)
+				char sSendTo[MAX_1024_LEN];
+				sprintf(sSendTo, "<img class=\"msg_image\" src=\"%s\">", fileServerMediaUrl);
+				if (SendMsg(pUser, sSendTo, 0) == SYS_SUCCESS)
 				{
 					m_handlerMsgs->ResultSendMsg(msgId);
 				}
@@ -5532,5 +5530,93 @@ bool CChatManager::RepickChatCon(string url, string& strRet, unsigned long &uin,
 	buf = NULL;
 
 	return bRet;
+}
+
+int CChatManager::SendTo_GetOnlineUser()
+{
+	m_hGetOnlineUserThread = CreateThread(NULL, 0, GetOnlineUserThread, this, CREATE_SUSPENDED, NULL);
+	ResumeThread(m_hGetOnlineUserThread);
+	return 0;
+}
+
+DWORD WINAPI CChatManager::GetOnlineUserThread(void *arg)
+{
+	CChatManager *pManager = (CChatManager *)arg;
+
+	pManager->GetOnlineUser();
+
+	return 0;
+}
+
+void CChatManager::GetOnlineUser()
+{
+	char strURL[MAX_1024_LEN];
+	string strHtml = "";
+
+	sprintf(strURL,"%s&uin=%d&strid=%s&pwd=%s&cuin=0&rtt=%lu",m_initConfig.webpage_companyuser,
+		m_userInfo.UserInfo.uid, m_userInfo.UserInfo.sid, m_userInfo.UserInfo.pass,time(NULL));
+
+	CHttpLoad httpLoad;
+	if (httpLoad.HttpLoad(string(strURL), "", REQUEST_TYPE_GET, "", strHtml))
+	{
+		CMarkupXml xml(strHtml.c_str());
+		CGroupObject *pGroupOb = &m_groupUser;
+		pGroupOb->DeleteAll();
+		if (ParseGroupUser(xml, pGroupOb, "Group", "Person"))
+		{
+			m_handlerMsgs->RecvOnlineUsers(pGroupOb);
+			return;
+		}
+	}
+	m_handlerMsgs->RecvOnlineUsers(NULL);
+}
+
+bool CChatManager::ParseGroupUser(CMarkupXml &xml, CGroupObject *pGroupOb, char *sGroupKey, char *sUserKey)
+{
+	if (pGroupOb == NULL)
+		return false;
+
+	string sex;
+	string name;
+	unsigned long groupid, pid, id;
+	char nc;
+
+	int nPersonNum(0);
+
+	while (xml.FindChildElem(sGroupKey))
+	{
+		groupid = (unsigned long)atol(xml.GetChildAttrib("id").c_str());
+		pid = (unsigned long)atol(xml.GetChildAttrib("pid").c_str());
+		name = xml.GetChildAttrib("name");
+
+		CGroupObject *pGroupOb1 = new CGroupObject(pid, name);
+		xml.IntoElem();
+		if (ParseGroupUser(xml, pGroupOb1, sGroupKey, sUserKey))
+		{
+			++nPersonNum;
+			pGroupOb->AddGroupObject(pGroupOb1);
+		}
+		else
+		{
+			delete pGroupOb1;
+		}
+		xml.OutOfElem();
+	}
+
+	while (xml.FindChildElem(sUserKey))
+	{
+		name = xml.GetChildAttrib("name");
+		sex = xml.GetChildAttrib("sex");
+		id = (unsigned long)atol(xml.GetChildData().c_str());
+		if (sex.empty())
+			nc = '0';
+		else
+			nc = sex[0];
+
+		++nPersonNum;
+		pGroupOb->AddUserObject(id, name, nc);
+	}
+
+	return nPersonNum > 0;
 }
 

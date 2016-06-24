@@ -7,6 +7,7 @@
 #include "../chat_common/comstruct.h"
 #include "../chat_common/comfloat.h"
 #include "../chat_common/comenum.h"
+#include "../chat_common/markup.h"
 
 typedef map<string/*thirdId*/, string/*公众号token*/> MapWxTokens; // 公众号的thirdid和token一一对应
 typedef map<unsigned long, CUserObject*> MapUsers; // 保存坐席用户
@@ -137,6 +138,8 @@ public:
 	// Parameter: bSuccess true 接受转接,false 拒绝转接
 	//************************************
 	virtual void ResultTransferUser(CWebUserObject* pWebUser, CUserObject* pUser, bool bSuccess) = 0;
+
+	virtual void RecvOnlineUsers(CGroupObject* pGroup) = 0;
 };
 
 class CChatManager : public IBaseReceive
@@ -251,6 +254,8 @@ public:
 	// Parameter: bAccept 是否同意
 	//************************************
 	int SendTo_TransferUserResult(CWebUserObject* pWebUser, CUserObject* pUser, bool bAccept);
+
+	int SendTo_GetOnlineUser();
 
 	// 获取上一次错误信息
 	string GetLastError();
@@ -497,6 +502,12 @@ public:
 
 	void AddToken(WxUserInfo* userInfo,string token);
 
+	static DWORD WINAPI GetOnlineUserThread(void *arg);
+
+	void GetOnlineUser();
+
+	bool ParseGroupUser(CMarkupXml &xml, CGroupObject *pGroupOb, char *sGroupKey, char *sUserKey);
+
 public:
 	int						m_nOnLineStatus;		// 是否在线,对于im服务器而言
 	int						m_nOnLineStatusEx;		// 是否在线,对于visit服务器而言
@@ -536,5 +547,7 @@ public:
 	list<MSG_INFO*>			m_listEarlyMsg;			// 保存还未初始化访客对象之前收到的消息
 	int						m_nClientIndex;			// 访客的序列号，自增
 	HMODULE					m_hScreenDll;			// 截图句柄
+	HANDLE					m_hGetOnlineUserThread;	// 获取在线坐席的线程
+	CGroupObject			m_groupUser;
 };
 

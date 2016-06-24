@@ -184,6 +184,8 @@ public:    //主界面消息回调
 
 	virtual void ResultTransferUser(CWebUserObject* pWebUser, CUserObject* pUser, bool bSuccess);
 
+	virtual void RecvOnlineUsers(CGroupObject* pGroup);
+
 public:
 	//自己定义的操作函数
 	void OnBtnFont(TNotifyUI& msg);

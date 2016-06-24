@@ -125,9 +125,6 @@ public:
 	IBaseObject(){};
 	~IBaseObject(){};
 
-	virtual bool Load(unsigned short ver)=0;
-	virtual bool Save(unsigned short ver)=0;
-
 	int m_nEMObType;
 };
 
@@ -136,9 +133,6 @@ class CUserObject : public IBaseObject
 public:
 	CUserObject();
 	~CUserObject();
-
-	bool Load(unsigned short ver);
-	bool Save(unsigned short ver);
 
 	void DownLoadFace(char* loadUrl);
 
@@ -191,10 +185,6 @@ class CWebUserObject : public IBaseObject
 public:
 	CWebUserObject();
 	~CWebUserObject();
-
-	//个人信息
-	bool Load(unsigned short ver);
-	bool Save(unsigned short ver);
 
 	void AddCommonTalkId(unsigned long uid);
 
@@ -287,5 +277,29 @@ public:
 	WxUserInfo*				m_pWxUserInfo;
 };
 
+// 组对象
+class CGroupObject : public IBaseObject
+{
+public:
+	CGroupObject();
+	CGroupObject(unsigned long id, string name);
+	~CGroupObject();
+
+	CGroupObject *AddGroupObject(unsigned long id, string name);
+	void AddGroupObject(CGroupObject * pGroup);
+	CUserObject *AddUserObject(unsigned long id, string name, char sex);
+
+	void DeleteAll();
+
+	void DeleteAllUser();
+	void DeleteAllGroup();
+
+public:
+	unsigned long id;
+	string strName;
+
+	list<CGroupObject *>m_ListGroupInfo;
+	list<CUserObject *>m_ListUserInfo;
+};
 
 #endif

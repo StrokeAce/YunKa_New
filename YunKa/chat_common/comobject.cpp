@@ -694,16 +694,6 @@ CUserObject::~CUserObject()
 
 }
 
-bool CUserObject::Load(unsigned short ver)
-{
-	return false;
-}
-
-bool CUserObject::Save(unsigned short ver)
-{
-	return false;
-}
-
 int GetEncoderClsid(const WCHAR* format, CLSID* pClsid)
 {
 	UINT  num = 0;          // number of image encoders  
@@ -891,16 +881,6 @@ CWebUserObject::CWebUserObject()
 CWebUserObject::~CWebUserObject()
 {
 	
-}
-
-bool CWebUserObject::Load(unsigned short ver)
-{
-	return false;
-}
-
-bool CWebUserObject::Save(unsigned short ver)
-{
-	return false;
 }
 
 void CWebUserObject::AddCommonTalkId(unsigned long uid)
@@ -1139,4 +1119,75 @@ WEBUSER_URL_INFO* CWebUserObject::GetLastScriptFlagOb()
 		}
 	}
 	return pUrl;
+}
+
+//×é¶ÔÏó
+
+CGroupObject::CGroupObject()
+{
+	m_nEMObType = OBJECT_GROUP;
+	id = 0;
+}
+
+CGroupObject::CGroupObject(unsigned long id, string name)
+{
+	id = id;
+	strName = name;
+}
+
+void CGroupObject::DeleteAll()
+{
+	DeleteAllGroup();
+	DeleteAllUser();
+}
+
+void CGroupObject::DeleteAllGroup()
+{
+	list<CGroupObject *>::iterator iter = m_ListGroupInfo.begin();
+	for (iter; iter != m_ListGroupInfo.end(); iter++)
+	{
+		delete *iter;
+	}
+
+	m_ListGroupInfo.clear();
+}
+
+void CGroupObject::DeleteAllUser()
+{
+	list<CUserObject*>::iterator iter = m_ListUserInfo.begin();
+	for (iter; iter != m_ListUserInfo.end(); iter++)
+	{
+		delete *iter;
+	}
+
+	m_ListUserInfo.clear();
+}
+
+CGroupObject::~CGroupObject()
+{
+	DeleteAllUser();
+}
+
+CGroupObject *CGroupObject::AddGroupObject(unsigned long id, string name)
+{
+	CGroupObject *pGroup = new CGroupObject(id, name);
+
+	m_ListGroupInfo.push_back(pGroup);
+	return pGroup;
+}
+
+void CGroupObject::AddGroupObject(CGroupObject * pGroup)
+{
+	m_ListGroupInfo.push_back(pGroup);
+}
+
+CUserObject *CGroupObject::AddUserObject(unsigned long id, string name, char sex)
+{
+	CUserObject *pUser = new CUserObject();
+
+	pUser->UserInfo.uid = id;
+	sprintf(pUser->UserInfo.nickname, "%s", name.c_str());
+
+	m_ListUserInfo.push_back(pUser);
+	return pUser;
 }

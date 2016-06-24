@@ -27,7 +27,7 @@ a { text-decoration:none; }
 .send_name { color:#357abc; vertical-align:top;}
 .recv_name { color:#da4901; vertical-align:top;}
 .time { font-family:"Times New Roman", Times, serif; color:#999999; font-size:8pt; padding-left:5px; -webkit-user-select:none; vertical-align:top;}
-.head_image {-moz-user-select:none;width:30px;height:30px;}
+.head_image {-moz-user-select:none;width:30px;height:30px;border-radius: 3px;}
 .msg_image{ width:30%;border:1px #cdcdcb solid;}
 .msg_voice{ width:250px; }
 .wait_image{ margin-right:20px;margin-left:20px;cursor:pointer;}

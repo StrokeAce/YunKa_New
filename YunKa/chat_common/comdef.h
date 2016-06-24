@@ -890,6 +890,7 @@ typedef enum{
 #define OBJECT_UNKNOWN		0
 #define OBJECT_USER			1
 #define OBJECT_WEBUSER		2 // web用户或者是微信用户
+#define OBJECT_GROUP		3
 
 //声音文件的类型
 #define SOUND_USERONLINE		0

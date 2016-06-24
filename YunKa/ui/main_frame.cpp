@@ -3105,3 +3105,8 @@ void CMainFrame::OnBtnSendFile(TNotifyUI& msg)
 {
 
 }
+
+void CMainFrame::RecvOnlineUsers(CGroupObject* pGroup)
+{
+
+}
