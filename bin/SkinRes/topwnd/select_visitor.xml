@@ -10,7 +10,7 @@
     <Label text="筛选访客-设置过滤器" font="10" width="200" />
     <Control />
 
-    <Button name="closeBtn_visitor" width="42" maxheight="18"     normalimage="file='frame_btn_close_normal.bmp' mask='#FFFF00FF'"     hotimage="file='frame_btn_close_hot.bmp' mask='#FFFF00FF'"     pushedimage="file='frame_btn_close_down.bmp' mask='#FFFF00FF'"/>
+    <Button name="closeBtn_visitor" width="42" maxheight="18"     normalimage="file='mainframe\\frame_btn_close_normal.bmp' mask='#FFFF00FF'"     hotimage="file='mainframe\\frame_btn_close_hot.bmp' mask='#FFFF00FF'"     pushedimage="file='mainframe\\frame_btn_close_down.bmp' mask='#FFFF00FF'"/>
 
 </HorizontalLayout>
 
