@@ -51,6 +51,8 @@ CMainFrame::CMainFrame(CChatManager* manager) :m_manager(manager)
 	m_curSelectOptionBtn = 0;
 	m_bRecording = false;
 
+	m_pLastOfflineNode = m_pLastOnlineNode = 0;
+	memset(m_pManagerBtn, 0, sizeof(m_pManagerBtn));
 }
 
 
@@ -414,7 +416,12 @@ void CMainFrame::OnTimer(TNotifyUI& msg)
 
 	if (msg.pSender == pUserList)
 	{
-		AddOnlineVisitor(pUserList, NULL, -1);
+		m_PaintManager.KillTimer(pUserList);
+		//延时3秒中后再去 去在线用户列表
+		m_manager->SendTo_GetListChatInfo();
+
+		/*
+	//	AddOnlineVisitor(pUserList, NULL, -1);
 		m_PaintManager.KillTimer(pUserList);
 		list<CUserObject* >::iterator  iter = m_upUser.begin();
 		for (; iter != m_upUser.end(); iter++)
@@ -424,10 +431,8 @@ void CMainFrame::OnTimer(TNotifyUI& msg)
 
 		}
 		//UserListUI::Node* tempNode = iter->second;
-
-
 		m_upUser.clear();
-
+		*/
 	}
 
 }
@@ -667,31 +672,7 @@ void CMainFrame::OnPrepare(TNotifyUI& msg)
 
 
 	//上层管理按钮 设置初始状态
-	for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
-	{
-		nameString.Format(_T("managerbutton_%d"),i+1);
-		m_pManagerBtn[i].m_pManagerBtn = NULL;
-		m_pManagerBtn[i].m_pManagerBtn = static_cast<CButtonUI*>(m_PaintManager.FindControl(nameString));
-
-		CDuiString str = m_pManagerBtn[i].m_pManagerBtn->GetNormalImage();
-		//m_pManagerBtn[i].normalImage =  m_pManagerBtn[i].m_pManagerBtn->GetNormalImage();
-		//m_pManagerBtn[i].hotImage = m_pManagerBtn[i].m_pManagerBtn->GetHotImage();
-		//m_pManagerBtn[i].pushedImage = m_pManagerBtn[i].m_pManagerBtn->GetPushedImage();
-
-		StrCpyW(m_pManagerBtn[i].hotImage, m_pManagerBtn[i].m_pManagerBtn->GetHotImage());
-		StrCpyW(m_pManagerBtn[i].pushedImage, m_pManagerBtn[i].m_pManagerBtn->GetPushedImage());
-
-		//筛选访客按钮
-		if (i == 5  || i >= 8 )
-		{
-			m_pManagerBtn[i].m_pManagerBtn->SetNormalImage(m_pManagerBtn[i].pushedImage);
-		}
-		else
-		{
-			m_pManagerBtn[i].m_pManagerBtn->SetHotImage(str);
-			m_pManagerBtn[i].m_pManagerBtn->SetPushedImage(str);
-		}
-	}
+	UpdateTopCenterButtonState(0);
 
 	//右下角小图标
 	m_frameSmallMenu.Init();
@@ -916,27 +897,10 @@ void CMainFrame::OnItemClick(TNotifyUI &msg)
 						ShowRightOptionFrameView(id);
 					}
 					m_curSelectId = id;
-
-					map<unsigned long, UserListUI::Node*>::iterator iter = m_waitVizitorMap.find(id);
-					if (iter != m_waitVizitorMap.end())
-					{
-						m_pManagerBtn[0].m_pManagerBtn->SetNormalImage(m_pManagerBtn[0].pushedImage);
-						m_pManagerBtn[0].m_pManagerBtn->SetHotImage(m_pManagerBtn[0].hotImage);
-						m_pManagerBtn[0].m_pManagerBtn->SetPushedImage(m_pManagerBtn[0].pushedImage);
-
-						m_pManagerBtn[3].m_pManagerBtn->SetNormalImage(m_pManagerBtn[3].pushedImage);
-						m_pManagerBtn[3].m_pManagerBtn->SetHotImage(m_pManagerBtn[3].hotImage);
-						m_pManagerBtn[3].m_pManagerBtn->SetPushedImage(m_pManagerBtn[3].pushedImage);
-
-						m_pManagerBtn[4].m_pManagerBtn->SetNormalImage(m_pManagerBtn[4].pushedImage);
-						m_pManagerBtn[4].m_pManagerBtn->SetHotImage(m_pManagerBtn[4].hotImage);
-						m_pManagerBtn[4].m_pManagerBtn->SetPushedImage(m_pManagerBtn[4].pushedImage);
-					}
-
-
-
-
 				}
+
+				//更新 上层的按钮状态
+				UpdateTopCenterButtonState(id);
 			}
 		}
 	}
@@ -1304,23 +1268,20 @@ void CMainFrame::OnBtnSendMessage(TNotifyUI& msg)
 //请求坐席列表
 void CMainFrame::SendMsgToGetList()
 {
-
-
-
 	//先请求自己的信息 
 	m_mySelfInfo = m_manager->GetMySelfUserInfo();
 
-
+	//先添加自己的位置
 	AddMyselfToList(pUserList, m_mySelfInfo);
 
+	//再添加最后一个的位置
+	AddOnlineVisitor(pUserList, NULL, -1);
 
 	//AddOnlineVisitor(pUserList,NULL,-1);
 	//获取坐席列表
 	m_manager->SendTo_GetShareList();
 
-
 	m_hMainWnd = m_PaintManager.GetPaintWindow();
-
 
 	m_PaintManager.SetTimer(pUserList, WM_ADD_ONLINE_DATA_TIMER_ID, DELAY_ADD_ONLINE_DATA_TIME);
 
@@ -1497,37 +1458,50 @@ void CMainFrame::AddHostUserList(UserListUI * ptr, CUserObject *user)
 		//nameString.Format(_T("{x 4}{i gameicons.png 18 0}{x 4} %s %s"), strTemp.GetData(), onlineString);
 		nameString.Format(_T("{x 4}{i user_client.png 1 0} %s %s"), strTemp.GetData(), onlineString);
 
-		//第一个主节点 显示 名称 在线状态
-		pUserNameNode = ptr->AddNode(nameString, user->UserInfo.uid);
+
+		if (m_pLastOfflineNode == NULL) // 第一个主节点 显示 名称 在线状态
+		{
+
+			if (m_pLastOnlineNode == NULL)
+				index = pUserList->GetNodeIndex(pMySelfeNode);
+			else
+				index = pUserList->GetNodeIndex(m_pLastOnlineNode);
+
+			pUserNameNode = ptr->AddNode(nameString, user->UserInfo.uid,index);
+			m_pLastOfflineNode = pUserNameNode;
+		}
+		else
+		{
+			index = pUserList->GetNodeIndex(m_pLastOfflineNode);
+			pUserNameNode = ptr->AddNode(nameString, user->UserInfo.uid,index);
+			m_pLastOfflineNode = pUserNameNode;
+		}
+
+
 	}
 	else  if (user->status == STATUS_ONLINE)                   //在线
 	{
-		//onlineString = _T("(在线)");
-		onlineString = _T("(离线)");
+		onlineString = _T("(在线)");
 
 		strTemp = AnsiToUnicode(user->UserInfo.nickname);
 		//nameString.Format(_T("{x 4}{i gameicons.png 18 0}{x 4} %s %s"), strTemp.GetData(), onlineString);
 		nameString.Format(_T("{x 4}{i user_client.png 1 0}{x 4} %s %s"), strTemp.GetData(), onlineString);
 
-		pUserNameNode = ptr->AddNode(nameString, user->UserInfo.uid);
-		
-		m_upUser.push_back(user);
 
-		/*
-		if (m_onlineNodeMap.size() > 0)
+		if (m_pLastOnlineNode == NULL) // 第一个主节点 显示 名称 在线状态
 		{
-			map<unsigned int, UserListUI::Node*>::iterator iter = m_onlineNodeMap.end();
-			UserListUI::Node* mapNode = iter->second;
-			index = pUserList->GetNodeIndex(mapNode);
+			index = pUserList->GetNodeIndex(pMySelfeNode);
+			pUserNameNode = ptr->AddNode(nameString, user->UserInfo.uid, index);
+			m_pLastOnlineNode = pUserNameNode;
 		}
 		else
 		{
-			index = pUserList->GetNodeIndex(pMySelfeNode);
+			index = pUserList->GetNodeIndex(m_pLastOnlineNode);
+			pUserNameNode = ptr->AddNode(nameString, user->UserInfo.uid, index);
+			m_pLastOnlineNode = pUserNameNode;
 		}
-		pUserNameNode = ptr->AddNode(nameString,index);
-		*/
-	
 
+		//m_upUser.push_back(user);
 	}
 
 
@@ -1542,18 +1516,22 @@ void CMainFrame::AddHostUserList(UserListUI * ptr, CUserObject *user)
 	pUserAcceptNode = pUserList->AddNode(acceptString, user->UserInfo.uid, pUserNameNode);
 
 
-	if ( 1 /* user->status == STATUS_OFFLINE */)    //离线
+	if (  user->status == STATUS_OFFLINE )    //离线
 	{
 		m_offlineNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
+
+
+		pUserList->ExpandNode(pUserNameNode, false);
 
 	}
 	else  if (user->status == STATUS_ONLINE) //在线
 	{
 		m_onlineNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
+
+		pUserList->ExpandNode(pUserNameNode, true);
 		
 	}
 
-	pUserList->ExpandNode(pUserNameNode, false);
 
 }
 
@@ -1577,10 +1555,7 @@ void CMainFrame::OnSendToCloseChat(unsigned long webUserid)
 void CMainFrame::RecvUserInfo(CUserObject* pWebUser)
 {
 
-	//m_PaintManager.KillTimer(pUserList);
 	AddHostUserList(pUserList, pWebUser);
-	//m_PaintManager.SetTimer(pUserList, WM_ADD_ONLINE_DATA_TIMER_ID, DELAY_ADD_ONLINE_DATA_TIME);
-
 
 
 }
@@ -1701,23 +1676,22 @@ void CMainFrame::RecvChatInfo(CWebUserObject* pWebUser, CUserObject* pUser)
 	WCHAR name[64] = { 0 };
 	ANSIToUnicode(pWebUser->info.name, name);
 
+
+	//是否来自微信
+	if (pWebUser->m_bIsFrWX)
+	{
+		text.Format(_T("{x 4}{i user_wx.png 1 0}{x 4}%s"), name);
+	}
+	else
+	{
+		text.Format(_T("{x 4}{i user_web.png 1 0}{x 4}%s"), name);
+	}
+
 	//先判断类型
 	//为接收的用户 在等待列表
 	if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_REQUEST)
 	{
 		//添加等待列表
-
-		//是否来自微信
-		if (pWebUser->m_bIsFrWX)
-		{
-			text.Format(_T("{x 4}{i user_wx.png 1 0}{x 4}%s"), name);
-		}
-		else
-		{
-			text.Format(_T("{x 4}{i user_web.png 1 0}{x 4}%s"), name);
-		}
-
-
 		UserListUI::Node* tempNode = pUserList->AddNode(text, pWebUser->webuserid, pWaitForAccept);
 		pUserList->ExpandNode(pWaitForAccept, true);
 		//m_waitVizitorList.push_back(text);
@@ -1737,13 +1711,15 @@ void CMainFrame::RecvChatInfo(CWebUserObject* pWebUser, CUserObject* pUser)
 		if (pUser->UserInfo.uid == m_mySelfInfo->UserInfo.uid)
 		{
 			UserListUI::Node* tempNode = pMySelfeNode->child(0);
-			pUserList->AddNode(text, pWebUser->webuserid, tempNode);
+			UserListUI::Node* addNode = pUserList->AddNode(text, pWebUser->webuserid, tempNode);
 			pUserList->ExpandNode(tempNode, true);
+
+			m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, addNode));
 		}
 		else //加到其他人列表底下
 		{
 
-			map<unsigned long, UserListUI::Node*>::iterator  iter = m_onlineNodeMap.find(pWebUser->info.uid);
+			map<unsigned long, UserListUI::Node*>::iterator  iter = m_onlineNodeMap.find(pUser->UserInfo.uid);
 
 			if (iter == m_onlineNodeMap.end())
 				return;
@@ -1751,10 +1727,15 @@ void CMainFrame::RecvChatInfo(CWebUserObject* pWebUser, CUserObject* pUser)
 			UserListUI::Node* tempNode = iter->second;
 			UserListUI::Node* child = tempNode->child(0);
 
-			pUserList->AddNode(text, pWebUser->webuserid, child);
+			UserListUI::Node* addNode  =  pUserList->AddNode(text, pWebUser->webuserid, child);
 			pUserList->ExpandNode(tempNode, true);
+			pUserList->ExpandNode(child, true);
+
+			m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, addNode));
 
 		}
+
+		m_allVisitorUserMap.insert(pair<unsigned long, unsigned long>(pWebUser->webuserid, pUser->UserInfo.uid));
 	}
 
 }
@@ -1813,6 +1794,7 @@ void CMainFrame::RecvAcceptChat(CUserObject* pUser, CWebUserObject* pWebUser)
 	m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(uid, currentNode));
 	m_waitVizitorMap.erase(iter);
 
+	m_allVisitorUserMap.insert(pair<unsigned long, unsigned long>(pWebUser->webuserid, pUser->UserInfo.uid));
 
 	//显示聊天界面内容
 	ShowClearMsg();
@@ -1870,10 +1852,21 @@ void CMainFrame::RecvCloseChat(CWebUserObject* pWebUser)
 	tempNode = iter->second;
 	pUserList->RemoveNode(tempNode);
 
+
+	//从 会话中 删除 当前访客 信息
+	map<unsigned long, unsigned long>::iterator iterLong = m_allVisitorUserMap.find(pWebUser->webuserid);
+
 	if (type == 0)
 		m_waitVizitorMap.erase(iter);
 	else
+	{
 		m_allVisitorNodeMap.erase(iter);
+
+		if (iterLong == m_allVisitorUserMap.end())
+			return;
+		m_allVisitorUserMap.erase(iterLong);
+
+	}
 
 }
 
@@ -1901,6 +1894,14 @@ void CMainFrame::RecvReleaseChat(CWebUserObject* pWebUser)
 	RecvChatInfo(pWebUser,NULL);
 
 	m_allVisitorNodeMap.erase(iter);
+
+
+	//从 会话中 删除 当前访客 信息
+	map<unsigned long, unsigned long>::iterator iterLong = m_allVisitorUserMap.find(pWebUser->webuserid);
+	if (iterLong == m_allVisitorUserMap.end())
+		return;
+	m_allVisitorUserMap.erase(iterLong);
+
 }
 
 
@@ -1998,6 +1999,26 @@ void CMainFrame::ResultScreenCapture(string imagePath)
 void CMainFrame::OnManagerButtonEvent(TNotifyUI& msg)
 {
 	char sURL[1024] = {0};
+	WCHAR managerName[32] = {0};
+	int doEvent = -1;
+
+	for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
+	{
+		wsprintf(managerName,L"managerbutton_%d",i+1);
+
+		if (msg.pSender->GetName() == managerName)
+		{
+			if (m_pManagerBtn[i].m_buttonState == 1)
+			{
+				doEvent = 0;
+			}
+			break;
+		}
+	}
+
+
+	if (doEvent == -1)
+		return;
 
 	//接受
 	if (msg.pSender->GetName() == _T("managerbutton_1"))
@@ -3108,5 +3129,127 @@ void CMainFrame::OnBtnSendFile(TNotifyUI& msg)
 
 void CMainFrame::RecvOnlineUsers(CGroupObject* pGroup)
 {
+
+}
+
+void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
+{
+	CDuiString nameString = _T("");
+
+	CUserObject *pUser = NULL;
+	CWebUserObject  *pWebUser = NULL;
+
+
+	CheckIdForUerOrWebuser(id, &pWebUser, &pUser);
+
+	if (id == 0 || pUser != NULL)  //上层管理按钮 设置初始状态
+	{
+		for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
+		{
+			nameString.Format(_T("managerbutton_%d"), i + 1);
+
+			if (m_pManagerBtn[i].m_pManagerBtn == NULL)
+			{
+				m_pManagerBtn[i].m_pManagerBtn = static_cast<CButtonUI*>(m_PaintManager.FindControl(nameString));
+
+				StrCpyW(m_pManagerBtn[i].normalImage, m_pManagerBtn[i].m_pManagerBtn->GetNormalImage());
+				StrCpyW(m_pManagerBtn[i].hotImage, m_pManagerBtn[i].m_pManagerBtn->GetHotImage());
+				StrCpyW(m_pManagerBtn[i].pushedImage, m_pManagerBtn[i].m_pManagerBtn->GetPushedImage());
+			}
+
+			//筛选访客按钮
+			if (i == 5 || i >= 8)
+			{
+				m_pManagerBtn[i].m_pManagerBtn->SetNormalImage(m_pManagerBtn[i].pushedImage);
+				m_pManagerBtn[i].m_pManagerBtn->SetHotImage(m_pManagerBtn[i].hotImage);
+				m_pManagerBtn[i].m_pManagerBtn->SetPushedImage(m_pManagerBtn[i].hotImage);
+				m_pManagerBtn[i].m_buttonState = 1;
+			}
+			else
+			{
+				m_pManagerBtn[i].m_pManagerBtn->SetNormalImage(m_pManagerBtn[i].normalImage);
+				m_pManagerBtn[i].m_pManagerBtn->SetHotImage(m_pManagerBtn[i].normalImage);
+				m_pManagerBtn[i].m_pManagerBtn->SetPushedImage(m_pManagerBtn[i].normalImage);
+				m_pManagerBtn[i].m_buttonState = 0;
+			}
+		}
+
+		return;
+	}
+
+	//如果在等待列表 显示 接受 屏蔽 邀请评价   这几个按钮
+	map<unsigned long, UserListUI::Node*>::iterator iter = m_waitVizitorMap.find(id);
+	if (iter != m_waitVizitorMap.end() ) 
+	{
+		m_pManagerBtn[0].m_pManagerBtn->SetNormalImage(m_pManagerBtn[0].pushedImage);
+		m_pManagerBtn[0].m_pManagerBtn->SetHotImage(m_pManagerBtn[0].hotImage);
+		m_pManagerBtn[0].m_pManagerBtn->SetPushedImage(m_pManagerBtn[0].hotImage);
+		m_pManagerBtn[0].m_buttonState = 1;
+		m_pManagerBtn[3].m_pManagerBtn->SetNormalImage(m_pManagerBtn[3].pushedImage);
+		m_pManagerBtn[3].m_pManagerBtn->SetHotImage(m_pManagerBtn[3].hotImage);
+		m_pManagerBtn[3].m_pManagerBtn->SetPushedImage(m_pManagerBtn[3].hotImage);
+		m_pManagerBtn[3].m_buttonState = 1;
+		m_pManagerBtn[4].m_pManagerBtn->SetNormalImage(m_pManagerBtn[4].pushedImage);
+		m_pManagerBtn[4].m_pManagerBtn->SetHotImage(m_pManagerBtn[4].hotImage);
+		m_pManagerBtn[4].m_pManagerBtn->SetPushedImage(m_pManagerBtn[4].hotImage);
+		m_pManagerBtn[4].m_buttonState = 1;
+
+	}
+	else
+	{
+
+		map<unsigned long, unsigned long>::iterator iterLong = m_allVisitorUserMap.find(pWebUser->webuserid);
+		if (iterLong == m_allVisitorUserMap.end())
+			return;
+
+
+		if (iterLong->second == m_mySelfInfo->UserInfo.uid)//在自己底下
+		{
+			for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
+			{
+				if (i == 0)
+				{
+					m_pManagerBtn[i].m_pManagerBtn->SetNormalImage(m_pManagerBtn[i].normalImage);
+					m_pManagerBtn[i].m_pManagerBtn->SetHotImage(m_pManagerBtn[i].normalImage);
+					m_pManagerBtn[i].m_pManagerBtn->SetPushedImage(m_pManagerBtn[i].normalImage);
+					m_pManagerBtn[i].m_buttonState = 0;
+				}
+				else
+				{
+					m_pManagerBtn[i].m_pManagerBtn->SetNormalImage(m_pManagerBtn[i].pushedImage);
+					m_pManagerBtn[i].m_pManagerBtn->SetHotImage(m_pManagerBtn[i].hotImage);
+					m_pManagerBtn[i].m_pManagerBtn->SetPushedImage(m_pManagerBtn[i].hotImage);
+					m_pManagerBtn[i].m_buttonState = 1;
+				}
+			}
+		}
+		else //别人底下
+		{
+
+			for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
+			{
+
+				//筛选访客按钮
+				if ( (i >=3 && i<=5 ) || i >= 8)
+				{
+					m_pManagerBtn[i].m_pManagerBtn->SetNormalImage(m_pManagerBtn[i].pushedImage);
+					m_pManagerBtn[i].m_pManagerBtn->SetHotImage(m_pManagerBtn[i].hotImage);
+					m_pManagerBtn[i].m_pManagerBtn->SetPushedImage(m_pManagerBtn[i].hotImage);
+					m_pManagerBtn[i].m_buttonState = 1;
+				}
+				else
+				{
+					m_pManagerBtn[i].m_pManagerBtn->SetNormalImage(m_pManagerBtn[i].normalImage);
+					m_pManagerBtn[i].m_pManagerBtn->SetHotImage(m_pManagerBtn[i].normalImage);
+					m_pManagerBtn[i].m_pManagerBtn->SetPushedImage(m_pManagerBtn[i].normalImage);
+					m_pManagerBtn[i].m_buttonState = 0;
+				}
+			}
+	
+		}
+
+	
+	}
+
 
 }

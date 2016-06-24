@@ -17,7 +17,7 @@
 
 
 #define MID_MANAGER_BUTTON_NUM    15
-#define MAX_PATH_LENGTH           1024
+#define MAX_PATH_LENGTH           512
 
 
 #define MSG_TYPE_SYS  3               //系统消息
@@ -93,9 +93,10 @@ public:
 typedef struct ManagerButtonStruct
 {
 	CButtonUI *m_pManagerBtn;
-
+	int   m_buttonState;
 	WCHAR hotImage[MAX_PATH_LENGTH];
 	WCHAR pushedImage[MAX_PATH_LENGTH];
+	WCHAR normalImage[MAX_PATH_LENGTH];
 
 }ManagerButtonStruct;
 
@@ -216,6 +217,8 @@ public:
 	void CMainFrame::OnCtrlVEvent();
 	bool CMainFrame::SaveBitmapToFile(HBITMAP hbitmap, BITMAP bitmap, string lpFileName);
 
+	void CMainFrame::UpdateTopCenterButtonState(unsigned long id);
+
 //	void CMainFrame::ReplaceFaceId(string &msg);
 	void CMainFrame::ShowMySelfSendMsg(string strMsg, MSG_DATA_TYPE msgType, string msgId);
 	void CMainFrame::MoveAndRestoreMsgWnd(int type);
@@ -265,6 +268,12 @@ public:
 	map<unsigned long, UserListUI::Node*> m_waitVizitorMap;
 	map<unsigned long, UserListUI::Node*> m_allVisitorNodeMap;
 
+
+	map<unsigned long, unsigned long > m_allVisitorUserMap;
+
+
+	UserListUI::Node* m_pLastOfflineNode;
+	UserListUI::Node* m_pLastOnlineNode;
 
 	list<CUserObject* > m_upUser;
 	unsigned int m_recordWaitNumber;
