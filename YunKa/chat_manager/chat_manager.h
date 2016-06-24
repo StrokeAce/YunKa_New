@@ -25,9 +25,11 @@ public:
 class IHandlerMsgs
 {
 public:
+	// 收到坐席列表
+	virtual void RecvShareListCount(int len) = 0;
 	
 	// 收到一个坐席用户的信息,用来初始化坐席列表
-	virtual void RecvUserInfo(CUserObject* pWebUser) = 0;
+	virtual void RecvUserInfo(CUserObject* pWebUser) = 0;	
 
 	// 收到一个会话消息
 	virtual void RecvChatInfo(CWebUserObject* pWebUser,CUserObject* pUser) = 0;

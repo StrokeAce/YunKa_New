@@ -144,9 +144,11 @@ public:
 	void OnItemActive(TNotifyUI &msg);
 
 public:    //主界面消息回调
+	// 收到坐席列表
+	virtual void RecvShareListCount(int len);
+
 	// 收到一个坐席用户的信息,用来初始化坐席列表
 	virtual void RecvUserInfo(CUserObject* pWebUser);
-
 
 	// 收到一个会话消息
 	virtual void RecvChatInfo(CWebUserObject* pWebUser, CUserObject* pUser);

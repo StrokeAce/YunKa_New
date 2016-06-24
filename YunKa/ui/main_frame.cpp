@@ -1551,6 +1551,11 @@ void CMainFrame::OnSendToCloseChat(unsigned long webUserid)
 
 /*****回调函数**************************************************************************************/
 
+void CMainFrame::RecvShareListCount(int len)
+{
+	
+}
+
 //回调过来的 坐席信息
 void CMainFrame::RecvUserInfo(CUserObject* pWebUser)
 {

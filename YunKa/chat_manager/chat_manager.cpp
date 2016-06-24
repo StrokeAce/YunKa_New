@@ -1198,7 +1198,7 @@ int CChatManager::RecvFloatShareList(PACK_HEADER packhead, char *pRecvBuff, int 
 		pUser->m_bFriend = true;
 	}
 
-	SendTo_GetAllUserInfo();
+	m_handlerMsgs->RecvShareListCount(RecvInfo.sharememlist.size());
 
 	nError = 0;
 
@@ -1297,6 +1297,8 @@ int CChatManager::RecvComSendMsg(PACK_HEADER packhead, char *pRecvBuff, int len)
 								delete pWebUser->m_pWxUserInfo;
 								pWebUser->m_pWxUserInfo = (WxUserInfo*)pwxobj;
 							}
+
+							strcpy(pWebUser->info.name, ((WxUserInfo*)pwxobj)->nickname.c_str());
 							nError = true;
 							pWebUser->m_bIsGetInfo = true;
 							// 此处微信用户信息不析构，保存并后面使用
@@ -3206,6 +3208,7 @@ WxMsgBase* CChatManager::ParseWxMsg(CWebUserObject* pWebUser, COM_FLOAT_CHATMSG&
 				delete pWebUser->m_pWxUserInfo;
 				pWebUser->m_pWxUserInfo = (WxUserInfo*)pwxobj;
 			}
+			strcpy(pWebUser->info.name, ((WxUserInfo*)pwxobj)->nickname.c_str());
 			pWebUser->m_bIsGetInfo = true;
 			return NULL;
 		}
@@ -5300,7 +5303,8 @@ void CChatManager::RestartSession(LPARAM lParam)
 	if (lParam == NULL)
 		return;
 
-	string strNavigateIconURL;// = (string)lParam;
+	char* url = (char*)lParam;
+	string strNavigateIconURL = url;
 
 	string strUrl = "";
 	string strRet,strErrMsg;
@@ -5347,7 +5351,7 @@ void CChatManager::FormatRequestUrl(string &strUrl,string strMsg)
 	szSign[SHA_DIGEST_LENGTH * 2] = 0;
 	unsigned long adminid = m_login->m_authAdminid;
 	char sUrl[MAX_1024_LEN];
-	sprintf(sUrl, m_initConfig.webpage_repickchaturl, m_userInfo.UserInfo.uid, szSign, strTime, strRand, adminid, strMsg);
+	sprintf(sUrl, m_initConfig.webpage_repickchaturl, m_userInfo.UserInfo.uid, szSign, strTime, strRand, adminid, strMsg.c_str());
 	strUrl = sUrl;
 	g_WriteLog.WriteLog(C_LOG_TRACE, "FormatRequestUrl.%s = [%s]\n", Request_Url_RestartSession, strUrl);
 }
