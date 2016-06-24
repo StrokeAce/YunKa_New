@@ -53,6 +53,7 @@ CMainFrame::CMainFrame(CChatManager* manager) :m_manager(manager)
 
 	m_pLastOfflineNode = m_pLastOnlineNode = 0;
 	memset(m_pManagerBtn, 0, sizeof(m_pManagerBtn));
+	m_userListCount = m_recordListCount = 0;
 }
 
 
@@ -416,9 +417,9 @@ void CMainFrame::OnTimer(TNotifyUI& msg)
 
 	if (msg.pSender == pUserList)
 	{
-		m_PaintManager.KillTimer(pUserList);
+	//	m_PaintManager.KillTimer(pUserList);
 		//延时3秒中后再去 去在线用户列表
-		m_manager->SendTo_GetListChatInfo();
+	//	m_manager->SendTo_GetListChatInfo();
 
 		/*
 	//	AddOnlineVisitor(pUserList, NULL, -1);
@@ -921,15 +922,8 @@ void CMainFrame::OnItemActive(TNotifyUI &msg)
 			CDuiString str = node->data()._text;
 			unsigned long uid = node->data()._uid;
 
-			if (uid > 0)
-			{
-				map<unsigned long, UserListUI::Node*>::iterator iter = m_waitVizitorMap.find(uid);
-				if (iter != m_waitVizitorMap.end())
-				{
-					OnSendToAcceptChat(uid);
-				}
-			}
-
+			OnActiveUser(uid);
+			  
 		}
 	}
 
@@ -1283,7 +1277,7 @@ void CMainFrame::SendMsgToGetList()
 
 	m_hMainWnd = m_PaintManager.GetPaintWindow();
 
-	m_PaintManager.SetTimer(pUserList, WM_ADD_ONLINE_DATA_TIMER_ID, DELAY_ADD_ONLINE_DATA_TIME);
+	//m_PaintManager.SetTimer(pUserList, WM_ADD_ONLINE_DATA_TIMER_ID, DELAY_ADD_ONLINE_DATA_TIME);
 
 }
 
@@ -1541,7 +1535,10 @@ void CMainFrame::AddHostUserList(UserListUI * ptr, CUserObject *user)
 
 void CMainFrame::RecvShareListCount(int len)
 {
-	
+	m_userListCount = len;
+
+	m_manager->SendTo_GetAllUserInfo();
+
 }
 
 //回调过来的 坐席信息
@@ -1549,7 +1546,10 @@ void CMainFrame::RecvUserInfo(CUserObject* pWebUser)
 {
 
 	AddHostUserList(pUserList, pWebUser);
+	m_recordListCount += 1;
 
+	if (m_recordListCount == m_userListCount)
+		m_manager->SendTo_GetListChatInfo();
 
 }
 
@@ -1741,6 +1741,9 @@ void CMainFrame::RecvAcceptChat(CUserObject* pUser, CWebUserObject* pWebUser)
 	CDuiString text;
 	unsigned long uid = 0;
 	UserListUI::Node* addNode = NULL;
+
+	if (pUser == NULL || pWebUser == NULL)
+		return;
 
 	map<unsigned long, UserListUI::Node*>::iterator iter = m_waitVizitorMap.find(pWebUser->webuserid);
 	if (iter != m_waitVizitorMap.end())
@@ -2071,7 +2074,11 @@ void CMainFrame::OnManagerButtonEvent(TNotifyUI& msg)
 	//邀请协助
 	else if (msg.pSender->GetName() == _T("managerbutton_8"))
 	{
+	    CUserObject	*pUser = m_manager->GetUserObjectByUid(9692110);
+		CWebUserObject *pWebUser = m_manager->GetWebUserObjectByUid(m_curSelectId);
 
+		if (pUser != NULL || pWebUser!= NULL)
+			m_manager->SendTo_InviteUser(pWebUser,pUser);
 
 	}
 	//内部对话
@@ -2444,13 +2451,104 @@ void CMainFrame::ChangeShowUserMsgWnd(unsigned long id)
 	*/
 }
 
+//收到邀请协助的 申请
 void CMainFrame::RecvInviteUser(CWebUserObject* pWebUser, CUserObject* pUser)
 {
+	//CUserObject	*pUser = m_manager->GetUserObjectByUid(9692111);
+	//CWebUserObject *pWebUser = m_manager->GetWebUserObjectByUid(m_curSelectId);
+
+	if (pUser == NULL || pWebUser == NULL)
+		return;
+
+	//放入邀请列表
+	m_acceptingsUserList.push_back(m_curSelectId);
+
 	
+
+	map<unsigned long, UserListUI::Node*>::iterator iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
+	//没有找到
+	if (iter == m_allVisitorNodeMap.end())
+	{
+		return;
+	}
+
+	UserListUI::Node *tempNode = iter->second;
+	CDuiString text = tempNode->data()._text;
+	int id = tempNode->data()._uid;
+
+	//先在用户的对话列表中删除 
+	pUserList->RemoveNode(tempNode);
+	m_allVisitorNodeMap.erase(iter);
+
+
+	//然后显示 在邀请列表中
+	UserListUI::Node* ChildNode = pMySelfeNode->child(2);
+	//int index = 0;
+	//int childNum = ChildNode->num_children;
+	//if (childNum == 0)
+	//	index = pUserList->GetNodeIndex(ChildNode);
+	//else
+	//{
+	//	UserListUI::Node* childNodeTemp = ChildNode->child(childNum - 1);
+	//	index = pUserList->GetNodeIndex(childNodeTemp);
+	//}
+
+	UserListUI::Node*currentNode  = pUserList->AddNode(text, id, ChildNode);
+	m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(id, currentNode));
+
+
 }
 
 void CMainFrame::ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, bool bSuccess)
 {
+
+	map<unsigned long, UserListUI::Node*>::iterator iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
+	//没有找到
+	if (iter == m_allVisitorNodeMap.end())
+	{
+		return;
+	}
+
+
+	if (bSuccess == true)
+	{
+		UserListUI::Node *tempNode = iter->second;
+
+		//先在用户的对话列表中删除 
+		pUserList->RemoveNode(tempNode);
+		m_allVisitorNodeMap.erase(iter);
+
+
+		//然后在添加
+		CDuiString text;
+		WCHAR name[64] = { 0 };
+		ANSIToUnicode(pWebUser->info.name, name);
+		if (pWebUser->m_bIsFrWX)
+		{
+			text.Format(_T("{x 4}{i gameicons.png 18 16}{i user_wx.png 1 0}{x 4}%s"), name);
+		}
+		else
+		{
+			text.Format(_T("{x 4}{i gameicons.png 18 16}{i user_web.png 1 0}{x 4}%s"), name);
+		}
+
+		UserListUI::Node *tempChildNode = pMySelfeNode->child(0);
+
+		UserListUI::Node * addNode = pUserList->AddNode(text, pWebUser->webuserid, tempChildNode);
+		m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, addNode));
+
+	}
+
+	else  if (bSuccess == false)
+	{
+
+
+
+	}
+
+
+
+
 
 }
 
@@ -3250,6 +3348,89 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 
 	
 	}
+
+
+}
+
+
+
+void CMainFrame::OnActiveUser(unsigned long id)
+{
+	CUserObject	*pUser = m_manager->GetUserObjectByUid(9692110);
+	CWebUserObject *pWebUser = m_manager->GetWebUserObjectByUid(id);
+	int type = -1;
+
+	if (id > 0)
+	{
+		map<unsigned long, UserListUI::Node*>::iterator iter = m_waitVizitorMap.find(id);
+		if (iter != m_waitVizitorMap.end())
+		{
+			m_manager->SendTo_AcceptChat(id);
+		}
+		else
+		{    //接受邀请 的操作
+
+			list<unsigned long >::iterator iterList =   m_acceptingsUserList.begin();
+			for (; iterList != m_acceptingsUserList.end(); iterList++)
+			{
+				if (id == *iterList)
+				{
+					//在邀请列表里删除 
+					m_acceptingsUserList.erase(iterList);
+					type = 0;
+					break;
+
+				}
+			}
+
+		}
+
+	}
+
+
+	if (type == 0)
+	{
+		if (pUser == NULL || pWebUser == NULL)
+			return;
+
+		m_manager->SendTo_InviteUserResult(pWebUser, pUser, true);
+		//然后加到对话中 
+
+		map<unsigned long, UserListUI::Node*>::iterator iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
+		//没有找到
+		if (iter == m_allVisitorNodeMap.end())
+		{
+			return;
+		}
+
+		UserListUI::Node *tempNode = iter->second;
+		CDuiString text = L"";
+
+		//先在用户的对话列表中删除 
+		pUserList->RemoveNode(tempNode);
+		m_allVisitorNodeMap.erase(iter);
+
+		WCHAR name[64] = { 0 };
+		ANSIToUnicode(pWebUser->info.name, name);
+		if (pWebUser->m_bIsFrWX)
+		{
+			text.Format(_T("{x 4}{i gameicons.png 18 16}{i user_wx.png 1 0}{x 4}%s"), name);
+		}
+		else
+		{
+			text.Format(_T("{x 4}{i gameicons.png 18 16}{i user_web.png 1 0}{x 4}%s"), name);
+		}
+
+		UserListUI::Node *tempChildNode = pMySelfeNode->child(0);
+
+		UserListUI::Node * addNode = pUserList->AddNode(text, pWebUser->webuserid, tempChildNode);
+		m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, addNode));
+	}
+
+}
+
+void CMainFrame::OnSelectUser(unsigned long id)
+{
 
 
 }

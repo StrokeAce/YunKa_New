@@ -212,14 +212,13 @@ public:
 
 
 //接入聊天 相关处理
-	void OnSendToAcceptChat(unsigned long webUserid);
-	void OnSendToReleaseChat(unsigned long webUserid);
-	void OnSendToCloseChat(unsigned long webUserid);
 	void CMainFrame::OnMenuEvent(CDuiString controlName);
 	void CMainFrame::OnCtrlVEvent();
 	bool CMainFrame::SaveBitmapToFile(HBITMAP hbitmap, BITMAP bitmap, string lpFileName);
 
 	void CMainFrame::UpdateTopCenterButtonState(unsigned long id);
+	void CMainFrame::OnSelectUser(unsigned long id);
+	void CMainFrame::OnActiveUser(unsigned long id);
 
 //	void CMainFrame::ReplaceFaceId(string &msg);
 	void CMainFrame::ShowMySelfSendMsg(string strMsg, MSG_DATA_TYPE msgType, string msgId);
@@ -267,11 +266,12 @@ public:
 	UserListUI::Node* pWaitForStart;
 	UserListUI::Node* pWaitForAccept;
 	UserListUI::Node* pMySelfeNode;
-	map<unsigned long, UserListUI::Node*> m_waitVizitorMap;
-	map<unsigned long, UserListUI::Node*> m_allVisitorNodeMap;
+	map<unsigned long, UserListUI::Node*> m_waitVizitorMap;  //等待列表
+	map<unsigned long, UserListUI::Node*> m_allVisitorNodeMap;  //所有访客列表
 
 
-	map<unsigned long, unsigned long > m_allVisitorUserMap;
+	map<unsigned long, unsigned long > m_allVisitorUserMap;   //所有访客的归属列表
+	list<unsigned long >m_acceptingsUserList;                 //邀请列表
 
 
 	UserListUI::Node* m_pLastOfflineNode;
@@ -329,6 +329,9 @@ private:
 	string m_facePathUrl;
 	int  m_curSelectOptionBtn;
 	unsigned long m_savedImageIndex;
+
+	int m_userListCount;
+	int m_recordListCount;
 
 
 
