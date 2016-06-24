@@ -469,11 +469,19 @@ bool CHttpLoad::HttpLoad(const string& szUrl, const string& szReffer, int reques
 		}
 		else
 		{
-			FILE* pFile;
+			FILE* pFile = NULL;
 			fopen_s(&pFile, szFilePath.c_str(), "wb");
-			SetHeadOptLoad(szUrl, szReffer, requestType, (void*)pFile, resultCode);
-			cret = curl_easy_perform(m_curl);
-			fclose(pFile);
+			if (pFile != NULL)
+			{
+				SetHeadOptLoad(szUrl, szReffer, requestType, (void*)pFile, resultCode);
+				cret = curl_easy_perform(m_curl);
+				fclose(pFile);
+			}
+			else
+			{
+				cret = CURLE_WRITE_ERROR;
+				m_bSuccess = false;
+			}
 		}
 		
 	}

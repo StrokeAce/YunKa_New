@@ -189,6 +189,8 @@ public:    //主界面消息回调
 
 	virtual void RecvOnlineUsers(CGroupObject* pGroup);
 
+	virtual void RecvWebUserInfo(CWebUserObject* pWebUser);
+
 public:
 	//自己定义的操作函数
 	void OnBtnFont(TNotifyUI& msg);

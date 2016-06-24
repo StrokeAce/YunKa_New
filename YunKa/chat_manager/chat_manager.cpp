@@ -49,6 +49,7 @@ static UINT WINAPI UpLoadFileToWxServerThread(void * pUpLoadInfo)
 	if (pWebUser == NULL && pWebUser->m_pWxUserInfo == NULL)
 	{	
 		pThis->SendGetWxUserInfoAndToken(pWebUser);
+		pThis->AfterUpload(userId, userType, msgId, "", msgDataType, "", filePath);
 		return false;
 	}
 
@@ -1277,45 +1278,14 @@ int CChatManager::RecvComSendMsg(PACK_HEADER packhead, char *pRecvBuff, int len)
 			}
 			else
 			{
+				WxMsgBase* pWxMsg = NULL;
 				if (strcmp(RecvInfo.msg.strfontinfo, "JSON=WX") == 0)
 				{
-					//微信消息类型，utf8编码类型
-					WxObj *pwxobj = ParseWxJsonMsg(RecvInfo.msg.strmsg);
+					pWebUser->m_bIsFrWX = true;
+					pWxMsg = ParseWxMsg(pWebUser, RecvInfo.msg.strmsg, NULL, RecvInfo.msg.sendtime);
 
-					if (pwxobj != NULL)
+					if (pWxMsg == NULL)
 					{
-						pWebUser->m_bIsFrWX = true;
-						if ("userinfo" == pwxobj->MsgType)
-						{
-							// 此处注意，如果第二次收到userinfo，应当将前面收到那次信息析构掉
-							if (pWebUser->m_pWxUserInfo == NULL)
-							{
-								pWebUser->m_pWxUserInfo = (WxUserInfo*)pwxobj;
-							}
-							else
-							{
-								delete pWebUser->m_pWxUserInfo;
-								pWebUser->m_pWxUserInfo = (WxUserInfo*)pwxobj;
-							}
-
-							strcpy(pWebUser->info.name, ((WxUserInfo*)pwxobj)->nickname.c_str());
-							nError = true;
-							pWebUser->m_bIsGetInfo = true;
-							// 此处微信用户信息不析构，保存并后面使用
-							goto RETURN;
-						}
-						else if ("wxactoken" == pwxobj->MsgType)
-						{
-							//todo:收到服务器发过来的微信的access_token消息
-							AddToken(pWebUser->m_pWxUserInfo, ((WxAccessTokenInfo*)pwxobj)->szAcToken);
-							delete pwxobj;
-							nError = true;
-							goto RETURN;
-						}
-					}
-					else
-					{
-						g_WriteLog.WriteLog(C_LOG_ERROR, "RecvComSendMsg NOT the weixin Json:%s", RecvInfo.msg.strmsg);
 						goto RETURN;
 					}
 				}
@@ -1367,7 +1337,7 @@ int CChatManager::RecvComSendMsg(PACK_HEADER packhead, char *pRecvBuff, int len)
 						pWebUser->m_waitresptimeouttimer = 0;	// 该客服说话了 [12/29/2010 SC]
 
 					AddMsgToList((IBaseObject*)pWebUser, msgFrom, MSG_RECV_ERROR, GetMsgId(), msgType, MSG_DATA_TYPE_TEXT,
-						RecvInfo.msg.strmsg, GetTimeByMDAndHMS(RecvInfo.msg.sendtime), NULL, NULL);
+						RecvInfo.msg.strmsg, GetTimeByMDAndHMS(RecvInfo.msg.sendtime), NULL, pWxMsg);
 
 					if ((RecvInfo.msg.bak == MSG_BAK_NORMAL) && !pWebUser->m_bConnected)
 					{
@@ -1579,7 +1549,7 @@ int CChatManager::RecvFloatCreateChat(PACK_HEADER packhead, char *pRecvBuff, int
 			pWebUser->talkuid = RecvInfo.uKefu;
 
 			//读取会话历史消息，并接受新的消息
-			SendStartRecvFloatMsg(packhead.random, RecvInfo.uAdminId, RecvInfo.chatid, pWebUser->m_sNewSeq);
+			//SendStartRecvFloatMsg(packhead.random, RecvInfo.uAdminId, RecvInfo.chatid, pWebUser->m_sNewSeq);
 
 			char msg[MAX_256_LEN];
 			sprintf(msg, "%s接受了访客%s的会话", pUser->UserInfo.nickname, pWebUser->info.name);
@@ -1800,7 +1770,6 @@ int CChatManager::RecvFloatChatMsg(PACK_HEADER packhead, char *pRecvBuff, int le
 	int nError = 0;
 	MSG_TYPE msgType = MSG_TYPE_NORMAL;
 	MSG_FROM_TYPE msgFrom = MSG_FROM_WEBUSER;
-	WxMsgBase* msgContentWx = NULL;
 	CUserObject *pAssistUser = NULL;
 	CWebUserObject *pWebUser = NULL;
 	WxMsgBase* pWxMsg = NULL;
@@ -1868,7 +1837,7 @@ int CChatManager::RecvFloatChatMsg(PACK_HEADER packhead, char *pRecvBuff, int le
 	if (strcmp(RecvInfo.strfontinfo, "JSON=WX") == 0)
 	{
 		pWebUser->m_bIsFrWX = true;
-		pWxMsg = ParseWxMsg(pWebUser, RecvInfo, pAssistUser);
+		pWxMsg = ParseWxMsg(pWebUser, RecvInfo.strmsg, pAssistUser,RecvInfo.tMsgTime);
 
 		if (pWxMsg == NULL)
 		{
@@ -1966,7 +1935,7 @@ int CChatManager::RecvFloatChatMsg(PACK_HEADER packhead, char *pRecvBuff, int le
 		string msgId = GetMsgId();
 		
 		AddMsgToList((IBaseObject*)pWebUser, msgFrom, MSG_RECV_ERROR, msgId, msgType, (MSG_DATA_TYPE)RecvInfo.nMsgDataType,
-			RecvInfo.strmsg, GetTimeByMDAndHMS(RecvInfo.tMsgTime), pAssistUser, msgContentWx);
+			RecvInfo.strmsg, GetTimeByMDAndHMS(RecvInfo.tMsgTime), pAssistUser, pWxMsg);
 
 		// 同步更新关联词
 		//if (m_sysConfig->m_bAutoSearchKeyword)
@@ -2367,7 +2336,7 @@ int CChatManager::RecvInviteResult(PACK_HEADER packhead, char *pRecvBuff, int le
 				pWebUser->cTalkedSatus = HASTALKED;
 			}
 		}
-
+		m_handlerMsgs->ResultInviteUser(pWebUser, pAcceptUser, false);
 		goto RETURN;
 	}
 	else//接受
@@ -2381,6 +2350,7 @@ int CChatManager::RecvInviteResult(PACK_HEADER packhead, char *pRecvBuff, int le
 		}
 
 		pWebUser->AddCommonTalkId(packhead.uin);
+		m_handlerMsgs->ResultInviteUser(pWebUser, pAcceptUser, true);
 	}
 
 	//这里要考虑如何显示
@@ -3188,11 +3158,11 @@ int CChatManager::SendTo_GetWebUserInfo(unsigned long webuserid, const char *cha
 	return nError;
 }
 
-WxMsgBase* CChatManager::ParseWxMsg(CWebUserObject* pWebUser, COM_FLOAT_CHATMSG& recvInfo, CUserObject* pAssistUser)
+WxMsgBase* CChatManager::ParseWxMsg(CWebUserObject* pWebUser, char* msg, CUserObject* pAssistUser, unsigned long time)
 {
 	//微信消息类型，utf8编码类型 
 	WxMsgBase* msgBase = NULL;
-	WxObj *pwxobj = ParseWxJsonMsg(recvInfo.strmsg);
+	WxObj *pwxobj = ParseWxJsonMsg(msg);
 
 	if (pwxobj != NULL)
 	{
@@ -3208,7 +3178,14 @@ WxMsgBase* CChatManager::ParseWxMsg(CWebUserObject* pWebUser, COM_FLOAT_CHATMSG&
 				delete pWebUser->m_pWxUserInfo;
 				pWebUser->m_pWxUserInfo = (WxUserInfo*)pwxobj;
 			}
-			strcpy(pWebUser->info.name, ((WxUserInfo*)pwxobj)->nickname.c_str());
+			int oldLen = strlen(pWebUser->info.name);
+			int newLen = ((WxUserInfo*)pwxobj)->nickname.length();
+			if (oldLen == 0 && newLen > 0)
+			{
+				strcpy(pWebUser->info.name, ((WxUserInfo*)pwxobj)->nickname.c_str());
+				m_handlerMsgs->RecvWebUserInfo(pWebUser);
+			}
+			
 			pWebUser->m_bIsGetInfo = true;
 			return NULL;
 		}
@@ -3231,7 +3208,7 @@ WxMsgBase* CChatManager::ParseWxMsg(CWebUserObject* pWebUser, COM_FLOAT_CHATMSG&
 				msgId.c_str(),imagePath.c_str(), msgId.c_str(), imagePath.c_str());
 
 			AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_WEBUSER, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL, MSG_DATA_TYPE_IMAGE, contentMsg, GetTimeByMDAndHMS(0), pAssistUser, NULL, false, true,false);
-			DownLoadFile(pWebUser, MSG_DATA_TYPE_IMAGE, ((WxMsgImage*)pwxobj)->MediaUrl, pAssistUser, recvInfo.tMsgTime, msgId);
+			DownLoadFile(pWebUser, MSG_DATA_TYPE_IMAGE, ((WxMsgImage*)pwxobj)->MediaUrl, pAssistUser, time, msgId);
 			delete pwxobj;
 			return NULL;
 		}
@@ -3247,7 +3224,7 @@ WxMsgBase* CChatManager::ParseWxMsg(CWebUserObject* pWebUser, COM_FLOAT_CHATMSG&
 
 			AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_WEBUSER, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL, MSG_DATA_TYPE_VOICE, contentMsg, GetTimeByMDAndHMS(0), pAssistUser, NULL, false, true, false);
 
-			DownLoadFile(pWebUser, MSG_DATA_TYPE_VOICE, ((WxMsgVoice*)pwxobj)->MediaUrl, pAssistUser, recvInfo.tMsgTime, msgId);
+			DownLoadFile(pWebUser, MSG_DATA_TYPE_VOICE, ((WxMsgVoice*)pwxobj)->MediaUrl, pAssistUser, time, msgId);
 			delete pwxobj;
 			return NULL;
 		}
@@ -3263,30 +3240,30 @@ WxMsgBase* CChatManager::ParseWxMsg(CWebUserObject* pWebUser, COM_FLOAT_CHATMSG&
 
 			AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_WEBUSER, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL, MSG_DATA_TYPE_VIDEO, contentMsg, GetTimeByMDAndHMS(0), pAssistUser, NULL, false, true, false);
 
-			DownLoadFile(pWebUser, MSG_DATA_TYPE_VIDEO, ((WxMsgVideo*)pwxobj)->MediaUrl, pAssistUser, recvInfo.tMsgTime, msgId);
+			DownLoadFile(pWebUser, MSG_DATA_TYPE_VIDEO, ((WxMsgVideo*)pwxobj)->MediaUrl, pAssistUser, time, msgId);
 			delete pwxobj;
 			return NULL;
 		}
 		else if ("location" == pwxobj->MsgType)
 		{
 			msgBase = (WxMsgBase*)pwxobj;
-			recvInfo.nMsgDataType = MSG_DATA_TYPE_LOCATION;
+			
 		}
 		else if ("link" == pwxobj->MsgType)
 		{
 			msgBase = (WxMsgBase*)pwxobj;
-			recvInfo.nMsgDataType = MSG_DATA_TYPE_LINK;
+			
 		}
 		else
 		{
-			g_WriteLog.WriteLog(C_LOG_ERROR, "ParseWxMsg unknow weixin Json:%s", recvInfo.strmsg);
+			g_WriteLog.WriteLog(C_LOG_ERROR, "ParseWxMsg unknow weixin Json:%s", msg);
 			delete pwxobj;
 			return NULL;
 		}
 	}
 	else
 	{
-		g_WriteLog.WriteLog(C_LOG_ERROR, "ParseWxMsg NOT the weixin Json:%s", recvInfo.strmsg);
+		g_WriteLog.WriteLog(C_LOG_ERROR, "ParseWxMsg NOT the weixin Json:%s", msg);
 		return NULL;
 	}
 	return msgBase;
@@ -3404,10 +3381,10 @@ void CChatManager::RecvComSendWorkBillMsg(unsigned long senduid, unsigned long r
 		{
 			pWebUser = GetWebUserObjectBySid(sid);
 
-			if (pWebUser == NULL)
+			if (pWebUser != NULL)
 			{
 				pWebUser = AddWebUserObject(sid, "", mobile, "", "", STATUS_ONLINE, 0);
-				SendTo_GetUserInfo(senduid);
+				g_WriteLog.WriteLog(C_LOG_ERROR,"RecvComSendWorkBillMsg 添加了空名字访客");
 			}
 
 			pWebUser->webuserid = senduid;
@@ -4880,7 +4857,7 @@ int CChatManager::SendToTransferUser(CUserObject *pAcceptUser, CWebUserObject *p
 	return nError;
 }
 
-void CChatManager::DownLoadFile(CWebUserObject *pWebUser, MSG_DATA_TYPE nMsgDataType, string url, CUserObject *pAssistUser, unsigned int time, string msgId)
+void CChatManager::DownLoadFile(CWebUserObject *pWebUser, MSG_DATA_TYPE nMsgDataType, string url, CUserObject *pAssistUser, unsigned long time, string msgId)
 {
 	unsigned long assistUid = 0;
 	if (pAssistUser)
@@ -4902,8 +4879,11 @@ void CChatManager::DownLoadFile(CWebUserObject *pWebUser, MSG_DATA_TYPE nMsgData
 			MapWxTokens::iterator iter = m_mapTokens.find(pWebUser->m_pWxUserInfo->fromwxname);
 			if (iter != m_mapTokens.end())
 			{
-				// 重新拼url是将最新token替换上，防止下载图片无效
-				loadUrl = ReplaceToken(url, iter->second);
+				if (TokenIsDifferent(iter->second, url))
+				{
+					// 重新拼url是将最新token替换上，防止下载图片无效
+					loadUrl = ReplaceToken(url, iter->second);
+				}
 			}
 			else
 			{
@@ -5145,8 +5125,8 @@ void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RE
 		if (bSave)
 		{
 			bool isNew = true;
-			list<ONE_MSG_INFO>::iterator iter = pWebUser->m_strMsgs.begin();
-			for (iter; iter != pWebUser->m_strMsgs.end(); iter++)
+			list<ONE_MSG_INFO>::reverse_iterator iter = pWebUser->m_strMsgs.rbegin();
+			for (iter; iter != pWebUser->m_strMsgs.rend(); iter++)
 			{
 				if (iter->msgId == msgId)
 				{
@@ -5622,5 +5602,10 @@ bool CChatManager::ParseGroupUser(CMarkupXml &xml, CGroupObject *pGroupOb, char 
 	}
 
 	return nPersonNum > 0;
+}
+
+bool CChatManager::TokenIsDifferent(string oldToken, string newToken)
+{
+	return true;
 }
 

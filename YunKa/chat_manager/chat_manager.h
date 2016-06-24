@@ -142,6 +142,8 @@ public:
 	virtual void ResultTransferUser(CWebUserObject* pWebUser, CUserObject* pUser, bool bSuccess) = 0;
 
 	virtual void RecvOnlineUsers(CGroupObject* pGroup) = 0;
+
+	virtual void RecvWebUserInfo(CWebUserObject* pWebUser) = 0;
 };
 
 class CChatManager : public IBaseReceive
@@ -455,7 +457,7 @@ public:
 	void ClearDirectory(string dir);
 
 	// 微信消息的解析
-	WxMsgBase* ParseWxMsg(CWebUserObject* pWebUser, COM_FLOAT_CHATMSG& recv,CUserObject* pUser);
+	WxMsgBase* ParseWxMsg(CWebUserObject* pWebUser, char* msg, CUserObject* pUser,unsigned long time);
 
 	string GetMsgId();
 
@@ -481,7 +483,7 @@ public:
 	void UpLoadFile(unsigned long userId, MSG_RECV_TYPE userType, string msgId, string filePath,
 					MSG_DATA_TYPE = MSG_DATA_TYPE_IMAGE);
 
-	void DownLoadFile(CWebUserObject *pWebUser, MSG_DATA_TYPE nMsgDataType, string url, CUserObject *pAssistUser, unsigned int time,string msgId);
+	void DownLoadFile(CWebUserObject *pWebUser, MSG_DATA_TYPE nMsgDataType, string url, CUserObject *pAssistUser, unsigned long time,string msgId);
 
 	void AfterUpload(unsigned long userId, MSG_RECV_TYPE userType, string msgId, string mediaID = "",
 					MSG_DATA_TYPE = MSG_DATA_TYPE_IMAGE, string fileId = "", string filePath = "");
@@ -509,6 +511,8 @@ public:
 	void GetOnlineUser();
 
 	bool ParseGroupUser(CMarkupXml &xml, CGroupObject *pGroupOb, char *sGroupKey, char *sUserKey);
+
+	bool TokenIsDifferent(string oldToken, string newToken);
 
 public:
 	int						m_nOnLineStatus;		// 是否在线,对于im服务器而言
