@@ -1742,7 +1742,7 @@ void CMainFrame::RecvAcceptChat(CUserObject* pUser, CWebUserObject* pWebUser)
 	unsigned long uid = 0;
 	UserListUI::Node* addNode = NULL;
 
-	if (pUser == NULL || pWebUser == NULL)
+	if ( pWebUser == NULL)
 		return;
 
 	map<unsigned long, UserListUI::Node*>::iterator iter = m_waitVizitorMap.find(pWebUser->webuserid);
@@ -1759,6 +1759,14 @@ void CMainFrame::RecvAcceptChat(CUserObject* pUser, CWebUserObject* pWebUser)
 
 	//需要从等待列表删除 这个用户
 	pUserList->RemoveNode(tempNode);
+
+	if (pUser == NULL)
+	{
+		m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, NULL));
+		return;
+	}
+		
+
 	//如果回调返回的user uid和自己的相同 则加到自己回话底下
  	if (pUser->UserInfo.uid == m_mySelfInfo->UserInfo.uid)
 	{
@@ -1846,7 +1854,8 @@ void CMainFrame::RecvCloseChat(CWebUserObject* pWebUser)
 		type = 1;
 	}
 	tempNode = iter->second;
-	pUserList->RemoveNode(tempNode);
+	if (tempNode != NULL)
+	    pUserList->RemoveNode(tempNode);
 
 
 	//从 会话中 删除 当前访客 信息
@@ -1879,11 +1888,15 @@ void CMainFrame::RecvReleaseChat(CWebUserObject* pWebUser)
 		return;
 	}
 	tempNode = iter->second;
-	CDuiString text = tempNode->data()._text;
 
+	if (tempNode != NULL)
+	{
+		CDuiString text = tempNode->data()._text;
 
-	//从坐席列表底下删除 然后加入等待列表
-	pUserList->RemoveNode(tempNode);
+		//从坐席列表底下删除 然后加入等待列表
+		pUserList->RemoveNode(tempNode);
+	}
+
 
 	CWebUserObject *webuser = pWebUser;
 	webuser->onlineinfo.talkstatus = TALKSTATUS_REQUEST;
@@ -2473,8 +2486,13 @@ void CMainFrame::RecvInviteUser(CWebUserObject* pWebUser, CUserObject* pUser)
 	}
 
 	UserListUI::Node *tempNode = iter->second;
-	CDuiString text = tempNode->data()._text;
-	int id = tempNode->data()._uid;
+	CDuiString text = L"";
+	unsigned long id = 0;
+	if (tempNode != NULL)
+	{
+		text = tempNode->data()._text;
+		id = tempNode->data()._uid;
+	}
 
 	//先在用户的对话列表中删除 
 	pUserList->RemoveNode(tempNode);
@@ -2494,6 +2512,8 @@ void CMainFrame::RecvInviteUser(CWebUserObject* pWebUser, CUserObject* pUser)
 	//}
 
 	UserListUI::Node*currentNode  = pUserList->AddNode(text, id, ChildNode);
+
+	pUserList->ExpandNode(ChildNode,true);
 	m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(id, currentNode));
 
 
