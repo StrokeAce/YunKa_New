@@ -22,11 +22,11 @@
 </VerticalLayout>
 
 
-<VerticalLayout width="80">
+<VerticalLayout width="75">
 
-<Button name="conformSelectVisotorBtn" text="确定" float="true" pos="80, 10, 160, 35" tooltip="点击这里确定修改" normalimage="mainframe\\button_nor.bmp" hotimage="mainframe\\button_over.bmp" pushedimage="mainframe\\button_down.bmp" />
+<Button name="conformChatInsideBtn" text="确定" float="true" pos="2, 10, 70, 30" tooltip="点击这里确定修改" normalimage="mainframe\\button_nor.bmp" hotimage="mainframe\\button_over.bmp" pushedimage="mainframe\\button_down.bmp" />
 
-<Button name="conformSelectVisotorBtn" text="取消" float="true" pos="200, 10, 280, 35" tooltip="点击这里取消修改" normalimage="mainframe\\button_nor.bmp" hotimage="mainframe\\button_over.bmp" pushedimage="mainframe\\button_down.bmp" />
+<Button name="cancelChatInsideBtn" text="取消" float="true" pos="2, 40, 70, 60" tooltip="点击这里取消修改" normalimage="mainframe\\button_nor.bmp" hotimage="mainframe\\button_over.bmp" pushedimage="mainframe\\button_down.bmp" />
 
 </VerticalLayout>
 
