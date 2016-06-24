@@ -36,7 +36,11 @@ void CChatInsideWnd::Notify(TNotifyUI& msg)
 
 	if (msg.sType == DUI_MSGTYPE_CLICK)
 	{
-		if (msg.pSender->GetName() == L"closeBtn_chat")
+		if (msg.pSender->GetName() == L"closeBtn_chat" || msg.pSender->GetName() == L"cancelChatInsideBtn")
+		{
+			Close();
+		}
+		else if (msg.pSender->GetName() == L"conformChatInsideBtn")
 		{
 			Close();
 		}

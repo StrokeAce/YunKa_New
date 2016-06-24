@@ -1535,18 +1535,6 @@ void CMainFrame::AddHostUserList(UserListUI * ptr, CUserObject *user)
 
 }
 
-void CMainFrame::OnSendToAcceptChat(unsigned long webUserid)
-{
-	m_manager->SendTo_AcceptChat(webUserid);
-}
-void CMainFrame::OnSendToReleaseChat(unsigned long webUserid)
-{
-	m_manager->SendTo_ReleaseChat(webUserid);
-}
-void CMainFrame::OnSendToCloseChat(unsigned long webUserid)
-{
-	m_manager->SendTo_CloseChat(webUserid, CHATCLOSE_USER);
-}
 
 
 /*****回调函数**************************************************************************************/
@@ -2028,7 +2016,14 @@ void CMainFrame::OnManagerButtonEvent(TNotifyUI& msg)
 	//接受
 	if (msg.pSender->GetName() == _T("managerbutton_1"))
 	{
-		
+		if (m_curSelectId > 0)
+		{
+			map<unsigned long, UserListUI::Node*>::iterator iter = m_waitVizitorMap.find(m_curSelectId);
+			if (iter != m_waitVizitorMap.end())
+			{
+				m_manager->SendTo_AcceptChat(m_curSelectId);
+			}
+		}
 
 	}
 
