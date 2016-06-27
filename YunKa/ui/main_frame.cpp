@@ -2474,9 +2474,9 @@ void CMainFrame::RecvInviteUser(CWebUserObject* pWebUser, CUserObject* pUser)
 		return;
 
 	//放入邀请列表
-	m_acceptingsUserList.push_back(m_curSelectId);
+	//
+	m_acceptingsUserList.push_back(pWebUser->info.uid);
 
-	
 
 	map<unsigned long, UserListUI::Node*>::iterator iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
 	//没有找到
