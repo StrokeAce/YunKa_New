@@ -181,11 +181,11 @@ public:    //主界面消息回调
 
 	virtual void RecvInviteUser(CWebUserObject* pWebUser, CUserObject* pUser);
 
-	virtual void ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, bool bSuccess);
+	virtual void ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, RESULT_STATUS status);
 
 	virtual void RecvTransferUser(CWebUserObject* pWebUser, CUserObject* pUser);
 
-	virtual void ResultTransferUser(CWebUserObject* pWebUser, CUserObject* pUser, bool bSuccess);
+	virtual void ResultTransferUser(CWebUserObject* pWebUser, CUserObject* pUser, RESULT_STATUS status);
 
 	virtual void RecvOnlineUsers(CGroupObject* pGroup);
 

@@ -79,6 +79,8 @@ private:
 
 	virtual void OnReceive(void* wParam, void* lParam);
 
+	virtual void OnReceiveEvent(int wParam, int lParam);
+
 public:
 	CChatManager*	m_manager;
 	CMySocket		m_socketEx;				// 访客接待连接

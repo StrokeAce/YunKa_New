@@ -122,7 +122,7 @@ public:
 	// Parameter: pUser 被邀请的协助者
 	// Parameter: bSuccess true 接受邀请,false 拒绝邀请
 	//************************************
-	virtual void ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, bool bSuccess) = 0;
+	virtual void ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, RESULT_STATUS status) = 0;
 
 	//************************************
 	// Method:    RecvTransferUser
@@ -131,15 +131,6 @@ public:
 	// Parameter: pUser 被邀请的转接者
 	//************************************
 	virtual void RecvTransferUser(CWebUserObject* pWebUser, CUserObject* pUser) = 0;
-
-	//************************************
-	// Method:    ResultTransferUser
-	// Qualifier: 邀请转接的结果
-	// Parameter: pWebUser 转接会话中的聊天访客
-	// Parameter: pUser 被邀请的转接者
-	// Parameter: bSuccess true 接受转接,false 拒绝转接
-	//************************************
-	virtual void ResultTransferUser(CWebUserObject* pWebUser, CUserObject* pUser, bool bSuccess) = 0;
 
 	virtual void RecvOnlineUsers(CGroupObject* pGroup) = 0;
 
@@ -180,6 +171,8 @@ public:
 
 	// 发送获取所有用户的信息的消息
 	int SendTo_GetAllUserInfo();
+
+	int StartLoginVisitor();
 
 	// 发送获取某个坐席信息的消息
 	int SendTo_GetUserInfo(unsigned long uid);
@@ -250,6 +243,8 @@ public:
 
 	int SendToTransferUser(CUserObject *pAcceptUser, CWebUserObject *pWebUser, unsigned long acceptuin = 0);
 
+	int SendToRefuseChat(CWebUserObject *pWebUser, string strReason = "NO");
+
 	//************************************
 	// Method:    SendTo_InviteUserResult
 	// Qualifier: 发送是否接受该坐席的会话转接
@@ -285,6 +280,8 @@ private:
 	/***************     继承接口的函数实现    *****************/
 
 	virtual void OnReceive(void* wParam, void* lParam);
+
+	virtual void OnReceiveEvent(int wParam, int lParam);
 
 
 	/***************     配置文件操作函数     *****************/

@@ -42,6 +42,11 @@ void CChatVisitor::OnReceive(void* wParam, void* lParam)
 	return;
 }
 
+void CChatVisitor::OnReceiveEvent(int wParam, int lParam)
+{
+
+}
+
 int CChatVisitor::SendPingToVisitorServer()
 {
 	char sbuff[512];
@@ -928,6 +933,5 @@ bool CChatVisitor::ConnectAndLoginToVisitorServer()
 	else
 		return false;
 }
-
 
 

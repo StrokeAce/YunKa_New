@@ -13,7 +13,6 @@ CMySocket::CMySocket()
 {
 	m_MsgRecvSuccID = WM_SOCKET_RECVSUCC;
 	m_MsgRecvFailID = WM_SOCKET_RECVFAIL;
-
 	m_MsgSocketCloseID = WM_SOCKET_CLOSE;
 	m_bIM = true;
 

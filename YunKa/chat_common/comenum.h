@@ -99,4 +99,11 @@ enum CODE_RECORD_AUDIO
 	CODE_AUDIO_IS_RECORDING	// 正在录音
 };
 
+enum RESULT_STATUS
+{
+	INVITE_ACCEPT,		// 成功接受
+	INVITE_REFUSE,		// 拒绝接受
+	INVITE_ING			// 邀请中
+};
+
 #endif

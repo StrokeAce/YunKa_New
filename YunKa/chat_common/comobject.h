@@ -17,6 +17,8 @@ class IBaseReceive
 {
 public:
 	virtual void OnReceive(void* wParam, void* lParam) = 0;
+
+	virtual void OnReceiveEvent(int wParam, int lParam) = 0;
 };
 
 //≥ı º…Ë÷√

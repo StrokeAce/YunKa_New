@@ -12,6 +12,7 @@ CLogin::CLogin()
 	memset(m_szAuthtoken, 0, MAX_256_LEN + 1);
 	m_manager = NULL;
 	m_pTqAuthClient = NULL;
+	m_nSendAuthToken = -20;
 }
 
 CLogin::~CLogin()

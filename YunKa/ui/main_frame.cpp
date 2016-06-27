@@ -2564,7 +2564,7 @@ void CMainFrame::RecvInviteUser(CWebUserObject* pWebUser, CUserObject* pUser)
 
 //邀请协助 做的最后一次 回调
 
-void CMainFrame::ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, bool bSuccess)
+void CMainFrame::ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser,RESULT_STATUS status)
 {
 
 	map<unsigned long, UserListUI::Node*>::iterator iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
@@ -2575,7 +2575,7 @@ void CMainFrame::ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, 
 	}
 
 
-	if (bSuccess == true)
+	if (status == INVITE_ACCEPT)
 	{
 		UserListUI::Node *tempNode = iter->second;
 
@@ -2606,7 +2606,7 @@ void CMainFrame::ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, 
 
 	}
 
-	else  if (bSuccess == false)
+	else  if (status == INVITE_REFUSE)
 	{
 
 
@@ -2680,7 +2680,7 @@ void CMainFrame::RecvTransferUser(CWebUserObject* pWebUser, CUserObject* pUser)
 
 
 //邀请转接的 最后一次 回调
-void CMainFrame::ResultTransferUser(CWebUserObject* pWebUser, CUserObject* pUser, bool bSuccess)
+void CMainFrame::ResultTransferUser(CWebUserObject* pWebUser, CUserObject* pUser,RESULT_STATUS status)
 {
 
 	map<unsigned long, UserListUI::Node*>::iterator iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
@@ -2690,7 +2690,7 @@ void CMainFrame::ResultTransferUser(CWebUserObject* pWebUser, CUserObject* pUser
 		return;
 	}
 
-	if (bSuccess == true)
+	if (status == INVITE_ACCEPT)
 	{
 		UserListUI::Node *tempNode = iter->second;
 
@@ -2722,7 +2722,7 @@ void CMainFrame::ResultTransferUser(CWebUserObject* pWebUser, CUserObject* pUser
 
 	}
 
-	else  if (bSuccess == false)
+	else  if (status == INVITE_REFUSE)
 	{
 
 
