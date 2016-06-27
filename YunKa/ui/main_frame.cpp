@@ -54,6 +54,9 @@ CMainFrame::CMainFrame(CChatManager* manager) :m_manager(manager)
 	m_pLastOfflineNode = m_pLastOnlineNode = 0;
 	memset(m_pManagerBtn, 0, sizeof(m_pManagerBtn));
 	m_userListCount = m_recordListCount = 0;
+
+
+	m_selectUserId = 9692111;
 }
 
 
@@ -2053,6 +2056,23 @@ void CMainFrame::OnManagerButtonEvent(TNotifyUI& msg)
 	//转接
 	else if (msg.pSender->GetName() == _T("managerbutton_2"))
 	{
+		//从 会话中 删除 当前访客 信息
+		if (m_curSelectId > 0)
+		{
+			//map<unsigned long, unsigned long>::iterator iterLong = m_allVisitorUserMap.find(m_curSelectId);
+			////if (iterLong == m_allVisitorUserMap.end())
+			//	return;
+			unsigned long userid = m_selectUserId;
+
+			CUserObject	*pUser = m_manager->GetUserObjectByUid(m_selectUserId);
+			CWebUserObject *pWebUser = m_manager->GetWebUserObjectByUid(m_curSelectId);
+
+			m_manager->SendTo_TransferRequestUser(pWebUser, pUser);
+
+
+
+		}
+
 
 
 	}
@@ -2094,7 +2114,7 @@ void CMainFrame::OnManagerButtonEvent(TNotifyUI& msg)
 	//邀请协助
 	else if (msg.pSender->GetName() == _T("managerbutton_8"))
 	{
-	    CUserObject	*pUser = m_manager->GetUserObjectByUid(9692110);
+		CUserObject	*pUser = m_manager->GetUserObjectByUid(m_selectUserId);
 		CWebUserObject *pWebUser = m_manager->GetWebUserObjectByUid(m_curSelectId);
 
 
@@ -2474,8 +2494,8 @@ void CMainFrame::ChangeShowUserMsgWnd(unsigned long id)
 	}
 	*/
 }
-
-//收到邀请协助的 申请
+ 
+//收到邀请协助的 申请  邀请协助的 回调函数
 void CMainFrame::RecvInviteUser(CWebUserObject* pWebUser, CUserObject* pUser)
 {
 	//CUserObject	*pUser = m_manager->GetUserObjectByUid(9692111);
@@ -2542,6 +2562,8 @@ void CMainFrame::RecvInviteUser(CWebUserObject* pWebUser, CUserObject* pUser)
 
 }
 
+//邀请协助 做的最后一次 回调
+
 void CMainFrame::ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, bool bSuccess)
 {
 
@@ -2597,15 +2619,126 @@ void CMainFrame::ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, 
 
 }
 
+
+//邀请  转接的 回调函数
 void CMainFrame::RecvTransferUser(CWebUserObject* pWebUser, CUserObject* pUser)
 {
 	
+	int type = -1;
+
+	if (pUser == NULL || pWebUser == NULL)
+		return;
+
+	//放入转接列表
+	//
+	list<unsigned long >::iterator iterList = m_transferUserList.begin();
+	for (; iterList != m_transferUserList.end(); iterList++)
+	{
+		if (pWebUser->webuserid == *iterList)
+		{
+			type = 0;
+			break;
+		}
+	}
+
+	if (type != 0)
+		m_transferUserList.push_back(pWebUser->webuserid);
+
+
+	map<unsigned long, UserListUI::Node*>::iterator iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
+	//没有找到
+	if (iter == m_allVisitorNodeMap.end())
+	{
+		return;
+	}
+
+	UserListUI::Node *tempNode = iter->second;
+	CDuiString text = L"";
+	unsigned long id = 0;
+	if (tempNode != NULL)
+	{
+		text = tempNode->data()._text;
+		id = tempNode->data()._uid;
+	}
+
+	//先在用户的对话列表中删除 
+	pUserList->RemoveNode(tempNode);
+	m_allVisitorNodeMap.erase(iter);
+
+
+	//然后显示 在转接列表中
+	UserListUI::Node* ChildNode = pMySelfeNode->child(1);
+
+
+	UserListUI::Node*currentNode = pUserList->AddNode(text, id, ChildNode);
+
+	pUserList->ExpandNode(ChildNode, true);
+	m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(id, currentNode));
+
+
 }
 
+
+//邀请转接的 最后一次 回调
 void CMainFrame::ResultTransferUser(CWebUserObject* pWebUser, CUserObject* pUser, bool bSuccess)
 {
 
+	map<unsigned long, UserListUI::Node*>::iterator iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
+	//没有找到
+	if (iter == m_allVisitorNodeMap.end())
+	{
+		return;
+	}
+
+	if (bSuccess == true)
+	{
+		UserListUI::Node *tempNode = iter->second;
+
+		CDuiString text = tempNode->data()._text;
+
+		//先在用户的对话列表中删除 
+		pUserList->RemoveNode(tempNode);
+		m_allVisitorNodeMap.erase(iter);
+
+
+		//然后在添加  在接受的用户中 对话中 加上webuser
+
+		map<unsigned long, UserListUI::Node*>::iterator  iter = m_onlineNodeMap.find(pUser->UserInfo.uid);
+		if (iter == m_onlineNodeMap.end())
+		{
+			iter = m_offlineNodeMap.find(pUser->UserInfo.uid);
+			if (iter == m_offlineNodeMap.end())
+				return;
+		}
+
+		tempNode = iter->second;
+
+		UserListUI::Node *tempChildNode = tempNode->child(1);
+
+		UserListUI::Node * addNode = pUserList->AddNode(text, pWebUser->webuserid, tempChildNode);
+		m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, addNode));
+
+		pUserList->ExpandNode(tempChildNode, true);
+
+	}
+
+	else  if (bSuccess == false)
+	{
+
+
+
+	}
+
+
+
+
+
+
+
 }
+
+
+
 
 //右键菜单的处理 根据控件的名字区分
 void CMainFrame::OnMenuEvent(CDuiString controlName)
@@ -3406,7 +3539,7 @@ void CMainFrame::RecvWebUserInfo(CWebUserObject* pWebUser)
 
 void CMainFrame::OnActiveUser(unsigned long id)
 {
-	CUserObject	*pUser = m_manager->GetUserObjectByUid(9692111);
+	CUserObject	*pUser = m_manager->GetUserObjectByUid(m_selectUserId);
 	CWebUserObject *pWebUser = m_manager->GetWebUserObjectByUid(id);
 	int type = -1;
 
@@ -3428,6 +3561,19 @@ void CMainFrame::OnActiveUser(unsigned long id)
 					//在邀请列表里删除 
 					m_acceptingsUserList.erase(iterList);
 					type = 0;
+					break;
+
+				}
+			}
+
+			iterList = m_transferUserList.begin();
+			for (; iterList != m_transferUserList.end(); iterList++)
+			{
+				if (id == *iterList)
+				{
+					//在邀请列表里删除 
+					m_transferUserList.erase(iterList);
+					type = 1;
 					break;
 
 				}
@@ -3476,6 +3622,39 @@ void CMainFrame::OnActiveUser(unsigned long id)
 		UserListUI::Node * addNode = pUserList->AddNode(text, pWebUser->webuserid, tempChildNode);
 		m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, addNode));
 	}
+
+	else if (type == 1)
+	{
+		if (pUser == NULL || pWebUser == NULL)
+			return;
+
+		m_manager->SendTo_TransferUserResult(pWebUser, pUser, true);
+		//然后加到对话中 
+
+		map<unsigned long, UserListUI::Node*>::iterator iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
+		//没有找到
+		if (iter == m_allVisitorNodeMap.end())
+		{
+			return;
+		}
+
+		UserListUI::Node *tempNode = iter->second;
+		CDuiString text = tempNode->data()._text;
+
+		//先在用户的对话列表中删除 
+		pUserList->RemoveNode(tempNode);
+		m_allVisitorNodeMap.erase(iter);
+
+
+		//先删掉 转接中的用户 然后放入对话中
+		UserListUI::Node *tempChildNode = pMySelfeNode->child(0);
+
+		UserListUI::Node * addNode = pUserList->AddNode(text, pWebUser->webuserid, tempChildNode);
+		m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, addNode));
+	}
+
+
+
 
 }
 

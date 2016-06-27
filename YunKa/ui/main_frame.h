@@ -274,6 +274,7 @@ public:
 
 	map<unsigned long, unsigned long > m_allVisitorUserMap;   //所有访客的归属列表
 	list<unsigned long >m_acceptingsUserList;                 //邀请列表
+	list<unsigned long >m_transferUserList;                 //邀请列表
 
 
 	UserListUI::Node* m_pLastOfflineNode;
@@ -335,6 +336,7 @@ private:
 	int m_userListCount;
 	int m_recordListCount;
 
+	unsigned long m_selectUserId;
 
 
 };
