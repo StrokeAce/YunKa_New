@@ -1549,7 +1549,14 @@ void CMainFrame::RecvUserInfo(CUserObject* pWebUser)
 	m_recordListCount += 1;
 
 	if (m_recordListCount == m_userListCount)
+	{
+
+		//获取会话消息
 		m_manager->SendTo_GetListChatInfo();
+
+
+	}
+		
 
 }
 
@@ -2090,6 +2097,10 @@ void CMainFrame::OnManagerButtonEvent(TNotifyUI& msg)
 	    CUserObject	*pUser = m_manager->GetUserObjectByUid(9692110);
 		CWebUserObject *pWebUser = m_manager->GetWebUserObjectByUid(m_curSelectId);
 
+
+		//获取在线坐席数
+		m_manager->SendTo_GetOnlineUser();
+
 		if (pUser != NULL || pWebUser!= NULL)
 			m_manager->SendTo_InviteUser(pWebUser,pUser);
 
@@ -2469,13 +2480,25 @@ void CMainFrame::RecvInviteUser(CWebUserObject* pWebUser, CUserObject* pUser)
 {
 	//CUserObject	*pUser = m_manager->GetUserObjectByUid(9692111);
 	//CWebUserObject *pWebUser = m_manager->GetWebUserObjectByUid(m_curSelectId);
+	int type = -1;
 
 	if (pUser == NULL || pWebUser == NULL)
 		return;
 
 	//放入邀请列表
 	//
-	m_acceptingsUserList.push_back(pWebUser->info.uid);
+	list<unsigned long >::iterator iterList = m_acceptingsUserList.begin();
+	for (; iterList != m_acceptingsUserList.end(); iterList++)
+	{
+		if (pWebUser->webuserid == *iterList)
+		{
+			type = 0;
+			break;
+		}
+	}
+
+	if (type != 0)
+	     m_acceptingsUserList.push_back(pWebUser->webuserid);
 
 
 	map<unsigned long, UserListUI::Node*>::iterator iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
@@ -2556,6 +2579,8 @@ void CMainFrame::ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, 
 
 		UserListUI::Node * addNode = pUserList->AddNode(text, pWebUser->webuserid, tempChildNode);
 		m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, addNode));
+
+		pUserList->ExpandNode(tempChildNode,true);
 
 	}
 
@@ -3245,6 +3270,8 @@ void CMainFrame::OnBtnSendFile(TNotifyUI& msg)
 
 }
 
+
+//获取在线 坐席
 void CMainFrame::RecvOnlineUsers(CGroupObject* pGroup)
 {
 
@@ -3379,7 +3406,7 @@ void CMainFrame::RecvWebUserInfo(CWebUserObject* pWebUser)
 
 void CMainFrame::OnActiveUser(unsigned long id)
 {
-	CUserObject	*pUser = m_manager->GetUserObjectByUid(9692110);
+	CUserObject	*pUser = m_manager->GetUserObjectByUid(9692111);
 	CWebUserObject *pWebUser = m_manager->GetWebUserObjectByUid(id);
 	int type = -1;
 
