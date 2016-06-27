@@ -10,7 +10,7 @@
 #include "menu_wnd.h"
 #include <WinUser.h>
 #include "jpeg_file/JpegFile.h"
-#include "chat_inside_wnd.h"
+#include "select_online_user_wnd.h"
 #include "select_visitor_wnd.h"
 
 #include <GdiPlus.h>
@@ -83,6 +83,8 @@ CControlUI* CMainFrame::CreateControl(LPCTSTR pstrClass)
 
 	if (_tcscmp(pstrClass, _T("UserList")) == 0) 
 		return new UserListUI;
+
+
 
 	return NULL;
 }
@@ -1813,36 +1815,6 @@ void CMainFrame::RecvAcceptChat(CUserObject* pUser, CWebUserObject* pWebUser)
 	//显示聊天界面内容
 	ShowClearMsg();
 
-	char str[MAX_1024_LEN] = {0};
-	sprintf(str, "%s接受了%s邀请的对话", pUser->UserInfo.nickname, pWebUser->info.name);
-
-
-#if 0
-	if (pWebUser->m_strMsgs.empty())
-	{
-		string msgid = m_manager->GetMsgId();
-		int len = strlen(pWebUser->info.name);
-		if (len > 0)
-		{
-	
-			CCodeConvert f_covet;
-			string msg = pUser->UserInfo.nickname;
-			msg += "的消息记录";
-			string name;
-			f_covet.Gb2312ToUTF_8(name, msg.c_str(), msg.length());
-			ONE_MSG_INFO ongMsg;
-			ongMsg.msgId = msgid;
-			char strJsCode[MAX_256_LEN];
-			sprintf(strJsCode,"AppendMsgToHistory('%d','%d','%s','%s','%s','%s','%s','%s');",
-				/*系统提示消息 3 MSG_TYPE_SYS */3, MSG_DATA_TYPE_TEXT, "", "", name.c_str(), "0", "unused", msgid);
-
-			m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->ExecuteJavaScript(strJsCode, "", 0);
-			
-		}
-
-		
-	}
-#endif
 
 }
 
@@ -2056,6 +2028,8 @@ void CMainFrame::OnManagerButtonEvent(TNotifyUI& msg)
 	//转接
 	else if (msg.pSender->GetName() == _T("managerbutton_2"))
 	{
+		//获取在线坐席数
+		m_manager->SendTo_GetOnlineUser();
 		//从 会话中 删除 当前访客 信息
 		if (m_curSelectId > 0)
 		{
@@ -2128,11 +2102,11 @@ void CMainFrame::OnManagerButtonEvent(TNotifyUI& msg)
 	//内部对话
 	else if (msg.pSender->GetName() == _T("managerbutton_9"))
 	{
-		CChatInsideWnd *dlg = new CChatInsideWnd();
 
-		dlg->Create(m_hWnd, _T(""), UI_WNDSTYLE_DIALOG, 0, 0, 0, 0, 0, NULL);
-		dlg->CenterWindow();
-		dlg->ShowModal();
+		//获取在线坐席数
+		m_manager->SendTo_GetOnlineUser();
+
+
 
 	}
 	//访客历史
@@ -3404,11 +3378,6 @@ void CMainFrame::OnBtnSendFile(TNotifyUI& msg)
 }
 
 
-//获取在线 坐席
-void CMainFrame::RecvOnlineUsers(CGroupObject* pGroup)
-{
-
-}
 
 void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 {
@@ -3658,8 +3627,26 @@ void CMainFrame::OnActiveUser(unsigned long id)
 
 }
 
+//获取在线 坐席
+void CMainFrame::RecvOnlineUsers(CGroupObject* pGroup)
+{
+
+
+	CSelectOnlineUserWnd *dlg = new CSelectOnlineUserWnd();
+
+	dlg->m_pGroup = pGroup;
+
+	dlg->Create(m_hWnd, _T(""), UI_WNDSTYLE_DIALOG, 0, 0, 0, 0, 0, NULL);
+	dlg->CenterWindow();
+	dlg->ShowModal();
+
+}
+
+
+
 void CMainFrame::OnSelectUser(unsigned long id)
 {
 
 
 }
+

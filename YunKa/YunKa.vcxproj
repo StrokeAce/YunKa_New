@@ -238,7 +238,6 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="timer\timer.h" />
-    <ClInclude Include="ui\chat_inside_wnd.h" />
     <ClInclude Include="ui\face_ctrl.h" />
     <ClInclude Include="ui\face_list.h" />
     <ClInclude Include="ui\face_sel_dlg.h" />
@@ -249,6 +248,7 @@
     <ClInclude Include="ui\menu_wnd.h" />
     <ClInclude Include="ui\observer_impl_base.hpp" />
     <ClInclude Include="ui\rich_edit_util.h" />
+    <ClInclude Include="ui\select_online_user_wnd.h" />
     <ClInclude Include="ui\select_visitor_wnd.h" />
     <ClInclude Include="ui\ui_crack.h" />
     <ClInclude Include="ui\ui_menu.h" />
@@ -330,7 +330,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="timer\timer.cpp" />
-    <ClCompile Include="ui\chat_inside_wnd.cpp" />
     <ClCompile Include="ui\face_ctrl.cpp" />
     <ClCompile Include="ui\face_list.cpp" />
     <ClCompile Include="ui\face_sel_dlg.cpp" />
@@ -338,6 +337,7 @@
     <ClCompile Include="ui\login_wnd.cpp" />
     <ClCompile Include="ui\main_frame.cpp" />
     <ClCompile Include="ui\rich_edit_util.cpp" />
+    <ClCompile Include="ui\select_online_user_wnd.cpp" />
     <ClCompile Include="ui\select_visitor_wnd.cpp" />
     <ClCompile Include="ui\ui_crack.cpp" />
     <ClCompile Include="ui\ui_menu.cpp" />
