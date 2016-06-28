@@ -1678,6 +1678,7 @@ int CChatManager::RecvFloatChatInfo(PACK_HEADER packhead, char *pRecvBuff, int l
 		pWebUser->m_nWaitTimer = 0;
 
 		SendStartRecvFloatMsg(packhead.random, RecvInfo.uAdminId, RecvInfo.chatid, pWebUser->m_sNewSeq);
+		m_handlerMsgs->RecvChatInfo(pWebUser);
 	}
 	else
 	{
