@@ -2632,7 +2632,7 @@ void CMainFrame::RecvTransferUser(CWebUserObject* pWebUser, CUserObject* pUser)
 }
 
 
-//邀请转接的 最后一次 回调
+//邀请转接的 最后一次 回调      
 void CMainFrame::ResultTransferUser(CWebUserObject* pWebUser, CUserObject* pUser,RESULT_STATUS status)
 {
 
