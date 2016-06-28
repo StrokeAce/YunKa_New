@@ -162,7 +162,7 @@ public:    //主界面消息回调
 	// 坐席下线消息
 	virtual void RecvOffline(IBaseObject* pObj);
 
-	virtual void RecvAcceptChat(CUserObject* pUser, CWebUserObject* pWebUser);
+	virtual void RecvAcceptChat(CWebUserObject* pWebUser, CUserObject* pUser);
 
 	virtual void RecvCloseChat(CWebUserObject* pWebUser);
 

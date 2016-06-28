@@ -266,21 +266,21 @@ struct WEBUSER_INFO
 
 struct WEBUSER_UPINFO
 {
-	char iecopyright[50];
-	char systeminfo[50];
-	char language[50];
+	char iecopyright[MAX_AREA_LEN];
+	char systeminfo[MAX_AREA_LEN];
+	char language[MAX_AREA_LEN];
 	int visioncolor;
-	char visionsize[20];
+	char visionsize[MAX_VSIZE_LEN];
 	unsigned int adminid;
 	char visiturl[MAX_URL_LEN];
-	char source[50];
+	char source[MAX_AREA_LEN];
 	char scriptflag[MAX_SCRIPTFLAG_LEN];
-	char sip[20];
+	char sip[MAX_VSIZE_LEN];
 	int port;
-	char sid[20];
+	char sid[MAX_VSIZE_LEN];
 	char lastvisit[MAX_URL_LEN];
-	char webtitle[50];
-	char nickname[50];
+	char webtitle[MAX_AREA_LEN];
+	char nickname[MAX_AREA_LEN];
 	int ctimes, ttimes;
 	char lastvtime[MAX_URL_LEN];
 	char lastttime[MAX_URL_LEN];

@@ -1745,7 +1745,7 @@ void CMainFrame::RecvChatInfo(CWebUserObject* pWebUser, CUserObject* pUser)
 
 
 //请求接受的回调
-void CMainFrame::RecvAcceptChat(CUserObject* pUser, CWebUserObject* pWebUser)
+void CMainFrame::RecvAcceptChat(CWebUserObject* pWebUser, CUserObject* pUser)
 {
 	UserListUI::Node *tempNode = NULL;
 	CDuiString text;
