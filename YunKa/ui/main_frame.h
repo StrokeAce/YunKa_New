@@ -212,8 +212,8 @@ public:
 	void AddHostUserList(UserListUI * ptr, CUserObject *user, int pos);
 	void AddOnlineVisitor(UserListUI * ptr, CUserObject *user, int index);
 	void AddMyselfToList(UserListUI * ptr, CUserObject *user);
-
-
+	UserListUI::Node* CMainFrame::GetOneUserNode(unsigned long id);
+	void CMainFrame::DeleteOneUserNode(unsigned long id);
 
 //接入聊天 相关处理
 	void CMainFrame::OnMenuEvent(CDuiString controlName);
@@ -230,7 +230,6 @@ public:
 	void CMainFrame::InitLibcef(void);
 	void CMainFrame::LoadBrowser(char* url);
 	void CMainFrame::ShowRightOptionFrameView(unsigned long id);
-	void CMainFrame::ShowOptionTab1FrameView();
 	void CMainFrame::ShowClearMsg();
 	void CMainFrame::ChangeShowUserMsgWnd(unsigned long id);
 	void CMainFrame::SetHandler();
