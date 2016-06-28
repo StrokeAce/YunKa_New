@@ -55,8 +55,6 @@ CMainFrame::CMainFrame(CChatManager* manager) :m_manager(manager)
 	memset(m_pManagerBtn, 0, sizeof(m_pManagerBtn));
 	m_userListCount = m_recordListCount = 0;
 
-
-	m_selectUserId = 9692111;
 }
 
 
@@ -2028,26 +2026,10 @@ void CMainFrame::OnManagerButtonEvent(TNotifyUI& msg)
 	//转接
 	else if (msg.pSender->GetName() == _T("managerbutton_2"))
 	{
+
+		m_topWndType = 1;
 		//获取在线坐席数
 		m_manager->SendTo_GetOnlineUser();
-		//从 会话中 删除 当前访客 信息
-		if (m_curSelectId > 0)
-		{
-			//map<unsigned long, unsigned long>::iterator iterLong = m_allVisitorUserMap.find(m_curSelectId);
-			////if (iterLong == m_allVisitorUserMap.end())
-			//	return;
-			unsigned long userid = m_selectUserId;
-
-			CUserObject	*pUser = m_manager->GetUserObjectByUid(m_selectUserId);
-			CWebUserObject *pWebUser = m_manager->GetWebUserObjectByUid(m_curSelectId);
-
-			m_manager->SendTo_TransferRequestUser(pWebUser, pUser);
-
-
-
-		}
-
-
 
 	}
 	//结束
@@ -2088,20 +2070,17 @@ void CMainFrame::OnManagerButtonEvent(TNotifyUI& msg)
 	//邀请协助
 	else if (msg.pSender->GetName() == _T("managerbutton_8"))
 	{
-		CUserObject	*pUser = m_manager->GetUserObjectByUid(m_selectUserId);
-		CWebUserObject *pWebUser = m_manager->GetWebUserObjectByUid(m_curSelectId);
 
-
+		m_topWndType = 2;
 		//获取在线坐席数
 		m_manager->SendTo_GetOnlineUser();
 
-		if (pUser != NULL || pWebUser!= NULL)
-			m_manager->SendTo_InviteUser(pWebUser,pUser);
 
 	}
 	//内部对话
 	else if (msg.pSender->GetName() == _T("managerbutton_9"))
 	{
+		m_topWndType = 3;
 
 		//获取在线坐席数
 		m_manager->SendTo_GetOnlineUser();
@@ -3638,7 +3617,41 @@ void CMainFrame::RecvOnlineUsers(CGroupObject* pGroup)
 
 	dlg->Create(m_hWnd, _T(""), UI_WNDSTYLE_DIALOG, 0, 0, 0, 0, 0, NULL);
 	dlg->CenterWindow();
-	dlg->ShowModal();
+	int state = dlg->ShowModal();
+
+
+	if (state == 1)
+	{
+		m_selectUserId = _globalSetting.m_currentSelectUserId;
+
+		if (m_topWndType == 1)  //转接 
+		{
+			if (m_curSelectId > 0)
+			{
+				CUserObject	*pUser = m_manager->GetUserObjectByUid(m_selectUserId);
+				CWebUserObject *pWebUser = m_manager->GetWebUserObjectByUid(m_curSelectId);
+				if (pUser != NULL && pWebUser != NULL)
+				    m_manager->SendTo_TransferRequestUser(pWebUser, pUser);
+
+			}
+		}
+		else if (m_topWndType == 2)  //邀请协助
+		{
+
+			CUserObject	*pUser = m_manager->GetUserObjectByUid(m_selectUserId);
+			CWebUserObject *pWebUser = m_manager->GetWebUserObjectByUid(m_curSelectId);
+			if (pUser != NULL && pWebUser != NULL)
+				m_manager->SendTo_InviteUser(pWebUser, pUser);
+
+		}
+		else if (m_topWndType == 3)  //内部对话
+		{
+		}
+
+
+
+	}
+
 
 }
 

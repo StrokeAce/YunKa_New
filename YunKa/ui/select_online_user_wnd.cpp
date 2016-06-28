@@ -21,7 +21,7 @@ class CSelectWndBuilderCallback : public IDialogBuilderCallback
 
 CSelectOnlineUserWnd::CSelectOnlineUserWnd()
 {
-
+	_globalSetting.m_currentSelectUserId = 0;
 }
 
 
@@ -52,14 +52,14 @@ void CSelectOnlineUserWnd::OnPrepare(TNotifyUI& msg)
 		ANSIToUnicode((*iter)->strName.c_str(), showText);
 		UserListUI::Node*  group = m_pOnlineUserList->AddNode(showText, 0);
 
-		list<CUserObject * >::iterator iteruser = m_pGroup->m_ListUserInfo.begin();
-		for (; iteruser != m_pGroup->m_ListUserInfo.end(); iteruser++)
+		list<CUserObject * >::iterator iteruser = (*iter)->m_ListUserInfo.begin(); //m_pGroup->m_ListUserInfo.begin();
+		for (; iteruser != (*iter)->m_ListUserInfo.end(); iteruser++)
 		{
 
 			ANSIToUnicode((*iteruser)->UserInfo.nickname, showText);
 			duiText = L"{x 12}";
 			duiText += showText;
-			m_pOnlineUserList->AddNode(showText, 0, group);
+			m_pOnlineUserList->AddNode(showText, (*iteruser)->UserInfo.uid, group);
 		}
 	}
 }
@@ -76,7 +76,7 @@ void CSelectOnlineUserWnd::Notify(TNotifyUI& msg)
 	{
 		if (msg.pSender->GetName() == L"closeBtn_chat" || msg.pSender->GetName() == L"cancelChatInsideBtn")
 		{
-			Close();
+			PostQuitMessage(0);
 		}
 		else if (msg.pSender->GetName() == L"conformChatInsideBtn")
 		{
@@ -86,10 +86,12 @@ void CSelectOnlineUserWnd::Notify(TNotifyUI& msg)
 	if (msg.sType == DUI_MSGTYPE_ITEMSELECT)
 	{
 
+	
+	
 	}
 	if (msg.sType == DUI_MSGTYPE_ITEMCLICK)
 	{
-
+		OnItemClick(msg);
 	}
 }
 
@@ -196,7 +198,7 @@ LRESULT CSelectOnlineUserWnd::MessageHandler(UINT uMsg, WPARAM wParam, LPARAM lP
 			else {
 				pEdit = static_cast<CEditUI*>(m_pm.FindControl(DEF_PASSWORD_TEXT_EDIT));
 				if (pEdit->GetText().IsEmpty()) pEdit->SetFocus();
-				else Close();
+				//else Close();
 			}
 			return true;
 		}
@@ -221,3 +223,24 @@ LRESULT CSelectOnlineUserWnd::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPAR
 }
 
 
+
+void CSelectOnlineUserWnd::OnItemClick(TNotifyUI &msg)
+{
+
+	if (msg.pSender->GetName() == _T("onlineSelectList"))
+	{
+		if (m_pOnlineUserList->GetItemIndex(msg.pSender) != -1)
+		{
+			if (_tcscmp(msg.pSender->GetClass(), _T("ListLabelElementUI")) == 0)
+			{
+
+				UserListUI::Node* node = (UserListUI::Node*)msg.pSender->GetTag();
+				CDuiString str = node->data()._text;
+				_globalSetting.m_currentSelectUserId = node->data()._uid;
+
+			}
+		}
+
+	}
+
+}

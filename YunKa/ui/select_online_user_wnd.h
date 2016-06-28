@@ -35,6 +35,7 @@ public:
 
 
 	LRESULT HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
+	void OnItemClick(TNotifyUI &msg);
 
 
 public:

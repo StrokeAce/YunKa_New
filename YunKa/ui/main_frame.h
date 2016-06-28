@@ -337,6 +337,8 @@ private:
 	int m_recordListCount;
 
 	unsigned long m_selectUserId;
+	int  m_topWndType; //当前选择的哪种方式  进入在线列表选择 加以区分
+
 
 
 };

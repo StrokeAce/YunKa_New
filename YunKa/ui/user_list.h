@@ -234,7 +234,7 @@ public:
 
 
 
-		if (m_listName == _T("talklist"))
+		if (m_listName == _T("talklist") || m_listName == _T("onlineSelectList"))
 		{
 			if (node->data()._level == 0 ) {
 				if (node->data()._expand) html_text += _T("<a><i tree_expand.png 2 1></a>");
@@ -305,7 +305,7 @@ public:
 			html_text += _T("<x 24>");
 		}
 
-		if (m_listName == _T("talklist"))
+		if (m_listName == _T("talklist") || m_listName == _T("onlineSelectList"))
 		{
 			if (node->data()._level == 0) {
 				if (node->data()._expand) html_text += _T("<a><i tree_expand.png 2 1></a>");
@@ -465,7 +465,7 @@ public:
 			html_text += _T("<x 24>");
 		}
 
-		if (m_listName == _T("talklist"))
+		if (m_listName == _T("talklist") || m_listName == _T("onlineSelectList"))
 		{
 			if (node->data()._level == 0) {
 				if (node->data()._expand) html_text += _T("<a><i tree_expand.png 2 1></a>");

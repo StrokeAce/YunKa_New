@@ -366,6 +366,8 @@ void CLoginWnd::LoginProgress(int percent)
 	else if (percent < 0 || percent>100)  //·µ»ØÊ§°Ü
 	{
 		MessageBox(this->GetHWND(),L"µÇÂ¼Ê§°Ü",L"µÇÂ¼Ê§°Ü",0);
+
+		m_pLoginBtn->SetEnabled(true);
 	}
 }
 

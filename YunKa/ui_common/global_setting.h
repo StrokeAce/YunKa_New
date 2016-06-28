@@ -35,6 +35,8 @@ public:
 	char m_userName[32];
 	char m_passWord[32];
 
+	unsigned long m_currentSelectUserId;
+
 
 };
 
