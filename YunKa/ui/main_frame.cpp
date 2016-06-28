@@ -3663,3 +3663,8 @@ void CMainFrame::OnSelectUser(unsigned long id)
 
 }
 
+void CMainFrame::RecvWebUserInInvite(CWebUserObject* pWebUser, CUserObject* pInviteUser)
+{
+
+}
+

@@ -32,7 +32,7 @@ public:
 	virtual void RecvUserInfo(CUserObject* pWebUser) = 0;	
 
 	// 收到一个会话消息
-	virtual void RecvChatInfo(CWebUserObject* pWebUser,CUserObject* pUser) = 0;
+	virtual void RecvChatInfo(CWebUserObject* pWebUser,CUserObject* pUser=NULL) = 0;
 
 	// 收到更新用户的在线状态
 	virtual void RecvUserStatus(CUserObject* pUser) = 0;
@@ -132,9 +132,14 @@ public:
 	//************************************
 	virtual void RecvTransferUser(CWebUserObject* pWebUser, CUserObject* pUser) = 0;
 
+	// 收到在线坐席信息
 	virtual void RecvOnlineUsers(CGroupObject* pGroup) = 0;
 
+	// 收到访客信息
 	virtual void RecvWebUserInfo(CWebUserObject* pWebUser) = 0;
+
+	// 收到坐席在邀请中的消息
+	virtual void RecvWebUserInInvite(CWebUserObject* pWebUser, CUserObject* pInviteUser) = 0;
 };
 
 class CChatManager : public IBaseReceive
@@ -402,6 +407,13 @@ public:
 
 	void CloseAllSocket();
 
+	void SetAllUserOffline();
+
+	void DeleteAllSrvInfo();
+
+	void DeleteAllUserInfo();
+
+	void DeleteAllWebUserInfo();
 
 	/***************     类内使用的发送到服务端的消息      *****************/
 

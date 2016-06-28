@@ -21,6 +21,8 @@ public:
 
 	void TimerSolveAuthToken();
 
+	void SetOffline();
+
 private:
 
 	bool CheckLoginInfo(string loginName, string password,bool isAutoLogin, bool isKeepPwd);

@@ -44,7 +44,25 @@ void CChatVisitor::OnReceive(void* wParam, void* lParam)
 
 void CChatVisitor::OnReceiveEvent(int wParam, int lParam)
 {
+	if (m_manager->m_bExit) return;
 
+	if (wParam == WM_SOCKET_CLOSE)
+	{
+		if (m_manager->m_nOnLineStatusEx != STATUS_OFFLINE)
+		{
+			m_manager->m_nOnLineStatusEx = STATUS_OFFLINE;
+			//继续连接
+			m_manager->m_nLoginToVisitor = 0;
+		}
+	}
+	else if (wParam == WM_SOCKET_RECVFAIL)
+	{
+		if (m_manager->m_nOnLineStatusEx == STATUS_OFFLINE)
+			return;
+
+		m_manager->m_nOnLineStatusEx = STATUS_OFFLINE;
+		m_manager->m_nLoginToVisitor = 0;
+	}
 }
 
 int CChatVisitor::SendPingToVisitorServer()
@@ -513,6 +531,7 @@ void CChatVisitor::SetVisitorOffline(CWebUserObject *pWebUser)
 		pWebUser->m_bConnected = FALSE;
 		pWebUser->onlineinfo.talkstatus = TALKSTATUS_NO;
 		pWebUser->info.status = STATUS_OFFLINE;
+		m_manager->m_handlerMsgs->RecvCloseChat(pWebUser);
 	}
 	
 	pWebUser->m_bIsShow = true;
@@ -620,6 +639,7 @@ void CChatVisitor::SolveVisitorSystemAlreadyApply(char *pInitBuff)
 	
 		//这里必须先在htmleditor中显示，然后再移动位置，因为移动位置可能会导致区域的切换，其他地方同样考虑
 		m_manager->GetInviteChatSysMsg(msg, pInviteUser, pWebUser, APPLY_ASK);
+		m_manager->m_handlerMsgs->RecvWebUserInInvite(pWebUser,pInviteUser);
 		break;
 	case APPLY_OPEN:
 		break;

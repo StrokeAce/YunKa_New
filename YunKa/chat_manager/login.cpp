@@ -309,3 +309,15 @@ void CLogin::TimerSolveAuthToken()
 		m_nSendAuthToken = 0;
 	}
 }
+
+void CLogin::SetOffline()
+{
+	if (m_pTqAuthClient != NULL && strlen(m_szAuthtoken) > 0)
+	{
+		int nlen = 200;
+		char recvbuf[201];
+		bool butf8(true);
+		m_pTqAuthClient->Logout(m_szAuthtoken, recvbuf, nlen, butf8);
+		strcpy(m_szAuthtoken, "");
+	}
+}
