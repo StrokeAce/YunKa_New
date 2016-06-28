@@ -19,7 +19,7 @@ void CChatVisitor::OnReceive(void* wParam, void* lParam)
 {
 	if (m_manager->m_bExit) return;
 
-	static char visitlogmame[100] = { 0 };
+	static char visitlogmame[MAX_128_LEN] = { 0 };
 	if (!visitlogmame[0])
 	{
 		sprintf(visitlogmame, "_%s(%lu)_visit.log", m_manager->m_userInfo.UserInfo.sid, m_manager->m_userInfo.UserInfo.uid);
@@ -67,7 +67,7 @@ void CChatVisitor::OnReceiveEvent(int wParam, int lParam)
 
 int CChatVisitor::SendPingToVisitorServer()
 {
-	char sbuff[512];
+	char sbuff[MAX_512_LEN];
 	int nError(0);
 
 	if (time(NULL) - m_tResentVisitPackTime > 60)
@@ -101,7 +101,7 @@ int CChatVisitor::SendWebuserTalkBegin(CWebUserObject *pWebUser)
 	if (pWebUser == NULL)
 		return SYS_ERROR_SENDFAIL;
 
-	char sbuff[512];
+	char sbuff[MAX_512_LEN];
 	int nError;
 
 	sprintf(sbuff, "<SCRIPTMSG><COMMAND>TALKBEG</COMMAND><ADMINID>%lu</ADMINID><CLIENTID>%s</CLIENTID><SERVICEUIN>%lu</SERVICEUIN><NICKNAME>%s</NICKNAME></SCRIPTMSG>\r\n",
@@ -116,7 +116,7 @@ int CChatVisitor::SendWebuserTalkEnd(CWebUserObject *pWebUser)
 	if (pWebUser == NULL)
 		return SYS_ERROR_SENDFAIL;
 
-	char sbuff[512];
+	char sbuff[MAX_512_LEN];
 	int nError;
 
 	sprintf(sbuff, "<SCRIPTMSG><COMMAND>TALKEND</COMMAND><ADMINID>%lu</ADMINID><CLIENTID>%s</CLIENTID><SERVICEUIN>%lu</SERVICEUIN><NICKNAME>%s</NICKNAME></SCRIPTMSG>\r\n",
@@ -153,7 +153,7 @@ int CChatVisitor::LoginToVisitorServer()
 		return nError;
 	}
 
-	char sbuff[512];
+	char sbuff[MAX_512_LEN];
 	string pass = GetMd5Str(m_manager->m_userInfo.UserInfo.pass);
 	sprintf(sbuff, "<SYSTEM><COMMAND>UP</COMMAND><USERUIN>%d</USERUIN><POSW>%s</POSW><VERSION>%d</VERSION><AUTOUP>YES</AUTOUP><UTF8>1</UTF8><ZLIB>%d</ZLIB></SYSTEM>\r\n",
 		m_manager->m_userInfo.UserInfo.uid, pass.c_str(), VISITOR_VERSION, (m_manager->m_initConfig.bZlibEnabled ? 1 : 0));
@@ -164,7 +164,7 @@ int CChatVisitor::LoginToVisitorServer()
 
 void CChatVisitor::SolveVisitorSystem(char *pInitBuff)
 {
-	char cmd[512];
+	char cmd[MAX_512_LEN];
 	string strTemp;
 
 	strTemp = GetXMLCommandString(pInitBuff, cmd, "COMMAND");
@@ -197,7 +197,7 @@ void CChatVisitor::SolveVisitorSystem(char *pInitBuff)
 
 void CChatVisitor::SolveVisitorSCRIPTMSG(char *pInitBuff)
 {
-	char cmd[100];
+	char cmd[MAX_128_LEN];
 	string strTemp;
 
 	strTemp = GetXMLCommandString(pInitBuff, cmd, "COMMAND", 100);
@@ -228,7 +228,7 @@ void CChatVisitor::SolveVisitorSCRIPTMSGApplyFail(char *pInitBuff)
 	CWebUserObject *pWebUser = NULL;
 	CUserObject *pTalkUser = NULL;
 
-	char sid[120], scriptflag[120], invitename[100];
+	char sid[MAX_128_LEN], scriptflag[MAX_128_LEN], invitename[MAX_128_LEN];
 	unsigned long talkuid;
 
 	GetXMLCommandString(pInitBuff, sid, "CLIENTID");
@@ -262,7 +262,7 @@ void CChatVisitor::SolveVisitorSCRIPTMSGModiName(char *pInitBuff)
 {
 	CWebUserObject *pWebUser = NULL;
 	CUserObject *pTalkUser = NULL;
-	char sid[120] = { 0 };
+	char sid[MAX_128_LEN] = { 0 };
 	GetXMLCommandString(pInitBuff, sid, "CLIENTID");
 
 
@@ -302,7 +302,7 @@ void CChatVisitor::SolveVisitorSCRIPTMSGTalkBegin(char *pInitBuff)
 {
 	CWebUserObject *pWebUser = NULL;
 	CUserObject *pTalkUser = NULL;
-	char sid[120] = { 0 };
+	char sid[MAX_128_LEN] = { 0 };
 	GetXMLCommandString(pInitBuff, sid, "CLIENTID");
 
 	pWebUser = m_manager->GetWebUserObjectBySid(sid);
@@ -345,7 +345,7 @@ void CChatVisitor::SolveVisitorSCRIPTMSGTalkEnd(char *pInitBuff)
 {
 	CWebUserObject *pWebUser = NULL;
 	CUserObject *pTalkUser = NULL;
-	char sid[120] = { 0 };
+	char sid[MAX_128_LEN] = { 0 };
 	GetXMLCommandString(pInitBuff, sid, "CLIENTID");
 
 	pWebUser = m_manager->GetWebUserObjectBySid(sid);
@@ -379,7 +379,7 @@ void CChatVisitor::SolveVisitorSystemAdmin(char *pInitBuff)
 {
 	CWebUserObject *pWebUser = NULL;
 
-	char cmdvalue[512];
+	char cmdvalue[MAX_512_LEN];
 
 	GetXMLCommandString(pInitBuff, cmdvalue, "IP");
 
@@ -406,25 +406,25 @@ void CChatVisitor::SolveVisitorSystemUp(char *pInitBuff)
 	WEBUSER_UPINFO webuser_upinfo;
 
 	memset(&webuser_upinfo, '\0', sizeof(WEBUSER_UPINFO));
-	GetXMLCommandString(pInitBuff, webuser_upinfo.sid, "CLIENTID");
-	GetXMLCommandString(pInitBuff, webuser_upinfo.source, "SOURCE");
+	GetXMLCommandString(pInitBuff, webuser_upinfo.sid, "CLIENTID", MAX_VSIZE_LEN);
+	GetXMLCommandString(pInitBuff, webuser_upinfo.source, "SOURCE", MAX_AREA_LEN);
 
-	GetXMLCommandString(pInitBuff, webuser_upinfo.iecopyright, "IECOPYRIGHT", 50);
-	GetXMLCommandString(pInitBuff, webuser_upinfo.systeminfo, "SYSTEMINFO", 50);
-	GetXMLCommandString(pInitBuff, webuser_upinfo.language, "LANGUAGE", 50);
+	GetXMLCommandString(pInitBuff, webuser_upinfo.iecopyright, "IECOPYRIGHT", MAX_AREA_LEN);
+	GetXMLCommandString(pInitBuff, webuser_upinfo.systeminfo, "SYSTEMINFO", MAX_AREA_LEN);
+	GetXMLCommandString(pInitBuff, webuser_upinfo.language, "LANGUAGE", MAX_AREA_LEN);
 	webuser_upinfo.visioncolor = GetXMLCommandInt(pInitBuff, "VISIONCOLOR");
 
-	GetXMLCommandString(pInitBuff, webuser_upinfo.visionsize, "VISIONSIZE", 20);
+	GetXMLCommandString(pInitBuff, webuser_upinfo.visionsize, "VISIONSIZE", MAX_VSIZE_LEN);
 	webuser_upinfo.adminid = GetXMLCommandInt(pInitBuff, "ADMINID");
 	GetXMLCommandString(pInitBuff, webuser_upinfo.visiturl, "VISIT", MAX_URL_LEN);
-	GetXMLCommandString(pInitBuff, webuser_upinfo.source, "SOURCE", 50);
-	GetXMLCommandString(pInitBuff, webuser_upinfo.scriptflag, "SCRIPTFLAG", 50);
-	GetXMLCommandString(pInitBuff, webuser_upinfo.sip, "IP", 20);
+	GetXMLCommandString(pInitBuff, webuser_upinfo.source, "SOURCE", MAX_AREA_LEN);
+	GetXMLCommandString(pInitBuff, webuser_upinfo.scriptflag, "SCRIPTFLAG", MAX_SCRIPTFLAG_LEN);
+	GetXMLCommandString(pInitBuff, webuser_upinfo.sip, "IP", MAX_VSIZE_LEN);
 	webuser_upinfo.port = GetXMLCommandInt(pInitBuff, "PORT");
 
 	GetXMLCommandString(pInitBuff, webuser_upinfo.lastvisit, "LASTVISIT", MAX_URL_LEN);
-	GetXMLCommandString(pInitBuff, webuser_upinfo.webtitle, "WEBTITLE", 50);
-	GetXMLCommandString(pInitBuff, webuser_upinfo.nickname, "NICKNAME", 20);
+	GetXMLCommandString(pInitBuff, webuser_upinfo.webtitle, "WEBTITLE", MAX_AREA_LEN);
+	GetXMLCommandString(pInitBuff, webuser_upinfo.nickname, "NICKNAME", MAX_AREA_LEN);
 
 	int nameflag = 1;
 	if (strlen(webuser_upinfo.nickname) <= 0)
@@ -541,7 +541,7 @@ void CChatVisitor::SolveVisitorSystemDown(char *pInitBuff)
 {
 	CWebUserObject *pWebUser = NULL;
 	
-	char sid[120], scriptflag[50];
+	char sid[MAX_128_LEN], scriptflag[MAX_AREA_LEN];
 	WEBUSER_URL_INFO *pUrlInfo;
 	
 	GetXMLCommandString(pInitBuff, sid, "CLIENTID");
@@ -592,7 +592,7 @@ void CChatVisitor::SolveVisitorSystemStopRecvMsg(char *pInitBuff)
 void CChatVisitor::SolveVisitorSystemAlreadyApply(char *pInitBuff)
 {
 	char sid[MAX_SID_LEN];
-	char stype[50];
+	char stype[MAX_AREA_LEN];
 	char msg[MAX_256_LEN];
 	
 	unsigned long uid;
@@ -602,7 +602,7 @@ void CChatVisitor::SolveVisitorSystemAlreadyApply(char *pInitBuff)
 	
 	uid = GetXMLCommandInt(pInitBuff, "USERUIN");
 	GetXMLCommandString(pInitBuff, sid, "CLIENTID", MAX_SID_LEN);
-	GetXMLCommandString(pInitBuff, stype, "TYPE", 50);
+	GetXMLCommandString(pInitBuff, stype, "TYPE", MAX_AREA_LEN);
 	
 	type = GetApplyTypeID(stype);
 	
@@ -639,7 +639,7 @@ void CChatVisitor::SolveVisitorSystemAlreadyApply(char *pInitBuff)
 	
 		//这里必须先在htmleditor中显示，然后再移动位置，因为移动位置可能会导致区域的切换，其他地方同样考虑
 		m_manager->GetInviteChatSysMsg(msg, pInviteUser, pWebUser, APPLY_ASK);
-		m_manager->m_handlerMsgs->RecvWebUserInInvite(pWebUser,pInviteUser);
+		m_manager->m_handlerMsgs->RecvInviteUser(pWebUser,pInviteUser);
 		break;
 	case APPLY_OPEN:
 		break;
@@ -674,7 +674,7 @@ void CChatVisitor::GetInviteSysMsg(char* msg, CWebUserObject *pWebUser, char *ni
 
 int CChatVisitor::SendStartRecvMsgToVisitorServer()
 {
-	char sbuff[100] = { 0 };
+	char sbuff[MAX_128_LEN] = { 0 };
 	int nError;
 
 	sprintf(sbuff, "<SYSTEM><COMMAND>STARTRECVMSG</COMMAND></SYSTEM>\r\n");

@@ -49,7 +49,7 @@ public:
 	// Parameter: pUser 接受会话的坐席对象
 	// Parameter: pWebUser 被接受的访客对象
 	//************************************
-	virtual void RecvAcceptChat(CUserObject* pUser, CWebUserObject* pWebUser) = 0;
+	virtual void RecvAcceptChat(CWebUserObject* pWebUser, CUserObject* pUser) = 0;
 
 	//************************************
 	// Method:    RecvCloseChat
