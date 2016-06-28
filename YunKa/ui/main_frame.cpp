@@ -692,7 +692,7 @@ void CMainFrame::OnPrepare(TNotifyUI& msg)
 	pUserList->SetListName(_T("userlist"));
 	pWaitForAccept = NULL;
 	pWaitForStart = pUserList->AddNode(_T("{x 4}{i gameicons.png 18 0}{x 4}等待开始"),0);
-	pWaitForAccept = pUserList->AddNode(_T("{x 4}{i gameicons.png 18 16}{x 4}等待应答"),0,pWaitForStart);
+	pWaitForAccept = pUserList->AddNode(_T("{x 4}{i gameicons.png 18 14}{x 4}等待应答"),0,pWaitForStart);
 
 	InitRightTalkList();
 
@@ -3485,6 +3485,7 @@ void CMainFrame::RecvAcceptChat(CWebUserObject* pWebUser, CUserObject* pUser)
 	CDuiString text;
 	unsigned long uid = 0;
 	UserListUI::Node* addNode = NULL;
+	int type = -1;
 
 	if (pWebUser == NULL)
 		return;
@@ -3497,9 +3498,26 @@ void CMainFrame::RecvAcceptChat(CWebUserObject* pWebUser, CUserObject* pUser)
 		uid = tempNode->data()._uid;
 		//当前选择 的用户就是 激活的用户
 		m_curSelectId = uid;
+
+		type = 0;
 	}
 	else
-		return;
+	{
+		iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
+		if (iter != m_allVisitorNodeMap.end())
+		{
+			tempNode = iter->second;
+			text = tempNode->data()._text;
+			uid = tempNode->data()._uid;
+			//当前选择 的用户就是 激活的用户
+			m_curSelectId = uid;
+
+			type = 1;
+		}
+
+	}
+	//else
+		//return;
 
 	//需要从等待列表删除 这个用户
 	pUserList->RemoveNode(tempNode);
@@ -3538,9 +3556,14 @@ void CMainFrame::RecvAcceptChat(CWebUserObject* pWebUser, CUserObject* pUser)
 	//添加显示 list
 	UserListUI::Node* currentNode = pUserList->AddNode(text, uid, addNode);
 	pUserList->ExpandNode(addNode, true);
+
+	if (type == 0)
+		m_waitVizitorMap.erase(iter);
+	else if (type == 1)
+		m_allVisitorNodeMap.erase(iter);
+
 	//插入 用户map 同时删除 等等map
 	m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(uid, currentNode));
-	m_waitVizitorMap.erase(iter);
 
 	m_allVisitorUserMap.insert(pair<unsigned long, unsigned long>(pWebUser->webuserid, pUser->UserInfo.uid));
 
@@ -3593,8 +3616,6 @@ void CMainFrame::RecvReleaseChat(CWebUserObject* pWebUser)
 {
 	UserListUI::Node *tempNode = NULL;
 
-	//map<unsigned long, UserListUI::Node*>::iterator iter = m_waitVizitorMap.find(pWebUser->webuserid);
-
 	map<unsigned long, UserListUI::Node*>::iterator iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
 	//没有找到
 	if (iter == m_allVisitorNodeMap.end())
@@ -3612,11 +3633,12 @@ void CMainFrame::RecvReleaseChat(CWebUserObject* pWebUser)
 	}
 
 
+	m_allVisitorNodeMap.erase(iter);
+
 	CWebUserObject *webuser = pWebUser;
 	webuser->onlineinfo.talkstatus = TALKSTATUS_REQUEST;
 	RecvChatInfo(pWebUser, NULL);
 
-	m_allVisitorNodeMap.erase(iter);
 
 
 	//从 会话中 删除 当前访客 信息
