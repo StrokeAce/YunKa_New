@@ -3419,10 +3419,14 @@ void CChatManager::RecvComSendWorkBillMsg(unsigned long senduid, unsigned long r
 		{
 			pWebUser = GetWebUserObjectBySid(sid);
 
-			if (pWebUser != NULL)
+			if (pWebUser == NULL)
 			{
 				pWebUser = AddWebUserObject(sid, "", mobile, "", "", STATUS_ONLINE, 0);
 				g_WriteLog.WriteLog(C_LOG_ERROR,"RecvComSendWorkBillMsg 添加了空名字访客");
+			}
+			else
+			{
+				strcpy(pWebUser->info.thirdid, thirdid);
 			}
 
 			pWebUser->webuserid = senduid;
