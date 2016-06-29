@@ -1648,7 +1648,6 @@ void CMainFrame::OnManagerButtonEvent(TNotifyUI& msg)
 	for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
 	{
 		wsprintf(managerName,L"managerbutton_%d",i+1);
-
 		if (msg.pSender->GetName() == managerName)
 		{
 			if (m_pManagerBtn[i].m_buttonState == 1)
@@ -1674,7 +1673,6 @@ void CMainFrame::OnManagerButtonEvent(TNotifyUI& msg)
 				m_manager->SendTo_AcceptChat(m_curSelectId);
 			}
 		}
-
 	}
 
 	//转接
