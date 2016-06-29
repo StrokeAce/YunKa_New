@@ -215,6 +215,9 @@ public:
 	UserListUI::Node* CMainFrame::GetOneUserNode(unsigned long id);
 	void CMainFrame::DeleteOneUserNode(unsigned long id);
 
+	//判定当前的用户id 处于那种状态底下
+	TREENODEENUM  CMainFrame::CheckIdForNodeType(unsigned long id);
+
 //接入聊天 相关处理
 	void CMainFrame::OnMenuEvent(CDuiString controlName);
 	void CMainFrame::OnCtrlVEvent();
@@ -263,15 +266,15 @@ protected:
 public:
 	CChatManager* m_manager;
     int	m_currentNumber;
-	map<unsigned long, UserListUI::Node*> m_onlineNodeMap;
-	map<unsigned long, UserListUI::Node*> m_offlineNodeMap;
-	UserListUI::Node* pOnlineNode ;
-	UserListUI::Node* pWaitForStart;
-	UserListUI::Node* pWaitForAccept;
-	UserListUI::Node* pMySelfeNode;
+	map<unsigned long, UserListUI::Node*> m_onlineNodeMap; //在线坐席
+	map<unsigned long, UserListUI::Node*> m_offlineNodeMap; //离线坐席
+	UserListUI::Node* pOnlineNode ;   //在线访客 
+	UserListUI::Node* pWaitForStart;  //等待开始
+	UserListUI::Node* pWaitForAccept;  //等待应答
+	UserListUI::Node* pMySelfeNode;    //自己的node
 	map<unsigned long, UserListUI::Node*> m_waitVizitorMap;  //等待列表
 	map<unsigned long, UserListUI::Node*> m_allVisitorNodeMap;  //所有访客列表
-
+	list<unsigned long>m_activeList;     //存自己主动邀请协助的 id
 
 	map<unsigned long, unsigned long > m_allVisitorUserMap;   //所有访客的归属列表
 	list<unsigned long >m_acceptingsUserList;                 //邀请列表
@@ -338,6 +341,8 @@ private:
 	int m_recordListCount;
 
 	unsigned long m_selectUserId;
+
+
 	int  m_topWndType; //当前选择的哪种方式  进入在线列表选择 加以区分
 
 

@@ -24,6 +24,30 @@ enum TALKSTATUS
 	TALKSTATUS_TALK,		// 对话中
 };
 
+
+enum TREENODEENUM
+{
+	DEFAULT_TYPE = 0,
+	MYSELF_CHILD_ACTIVE_1, //自己对话中 自己被动邀请的协助
+	MYSELF_CHILD_1,   //自己对话中  自己同意的协助
+	MYSELF_CHILD_2,   //转接中
+    MYSELF_CHILD_3,   //邀请中
+	MYSELF_CHILD_4,   //内部对话
+	OTHER_CHILD_1,   //别人 对话中
+	OTHER_CHILD_2,   //转接中
+	OTHER_CHILD_3,   //邀请中
+
+
+
+
+
+	NODE_END = 20
+
+};
+
+
+
+
 enum USER_STATUS
 {
 	STATUS_UNDEFINE=-1,
