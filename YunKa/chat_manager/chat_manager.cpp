@@ -1210,6 +1210,7 @@ int CChatManager::RecvFloatShareList(PACK_HEADER packhead, char *pRecvBuff, int 
 		return nError;
 	}
 
+	int bSelf = 0;
 	ONLINEFLAGUNION onlineflag;
 	for (iter = RecvInfo.sharememlist.begin(); iter != RecvInfo.sharememlist.end(); iter++)
 	{
@@ -1223,12 +1224,19 @@ int CChatManager::RecvFloatShareList(PACK_HEADER packhead, char *pRecvBuff, int 
 			pUser = AddUserObject(ShareUserOb.uin, "", "", onlineflag.stStatus.nOnlineStatus, -1);
 			pUser->DownLoadFace(m_initConfig.webpage_DownloadHeadImage);
 		}
+		else
+		{
+			if (pUser->UserInfo.uid == m_userInfo.UserInfo.uid)
+			{
+				bSelf = 1;
+			}
+		}
 
 		g_WriteLog.WriteLog(C_LOG_TRACE, "RecvFloatShareList:uin=%u:OnlineStatus=%d", ShareUserOb.uin, onlineflag.stStatus.nOnlineStatus);
 		pUser->m_bFriend = true;
 	}
 
-	m_handlerMsgs->RecvShareListCount(RecvInfo.sharememlist.size());
+	m_handlerMsgs->RecvShareListCount(RecvInfo.sharememlist.size() - bSelf);
 
 	nError = 0;
 
