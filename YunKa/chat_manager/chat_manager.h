@@ -466,7 +466,9 @@ public:
 	void ClearDirectory(string dir);
 
 	// 微信消息的解析
-	WxMsgBase* ParseWxMsg(CWebUserObject* pWebUser, char* msg, CUserObject* pUser,unsigned long time);
+	WxMsgBase* ParseWxMsg(CWebUserObject* pWebUser, char* msg, CUserObject* pAssistUser, unsigned long time);
+
+	bool ParseTextMsg(CWebUserObject* pWebUser, string content, CUserObject* pAssistUser, unsigned long time);
 
 	string GetMsgId();
 
@@ -497,13 +499,17 @@ public:
 	void AfterUpload(unsigned long userId, MSG_RECV_TYPE userType, string msgId, string mediaID = "",
 					MSG_DATA_TYPE = MSG_DATA_TYPE_IMAGE, string fileId = "", string filePath = "");
 
-	string& TransferFaceToStr(string& msg);
+	void TransferFaceToStr(string& msg, MSG_RECV_TYPE recvType);
 
-	string& TransferStrToFace(string& msg);
+	void TransferStrToFace(string& msg);
+
+	void TransferStrToOldFace(string& msg);
+
+	void TransferFaceToServeStr(string& msg);
 
 	int GetFaceIndex(const char * faceStr);
 
-	const string& GetFaceStr(int id);
+	string GetFaceStr(int id, MSG_RECV_TYPE recvType);
 
 	void Amr2Wav(string filePath);
 

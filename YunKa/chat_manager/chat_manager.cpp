@@ -707,7 +707,6 @@ int CChatManager::RecvSrvRepUserinfo(PACK_HEADER packhead, char *pRecvBuff, int 
 			ONLINEFLAGUNION onlineflag;
 			onlineflag.online_flag = RecvInfo.UserInfo.info.onlineflag;
 
-
 			pUser = GetUserObjectByUid(RecvInfo.uin);
 			if (pUser == NULL)
 			{
@@ -726,29 +725,29 @@ int CChatManager::RecvSrvRepUserinfo(PACK_HEADER packhead, char *pRecvBuff, int 
 				if (pUser->status != onlineflag.stStatus.nOnlineStatus
 					|| strcmp(pUser->UserInfo.nickname, RecvInfo.UserInfo.info.nickname) != 0)
 				{
-					bool bexpand = (pUser->status != onlineflag.stStatus.nOnlineStatus);
-
 					pUser->status = onlineflag.stStatus.nOnlineStatus;
 					strcpy(pUser->UserInfo.nickname, RecvInfo.UserInfo.info.nickname);
 					
+					if (pUser->m_bFriend)
+					{
+						CCodeConvert convert;
+						string msg = pUser->UserInfo.nickname;
+						msg += "的消息记录";
+						string sMsg;
+						convert.Gb2312ToUTF_8(sMsg, msg.c_str(), msg.length());
+						ONE_MSG_INFO ongMsg;
+						ongMsg.msgId = GetMsgId();
+						char strJsCode[MAX_512_LEN];
+						sprintf(strJsCode, "AppendMsgToHistory('%d','%d','%s','%s','%s','%s','%s','%s');",
+							MSG_FROM_SYS, MSG_DATA_TYPE_TEXT, "", GetTimeByMDAndHMS(0).c_str(), sMsg.c_str(),
+							"0", pUser->m_headPath.c_str(), ongMsg.msgId.c_str());
+						ongMsg.msg = strJsCode;
+						pUser->m_strMsgs.push_back(ongMsg);
+
+						m_handlerMsgs->RecvUserInfo(pUser);
+					}
 				}
 			}
-
-			CCodeConvert convert;
-			string msg = pUser->UserInfo.nickname;
-			msg += "的消息记录";
-			string sMsg;
-			convert.Gb2312ToUTF_8(sMsg, msg.c_str(), msg.length());
-			ONE_MSG_INFO ongMsg;
-			ongMsg.msgId = GetMsgId();
-			char strJsCode[MAX_512_LEN];
-			sprintf(strJsCode, "AppendMsgToHistory('%d','%d','%s','%s','%s','%s','%s','%s');",
-				MSG_FROM_SYS, MSG_DATA_TYPE_TEXT, "", GetTimeByMDAndHMS(0).c_str(), sMsg.c_str(),
-				"0", pUser->m_headPath.c_str(), ongMsg.msgId.c_str());
-			ongMsg.msg = strJsCode;
-			pUser->m_strMsgs.push_back(ongMsg);
-
-			m_handlerMsgs->RecvUserInfo(pUser);
 		}
 	}
 	
@@ -1366,6 +1365,11 @@ int CChatManager::RecvComSendMsg(PACK_HEADER packhead, char *pRecvBuff, int len)
 					if (pWebUser->m_waitresptimeouttimer < 0)
 						pWebUser->m_waitresptimeouttimer = 0;	// 该客服说话了 [12/29/2010 SC]
 
+					if (RecvInfo.msg.bak != 0)
+					{
+						msgType = MSG_TYPE_PREV;
+					}
+
 					AddMsgToList((IBaseObject*)pWebUser, msgFrom, MSG_RECV_ERROR, GetMsgId(), msgType, MSG_DATA_TYPE_TEXT,
 						RecvInfo.msg.strmsg, GetTimeByMDAndHMS(RecvInfo.msg.sendtime), NULL, pWxMsg);
 
@@ -1609,7 +1613,10 @@ int CChatManager::RecvFloatCreateChat(PACK_HEADER packhead, char *pRecvBuff, int
 	else
 		pWebUser->m_bNotResponseUser = 1;
 
-	m_handlerMsgs->RecvChatInfo(pWebUser,pUser);
+	if (m_bLoginSuccess)
+	{
+		m_handlerMsgs->RecvChatInfo(pWebUser, pUser);
+	}
 
 	nError = 0;
 RETURN:
@@ -1892,6 +1899,11 @@ int CChatManager::RecvFloatChatMsg(PACK_HEADER packhead, char *pRecvBuff, int le
 	}
 	else
 	{
+		if (ParseTextMsg(pWebUser, RecvInfo.strmsg, pAssistUser, RecvInfo.tMsgTime))
+		{
+			goto RETURN;
+		}
+
 		std::string content = RecvInfo.strmsg;
 		bool isUrl = PathIsURLA(content.c_str());
 		if (isUrl && pWebUser->m_bIsFrWX)
@@ -1926,32 +1938,6 @@ int CChatManager::RecvFloatChatMsg(PACK_HEADER packhead, char *pRecvBuff, int le
 
 		if (RecvInfo.nMsgType == MSG_FLOAT_NORMAL)
 		{
-			string strMsg = RecvInfo.strmsg;
-			transform(strMsg.begin(), strMsg.end(), strMsg.begin(), ::toupper);
-			if ((int)strMsg.find("userfile") > -1 && (int)strMsg.find("收到文件") > -1)
-			{
-				// 接待的坐席给微信对象发的					
-				if ((int)strMsg.find(".jpg") > -1 || (int)strMsg.find(".jpeg") > -1 ||
-					(int)strMsg.find(".bmp") > -1 || (int)strMsg.find(".png") > -1)
-				{
-					RecvInfo.nMsgDataType = MSG_DATA_TYPE_IMAGE;
-				}
-				else
-				{
-					RecvInfo.nMsgDataType = MSG_DATA_TYPE_FILE;
-				}
-			}
-			else if ((int)strMsg.find("http:") > -1 && ((int)strMsg.find(".jpg") > -1 || (int)strMsg.find(".jpeg") > -1 ||
-				(int)strMsg.find(".bmp") > -1 || (int)strMsg.find(".png") > -1) || (int)strMsg.find("收到一个图片") > -1)
-			{
-				RecvInfo.nMsgDataType = MSG_DATA_TYPE_IMAGE;
-			}
-			else if ((int)strMsg.find("userfile") > -1)
-			{
-				// 接待的坐席给web用户发的
-				RecvInfo.nMsgDataType = MSG_DATA_TYPE_FILE;
-			}
-
 			if (pAssistUser == NULL)
 			{
 				// 访客发来消息时，其未应答等待时间清零
@@ -2949,6 +2935,7 @@ void CChatManager::TimerProc(int timeId, LPVOID pThis)
 		if (!chat_manager->m_bLoginSuccess)
 		{
 			chat_manager->m_lastError = "登录超时";
+			chat_manager->m_handlerLogin->LoginProgress(-1);
 		}
 		chat_manager->m_timers->KillTimer(TIMER_LOGIN);
 	}
@@ -3507,7 +3494,11 @@ void CChatManager::RecvComSendWorkBillMsg(unsigned long senduid, unsigned long r
 			pWebUser->m_nWaitTimer = 0;
 			pWebUser->m_bConnected = true;
 
-			m_handlerMsgs->RecvChatInfo(pWebUser, &m_userInfo);
+			if (m_bLoginSuccess)
+			{
+				m_handlerMsgs->RecvChatInfo(pWebUser, &m_userInfo);
+			}
+			
 			//if (nRet < 0)
 			//	m_pFormUser->m_TreeListUser.DeleteItemByLParam((LPARAM)pWebUser);
 			//else
@@ -3898,6 +3889,8 @@ void CChatManager::Exit()
 
 	string tempPath = FullPath("temp\\");
 	ClearDirectory(tempPath);
+
+	Sleep(500);
 }
 
 CChatManager* CChatManager::GetInstance()
@@ -4167,14 +4160,14 @@ int CChatManager::SendTo_Msg(unsigned long userId, MSG_RECV_TYPE userType, strin
 	string sMsg = msg;
 	StringReplace(msg, "\\", "/");
 
-	if (userType == OBJECT_USER)
+	if (userType == MSG_RECV_CLIENT)
 	{
 		CUserObject* pUser = GetUserObjectByUid(userId);
 		if (pUser == NULL) return nError;
 		switch (msgDataType)
 		{
 		case MSG_DATA_TYPE_TEXT:
-			TransferFaceToStr(sMsg);
+			TransferFaceToStr(sMsg, userType);
 			if (SendMsg(pUser, sMsg.c_str()) == SYS_SUCCESS)
 			{
 				ReplaceFaceId(msg);
@@ -4191,7 +4184,7 @@ int CChatManager::SendTo_Msg(unsigned long userId, MSG_RECV_TYPE userType, strin
 			break;
 		}
 	}
-	else if (userType == OBJECT_WEBUSER)
+	else if (userType == MSG_RECV_WEB || userType == MSG_RECV_WX)
 	{
 		CWebUserObject* pWebUser = GetWebUserObjectByUid(userId);
 		if (pWebUser == NULL) return nError;
@@ -4199,7 +4192,7 @@ int CChatManager::SendTo_Msg(unsigned long userId, MSG_RECV_TYPE userType, strin
 		switch (msgDataType)
 		{
 		case MSG_DATA_TYPE_TEXT:
-			TransferFaceToStr(sMsg);
+			TransferFaceToStr(sMsg, userType);
 			if (SendMsg(pWebUser, sMsg.c_str()) == SYS_SUCCESS)
 			{
 				ReplaceFaceId(msg);
@@ -4210,10 +4203,6 @@ int CChatManager::SendTo_Msg(unsigned long userId, MSG_RECV_TYPE userType, strin
 		case MSG_DATA_TYPE_IMAGE:
 		case MSG_DATA_TYPE_VOICE:
 			UpLoadFile(userId, userType, msgId, msg, msgDataType);
-			break;
-		case MSG_DATA_TYPE_VIDEO:
-			break;
-		case MSG_DATA_TYPE_LOCATION:
 			break;
 		case MSG_DATA_TYPE_FILE:
 			break;
@@ -4665,12 +4654,12 @@ void CChatManager::AfterUpload(unsigned long userId, MSG_RECV_TYPE userType, str
 			{
 				// 获取文件服务器文件路径format串
 				// 图片在文件服务器的url
-				sprintf(fileServerMediaUrl, "%s%s", m_initConfig.fileserver_media_upload, mediaID.c_str());
+				sprintf(fileServerMediaUrl, m_initConfig.fileserver_media_fileid, mediaID.c_str());
 
 				// 生成发送给web的消息
 				char sSendTo[MAX_1024_LEN];
 				sprintf(sSendTo, "<span style=\"font-size:10pt; color:#000000; font-family:微软雅黑\">\
-						收到一个图片（点击查看原图）<br></span><a href = \"%s\" target=\"blank\"><img \
+						收到一个图片（点击查看原图）<br></span><a href=\"%s\" target=\"blank\"><img \
 						src=\"%s\" width=30%%></a>", fileServerMediaUrl, fileServerMediaUrl);
 				if (SendMsg(pWebUser, sSendTo, 0) == SYS_SUCCESS)
 				{
@@ -4777,7 +4766,7 @@ int CChatManager::SendLoginOff()
 	return SendPackTo(&SendInfo);
 }
 
-string& CChatManager::TransferFaceToStr(string& msg)
+void CChatManager::TransferFaceToStr(string& msg, MSG_RECV_TYPE recvType)
 {
 	int n;
 	std::string::size_type len, begin, pos, end;
@@ -4795,12 +4784,11 @@ string& CChatManager::TransferFaceToStr(string& msg)
 			pos = begin;
 			if ((n = GetFaceIndex(msg.c_str() + begin + 1)) < 0)
 				continue;
-			const string &face = GetFaceStr(n);
+			string face = GetFaceStr(n, recvType);
 			msg.replace(begin, ++end - begin, face);
 			pos += face.length();
 		}
 	}
-	return msg;
 }
 
 int CChatManager::GetFaceIndex(const char * faceStr)
@@ -4812,13 +4800,22 @@ int CChatManager::GetFaceIndex(const char * faceStr)
 	return n;
 }
 
-const string& CChatManager::GetFaceStr(int id)
+string CChatManager::GetFaceStr(int id,MSG_RECV_TYPE recvType)
 {
-	if (id < 0 || _countof(wx_faces) - 1 < id) return "";
+	if (recvType == MSG_RECV_WEB)
+	{
+		char str[MAX_256_LEN];
+		sprintf(str, "<img src=\"%s%d.gif\" >", m_initConfig.webpage_FaceImage, id);
+		return str;
+	}
+	else
+	{
+		if (id < 0 || _countof(wx_faces) - 1 < id) return "";
 		return wx_faces[id].enc.empty() ? wx_faces[id].raw : wx_faces[id].enc;
+	}
 }
 
-string& CChatManager::TransferStrToFace(string& msg)
+void CChatManager::TransferStrToFace(string& msg)
 {
 	char buf[8];
 	std::string::size_type pos, n;
@@ -4859,7 +4856,6 @@ string& CChatManager::TransferStrToFace(string& msg)
 			msg.erase(i + 3, 1);
 		}
 	}
-	return msg;
 }
 
 extern "C" _declspec(dllimport) void AMRToWAV(char* amrID);
@@ -4927,56 +4923,99 @@ void CChatManager::DownLoadFile(CWebUserObject *pWebUser, MSG_DATA_TYPE nMsgData
 	}
 	if (nMsgDataType == MSG_DATA_TYPE_IMAGE)
 	{
-		string path = FullPath("temp\\") + GetFileId();
-		string fullPath = path + ".jpg";
-		if (!PathFileExistsA(fullPath.c_str()) && pWebUser && pWebUser->m_pWxUserInfo)
+		if (pWebUser->m_bIsFrWX)
 		{
-			CCodeConvert convert;
-			string loadUrl = url;
-			DOWNLOAD_INFO* param = new DOWNLOAD_INFO();
-			param->pUser = NULL;
-			param->pThis = this;
-			param->filePath = convert.URLEncode(path.c_str());
-			MapWxTokens::iterator iter = m_mapTokens.find(pWebUser->m_pWxUserInfo->fromwxname);
-			if (iter != m_mapTokens.end())
+			string path = FullPath("temp\\") + GetFileId();
+			string fullPath = path + ".jpg";
+			if (!PathFileExistsA(fullPath.c_str()) && pWebUser && pWebUser->m_pWxUserInfo)
 			{
-				if (TokenIsDifferent(iter->second, url))
+				CCodeConvert convert;
+				string loadUrl = url;
+				DOWNLOAD_INFO* param = new DOWNLOAD_INFO();
+				param->pUser = NULL;
+				param->pThis = this;
+				param->filePath = convert.URLEncode(path.c_str());
+				MapWxTokens::iterator iter = m_mapTokens.find(pWebUser->m_pWxUserInfo->fromwxname);
+				if (iter != m_mapTokens.end())
 				{
-					// 重新拼url是将最新token替换上，防止下载图片无效
-					loadUrl = ReplaceToken(url, iter->second);
+					if (TokenIsDifferent(iter->second, url))
+					{
+						// 重新拼url是将最新token替换上，防止下载图片无效
+						loadUrl = ReplaceToken(url, iter->second);
+					}
 				}
+				else
+				{
+					SendGetWxUserInfoAndToken(pWebUser);
+				}
+				param->downLoadUrl = loadUrl;
+				param->msgDataType = MSG_DATA_TYPE_IMAGE;
+				if (pAssistUser)
+				{
+					param->pUser = pAssistUser;
+				}
+				param->time = GetTimeByMDAndHMS(time);
+				param->pWebUser = pWebUser;
+				param->msgId = msgId;
+				param->msgFromType = MSG_FROM_WEBUSER;
+				_beginthreadex(NULL, 0, DownLoadFileFromServerThread, (void*)param, 0, NULL);
 			}
 			else
 			{
-				SendGetWxUserInfoAndToken(pWebUser);
+				g_WriteLog.WriteLog(C_LOG_TRACE, "DownLoadFile 没有拿到token之前不能进行文件下载");
+
+				string imagePath = FullPath("SkinRes\\mainframe\\");
+				StringReplace(imagePath, "\\", "/");
+
+				char contentMsg[MAX_1024_LEN];
+				sprintf(contentMsg, "<img id=\"%s_msg\" class=\"msg_image\" src=\"%srecv_image_fail.jpg\"><img id = \"%s_image\" onclick=ReRecvFile(\"%s\",\"%d\",\"%s\",\"%d\",\"%lu\",\"%lu\",\"%s\") class=\"wait_image\" src=\"%smsg_fail.png\">",
+					msgId.c_str(), imagePath.c_str(), msgId.c_str(), url.c_str(), MSG_FROM_WEBUSER, msgId.c_str(),
+					MSG_DATA_TYPE_IMAGE, pWebUser->webuserid, assistUid, imagePath.c_str(), imagePath.c_str());
+
+				// 保存该条未下载记录
+				AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_WEBUSER, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL,
+					nMsgDataType, contentMsg, GetTimeByMDAndHMS(time), pAssistUser, NULL, true, false, false);
 			}
-			param->downLoadUrl = loadUrl;
-			param->msgDataType = MSG_DATA_TYPE_IMAGE;
-			if (pAssistUser)
-			{
-				param->pUser = pAssistUser;
-			}
-			param->time = GetTimeByMDAndHMS(time);
-			param->pWebUser = pWebUser;
-			param->msgId = msgId;
-			param->msgFromType = MSG_FROM_WEBUSER;
-			_beginthreadex(NULL, 0, DownLoadFileFromServerThread, (void*)param, 0, NULL);			
 		}
 		else
 		{
-			g_WriteLog.WriteLog(C_LOG_TRACE, "DownLoadFile 没有拿到token之前不能进行文件下载");
+			string path = FullPath("temp\\") + GetFileId();
+			string fullPath = path + ".jpg";
+			if (!PathFileExistsA(fullPath.c_str()) && pWebUser)
+			{
+				CCodeConvert convert;
+				DOWNLOAD_INFO* param = new DOWNLOAD_INFO();
+				param->pUser = NULL;
+				param->pThis = this;
+				param->filePath = convert.URLEncode(path.c_str());
+				param->downLoadUrl = url;
+				param->msgDataType = MSG_DATA_TYPE_IMAGE;
+				if (pAssistUser)
+				{
+					param->pUser = pAssistUser;
+				}
+				param->time = GetTimeByMDAndHMS(time);
+				param->pWebUser = pWebUser;
+				param->msgId = msgId;
+				param->msgFromType = MSG_FROM_WEBUSER;
+				_beginthreadex(NULL, 0, DownLoadFileFromServerThread, (void*)param, 0, NULL);
+			}
+			else
+			{
+				g_WriteLog.WriteLog(C_LOG_ERROR, "DownLoadFile  下载参数异常");
 
-			string imagePath = FullPath("SkinRes\\mainframe\\");
-			StringReplace(imagePath, "\\", "/");
+				string imagePath = FullPath("SkinRes\\mainframe\\");
+				StringReplace(imagePath, "\\", "/");
 
-			char contentMsg[MAX_1024_LEN];
-			sprintf(contentMsg, "<img id=\"%s_msg\" class=\"msg_image\" src=\"%srecv_image_fail.jpg\"><img id = \"%s_image\" onclick=ReRecvFile(\"%s\",\"%d\",\"%s\",\"%d\",\"%lu\",\"%lu\",\"%s\") class=\"wait_image\" src=\"%smsg_fail.png\">",
-				msgId.c_str(), imagePath.c_str(), msgId.c_str(), url.c_str(), MSG_FROM_WEBUSER, msgId.c_str(),
-				MSG_DATA_TYPE_IMAGE, pWebUser->webuserid, assistUid, imagePath.c_str(), imagePath.c_str());
+				char contentMsg[MAX_1024_LEN];
+				sprintf(contentMsg, "<img id=\"%s_msg\" class=\"msg_image\" src=\"%srecv_image_fail.jpg\"><img id = \"%s_image\" onclick=ReRecvFile(\"%s\",\"%d\",\"%s\",\"%d\",\"%lu\",\"%lu\",\"%s\") class=\"wait_image\" src=\"%smsg_fail.png\">",
+					msgId.c_str(), imagePath.c_str(), msgId.c_str(), url.c_str(), MSG_FROM_WEBUSER, msgId.c_str(),
+					MSG_DATA_TYPE_IMAGE, pWebUser->webuserid, assistUid, imagePath.c_str(), imagePath.c_str());
 
-			// 保存该条未下载记录
-			AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_WEBUSER, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL,
-				nMsgDataType, contentMsg, GetTimeByMDAndHMS(time), pAssistUser, NULL, true, false, false);
+				// 保存该条未下载记录
+				AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_WEBUSER, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL,
+					nMsgDataType, contentMsg, GetTimeByMDAndHMS(time), pAssistUser, NULL, true, false, false);
+			}
 		}
 	}
 	else if (nMsgDataType == MSG_DATA_TYPE_VOICE)
@@ -5084,7 +5123,7 @@ void CChatManager::DownLoadFile(CWebUserObject *pWebUser, MSG_DATA_TYPE nMsgData
 }
 
 void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RECV_TYPE recvType,string msgId, 
-	MSG_TYPE msgType,	MSG_DATA_TYPE msgDataType,string msgContent, string msgTime, CUserObject* pAssistUser,
+	MSG_TYPE msgType, MSG_DATA_TYPE msgDataType,string msgContent, string msgTime, CUserObject* pAssistUser,
 	WxMsgBase* msgContentWx, bool bSave, bool bNotify, bool bSuccess)
 {
 	ONE_MSG_INFO ongMsg;
@@ -5094,158 +5133,198 @@ void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RE
 	string sName;
 	string sMsg;
 	char callJsMsg[MAX_2048_LEN];
-	char contentMsg[MAX_1024_LEN];
 	CCodeConvert convert;
-
-	int urlPos = msgContent.find("用户头像地址:");
-	int urlPos1 = msgContent.find("user_headimgurl:");
-	int urlPos2 = msgContent.find(">立即评价</a>");
-
-	if (urlPos > -1 || urlPos1 > -1 || urlPos2 > -1)
-	{
-		// 过滤这条无用的用户信息消息
-	}
-	else
-	{
-	}
 	
-	// 保存消息记录，界面切换聊天对象时，需要获取这些消息
-	if (pObj->m_nEMObType == OBJECT_WEBUSER)
+	if (msgType == MSG_TYPE_NORMAL)
 	{
-		CWebUserObject* pWebUser = (CWebUserObject*)pObj;
-
-		if (msgFrom == MSG_FROM_WEBUSER)
+		// 保存消息记录，界面切换聊天对象时，需要获取这些消息
+		if (pObj->m_nEMObType == OBJECT_WEBUSER)
 		{
-			if (pWebUser->m_pWxUserInfo)
+			CWebUserObject* pWebUser = (CWebUserObject*)pObj;
+
+			if (msgFrom == MSG_FROM_WEBUSER)
 			{
-				head = pWebUser->m_pWxUserInfo->headimgurl;
+				if (pWebUser->m_pWxUserInfo)
+				{
+					head = pWebUser->m_pWxUserInfo->headimgurl;
+				}
+				else
+				{
+					string strPath = FullPath("res\\headimage\\default.png");
+					StringReplace(strPath, "\\", "/");
+					convert.Gb2312ToUTF_8(head, strPath.c_str(), strPath.length());
+				}
+				name = pWebUser->info.name;
+			}
+			else if (msgFrom == MSG_FROM_ASSIST)
+			{
+				head = pAssistUser->m_headPath;
+				name = pAssistUser->UserInfo.nickname;
+			}
+			else if (msgFrom == MSG_FROM_SELF)
+			{
+				head = m_userInfo.m_headPath;
+				name = m_userInfo.UserInfo.nickname;
+			}
+			else if (msgFrom == MSG_FROM_SYS)
+			{
+				head = "sys";
+				name = "sys";
 			}
 			else
 			{
-				string strPath = FullPath("res\\headimage\\default.png");
-				StringReplace(strPath, "\\", "/");
-				convert.Gb2312ToUTF_8(head, strPath.c_str(), strPath.length());
+				g_WriteLog.WriteLog(C_LOG_ERROR, "AddMsgToList 消息来源错误");
+				return;
 			}
-			name = pWebUser->info.name;
-		}
-		else if (msgFrom == MSG_FROM_ASSIST)
-		{
-			head = pAssistUser->m_headPath;
-			name = pAssistUser->UserInfo.nickname;
-		}
-		else if (msgFrom == MSG_FROM_SELF)
-		{
-			head = m_userInfo.m_headPath;
-			name = m_userInfo.UserInfo.nickname;
-		}
-		else if (msgFrom == MSG_FROM_SYS)
-		{
-			head = "sys";
-			name = "sys";
-		}
-		else
-		{
-			g_WriteLog.WriteLog(C_LOG_ERROR, "AddMsgToList 消息来源错误");
-			return;
-		}
 
-		StringReplace(name,"\\", "\\\\");
-		StringReplace(name,"'", "&#039;");
-		StringReplace(name,"\r\n", "<br>");
-		convert.Gb2312ToUTF_8(sName, name.c_str(), name.length());
+			StringReplace(name, "\\", "\\\\");
+			StringReplace(name, "'", "&#039;");
+			StringReplace(name, "\r\n", "<br>");
+			convert.Gb2312ToUTF_8(sName, name.c_str(), name.length());
 
-		StringReplace(msgContent, "\\", "\\\\");
-		StringReplace(msgContent, "'", "&#039;");
-		StringReplace(msgContent, "\r\n", "<br>");
-		convert.Gb2312ToUTF_8(sMsg, msgContent.c_str(), msgContent.length());
-
-		if (bSuccess)
-		{
-			if (msgDataType == MSG_DATA_TYPE_IMAGE)
+			if (bSuccess)
 			{
-				sprintf(contentMsg, "<img class=\"msg_image\" src=\"%s\">", sMsg.c_str());
-				sMsg = contentMsg;
-			}
-			else if (msgDataType == MSG_DATA_TYPE_VOICE)
-			{
-				sprintf(contentMsg, "<audio controls=\"controls\" class=\"msg_voice\" src=\"%s\" type = \"audio/mpeg\"></audio>", sMsg.c_str());
-				sMsg = contentMsg;
-			}
-			else if (msgDataType == MSG_DATA_TYPE_VIDEO)
-			{
-				sprintf(contentMsg, "<video controls=\"controls\" class=\"msg_voice\" src=\"%s\" type = \"video/mp4\"></video>", sMsg.c_str());
-				sMsg = contentMsg;
-			}
-		}
-		
-		sprintf(callJsMsg, "AppendMsgToHistory('%d','%d','%s','%s','%s','%s','%s','%s','%s');",
-				msgFrom, msgDataType, sName.c_str(), msgTime.c_str(), sMsg.c_str(), "0",
-				head.c_str(), msgId.c_str(), "");
-		ongMsg.msg = callJsMsg;
-
-		if (bSave)
-		{
-			bool isNew = true;
-			list<ONE_MSG_INFO>::reverse_iterator iter = pWebUser->m_strMsgs.rbegin();
-			for (iter; iter != pWebUser->m_strMsgs.rend(); iter++)
-			{
-				if (iter->msgId == msgId)
+				char formatMsg[MAX_1024_LEN];
+				if (msgDataType == MSG_DATA_TYPE_TEXT)
 				{
-					iter->msg = callJsMsg;
-					isNew = false;
-					break;
+					if (msgFrom != MSG_FROM_SELF)
+					{
+						string strMsg = msgContent;
+						transform(strMsg.begin(), strMsg.end(), strMsg.begin(), ::tolower);
+						if ((int)strMsg.find("userfile") > -1 && (int)strMsg.find("收到文件") > -1)
+						{
+							// 协助对象给微信访客发的
+							msgDataType = MSG_DATA_TYPE_FILE;
+
+							int pos = strMsg.find("href=");							
+							if (pos > -1)
+							{
+								int pos1 = strMsg.find(">", pos);
+								if (pos1 > -1)
+								{
+									string fileUrl;
+									fileUrl = strMsg.substr(pos + 6, pos1 - pos - 8);
+									sprintf(formatMsg, "收到文件 <a style=\"color: blue;cursor:pointer\" href=\"%s\" target=\"_blank\">%s</a>",
+										fileUrl.c_str(), fileUrl.c_str());
+									msgContent = formatMsg;
+								}
+							}
+						}
+						else if ((int)strMsg.find("userfile") > -1)
+						{
+							// web用户发来
+							msgDataType = MSG_DATA_TYPE_FILE;
+							string vFileName;
+							int pos1 = strMsg.find("userfile/");
+							vFileName = strMsg.substr(pos1 + 9, strMsg.length() - pos1 - 9);
+
+							sprintf(formatMsg, "收到文件 <a style=\"color: blue;cursor:pointer\" href=\"%s\" target=\"_blank\">%s</a>",
+								strMsg.c_str(), vFileName.c_str());
+							msgContent = formatMsg;
+						}
+					}
+					
+					TransferStrToOldFace(msgContent);
+
+					StringReplace(msgContent, "'", "&#039;");
+					StringReplace(msgContent, "\r\n", "<br>");
+
+					convert.Gb2312ToUTF_8(sMsg, msgContent.c_str(), msgContent.length());
+				}
+				else if (msgDataType == MSG_DATA_TYPE_IMAGE)
+				{
+					sprintf(formatMsg, "<img class=\"msg_image\" src=\"%s\">", msgContent.c_str());
+					sMsg = formatMsg;
+				}
+				else if (msgDataType == MSG_DATA_TYPE_VOICE)
+				{
+					sprintf(formatMsg, "<audio controls=\"controls\" class=\"msg_voice\" src=\"%s\" type = \"audio/mpeg\"></audio>", msgContent.c_str());
+					sMsg = formatMsg;
+				}
+				else if (msgDataType == MSG_DATA_TYPE_VIDEO)
+				{
+					sprintf(formatMsg, "<video controls=\"controls\" class=\"msg_voice\" src=\"%s\" type = \"video/mp4\"></video>", msgContent.c_str());
+					sMsg = formatMsg;
 				}
 			}
-			if (isNew)
+			else
 			{
-				pWebUser->m_strMsgs.push_back(ongMsg);
+				sMsg = msgContent;
+			}
+
+			sprintf(callJsMsg, "AppendMsgToHistory('%d','%d','%s','%s','%s','%s','%s','%s','%s');",
+				msgFrom, msgDataType, sName.c_str(), msgTime.c_str(), sMsg.c_str(), "0",
+				head.c_str(), msgId.c_str(), "");
+			ongMsg.msg = callJsMsg;
+
+			if (bSave)
+			{
+				bool isNew = true;
+				list<ONE_MSG_INFO>::reverse_iterator iter = pWebUser->m_strMsgs.rbegin();
+				for (iter; iter != pWebUser->m_strMsgs.rend(); iter++)
+				{
+					if (iter->msgId == msgId)
+					{
+						iter->msg = callJsMsg;
+						isNew = false;
+						break;
+					}
+				}
+				if (isNew)
+				{
+					pWebUser->m_strMsgs.push_back(ongMsg);
+				}
+			}
+		}
+		else if (pObj->m_nEMObType == OBJECT_USER)
+		{
+			CUserObject* pUser = (CUserObject*)pObj;
+			if (msgFrom == MSG_FROM_CLIENT)
+			{
+				head = pUser->m_headPath;
+				name = pUser->UserInfo.nickname;
+			}
+			else if (msgFrom == MSG_FROM_SELF)
+			{
+				head = m_userInfo.m_headPath;
+				name = m_userInfo.UserInfo.nickname;
+			}
+			else if (msgFrom == MSG_FROM_SYS)
+			{
+				head = "sys";
+				name = "sys";
+			}
+			else
+			{
+				g_WriteLog.WriteLog(C_LOG_ERROR, "AddMsgToList 消息来源错误");
+				return;
+			}
+
+			StringReplace(name, "\\", "\\\\");
+			StringReplace(name, "'", "&#039;");
+			StringReplace(name, "\r\n", "<br>");
+			convert.Gb2312ToUTF_8(sName, name.c_str(), name.length());
+
+			StringReplace(msgContent, "\\", "\\\\");
+			StringReplace(msgContent, "'", "&#039;");
+			StringReplace(msgContent, "\r\n", "<br>");
+			convert.Gb2312ToUTF_8(sMsg, msgContent.c_str(), msgContent.length());
+
+			ReplaceFaceId(sMsg);
+
+			sprintf(callJsMsg, "AppendMsgToHistory('%d','%d','%s','%s','%s','%s','%s','%s');",
+				msgFrom, msgDataType, sName.c_str(), msgTime.c_str(), sMsg.c_str(), "0", head.c_str(), msgId.c_str());
+			ongMsg.msg = callJsMsg;
+
+			if (bSave && msgType == MSG_TYPE_NORMAL)
+			{
+				pUser->m_strMsgs.push_back(ongMsg);
 			}
 		}
 	}
-	else if (pObj->m_nEMObType == OBJECT_USER)
+	else
 	{
-		CUserObject* pUser = (CUserObject*)pObj;
-		if (msgFrom == MSG_FROM_CLIENT)
-		{
-			head = pUser->m_headPath;
-			name = pUser->UserInfo.nickname;
-		}
-		else if (msgFrom == MSG_FROM_SELF)
-		{
-			head = m_userInfo.m_headPath;
-			name = m_userInfo.UserInfo.nickname;
-		}
-		else if (msgFrom == MSG_FROM_SYS)
-		{
-			head = "sys";
-			name = "sys";
-		}
-		else
-		{
-			g_WriteLog.WriteLog(C_LOG_ERROR, "AddMsgToList 消息来源错误");
-			return;
-		}
-
-		StringReplace(name, "\\", "\\\\");
-		StringReplace(name, "'", "&#039;");
-		StringReplace(name, "\r\n", "<br>");
-		convert.Gb2312ToUTF_8(sName, name.c_str(), name.length());
-
-		StringReplace(msgContent, "\\", "\\\\");
-		StringReplace(msgContent, "'", "&#039;");
-		StringReplace(msgContent, "\r\n", "<br>");
-		convert.Gb2312ToUTF_8(sMsg, msgContent.c_str(), msgContent.length());
-
-		ReplaceFaceId(sMsg);
-
-		sprintf(callJsMsg, "AppendMsgToHistory('%d','%d','%s','%s','%s','%s','%s','%s');",
-			msgFrom, msgDataType, sName.c_str(), msgTime.c_str(), sMsg.c_str(), "0", head.c_str(), msgId.c_str());
-		ongMsg.msg = callJsMsg;
-
-		if (bSave)
-		{
-			pUser->m_strMsgs.push_back(ongMsg);
-		}
+		strcpy(callJsMsg, msgContent.c_str());
 	}
 	
 	// 界面实时显示消息
@@ -5799,3 +5878,70 @@ void CChatManager::DeleteAllWebUserInfo()
 	m_mapWebUsers.clear();
 }
 
+void CChatManager::TransferStrToOldFace(string& msg)
+{
+	int n;
+	string strPath = FullPath("res/oldfaces/");
+	StringReplace(strPath, "\\", "/");
+	std::string::size_type begin, pos, end;
+	char face[MAX_128_LEN];
+	for ( pos = 0; begin = msg.find("\\<", pos), begin != std::string::npos;)
+	{
+		end = msg.find('>', begin);
+		if (end == std::string::npos)
+			break;
+		pos = begin;
+		string num = msg.substr(begin + 2, end - begin - 2);
+		n = atoi(num.c_str());
+		sprintf(face, "<img src=\"%s%d.gif\" width=24 height=24>", strPath.c_str(),n);
+		msg.replace(begin, ++end - begin, face);
+		pos += strlen(face);
+	}
+}
+
+void CChatManager::TransferFaceToServeStr(string& msg)
+{
+
+}
+
+bool CChatManager::ParseTextMsg(CWebUserObject* pWebUser, string content, CUserObject* pAssistUser, unsigned long time)
+{
+	string msgId = GetMsgId();
+	string imagePath = FullPath("SkinRes\\mainframe\\");
+	StringReplace(imagePath, "\\", "/");
+
+	if ((int)content.find("http:") > -1 && (int)content.find("收到一个图片") > -1)
+	{
+		// 协助对象给web访客发的
+		int pos = content.find("href=");
+		int pos1 = content.find("target=");
+		if (pos > -1 && pos1 > -1)
+		{
+			string imageUrl;
+			imageUrl = content.substr(pos + 6, pos1 - pos - 8);
+
+			char contentMsg[MAX_1024_LEN];
+			sprintf(contentMsg, "<img id=\"%s_msg\" class=\"msg_image\" src=\"%srecv_image_fail.jpg\"><img id=\"%s_image\" class=\"wait_image\" src=\"%smsg_wait.gif\">",
+				msgId.c_str(), imagePath.c_str(), msgId.c_str(), imagePath.c_str());
+
+			AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_WEBUSER, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL, MSG_DATA_TYPE_IMAGE, contentMsg, GetTimeByMDAndHMS(0), pAssistUser, NULL, false, true, false);
+			DownLoadFile(pWebUser, MSG_DATA_TYPE_IMAGE, imageUrl, pAssistUser, time, msgId);
+		}
+		return true;
+	}
+	else if ((int)content.find("http:") > -1 && ((int)content.find(".jpg") > -1 ||
+		(int)content.find(".jpeg") > -1 || (int)content.find(".bmp") > -1 ||
+		(int)content.find(".png") > -1))
+	{
+		// web用户发来
+		char contentMsg[MAX_1024_LEN];
+		sprintf(contentMsg, "<img id=\"%s_msg\" class=\"msg_image\" src=\"%srecv_image_fail.jpg\"><img id=\"%s_image\" class=\"wait_image\" src=\"%smsg_wait.gif\">",
+			msgId.c_str(), imagePath.c_str(), msgId.c_str(), imagePath.c_str());
+
+		AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_WEBUSER, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL, MSG_DATA_TYPE_IMAGE, contentMsg, GetTimeByMDAndHMS(0), pAssistUser, NULL, false, true, false);
+		DownLoadFile(pWebUser, MSG_DATA_TYPE_IMAGE, content, pAssistUser, time, msgId);
+
+		return true;
+	}
+	return false;
+}
