@@ -327,7 +327,6 @@ private:
 
 	UserListUI* pUserList;
 	UserListUI* m_pTalkList;
-	CUserObject* m_mySelfInfo;
 
 	unsigned long m_curSelectId;
 

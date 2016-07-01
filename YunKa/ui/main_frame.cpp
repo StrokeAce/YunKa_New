@@ -964,7 +964,7 @@ void CMainFrame::OnItemRbClick(TNotifyUI &msg)
 		{
 			xmlPath = L"menu\\menu_right_2.xml";
 		}
-		else if (uid == m_mySelfInfo->UserInfo.uid) //自己的uid
+		else if (uid == m_manager->m_userInfo.UserInfo.uid) //自己的uid
 		{
 			xmlPath = L"menu\\menu_right_3.xml";
 		}
@@ -1266,11 +1266,8 @@ void CMainFrame::OnBtnSendMessage(TNotifyUI& msg)
 //请求坐席列表
 void CMainFrame::SendMsgToGetList()
 {
-	//先请求自己的信息 
-	m_mySelfInfo = m_manager->GetMySelfUserInfo();
-
 	//先添加自己的位置
-	AddMyselfToList(pUserList, m_mySelfInfo);
+	AddMyselfToList(pUserList, &m_manager->m_userInfo);
 
 	//再添加最后一个的位置
 	AddOnlineVisitor(pUserList, NULL, -1);
@@ -1762,13 +1759,13 @@ void CMainFrame::OnManagerButtonEvent(TNotifyUI& msg)
 	else if (msg.pSender->GetName() == _T("managerbutton_11"))
 	{
 
-		sprintf(sURL, "%s&kefu_uin=%lu&token=%s", m_manager->m_initConfig.webpage_querywebphone, m_mySelfInfo->UserInfo.uid, m_manager->m_login->m_szAuthtoken);
+		sprintf(sURL, "%s&kefu_uin=%lu&token=%s", m_manager->m_initConfig.webpage_querywebphone, m_manager->m_userInfo.UserInfo.uid, m_manager->m_login->m_szAuthtoken);
 		ShowWebBrowser(sURL);
 	}
 	//访客留言
 	else if (msg.pSender->GetName() == _T("managerbutton_12"))
 	{
-		sprintf(sURL, "%s&action=query&result=0&kefu_uin=%lu&token=%s", m_manager->m_initConfig.webpage_note, m_mySelfInfo->UserInfo.uid, m_manager->m_login->m_szAuthtoken);
+		sprintf(sURL, "%s&action=query&result=0&kefu_uin=%lu&token=%s", m_manager->m_initConfig.webpage_note, m_manager->m_userInfo.UserInfo.uid, m_manager->m_login->m_szAuthtoken);
 		ShowWebBrowser(sURL);
 	}
 	//客户管理
@@ -1807,7 +1804,7 @@ void CMainFrame::ShowMySelfSendMsg(string strMsg, MSG_DATA_TYPE msgType, string 
 		return;
 	}
 
-	string strName = m_mySelfInfo->UserInfo.nickname;
+	string strName = m_manager->m_userInfo.UserInfo.nickname;
 	StringReplace(strName, "\\", "\\\\");
 	StringReplace(strName, "'", "&#039;");
 	StringReplace(strName, "\r\n", "<br>");
@@ -1837,7 +1834,7 @@ void CMainFrame::ShowMySelfSendMsg(string strMsg, MSG_DATA_TYPE msgType, string 
 	//组合消息
 	string msgTime = GetTimeByMDAndHMS(0);
 	sprintf(strJsCode, "AppendMsgToHistory('%d', '%d', '%s', '%s', '%s', '%lu', '%s', '%s', '%s'); ",
-		MSG_FROM_SELF, msgType, name.c_str(), msgTime.c_str(), msg.c_str(), userId, m_mySelfInfo->m_headPath.c_str(), msgId.c_str(), imagePath.c_str());
+		MSG_FROM_SELF, msgType, name.c_str(), msgTime.c_str(), msg.c_str(), userId, m_manager->m_userInfo.m_headPath.c_str(), msgId.c_str(), imagePath.c_str());
 
 	if (m_pListMsgHandler.isLoaded)
 	{
@@ -1956,7 +1953,7 @@ void CMainFrame::ShowRightOptionFrameView(unsigned long id)
 			_globalSetting.GetCurTimeString(strFrom, strEnd, 30);
 			if (m_manager->m_sysConfig->m_sStrServer == "tcp01.tq.cn" || m_manager->m_sysConfig->m_sStrServer == "211.151.52.48")//公网使用原来的链接
 			{
-				sprintf(showMsg, m_manager->m_initConfig.visitorpage_visitortail, pWebUser->chatid, pWebUser->webuserid, pWebUser->info.sid, 0, nTransFrom, strFrom.c_str(), strEnd.c_str(),/*pWebUser->floatadminuid*/ m_mySelfInfo->UserInfo.uid);		
+				sprintf(showMsg, m_manager->m_initConfig.visitorpage_visitortail, pWebUser->chatid, pWebUser->webuserid, pWebUser->info.sid, 0, nTransFrom, strFrom.c_str(), strEnd.c_str(),/*pWebUser->floatadminuid*/  m_manager->m_userInfo.UserInfo.uid);
 			}
 			else//公司内部使用新开发修改的链接
 			{	
@@ -2764,23 +2761,18 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 	CWebUserObject  *pWebUser = NULL;
 
 	CheckIdForUerOrWebuser(id, &pWebUser, &pUser);
-
-
 	if (id == 0 || pUser != NULL)  //上层管理按钮 设置初始状态
 	{
 		for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
 		{
 			nameString.Format(_T("managerbutton_%d"), i + 1);
-
 			if (m_pManagerBtn[i].m_pManagerBtn == NULL)
 			{
 				m_pManagerBtn[i].m_pManagerBtn = static_cast<CButtonUI*>(m_PaintManager.FindControl(nameString));
-
 				StrCpyW(m_pManagerBtn[i].normalImage, m_pManagerBtn[i].m_pManagerBtn->GetNormalImage());
 				StrCpyW(m_pManagerBtn[i].hotImage, m_pManagerBtn[i].m_pManagerBtn->GetHotImage());
 				StrCpyW(m_pManagerBtn[i].pushedImage, m_pManagerBtn[i].m_pManagerBtn->GetPushedImage());
 			}
-
 			//筛选访客按钮
 			if (i == 5 || i >= 8)
 			{
@@ -2797,11 +2789,8 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 				m_pManagerBtn[i].m_buttonState = 0;
 			}
 		}
-
 		return;
 	}
-
-
 	//如果在等待列表 显示 接受 屏蔽 邀请评价   这几个按钮
 	map<unsigned long, UserListUI::Node*>::iterator iter = m_waitVizitorMap.find(id);
 	if (iter != m_waitVizitorMap.end() ) 
@@ -2818,16 +2807,12 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 		m_pManagerBtn[4].m_pManagerBtn->SetHotImage(m_pManagerBtn[4].hotImage);
 		m_pManagerBtn[4].m_pManagerBtn->SetPushedImage(m_pManagerBtn[4].hotImage);
 		m_pManagerBtn[4].m_buttonState = 1;
-
 	}
 	else
 	{
-
 		TREENODEENUM  type = CheckIdForNodeType(id);
-
 		switch (type)
 		{
-
 		case MYSELF_CHILD_1:
 			for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
 			{
@@ -2847,7 +2832,6 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 				}
 			}
 			break;
-
 		case MYSELF_CHILD_2:
 		case MYSELF_CHILD_3:
 			for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
@@ -2869,6 +2853,7 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 			}
 			break;
 		case MYSELF_CHILD_4:
+
 			break;
 		case OTHER_CHILD_1:
 		case MYSELF_CHILD_ACTIVE_1:
@@ -2889,20 +2874,17 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 					m_pManagerBtn[i].m_buttonState = 1;
 				}
 			}
-
 			break;
 		case OTHER_CHILD_2:
+
 			break;
 		case OTHER_CHILD_3:
+
 			break;
-
-
-
 		default:
 
 			break;
 		}
-
 
 
 #if 0
@@ -2972,7 +2954,6 @@ void CMainFrame::OnActiveUser(unsigned long id)
 	CUserObject	*pUser = m_manager->GetUserObjectByUid(m_selectUserId);
 	CWebUserObject *pWebUser = m_manager->GetWebUserObjectByUid(id);
 	int type = -1;
-
 	if (id > 0)
 	{
 		map<unsigned long, UserListUI::Node*>::iterator iter = m_waitVizitorMap.find(id);
@@ -2981,8 +2962,8 @@ void CMainFrame::OnActiveUser(unsigned long id)
 			m_manager->SendTo_AcceptChat(id);
 		}
 		else
-		{    //接受邀请 的操作
-
+		{    
+			//接受邀请 的操作
 			list<unsigned long >::iterator iterList =   m_acceptingsUserList.begin();
 			for (; iterList != m_acceptingsUserList.end(); iterList++)
 			{
@@ -2992,10 +2973,8 @@ void CMainFrame::OnActiveUser(unsigned long id)
 					m_acceptingsUserList.erase(iterList);
 					type = 0;
 					break;
-
 				}
 			}
-
 			iterList = m_transferUserList.begin();
 			for (; iterList != m_transferUserList.end(); iterList++)
 			{
@@ -3005,15 +2984,10 @@ void CMainFrame::OnActiveUser(unsigned long id)
 					m_transferUserList.erase(iterList);
 					type = 1;
 					break;
-
 				}
 			}
-
 		}
-
 	}
-
-
 	if (type == 0)
 	{
 		if (pUser == NULL || pWebUser == NULL)
@@ -3021,21 +2995,17 @@ void CMainFrame::OnActiveUser(unsigned long id)
 
 		m_manager->SendTo_InviteUserResult(pWebUser, pUser, true);
 		//然后加到对话中 
-
 		map<unsigned long, UserListUI::Node*>::iterator iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
 		//没有找到
 		if (iter == m_allVisitorNodeMap.end())
 		{
 			return;
 		}
-
 		UserListUI::Node *tempNode = iter->second;
 		CDuiString text = L"";
-
 		//先在用户的对话列表中删除 
 		pUserList->RemoveNode(tempNode);
 		m_allVisitorNodeMap.erase(iter);
-
 		WCHAR name[64] = { 0 };
 		ANSIToUnicode(pWebUser->info.name, name);
 		if (pWebUser->m_bIsFrWX)
@@ -3048,7 +3018,6 @@ void CMainFrame::OnActiveUser(unsigned long id)
 		}
 
 		UserListUI::Node *tempChildNode = pMySelfeNode->child(0);
-
 		UserListUI::Node * addNode = pUserList->AddNode(text, pWebUser->webuserid, tempChildNode);
 		m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, addNode));
 	}
@@ -3057,17 +3026,14 @@ void CMainFrame::OnActiveUser(unsigned long id)
 	{
 		if (pUser == NULL || pWebUser == NULL)
 			return;
-
 		m_manager->SendTo_TransferUserResult(pWebUser, pUser, true);
 		//然后加到对话中 
-
 		map<unsigned long, UserListUI::Node*>::iterator iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
 		//没有找到
 		if (iter == m_allVisitorNodeMap.end())
 		{
 			return;
 		}
-
 		UserListUI::Node *tempNode = iter->second;
 		CDuiString text = tempNode->data()._text;
 
@@ -3075,66 +3041,82 @@ void CMainFrame::OnActiveUser(unsigned long id)
 		pUserList->RemoveNode(tempNode);
 		m_allVisitorNodeMap.erase(iter);
 
-
 		//先删掉 转接中的用户 然后放入对话中
 		UserListUI::Node *tempChildNode = pMySelfeNode->child(0);
-
 		UserListUI::Node * addNode = pUserList->AddNode(text, pWebUser->webuserid, tempChildNode);
 		m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, addNode));
 	}
-
-
-
-
 }
 
 //获取在线 坐席
 void CMainFrame::RecvOnlineUsers(CGroupObject* pGroup)
 {
-
-
 	CSelectOnlineUserWnd *dlg = new CSelectOnlineUserWnd();
-
 	dlg->m_pGroup = pGroup;
-
 	dlg->Create(m_hWnd, _T(""), UI_WNDSTYLE_DIALOG, 0, 0, 0, 0, 0, NULL);
 	dlg->CenterWindow();
 	int state = dlg->ShowModal();
-
-
 	if (state == 1)
 	{
 		m_selectUserId = _globalSetting.m_currentSelectUserId;
+
+		if (m_selectUserId == m_manager->m_userInfo.UserInfo.uid)
+		{
+			MessageBox(this->GetHWND(), L"不能选择自己", L"不能选择自己", 0);
+			return;
+		}
+
+		CUserObject	*pUser = m_manager->GetUserObjectByUid(m_selectUserId);
+		CWebUserObject *pWebUser = m_manager->GetWebUserObjectByUid(m_curSelectId);
 
 		if (m_topWndType == 1)  //转接 
 		{
 			if (m_curSelectId > 0)
 			{
-				CUserObject	*pUser = m_manager->GetUserObjectByUid(m_selectUserId);
-				CWebUserObject *pWebUser = m_manager->GetWebUserObjectByUid(m_curSelectId);
 				if (pUser != NULL && pWebUser != NULL)
 				    m_manager->SendTo_TransferRequestUser(pWebUser, pUser);
-
 			}
 		}
 		else if (m_topWndType == 2)  //邀请协助
 		{
-
-			CUserObject	*pUser = m_manager->GetUserObjectByUid(m_selectUserId);
-			CWebUserObject *pWebUser = m_manager->GetWebUserObjectByUid(m_curSelectId);
 			if (pUser != NULL && pWebUser != NULL)
 				m_manager->SendTo_InviteUser(pWebUser, pUser);
-
 		}
 		else if (m_topWndType == 3)  //内部对话
 		{
+			if (pUser != NULL)
+			{
+				if (pUser->m_bFriend)
+				{
+					if (MessageBox(this->GetHWND(), L"该用户已经为您的友好对象! 您可以直接和他交流, 是否现在交流！", L"询问", MB_YESNO) != IDYES)
+						return;
+
+					//this->m_pFormUser->SelectItem((DWORD)pUser);
+				}
+				else if (pUser->m_bInnerTalk)
+				{
+					if (MessageBox(this->GetHWND(), L"该用户已经为您的内部对话对象! 您可以直接和他交流, 是否现在交流！", L"询问", MB_YESNO) != IDYES)
+						return;
+
+					//this->m_pFormUser->SelectItem((DWORD)pUser);
+				}
+
+
+				strcpy(pUser->UserInfo.nickname, dlg.m_pSelectedUser->UserInfo.nickname);
+				pUser->m_bInnerTalk = true;
+				m_pFormUser->AddUserToUserInnerTalk(pUser, this->m_pUserInfo);
+				this->m_pFormUser->SelectItem((DWORD)pUser);
+
+				CString str;
+				str.Format("%s发送内部对话消息", pUser->UserInfo.nickname);
+				SolveAlertInfo(SOUND_MSG, str);
+
+			}
+
+			
+
 		}
-
-
-
 	}
-
-
 }
 
 
@@ -3144,8 +3126,6 @@ void CMainFrame::OnSelectUser(unsigned long id)
 
 
 }
-
-
 
 
 #if 0
@@ -3310,33 +3290,24 @@ void CMainFrame::RecvChatInfo(CWebUserObject* pWebUser, CUserObject* pUser)
 #endif
 
 
-
 UserListUI::Node* CMainFrame::GetOneUserNode(unsigned long id)
 {
 	UserListUI::Node* returnNode = NULL;
 	map<unsigned long, UserListUI::Node*>::iterator  iter = m_allVisitorNodeMap.find(id);
-
 	if (iter == m_allVisitorNodeMap.end())
 		return returnNode;
-
 	returnNode = iter->second;
-
 	return returnNode;
-
 }
 
 void CMainFrame::DeleteOneUserNode(unsigned long id)
 {
 	UserListUI::Node* returnNode = NULL;
 	map<unsigned long, UserListUI::Node*>::iterator  iter = m_allVisitorNodeMap.find(id);
-
 	if (iter == m_allVisitorNodeMap.end())
 		return ;
-
 	m_allVisitorNodeMap.erase(iter);
-
 	return;
-
 }
 
 
@@ -3348,15 +3319,12 @@ void CMainFrame::DeleteOneUserNode(unsigned long id)
 void CMainFrame::RecvShareListCount(int len)
 {
 	m_userListCount = len;
-
 	m_manager->SendTo_GetAllUserInfo();
-
 }
 
 //回调过来的 坐席信息
 void CMainFrame::RecvUserInfo(CUserObject* pWebUser)
 {
-
 	AddHostUserList(pUserList, pWebUser);
 	m_recordListCount += 1;
 
@@ -3524,7 +3492,7 @@ void CMainFrame::RecvChatInfo(CWebUserObject* pWebUser, CUserObject* pUser)
 	else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_TALK)
 	{
 		//如果是自己的id 则加到自己下面
-		if (pUser->UserInfo.uid == m_mySelfInfo->UserInfo.uid)
+		if (pUser->UserInfo.uid == m_manager->m_userInfo.UserInfo.uid)
 		{
 			UserListUI::Node* tempNode = pMySelfeNode->child(0);
 			UserListUI::Node* addNode = pUserList->AddNode(text, pWebUser->webuserid, tempNode);
@@ -3614,7 +3582,7 @@ void CMainFrame::RecvAcceptChat(CWebUserObject* pWebUser, CUserObject* pUser)
 
 
 	//如果回调返回的user uid和自己的相同 则加到自己回话底下
-	if (pUser->UserInfo.uid == m_mySelfInfo->UserInfo.uid)
+	if (pUser->UserInfo.uid == m_manager->m_userInfo.UserInfo.uid)
 	{
 		//需要 加到那个底下  还得判断状态 暂时先加第一个
 		addNode = pMySelfeNode->child(0);
@@ -3686,8 +3654,7 @@ void CMainFrame::RecvCloseChat(CWebUserObject* pWebUser)
 		type = 1;
 	}
 	tempNode = iter->second;
-	if (tempNode != NULL)
-		pUserList->RemoveNode(tempNode);
+
 
 
 	//从 会话中 删除 当前访客 信息
@@ -3704,6 +3671,9 @@ void CMainFrame::RecvCloseChat(CWebUserObject* pWebUser)
 		m_allVisitorUserMap.erase(iterLong);
 
 	}
+
+	if (tempNode != NULL)
+		pUserList->RemoveNode(tempNode);
 
 }
 
@@ -3731,14 +3701,15 @@ void CMainFrame::RecvReleaseChat(CWebUserObject* pWebUser)
 	}
 	tempNode = iter->second;
 
+
+	m_allVisitorNodeMap.erase(iter);
+
 	if (tempNode != NULL)
 	{
 		//从坐席列表底下删除 然后加入等待列表
 		pUserList->RemoveNode(tempNode);
 	}
 
-
-	m_allVisitorNodeMap.erase(iter);
 
 	CWebUserObject *webuser = pWebUser;
 	webuser->onlineinfo.talkstatus = TALKSTATUS_REQUEST;
@@ -3858,7 +3829,7 @@ void CMainFrame::ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, 
 			text.Format(_T("{x 4}{i gameicons.png 18 16}{i user_web.png 1 0}{x 4}%s"), name);
 		}
 
-		if (pUser->UserInfo.uid != m_mySelfInfo->UserInfo.uid)
+		if (pUser->UserInfo.uid != m_manager->m_userInfo.UserInfo.uid)
 			m_activeList.push_back(pWebUser->webuserid);
 
 		UserListUI::Node *tempChildNode = pMySelfeNode->child(0);
@@ -4044,7 +4015,7 @@ TREENODEENUM  CMainFrame::CheckIdForNodeType(unsigned long id)
 		return type;
 
 	//是自己的孩子 
-	if (fatherId == m_mySelfInfo->UserInfo.uid)
+	if (fatherId == m_manager->m_userInfo.UserInfo.uid)
 	{
 		for (int i = 0; i < 4; i++)
 		{
