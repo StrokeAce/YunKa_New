@@ -2803,18 +2803,24 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 	map<unsigned long, UserListUI::Node*>::iterator iter = m_waitVizitorMap.find(id);
 	if (iter != m_waitVizitorMap.end() ) 
 	{
-		m_pManagerBtn[0].m_pManagerBtn->SetNormalImage(m_pManagerBtn[0].pushedImage);
-		m_pManagerBtn[0].m_pManagerBtn->SetHotImage(m_pManagerBtn[0].hotImage);
-		m_pManagerBtn[0].m_pManagerBtn->SetPushedImage(m_pManagerBtn[0].hotImage);
-		m_pManagerBtn[0].m_buttonState = 1;
-		m_pManagerBtn[3].m_pManagerBtn->SetNormalImage(m_pManagerBtn[3].pushedImage);
-		m_pManagerBtn[3].m_pManagerBtn->SetHotImage(m_pManagerBtn[3].hotImage);
-		m_pManagerBtn[3].m_pManagerBtn->SetPushedImage(m_pManagerBtn[3].hotImage);
-		m_pManagerBtn[3].m_buttonState = 1;
-		m_pManagerBtn[4].m_pManagerBtn->SetNormalImage(m_pManagerBtn[4].pushedImage);
-		m_pManagerBtn[4].m_pManagerBtn->SetHotImage(m_pManagerBtn[4].hotImage);
-		m_pManagerBtn[4].m_pManagerBtn->SetPushedImage(m_pManagerBtn[4].hotImage);
-		m_pManagerBtn[4].m_buttonState = 1;
+
+		for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
+		{
+			if (i == 1 || i == 2|| i == 6 || i == 7)
+			{
+				m_pManagerBtn[i].m_pManagerBtn->SetNormalImage(m_pManagerBtn[i].normalImage);
+				m_pManagerBtn[i].m_pManagerBtn->SetHotImage(m_pManagerBtn[i].normalImage);
+				m_pManagerBtn[i].m_pManagerBtn->SetPushedImage(m_pManagerBtn[i].normalImage);
+				m_pManagerBtn[i].m_buttonState = 0;
+			}
+			else
+			{
+				m_pManagerBtn[i].m_pManagerBtn->SetNormalImage(m_pManagerBtn[i].pushedImage);
+				m_pManagerBtn[i].m_pManagerBtn->SetHotImage(m_pManagerBtn[i].hotImage);
+				m_pManagerBtn[i].m_pManagerBtn->SetPushedImage(m_pManagerBtn[i].hotImage);
+				m_pManagerBtn[i].m_buttonState = 1;
+			}
+		}
 	}
 	else
 	{
@@ -3009,6 +3015,7 @@ void CMainFrame::RecvOnlineUsers(CGroupObject* pGroup)
 	WCHAR showText[128] = { 0 };
 	CDuiString duiText;
 	UserListUI::Node* currentNode = NULL;
+	int type = -1;
 	CSelectOnlineUserWnd *dlg = new CSelectOnlineUserWnd();
 	dlg->m_pGroup = pGroup;
 	dlg->Create(m_hWnd, _T(""), UI_WNDSTYLE_DIALOG, 0, 0, 0, 0, 0, NULL);
@@ -3097,20 +3104,19 @@ void CMainFrame::RecvOnlineUsers(CGroupObject* pGroup)
 				iter = m_offlineNodeMap.find(pUser->UserInfo.uid);
 
 				if (iter == m_offlineNodeMap.end())
-					return;
+				{
+					type = 0;
+				}
+				
 			}
-			UserListUI::Node* node = iter->second;
-			if (node == NULL)
+			UserListUI::Node* node = NULL;
+			if (type == 0)
 				node = currentNode;
-
+			else
+				node = iter->second;
+			
 			pUserList->SelectNode(node);
 			OnItemClickEvent(m_selectUserId, -1);
-				
-
-			
-
-			
-
 		}
 	}
 }
@@ -3580,10 +3586,10 @@ void CMainFrame::RecvReleaseChat(CWebUserObject* pWebUser)
 
 	m_allVisitorNodeMap.erase(iter);
 
-	if (tempNode != NULL )
+	if (tempNode != NULL && tempNode->data()._level >= 0)
 	{
 		//从坐席列表底下删除 然后加入等待列表
-	//	pUserList->RemoveNode(tempNode);
+		pUserList->RemoveNode(tempNode);
 	}
 
 
@@ -3910,8 +3916,8 @@ TREENODEENUM  CMainFrame::CheckIdForNodeType(unsigned long id)
 							type = MYSELF_CHILD_ACTIVE_1;
 							break;
 						}
-							
-						
+
+
 					}
 
 					break;
@@ -3930,7 +3936,7 @@ TREENODEENUM  CMainFrame::CheckIdForNodeType(unsigned long id)
 			if (iter == m_offlineNodeMap.end())
 				return type;
 		}
-		fatherNode =iter->second;
+		fatherNode = iter->second;
 		for (int i = 0; i < 3; i++)
 		{
 			UserListUI::Node *tempNode = fatherNode->child(i);
@@ -3947,11 +3953,7 @@ TREENODEENUM  CMainFrame::CheckIdForNodeType(unsigned long id)
 
 
 	}
-
-
 	return type;
-
-
 }
 
 
