@@ -3260,7 +3260,28 @@ void CMainFrame::RecvOffline(IBaseObject* pObj)
 			if (iter == m_onlineNodeMap.end())
 				return;
 
+
 			UserListUI::Node* tempNode = iter->second;
+#if 0
+			
+
+
+			for (int i = 0; i < tempNode->num_children; i++)
+			{
+
+				UserListUI::Node* child = tempNode->child[i];
+
+				for (int j = 0; j < child->num_children; j++)
+				{
+
+					UserListUI::Node* child1 = child->child[j];
+
+				}
+
+
+			}
+
+#endif
 
 			//先删除
 			pUserList->RemoveNode(tempNode);
@@ -3465,8 +3486,14 @@ void CMainFrame::RecvAcceptChat(CWebUserObject* pWebUser, CUserObject* pUser)
 	m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(uid, currentNode));
 
 	m_allVisitorUserMap.insert(pair<unsigned long, unsigned long>(pWebUser->webuserid, pUser->UserInfo.uid));
-	pUserList->SelectNode(currentNode);
-	OnItemClickEvent(pWebUser->webuserid,-1);
+
+	if (pUser->UserInfo.uid == m_manager->m_userInfo.UserInfo.uid)
+	{
+
+		pUserList->SelectNode(currentNode);
+		OnItemClickEvent(pWebUser->webuserid, -1);
+	}
+
 
 
 	//显示聊天界面内容
@@ -3531,7 +3558,6 @@ void CMainFrame::RecvReleaseChat(CWebUserObject* pWebUser)
 {
 	UserListUI::Node *tempNode = NULL;
 
-
 	list<unsigned long>::iterator iterList = m_activeList.begin();
 	for (; iterList != m_activeList.end(); iterList++)
 	{
@@ -3554,10 +3580,10 @@ void CMainFrame::RecvReleaseChat(CWebUserObject* pWebUser)
 
 	m_allVisitorNodeMap.erase(iter);
 
-	if (tempNode != NULL)
+	if (tempNode != NULL )
 	{
 		//从坐席列表底下删除 然后加入等待列表
-		pUserList->RemoveNode(tempNode);
+	//	pUserList->RemoveNode(tempNode);
 	}
 
 
