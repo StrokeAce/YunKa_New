@@ -214,6 +214,7 @@ public:
 	void AddMyselfToList(UserListUI * ptr, CUserObject *user);
 	UserListUI::Node* CMainFrame::GetOneUserNode(unsigned long id);
 	void CMainFrame::DeleteOneUserNode(unsigned long id);
+	void CMainFrame::OnItemClickEvent(unsigned long id,int type);
 
 	//判定当前的用户id 处于那种状态底下
 	TREENODEENUM  CMainFrame::CheckIdForNodeType(unsigned long id);

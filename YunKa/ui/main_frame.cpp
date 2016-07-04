@@ -12,7 +12,7 @@
 #include "jpeg_file/JpegFile.h"
 #include "select_online_user_wnd.h"
 #include "select_visitor_wnd.h"
-
+#include <ShlObj.h>
 #include <GdiPlus.h>
 
 
@@ -891,21 +891,8 @@ void CMainFrame::OnItemClick(TNotifyUI &msg)
 				CDuiString str = node->data()._text;
 				unsigned long id = node->data()._uid;
 				m_savedClickId = id;
-				if (id > 0)
-				{
-					//
-					if (m_curSelectId != id)//切换聊天对象显示 
-					{
-
-						ChangeShowUserMsgWnd(id);
-
-						ShowRightOptionFrameView(id);
-					}
-					m_curSelectId = id;
-				}
-
-				//更新 上层的按钮状态
-				UpdateTopCenterButtonState(id);
+				
+				OnItemClickEvent(id,0);
 			}
 		}
 	}
@@ -1361,24 +1348,23 @@ void CMainFrame::AddHostUserList(UserListUI * ptr, CUserObject *user, int pos)
 	{
 		m_offlineNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
 
-		map<unsigned long, UserListUI::Node*>::iterator  iter = m_allVisitorNodeMap.find(user->UserInfo.uid);
-		if (iter != m_allVisitorNodeMap.end())
-			m_allVisitorNodeMap.erase(iter);
+		//map<unsigned long, UserListUI::Node*>::iterator  iter = m_allVisitorNodeMap.find(user->UserInfo.uid);
+		//if (iter != m_allVisitorNodeMap.end())
+			//m_allVisitorNodeMap.erase(iter);
 
+		//m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
 
-		m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
 		pUserList->ExpandNode(pUserNameNode, false);
 	}
 	else  if (user->status == STATUS_ONLINE)     //在线
 	{
 		m_onlineNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
 
+		//map<unsigned long, UserListUI::Node*>::iterator  iter = m_allVisitorNodeMap.find(user->UserInfo.uid);
+		//if (iter != m_allVisitorNodeMap.end())
+			//m_allVisitorNodeMap.erase(iter);
+		//m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
 
-		map<unsigned long, UserListUI::Node*>::iterator  iter = m_allVisitorNodeMap.find(user->UserInfo.uid);
-		if (iter != m_allVisitorNodeMap.end())
-			m_allVisitorNodeMap.erase(iter);
-
-		m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
 		pUserList->ExpandNode(pUserNameNode, true);
 	}
 
@@ -1441,7 +1427,7 @@ void CMainFrame::AddMyselfToList(UserListUI * ptr, CUserObject *user)
 	pMySelfeNode = pUserNameNode;
 	pUserList->ExpandNode(pMySelfeNode, true);
 
-	m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
+	//m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
 }
 
 
@@ -1529,7 +1515,7 @@ void CMainFrame::AddHostUserList(UserListUI * ptr, CUserObject *user)
 	{
 		m_offlineNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
 
-		m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
+		//m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
 
 
 		pUserList->ExpandNode(pUserNameNode, false);
@@ -1538,7 +1524,7 @@ void CMainFrame::AddHostUserList(UserListUI * ptr, CUserObject *user)
 	else  if (user->status == STATUS_ONLINE) //在线
 	{
 		m_onlineNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
-		m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
+		//m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
 		pUserList->ExpandNode(pUserNameNode, true);
 		
 	}
@@ -2748,6 +2734,28 @@ void CMainFrame::HideWebBrowser()
 
 void CMainFrame::OnBtnSendFile(TNotifyUI& msg)
 {
+	TCHAR pszPath[1024];
+	BROWSEINFO bi;
+	bi.hwndOwner = this->GetHWND();
+	bi.pidlRoot = NULL;
+	bi.pszDisplayName = NULL;
+	bi.lpszTitle = TEXT("请选择需要发送的文件");
+	bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_STATUSTEXT | BIF_BROWSEINCLUDEFILES;;
+	bi.lpfn = NULL;
+	bi.lParam = 0;
+	bi.iImage = 0;
+
+	LPITEMIDLIST pidl = SHBrowseForFolder(&bi);
+	if (pidl == NULL)
+	{
+		return;
+	}
+
+	if (SHGetPathFromIDList(pidl, pszPath))
+	{
+
+		//m_manager->sendto_
+	}
 
 }
 
@@ -2886,59 +2894,6 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 			break;
 		}
 
-
-#if 0
-		map<unsigned long, unsigned long>::iterator iterLong = m_allVisitorUserMap.find(pWebUser->webuserid);
-		if (iterLong == m_allVisitorUserMap.end())
-			return;
-
-
-		if (iterLong->second == m_mySelfInfo->UserInfo.uid)//在自己底下
-		{
-			for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
-			{
-				if (i == 0)
-				{
-					m_pManagerBtn[i].m_pManagerBtn->SetNormalImage(m_pManagerBtn[i].normalImage);
-					m_pManagerBtn[i].m_pManagerBtn->SetHotImage(m_pManagerBtn[i].normalImage);
-					m_pManagerBtn[i].m_pManagerBtn->SetPushedImage(m_pManagerBtn[i].normalImage);
-					m_pManagerBtn[i].m_buttonState = 0;
-				}
-				else
-				{
-					m_pManagerBtn[i].m_pManagerBtn->SetNormalImage(m_pManagerBtn[i].pushedImage);
-					m_pManagerBtn[i].m_pManagerBtn->SetHotImage(m_pManagerBtn[i].hotImage);
-					m_pManagerBtn[i].m_pManagerBtn->SetPushedImage(m_pManagerBtn[i].hotImage);
-					m_pManagerBtn[i].m_buttonState = 1;
-				}
-			}
-		}
-		else //别人底下
-		{
-
-			for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
-			{
-
-				//筛选访客按钮
-				if ( (i >=3 && i<=5 ) || i >= 8)
-				{
-					m_pManagerBtn[i].m_pManagerBtn->SetNormalImage(m_pManagerBtn[i].pushedImage);
-					m_pManagerBtn[i].m_pManagerBtn->SetHotImage(m_pManagerBtn[i].hotImage);
-					m_pManagerBtn[i].m_pManagerBtn->SetPushedImage(m_pManagerBtn[i].hotImage);
-					m_pManagerBtn[i].m_buttonState = 1;
-				}
-				else
-				{
-					m_pManagerBtn[i].m_pManagerBtn->SetNormalImage(m_pManagerBtn[i].normalImage);
-					m_pManagerBtn[i].m_pManagerBtn->SetHotImage(m_pManagerBtn[i].normalImage);
-					m_pManagerBtn[i].m_pManagerBtn->SetPushedImage(m_pManagerBtn[i].normalImage);
-					m_pManagerBtn[i].m_buttonState = 0;
-				}
-			}
-	
-		}
-
-#endif
 	}
 
 
@@ -3051,6 +3006,9 @@ void CMainFrame::OnActiveUser(unsigned long id)
 //获取在线 坐席
 void CMainFrame::RecvOnlineUsers(CGroupObject* pGroup)
 {
+	WCHAR showText[128] = { 0 };
+	CDuiString duiText;
+	UserListUI::Node* currentNode = NULL;
 	CSelectOnlineUserWnd *dlg = new CSelectOnlineUserWnd();
 	dlg->m_pGroup = pGroup;
 	dlg->Create(m_hWnd, _T(""), UI_WNDSTYLE_DIALOG, 0, 0, 0, 0, 0, NULL);
@@ -3084,34 +3042,72 @@ void CMainFrame::RecvOnlineUsers(CGroupObject* pGroup)
 		}
 		else if (m_topWndType == 3)  //内部对话
 		{
-			if (pUser != NULL)
+			if (pUser == NULL)
 			{
-				if (pUser->m_bFriend)
+				list<CGroupObject *>::iterator iter = pGroup->m_ListGroupInfo.begin();
+
+				for (; iter != pGroup->m_ListGroupInfo.end(); iter++)
 				{
-					if (MessageBox(this->GetHWND(), L"该用户已经为您的友好对象! 您可以直接和他交流, 是否现在交流！", L"询问", MB_YESNO) != IDYES)
-						return;
 
-					//this->m_pFormUser->SelectItem((DWORD)pUser);
+					ANSIToUnicode((*iter)->strName.c_str(), showText);
+		
+					list<CUserObject * >::iterator iteruser = (*iter)->m_ListUserInfo.begin(); //m_pGroup->m_ListUserInfo.begin();
+					for (; iteruser != (*iter)->m_ListUserInfo.end(); iteruser++)
+					{
+						if (m_selectUserId == (*iteruser)->UserInfo.uid)
+						{	
+							pUser = (*iteruser);
+							break;
+						}
+					}
 				}
-				else if (pUser->m_bInnerTalk)
-				{
-					if (MessageBox(this->GetHWND(), L"该用户已经为您的内部对话对象! 您可以直接和他交流, 是否现在交流！", L"询问", MB_YESNO) != IDYES)
-						return;
+			}
 
-					//this->m_pFormUser->SelectItem((DWORD)pUser);
-				}
-
-
-				strcpy(pUser->UserInfo.nickname, dlg.m_pSelectedUser->UserInfo.nickname);
-				pUser->m_bInnerTalk = true;
-				m_pFormUser->AddUserToUserInnerTalk(pUser, this->m_pUserInfo);
-				this->m_pFormUser->SelectItem((DWORD)pUser);
-
-				CString str;
-				str.Format("%s发送内部对话消息", pUser->UserInfo.nickname);
-				SolveAlertInfo(SOUND_MSG, str);
+			if (pUser->m_bFriend)
+			{
+				if (MessageBox(this->GetHWND(), L"该用户已经为您的友好对象! 您可以直接和他交流, 是否现在交流！", L"询问", MB_YESNO) != IDYES)
+					return;
 
 			}
+			else if (pUser->m_bInnerTalk)
+			{
+				if (MessageBox(this->GetHWND(), L"该用户已经为您的内部对话对象! 您可以直接和他交流, 是否现在交流！", L"询问", MB_YESNO) != IDYES)
+					return;
+			}
+
+			else
+			{
+				CDuiString strTemp = AnsiToUnicode(pUser->UserInfo.nickname);
+				CDuiString nameString;
+				nameString.Format(_T("{x 4}{i user_client.png 1 0}{x 4} %s"), strTemp.GetData());
+				UserListUI::Node* addNode = pMySelfeNode->child(3);
+
+				currentNode = pUserList->AddNode(nameString.GetData(), m_selectUserId, addNode);
+
+				pUserList->ExpandNode(addNode,true);
+
+				m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(m_selectUserId, currentNode));
+				m_allVisitorUserMap.insert(pair<unsigned long, unsigned long>(m_selectUserId, m_manager->m_userInfo.UserInfo.uid));
+
+			}
+
+			map<unsigned long, UserListUI::Node*>::iterator iter = m_onlineNodeMap.find(m_selectUserId);
+			if (iter == m_onlineNodeMap.end())
+			{
+				iter = m_offlineNodeMap.find(pUser->UserInfo.uid);
+
+				if (iter == m_offlineNodeMap.end())
+					return;
+			}
+			UserListUI::Node* node = iter->second;
+			if (node == NULL)
+				node = currentNode;
+
+			pUserList->SelectNode(node);
+			OnItemClickEvent(m_selectUserId, -1);
+				
+
+			
 
 			
 
@@ -3128,174 +3124,25 @@ void CMainFrame::OnSelectUser(unsigned long id)
 }
 
 
-#if 0
-void CMainFrame::RecvChatInfo(CWebUserObject* pWebUser, CUserObject* pUser)
-{
-	CDuiString text;
-	WCHAR name[64] = { 0 };
-	ANSIToUnicode(pWebUser->info.name, name);
-
-
-	//首先得找一下 webuser id  如果已经在 数列表里 则先删除
-	UserListUI::Node* tempNode = GetOneUserNode(pWebUser->webuserid);
-	if (tempNode != NULL)
-	{
-		//if(pWebUser->onlineinfo.talkstatus == TALKSTATUS_TALK)
-
-
-		pUserList->RemoveNode(tempNode);
-
-		DeleteOneUserNode(pWebUser->webuserid);
-
-		map<unsigned long, unsigned long >::iterator  iter = m_allVisitorUserMap.find(pWebUser->webuserid);
-		if (iter != m_allVisitorUserMap.end())
-			m_allVisitorUserMap.erase(iter);
-	}
-
-
-
-
-	//是否来自微信
-	if (pWebUser->m_bIsFrWX)
-	{
-		text.Format(_T("{x 4}{i user_wx.png 1 0}{x 4}%s"), name);
-	}
-	else
-	{
-		text.Format(_T("{x 4}{i user_web.png 1 0}{x 4}%s"), name);
-	}
-
-	//先判断类型
-	//为接收的用户 在等待列表
-	if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_REQUEST)
-	{
-		//添加等待列表
-		UserListUI::Node* tempNode = pUserList->AddNode(text, pWebUser->webuserid, pWaitForAccept);
-		pUserList->ExpandNode(pWaitForAccept, true);
-
-		m_waitVizitorMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, tempNode));
-
-		m_allVisitorUserMap.insert(pair<unsigned long, unsigned long>(pWebUser->webuserid, 0));
-
-		m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, tempNode));
-	}
-	//已接收的在会话列表
-	else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_TALK)
-	{
-		//如果是自己的id 则加到自己下面
-		if (pUser->UserInfo.uid == m_mySelfInfo->UserInfo.uid)
-		{
-			UserListUI::Node* tempNode = pMySelfeNode->child(0);
-			UserListUI::Node* addNode = pUserList->AddNode(text, pWebUser->webuserid, tempNode);
-			pUserList->ExpandNode(tempNode, true);
-
-			m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, addNode));
-		}
-		else //加到其他人列表底下
-		{
-
-			//map<unsigned long, UserListUI::Node*>::iterator  iter = m_onlineNodeMap.find(pUser->UserInfo.uid);
-
-			//if (iter == m_onlineNodeMap.end())
-				//return;
-
-			UserListUI::Node* tempNode = GetOneUserNode(pUser->UserInfo.uid);
-			if (tempNode == NULL)
-				return;
-
-			UserListUI::Node* child = tempNode->child(0);
-
-			UserListUI::Node* addNode = pUserList->AddNode(text, pWebUser->webuserid, child);
-			pUserList->ExpandNode(tempNode, true);
-			pUserList->ExpandNode(child, true);
-
-			m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, addNode));
-
-		}
-
-		m_allVisitorUserMap.insert(pair<unsigned long, unsigned long>(pWebUser->webuserid, pUser->UserInfo.uid));
-	}
-
-
-
-	else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_INVITE)
-	{
-
-		//如果是自己的id 则加到自己下面
-		if (pUser->UserInfo.uid == m_mySelfInfo->UserInfo.uid)
-		{
-			UserListUI::Node* tempNode = pMySelfeNode->child(2);
-			UserListUI::Node* addNode = pUserList->AddNode(text, pWebUser->webuserid, tempNode);
-			pUserList->ExpandNode(tempNode, true);
-
-			m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, addNode));
-		}
-		else //加到其他人列表底下
-		{
-
-			UserListUI::Node* tempNode = GetOneUserNode(pUser->UserInfo.uid);
-			if (tempNode == NULL)
-				return;
-
-		
-			UserListUI::Node* child = tempNode->child(2);
-
-			UserListUI::Node* addNode = pUserList->AddNode(text, pWebUser->webuserid, child);
-			pUserList->ExpandNode(tempNode, true);
-			pUserList->ExpandNode(child, true);
-
-			m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, addNode));
-
-		}
-
-		m_allVisitorUserMap.insert(pair<unsigned long, unsigned long>(pWebUser->webuserid, pUser->UserInfo.uid));
-
-
-	}
-
-	else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_TRANSFER)
-	{
-		//如果是自己的id 则加到自己下面
-		if (pUser->UserInfo.uid == m_mySelfInfo->UserInfo.uid)
-		{
-			UserListUI::Node* tempNode = pMySelfeNode->child(1);
-			UserListUI::Node* addNode = pUserList->AddNode(text, pWebUser->webuserid, tempNode);
-			pUserList->ExpandNode(tempNode, true);
-
-			m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, addNode));
-		}
-		else //加到其他人列表底下
-		{
-
-			UserListUI::Node* tempNode = GetOneUserNode(pUser->UserInfo.uid);
-			if (tempNode == NULL)
-				return;
-
-
-			UserListUI::Node* child = tempNode->child(1);
-
-			UserListUI::Node* addNode = pUserList->AddNode(text, pWebUser->webuserid, child);
-			pUserList->ExpandNode(tempNode, true);
-			pUserList->ExpandNode(child, true);
-
-			m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, addNode));
-
-		}
-
-		m_allVisitorUserMap.insert(pair<unsigned long, unsigned long>(pWebUser->webuserid, pUser->UserInfo.uid));
-
-	}
-}
-
-#endif
-
 
 UserListUI::Node* CMainFrame::GetOneUserNode(unsigned long id)
 {
 	UserListUI::Node* returnNode = NULL;
 	map<unsigned long, UserListUI::Node*>::iterator  iter = m_allVisitorNodeMap.find(id);
 	if (iter == m_allVisitorNodeMap.end())
-		return returnNode;
+	{
+
+		iter = m_onlineNodeMap.find(id);
+		if (iter == m_onlineNodeMap.end())
+		{
+			iter = m_offlineNodeMap.find(id);
+			if (iter == m_offlineNodeMap.end())
+			{
+				return returnNode;
+			}
+		}
+	}
+		
 	returnNode = iter->second;
 	return returnNode;
 }
@@ -3618,9 +3465,12 @@ void CMainFrame::RecvAcceptChat(CWebUserObject* pWebUser, CUserObject* pUser)
 	m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(uid, currentNode));
 
 	m_allVisitorUserMap.insert(pair<unsigned long, unsigned long>(pWebUser->webuserid, pUser->UserInfo.uid));
+	pUserList->SelectNode(currentNode);
+	OnItemClickEvent(pWebUser->webuserid,-1);
+
 
 	//显示聊天界面内容
-	ShowClearMsg();
+	//ShowClearMsg();
 
 
 }
@@ -4009,7 +3859,7 @@ TREENODEENUM  CMainFrame::CheckIdForNodeType(unsigned long id)
 	//没有找到
 	if (iter == m_allVisitorNodeMap.end())
 		return type;
-	
+
 	childNode = iter->second;
 	if (childNode == NULL)
 		return type;
@@ -4047,10 +3897,13 @@ TREENODEENUM  CMainFrame::CheckIdForNodeType(unsigned long id)
 	else //别人的孩子
 	{
 		//先找 别人的node根节点
-		iter = m_allVisitorNodeMap.find(fatherId);
-		if (iter == m_allVisitorNodeMap.end())
-			return type;
-
+		iter = m_onlineNodeMap.find(fatherId);
+		if (iter == m_onlineNodeMap.end())
+		{
+			iter = m_offlineNodeMap.find(fatherId);
+			if (iter == m_offlineNodeMap.end())
+				return type;
+		}
 		fatherNode =iter->second;
 		for (int i = 0; i < 3; i++)
 		{
@@ -4070,8 +3923,27 @@ TREENODEENUM  CMainFrame::CheckIdForNodeType(unsigned long id)
 	}
 
 
-
 	return type;
 
+
+}
+
+
+void CMainFrame::OnItemClickEvent(unsigned long id,int type)
+{
+	if (id > 0)
+	{
+		if (m_curSelectId != id || type == -1)//切换聊天对象显示 
+		{
+
+			ChangeShowUserMsgWnd(id);
+
+			ShowRightOptionFrameView(id);
+		}
+		m_curSelectId = id;
+	}
+
+	//更新 上层的按钮状态
+	UpdateTopCenterButtonState(id);
 
 }

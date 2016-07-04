@@ -353,6 +353,12 @@ public:
 		return node;
 	}
 
+	void SelectNode(Node* node)
+	{
+		if (!node) node = _root;
+
+		node->data()._pListElement->Select(true);
+	}
 
 	int GetNodeIndex( Node* node)
 	{
@@ -388,6 +394,9 @@ public:
 
 		return index;
 	}
+
+
+
 
 
 	int GetNodeListNumber(Node* node)
