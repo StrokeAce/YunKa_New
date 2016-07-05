@@ -1545,10 +1545,16 @@ void CMainFrame::RecvMsg(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, string msgId,
 		CUserObject       *pAssistObj = NULL;
 		unsigned long     userId = 0;
 
-		if (msgFrom == MSG_FROM_CLIENT || msgFrom == MSG_FROM_ASSIST)
+		if (msgFrom == MSG_FROM_CLIENT)
 		{
 			pUserObj = (CUserObject *)pObj;
 			userId = pUserObj->UserInfo.uid;
+		}
+		else if ( msgFrom == MSG_FROM_ASSIST)
+		{
+			pWebUserObj = (CWebUserObject *)pObj;
+			pAssistObj = (CUserObject *)pAssistUser;
+			userId = pWebUserObj->webuserid;
 		}
 		else if (msgFrom == MSG_FROM_WEBUSER)
 		{
@@ -1611,7 +1617,18 @@ void CMainFrame::ResultSendMsg(string msgId, bool bSuccess, unsigned long userId
 	char strCallJs[MAX_256_LEN];
 	if (bSuccess)
 	{
-		sprintf(strCallJs, "ResultSendMsg('%s_image','%d');", msgId.c_str(), bSuccess);
+		if (msgDataType == MSG_DATA_TYPE_IMAGE || msgDataType == MSG_DATA_TYPE_VOICE)
+		{
+			sprintf(strCallJs, "ResultSendMsg('%s','%d','0','%s','%d','%d','%lu');", 
+				msgId.c_str(), bSuccess, msg.c_str(), recvUserType, msgDataType, userId);
+		}
+		else if (msgDataType == MSG_DATA_TYPE_FILE)
+		{
+			int pos = msg.find_last_of("/");
+			string fileName = msg.substr(pos + 1, msg.length() - pos - 1);
+			sprintf(strCallJs, "ResultSendMsg('%s','%d','%s','%s','%d','%d','%lu');",
+				msgId.c_str(), bSuccess, fileName.c_str(), msg.c_str(), recvUserType, msgDataType, userId);
+		}
 	}
 	else
 	{
@@ -1807,13 +1824,19 @@ void CMainFrame::ShowMySelfSendMsg(string strMsg, MSG_DATA_TYPE msgType, string 
 	if (msgType == MSG_DATA_TYPE_IMAGE)
 	{
 		sprintf(contentMsg, "<img id=\"%s_image\" class=\"wait_image\" src=\"%s\"><img class=\"msg_image\" src=\"%s\">",
-			msgId.c_str(), imagePath.c_str(), strMsg.c_str());
+			msgId.c_str(), imagePath.c_str(), msg.c_str());
 		msg = contentMsg;
 	}
 	else if (msgType == MSG_DATA_TYPE_VOICE)
 	{
 		sprintf(contentMsg, "<img id=\"%s_image\" class=\"wait_image\" src=\"%s\"><audio class=\"msg_voice\" controls=\"controls\" src=\"%s.wav\" type=\"audio/mpeg\"></audio>",
 			msgId.c_str(), imagePath.c_str(),m_audioPath.c_str());
+		msg = contentMsg;
+	}
+	else if (msgType == MSG_DATA_TYPE_FILE)
+	{
+		sprintf(contentMsg, "<img id=\"%s_image\" class=\"wait_image\" src=\"%s\"><span id=\"%s_span\" style=\"color:red\">%s</span>",
+			msgId.c_str(), imagePath.c_str(), msgId.c_str(), msg.c_str());
 		msg = contentMsg;
 	}
 
@@ -2456,7 +2479,7 @@ string CMainFrame::CreateClientInfoHtml(WxUserInfo* pWxUser)
 			sprintf(htmlitem, itemFormat, "来源", "未知");
 			htmlContent += htmlitem;
 		}
-		if (!pWxUser->ullCometimes >= 0)
+		/*if (!pWxUser->ullCometimes >= 0)
 		{
 			char strCometimes[32] = {0};;
 			sprintf(strCometimes,"%u", pWxUser->ullCometimes);
@@ -2467,7 +2490,7 @@ string CMainFrame::CreateClientInfoHtml(WxUserInfo* pWxUser)
 		{
 			sprintf(htmlitem, itemFormat, "来访次数", "未知");
 			htmlContent += htmlitem;
-		}
+		}*/
 
 		if (!pWxUser->headimgurl.empty())
 		{
@@ -2753,8 +2776,18 @@ void CMainFrame::OnBtnSendFile(TNotifyUI& msg)
 
 	if (SHGetPathFromIDList(pidl, pszPath))
 	{
+		char getInput[MAX_1024_LEN];
+		UnicodeToANSI(pszPath, getInput);
+		MSG_RECV_TYPE sendUserType = GetSendUserType(m_curSelectId);
+		if (sendUserType == MSG_RECV_ERROR || m_curSelectId <= 0)
+			return;
 
-		//m_manager->sendto_
+		string msgId = m_manager->GetMsgId();
+
+		ShowMySelfSendMsg("发送文件.....", MSG_DATA_TYPE_FILE, msgId);
+
+		m_manager->SendTo_Msg(m_curSelectId, sendUserType, msgId, MSG_DATA_TYPE_FILE,
+			getInput);
 	}
 
 }
@@ -3251,6 +3284,36 @@ void CMainFrame::RecvOnline(IBaseObject* pObj)
 
 	else if (pObj->m_nEMObType == OBJECT_WEBUSER)
 	{
+		CWebUserObject* pWebUser = (CWebUserObject*)pObj;
+		CDuiString text;
+		UserListUI::Node* tempNode;
+		WCHAR name[64] = { 0 };
+		ANSIToUnicode(pWebUser->info.name, name);
+
+		if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_NO)
+		{
+			tempNode = pOnlineNode->child(1);
+		}
+		else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_AUTOINVITE)
+		{
+			tempNode = pOnlineNode->child(0);
+		}
+		else
+			return;
+		//是否来自微信
+		if (pWebUser->m_bIsFrWX)
+		{
+			text.Format(_T("{x 4}{i user_wx.png 1 0}{x 4}%s"), name);
+		}
+		else
+		{
+			text.Format(_T("{x 4}{i user_web.png 1 0}{x 4}%s"), name);
+		}
+
+	
+		//添加等待列表
+		UserListUI::Node* AddNode = pUserList->AddNode(text, pWebUser->webuserid, tempNode);
+		pUserList->ExpandNode(tempNode, true);
 
 
 	}
@@ -3993,4 +4056,9 @@ void CMainFrame::OnItemClickEvent(unsigned long id,int type)
 	//更新 上层的按钮状态
 	UpdateTopCenterButtonState(id);
 
+}
+
+void CMainFrame::ResultInviteWebUser(CWebUserObject* pWebUser, bool bAgree)
+{
+	
 }
