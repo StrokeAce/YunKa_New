@@ -250,11 +250,10 @@ void CChatVisitor::SolveVisitorSCRIPTMSGApplyFail(char *pInitBuff)
 	pWebUser->onlineinfo.talkstatus = TALKSTATUS_NO;
 	pWebUser->m_nWaitTimer = -20;
 
-
 	//访客退回到在线列表
 	char msg[MAX_256_LEN];
 	GetInviteSysMsg(msg, pWebUser, invitename, RESPINVITE_FAIL);
-
+	m_manager->m_handlerMsgs->ResultInviteWebUser(pWebUser,false);
 	return;
 }
 

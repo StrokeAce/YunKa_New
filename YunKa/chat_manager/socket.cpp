@@ -68,7 +68,7 @@ void CMySocket::RecvThread(void *param)
 			}
 		}
 
-		if (pthis->TestContinue())
+		if (pthis->m_bRecvThread && pthis->TestContinue())
 		{
 			g_WriteLog.WriteLog(C_LOG_TRACE, "TestContinue successed,newfd=%d", pthis->m_hSocket);
 			continue; //接续连接

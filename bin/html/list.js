@@ -334,7 +334,8 @@ function ResultSendMsg(msgId, bSuccess, imagePath, filePath, recvUserType, msgDa
 {
     if (bSuccess == '0')
     {
-        var oImg = document.getElementById(msgId+"_image");
+        var imgId = msgId + "_image";
+        var oImg = document.getElementById(imgId);
         oImg.src = imagePath + "msg_fail.png";
         oImg.onclick = function ()
         {
@@ -344,8 +345,21 @@ function ResultSendMsg(msgId, bSuccess, imagePath, filePath, recvUserType, msgDa
     }
     else
     {
-        var oImg = document.getElementById(msgId);
-        oImg.src = "";
+        if (msgDataType == 2 || msgDataType == 3)
+        {
+            var imgId = msgId + "_image";
+            var oImg = document.getElementById(imgId);
+            oImg.src = "";
+        }
+        else if (msgDataType == 6)
+        {
+            var imgId = msgId + "_image";
+            var oImg = document.getElementById(imgId);
+            oImg.src = "";
+            var spanId = msgId + "_span";
+            var oSpan = document.getElementById(spanId);
+            oSpan.innerHTML = "·¢ËÍÎÄ¼þ <a style='color: blue;cursor:pointer' href='" + filePath + "' target='_blank'>" + imagePath + "</a>";
+        }        
     }
 }
 

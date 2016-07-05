@@ -466,7 +466,7 @@ bool ClientHandler::OnBeforePopup(CefRefPtr<CefBrowser> browser,
   CEF_REQUIRE_IO_THREAD();
 
   // 用默认的浏览器打开，禁止用新窗口打开
-//  ShellExecute(NULL, "open", ((string)target_url).c_str(), NULL, NULL, SW_SHOW);
+  ShellExecuteA(NULL, "open", ((string)target_url).c_str(), NULL, NULL, SW_SHOW);
   return true;
 }
 

@@ -28,6 +28,14 @@ DWORD HttpDownloadFile(int nIndex,
 					char* lpszHeader = NULL,
 					IHttpFileEvent* pEvent = NULL);
 
+int HttpDownloadFile(string url,
+	string &body,
+	string &urlfile,
+	string postfile,
+	const string& AdditionHead = "",
+	const char* pszProxyip = NULL,
+	unsigned short proxyport = 0);
+
 
 class CHttpLoad
 {

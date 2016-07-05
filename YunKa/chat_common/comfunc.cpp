@@ -3,6 +3,10 @@
 #include "comdef.h"
 #include "md5.h"
 #include "tstring.h"
+#include "winlog.h"
+#include "convert.h"
+#include "http_unit.h"
+#include <algorithm>
 
 //字符串到长整形的互换
 DWORD StringToDWORD(string str)
@@ -688,4 +692,52 @@ unsigned long GetTimeLongByDHMS()
 		ntime = atol(stime);
 	}
 	return ntime;
+}
+
+int SendFileToWebUserFunc(string &strUpLink, string strPath, unsigned long CurUserId, unsigned long sendUserId)
+{
+	int nRetCode = 404;
+	string body, urlfile, strhttpHeader;
+	char sBuff[MAX_1024_LEN] = { 0 };
+
+	string strText, strLower;
+	int pos = strPath.find_last_of('.');
+	if (pos != -1)
+	{
+		int nExtLen = strPath.length() - pos - 1;
+		strLower = strText = strPath.substr(pos + 1, nExtLen);
+	}
+	else
+		return -1;//文件名后缀没有
+
+	transform(strLower.begin(), strLower.end(), strLower.begin(), ::tolower);
+	if (("gif") == strLower || ("jpg") == strLower || ("jpeg") == strLower || ("png") == strLower ||
+		("bmp") == strLower || ("zip") == strLower || ("rar") == strLower || ("txt") == strLower ||
+		("xls") == strLower || ("swf") == strLower || ("ppt") == strLower || ("wps") == strLower ||
+		("doc") == strLower || ("docx") == strLower || ("xlsx") == strLower || ("pptx") == strLower || ("pdf") == strLower)
+	{
+		sprintf(sBuff, ("%u:%u:%s"), CurUserId, sendUserId, strText.c_str());
+		CConvert convert;
+		ConvertMsg(sBuff, sizeof(sBuff)-1);
+		strhttpHeader = "Authorization: BASIC " + convert.enBase64(sBuff) + "\r\n";
+		strhttpHeader += "Content-Type: text/html\r\n";
+
+		sprintf(sBuff, "%s", strUpLink.c_str());
+		ConvertMsg(sBuff, sizeof(sBuff)-1);
+		nRetCode = HttpDownloadFile(sBuff, body, urlfile, strPath,strhttpHeader);
+
+		if (nRetCode / 100 != 2)
+		{
+			g_WriteLog.WriteLog(C_LOG_ERROR, "SendFileToWebUserFunc-UploadFailed，errCode：%d", nRetCode);
+			return -2;//上传失败
+		}
+	}
+	else
+	{
+		return -1;//文件格式不对
+	}
+
+	int position = urlfile.find_last_of("\r");
+	strUpLink = urlfile.substr(0, position);
+	return 1;
 }

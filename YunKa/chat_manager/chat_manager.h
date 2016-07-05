@@ -140,6 +140,8 @@ public:
 
 	// 收到坐席在邀请中的消息
 	virtual void RecvWebUserInInvite(CWebUserObject* pWebUser, CUserObject* pInviteUser) = 0;
+
+	virtual void ResultInviteWebUser(CWebUserObject* pWebUser, bool bAgree) = 0;
 };
 
 class CChatManager : public IBaseReceive
@@ -497,7 +499,8 @@ public:
 	void DownLoadFile(CWebUserObject *pWebUser, MSG_DATA_TYPE nMsgDataType, string url, CUserObject *pAssistUser, unsigned long time,string msgId);
 
 	void AfterUpload(unsigned long userId, MSG_RECV_TYPE userType, string msgId, string mediaID = "",
-					MSG_DATA_TYPE = MSG_DATA_TYPE_IMAGE, string fileId = "", string filePath = "");
+					MSG_DATA_TYPE = MSG_DATA_TYPE_IMAGE, string fileId = "", string filePath = "",
+					string wxToken = "");
 
 	void TransferFaceToStr(string& msg, MSG_RECV_TYPE recvType);
 
@@ -528,6 +531,16 @@ public:
 	bool ParseGroupUser(CMarkupXml &xml, CGroupObject *pGroupOb, char *sGroupKey, char *sUserKey);
 
 	bool TokenIsDifferent(string oldToken, string newToken);
+
+	static UINT WINAPI UpLoadFileToWxServerThread(void * pUpLoadInfo);
+
+	static UINT WINAPI UpLoadFileToServerThread(void * pUpLoadInfo);
+
+	static UINT WINAPI DownLoadFileFromServerThread(void * para);
+
+	static DWORD WINAPI SendFileThread(void *arg);
+
+	bool SendFileToUser(IBaseObject* pUser, string strPathFile, string msgId, MSG_RECV_TYPE userType);
 
 public:
 	int						m_nOnLineStatus;		// 是否在线,对于im服务器而言
@@ -569,6 +582,7 @@ public:
 	int						m_nClientIndex;			// 访客的序列号，自增
 	HMODULE					m_hScreenDll;			// 截图句柄
 	HANDLE					m_hGetOnlineUserThread;	// 获取在线坐席的线程
-	CGroupObject			m_groupUser;
+	CGroupObject			m_groupUser;			// 
+	HANDLE					m_sendFileThreadHandle;	// 
 };
 

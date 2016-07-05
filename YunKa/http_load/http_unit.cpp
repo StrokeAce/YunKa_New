@@ -434,6 +434,216 @@ CleanUp:
 	return dwRet;
 }
 
+int HttpDownloadFile(string url, string &body, string &urlfile, string postfile, const string& AdditionHead, const char* pszProxyip, unsigned short proxyport)
+{
+	body = "";
+	urlfile = "";
+	int pos = url.find('/', 8);
+	if (pos == -1)
+	{
+		return 404;
+	}
+
+	string host = url.substr(7, pos - 7);
+	string remotepath = url.substr(pos, url.length());
+	pos = host.find(':');
+	int port = 80;
+	if (pos != -1)
+	{
+		port = atoi(host.substr(pos + 1, host.length()).c_str());
+		if (port == 0)
+			port = 80;
+		host = host.substr(0, pos);
+	}
+
+	SOCKET sServer = INVALID_SOCKET;
+
+	if (pszProxyip == NULL || strlen(pszProxyip) == 0)
+	{
+		sServer = WSASocketA(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
+		if (sServer == INVALID_SOCKET)
+			return 0;
+
+		struct sockaddr_in inAddr;
+		inAddr.sin_addr.S_un.S_addr = inet_addr(host.c_str());
+		inAddr.sin_family = AF_INET;
+		inAddr.sin_port = htons(port);
+		if (inAddr.sin_addr.S_un.S_addr == INADDR_NONE)
+		{
+			struct hostent* phost = gethostbyname(host.c_str());
+			if (phost == NULL)
+				return 404;
+			inAddr.sin_addr = *((struct in_addr*)phost->h_addr);
+		}
+		if (connect(sServer, (SOCKADDR*)&inAddr, sizeof(inAddr)) != 0)
+		{
+			closesocket(sServer);
+			sServer = INVALID_SOCKET;
+		}
+	}
+	else
+	{
+		sServer = ConnectToServer(host.c_str(), port, pszProxyip, proxyport);
+	}
+	if (sServer == INVALID_SOCKET)
+	{
+		return 404;
+	}
+
+	string cmd;
+	FILE*  myFile = NULL;
+	WIN32_FIND_DATAA FindFileData;
+	DWORD dwRead;
+	int nCurDel, nDelToSend;
+	int nCurRead, nCurSend;
+	char data[MAX_1024_LEN];
+	int onereadlen = 1000;
+	int nHttpCode = 404;
+
+	fopen_s(&myFile, postfile.c_str(),"rb");
+	if (myFile == NULL)
+	{
+		return 404;
+	}
+
+	FindClose(FindFirstFileA(postfile.c_str(), &FindFileData));
+
+	dwRead = 0;
+	fseek(myFile, 0, SEEK_SET);
+
+	nDelToSend = FindFileData.nFileSizeLow / 100;
+	nCurDel = 0;
+
+	if (postfile.empty())
+	{
+		cmd = "GET " + remotepath + " HTTP/1.0\r\nHost: " + host + "\r\nUser-Agent:Tracq\r\n" + AdditionHead + "\r\n";
+	}
+	else
+	{
+		char buff[MAX_256_LEN];
+		sprintf(buff, "%d", FindFileData.nFileSizeLow);
+		cmd = "POST " + remotepath + " HTTP/1.0\r\nHost: " + host + "\r\nUser-Agent:Tracq\r\nContent-Length: " + buff + "\r\n" + AdditionHead + "\r\n";
+	}
+
+	send(sServer, cmd.c_str(), cmd.length(), 0);
+
+	while (dwRead < FindFileData.nFileSizeLow)
+	{
+		nCurRead = fread(data, 1, onereadlen, myFile);
+
+		if (nCurRead == 0)
+		{
+			break;
+		}
+		else if (nCurRead < 0)
+		{
+			fclose(myFile);
+			return 404;
+		}
+
+		dwRead += nCurRead;
+		nCurDel += nCurRead;
+
+		nCurSend = send(sServer, data, nCurRead, 0);
+		if (nCurSend <= 0)
+		{
+			fclose(myFile);
+			closesocket(sServer);
+			return 404;
+		}
+
+		if (nCurDel > nDelToSend || dwRead == nCurRead)
+		{
+			nCurDel = 0;
+		}
+
+		if (FindFileData.nFileSizeLow <= onereadlen)
+			break;
+	}
+
+	fclose(myFile);
+
+
+	char *buf = new char[15535];
+	int nLenth = 0;
+	int nRecv;
+	nRecv = recv(sServer, buf, 15534, 0);
+	if (nRecv > 0)
+	{
+		buf[nRecv] = 0;
+
+		char* pStatue = strchr(buf, ' ');
+		char* headend = strstr(buf, "\r\n\r\n");
+		*headend = '\0';
+		headend += 4;
+		nHttpCode = atoi(pStatue);
+		if (nHttpCode != 200)
+		{
+			closesocket(sServer);
+			delete[] buf;
+			return nHttpCode;
+		}
+
+		string retstring = buf;
+		int index = retstring.find("FileUrl:");
+		if (index != string::npos)
+		{
+			int endindex = retstring.find("\n", index);
+			if (endindex != string::npos)
+			{
+				urlfile = retstring.substr(index + 9, endindex - index - 9);
+			}
+		}
+
+		pStatue = strstr(buf, "Content-Length:");
+		pStatue += 15;
+		nLenth = atoi(pStatue);
+
+		string strNewURL;
+		char* pNewURL = strstr(buf, "Last-Modified:");
+		if (pNewURL != NULL)
+		{
+			pNewURL += 14;
+			while ((*pNewURL) == ' ')
+			{
+				pNewURL++;
+			}
+			char* pEnd = strchr(pNewURL, '\n');
+			if (pEnd)
+				*pEnd = '\0';
+			pEnd = strchr(pNewURL, '\r');
+			if (pEnd)
+				*pEnd = '\0';
+		}
+
+		int headlen = headend - buf;
+		body = string(headend, nRecv - headlen);
+
+		nLenth = nLenth - nRecv + headlen;
+		while (nLenth > 0)
+		{
+			nRecv = recv(sServer, buf, 15534, 0);
+			if (nRecv <= 0)
+			{
+				break;
+			}
+			buf[nRecv] = 0;
+			body += string(buf, nRecv);
+			nLenth -= nRecv;
+		}
+		if (nLenth > 0)
+		{
+			nHttpCode = 404;
+		}
+	}
+
+
+	closesocket(sServer);
+
+	delete[] buf;
+	return nHttpCode;
+}
+
 CHttpLoad::CHttpLoad()
 {
 	m_curl = NULL;

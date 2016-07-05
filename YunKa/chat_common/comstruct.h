@@ -420,6 +420,15 @@ struct DOWNLOAD_INFO
 	MSG_FROM_TYPE msgFromType;	// 消息来源类型
 };
 
+struct UPFILETHREAD_STRUCT
+{
+	void* pThis;
+	string filePath;
+	MSG_RECV_TYPE recvType;
+	string msgId;
+	unsigned long recvuid;
+};
+
 typedef struct {
 	const string raw, enc;
 } wx_face_t;

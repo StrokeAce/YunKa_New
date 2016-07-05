@@ -81,5 +81,7 @@ int GetApplyTypeID(string stype);
 
 string GetApplyTypeString(int type);
 
+int SendFileToWebUserFunc(string &strUpLink, string strPath, unsigned long CurUserId, unsigned long sendUserId);
+
 
 #endif
