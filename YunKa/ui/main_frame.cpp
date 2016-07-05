@@ -2965,7 +2965,9 @@ void CMainFrame::OnActiveUser(unsigned long id)
 		UserListUI::Node *tempNode = iter->second;
 		CDuiString text = L"";
 		//先在用户的对话列表中删除 
-		pUserList->RemoveNode(tempNode);
+		if (tempNode != NULL && tempNode->data()._level >= 0)
+			pUserList->RemoveNode(tempNode);
+
 		m_allVisitorNodeMap.erase(iter);
 		WCHAR name[64] = { 0 };
 		ANSIToUnicode(pWebUser->info.name, name);
@@ -2999,7 +3001,9 @@ void CMainFrame::OnActiveUser(unsigned long id)
 		CDuiString text = tempNode->data()._text;
 
 		//先在用户的对话列表中删除 
-		pUserList->RemoveNode(tempNode);
+		if (tempNode != NULL && tempNode->data()._level >= 0)
+			pUserList->RemoveNode(tempNode);
+
 		m_allVisitorNodeMap.erase(iter);
 
 		//先删掉 转接中的用户 然后放入对话中
@@ -3224,7 +3228,9 @@ void CMainFrame::RecvOnline(IBaseObject* pObj)
 
 
 			//先删除
-			pUserList->RemoveNode(tempNode);
+			if (tempNode != NULL && tempNode->data()._level >= 0)
+				pUserList->RemoveNode(tempNode);
+
 			m_offlineNodeMap.erase(iter);
 
 			if (m_onlineNodeMap.size() > 0)
@@ -3290,7 +3296,9 @@ void CMainFrame::RecvOffline(IBaseObject* pObj)
 #endif
 
 			//先删除
-			pUserList->RemoveNode(tempNode);
+			if (tempNode != NULL && tempNode->data()._level >= 0)
+				pUserList->RemoveNode(tempNode);
+
 			m_onlineNodeMap.erase(iter);
 
 
@@ -3329,7 +3337,9 @@ void CMainFrame::RecvChatInfo(CWebUserObject* pWebUser, CUserObject* pUser)
 	UserListUI::Node* tempNode = GetOneUserNode(pWebUser->webuserid);
 	if (tempNode != NULL)
 	{
-		pUserList->RemoveNode(tempNode);
+		if ( tempNode->data()._level >= 0)
+			pUserList->RemoveNode(tempNode);
+
 		DeleteOneUserNode(pWebUser->webuserid);
 
 		map<unsigned long, unsigned long >::iterator  iter = m_allVisitorUserMap.find(pWebUser->webuserid);
@@ -3365,6 +3375,13 @@ void CMainFrame::RecvChatInfo(CWebUserObject* pWebUser, CUserObject* pUser)
 	//已接收的在会话列表
 	else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_TALK)
 	{
+		if (pUser == NULL)
+		{
+			g_WriteLog.WriteLog(C_LOG_ERROR, "RecvChatInfo error: pUser = NULL, Print pWebUser state:%d ----webUid = %ul ", pWebUser->onlineinfo.talkstatus, pWebUser->webuserid);
+			return;
+		}
+
+
 		//如果是自己的id 则加到自己下面
 		if (pUser->UserInfo.uid == m_manager->m_userInfo.UserInfo.uid)
 		{
@@ -3446,7 +3463,8 @@ void CMainFrame::RecvAcceptChat(CWebUserObject* pWebUser, CUserObject* pUser)
 		//return;
 
 	//需要从等待列表删除 这个用户
-	pUserList->RemoveNode(tempNode);
+	if (tempNode != NULL && tempNode->data()._level >= 0)
+		pUserList->RemoveNode(tempNode);
 
 	if (pUser == NULL)
 	{
@@ -3538,6 +3556,12 @@ void CMainFrame::RecvCloseChat(CWebUserObject* pWebUser)
 	}
 	tempNode = iter->second;
 
+	if (tempNode != NULL && tempNode->data()._level >= 0)
+	{
+		//从坐席列表底下删除 然后加入等待列表
+		pUserList->RemoveNode(tempNode);
+	}
+
 
 
 	//从 会话中 删除 当前访客 信息
@@ -3554,9 +3578,6 @@ void CMainFrame::RecvCloseChat(CWebUserObject* pWebUser)
 		m_allVisitorUserMap.erase(iterLong);
 
 	}
-
-	if (tempNode != NULL)
-		pUserList->RemoveNode(tempNode);
 
 }
 
@@ -3652,7 +3673,8 @@ void CMainFrame::RecvInviteUser(CWebUserObject* pWebUser, CUserObject* pUser)
 	}
 
 	//先在用户的对话列表中删除 
-	pUserList->RemoveNode(tempNode);
+	if (tempNode != NULL && tempNode->data()._level >= 0)
+		pUserList->RemoveNode(tempNode);
 	m_allVisitorNodeMap.erase(iter);
 
 
@@ -3694,7 +3716,9 @@ void CMainFrame::ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, 
 		UserListUI::Node *tempNode = iter->second;
 
 		//先在用户的对话列表中删除 
-		pUserList->RemoveNode(tempNode);
+		if (tempNode != NULL && tempNode->data()._level >= 0)
+			pUserList->RemoveNode(tempNode);
+
 		m_allVisitorNodeMap.erase(iter);
 
 
@@ -3782,7 +3806,9 @@ void CMainFrame::RecvTransferUser(CWebUserObject* pWebUser, CUserObject* pUser)
 	}
 
 	//先在用户的对话列表中删除 
-	pUserList->RemoveNode(tempNode);
+	if (tempNode != NULL && tempNode->data()._level >= 0)
+		pUserList->RemoveNode(tempNode);
+
 	m_allVisitorNodeMap.erase(iter);
 
 
@@ -3817,7 +3843,9 @@ void CMainFrame::ResultTransferUser(CWebUserObject* pWebUser, CUserObject* pUser
 		CDuiString text = tempNode->data()._text;
 
 		//先在用户的对话列表中删除 
-		pUserList->RemoveNode(tempNode);
+		if (tempNode != NULL && tempNode->data()._level >= 0)
+			pUserList->RemoveNode(tempNode);
+
 		m_allVisitorNodeMap.erase(iter);
 
 
