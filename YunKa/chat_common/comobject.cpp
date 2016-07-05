@@ -870,7 +870,7 @@ CWebUserObject::CWebUserObject()
 
 	m_refuseinvite = 0;
 	nVisitFrom = WEBUSERICON_DIRECTURL;
-	m_bIsFrWX = FALSE;
+	m_bIsFrWX = false;
 	cTalkedSatus = 0;
 	m_pWxUserInfo = NULL;
 

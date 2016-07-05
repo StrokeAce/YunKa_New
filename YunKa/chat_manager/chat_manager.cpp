@@ -1051,7 +1051,11 @@ int CChatManager::RecvComSendMsg(PACK_HEADER packhead, char *pRecvBuff, int len)
 				WxMsgBase* pWxMsg = NULL;
 				if (strcmp(RecvInfo.msg.strfontinfo, "JSON=WX") == 0)
 				{
-					pWebUser->m_bIsFrWX = true;
+					if (!pWebUser->m_bIsFrWX)
+					{
+						pWebUser->m_bIsFrWX = true;
+						m_handlerMsgs->RecvWebUserInfo(pWebUser);
+					}
 					pWxMsg = ParseWxMsg(pWebUser, RecvInfo.msg.strmsg, NULL, RecvInfo.msg.sendtime);
 
 					if (pWxMsg == NULL)
@@ -1630,7 +1634,11 @@ int CChatManager::RecvFloatChatMsg(PACK_HEADER packhead, char *pRecvBuff, int le
 
 	if (strcmp(RecvInfo.strfontinfo, "JSON=WX") == 0)
 	{
-		pWebUser->m_bIsFrWX = true;
+		if (!pWebUser->m_bIsFrWX)
+		{
+			pWebUser->m_bIsFrWX = true;
+			m_handlerMsgs->RecvWebUserInfo(pWebUser);
+		}
 		pWxMsg = ParseWxMsg(pWebUser, RecvInfo.strmsg, pAssistUser,RecvInfo.tMsgTime);
 
 		if (pWxMsg == NULL)
@@ -3174,8 +3182,13 @@ void CChatManager::RecvComSendWorkBillMsg(unsigned long senduid, unsigned long r
 			// 微信用户，主动获取微信的userinfo
 			if (!pWebUser->m_sWxAppid.empty())
 			{
-				pWebUser->m_bIsFrWX = true;
+				if (!pWebUser->m_bIsFrWX)
+				{
+					pWebUser->m_bIsFrWX = true;
+					m_handlerMsgs->RecvWebUserInfo(pWebUser);
+				}
 				SendGetWxUserInfoAndToken(pWebUser);
+				m_handlerMsgs->RecvWebUserInfo(pWebUser);
 			}
 
 			time_t tnow = time(NULL);
@@ -3605,6 +3618,8 @@ void CChatManager::SetHandlerMsgs(IHandlerMsgs* handlerMsgs)
 void CChatManager::Exit()
 {
 	SendLoginOff();
+
+	g_WriteLog.WriteLog(C_LOG_TRACE, "Exit");
 
 	m_bExit = true;
 	m_socket.m_bRecvThread = false;
@@ -5316,7 +5331,7 @@ bool CChatManager::RepickChatCon(string url, string& strRet, unsigned long &uin,
 	string recvData;
 	int pos = url.find('/', 8);
 	if (pos == -1)
-		return FALSE;
+		return false;
 	string host = url.substr(7, pos - 7);
 	string hostbak = host;
 	string remotepath = url.substr(pos, url.length());
@@ -5628,7 +5643,7 @@ int CChatManager::SendToRefuseChat(CWebUserObject *pWebUser, string strReason)
 		if (nError == 0)
 		{
 			//删掉转接中的会话, 目前服务没有发送的拒绝返回包，无法判断对方是否收到拒绝包，只能在发送成功后删掉会话
-			pWebUser->m_bConnected = FALSE;
+			pWebUser->m_bConnected = false;
 			pWebUser->onlineinfo.talkstatus = TALKSTATUS_NO;
 			pWebUser->info.status = STATUS_OFFLINE;
 			pWebUser->transferuid = 0;

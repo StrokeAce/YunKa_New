@@ -2598,7 +2598,12 @@ void CMainFrame::InitRightTalkList()
 
 void CMainFrame::JsCallMFC(WPARAM wParam, LPARAM lParam)
 {
-	if (wParam == JS_CALL_START_RECORD)
+	if (wParam == JS_CALL_RESTART_SESSION)
+	{
+		m_manager->RestartSession(lParam);
+		delete[](char*)lParam;
+	}
+	else if (wParam == JS_CALL_START_RECORD)
 	{
 		CODE_RECORD_AUDIO result = StartRecordAudio();
 		if (result != CODE_AUDIO_SUCCESS)
