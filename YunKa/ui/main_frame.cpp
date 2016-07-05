@@ -3370,7 +3370,7 @@ void CMainFrame::RecvChatInfo(CWebUserObject* pWebUser, CUserObject* pUser)
 
 		m_allVisitorUserMap.insert(pair<unsigned long, unsigned long>(pWebUser->webuserid, 0));
 
-		m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, tempNode));
+		//m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, tempNode));
 	}
 	//已接收的在会话列表
 	else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_TALK)
@@ -3446,29 +3446,29 @@ void CMainFrame::RecvAcceptChat(CWebUserObject* pWebUser, CUserObject* pUser)
 	}
 	else
 	{
-		iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
-		if (iter != m_allVisitorNodeMap.end())
-		{
-			tempNode = iter->second;
-			text = tempNode->data()._text;
-			uid = tempNode->data()._uid;
-			//当前选择 的用户就是 激活的用户
-			m_curSelectId = uid;
+		//iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
+		//if (iter != m_allVisitorNodeMap.end())
+		//{
+		//	tempNode = iter->second;
+		//	text = tempNode->data()._text;
+		//	uid = tempNode->data()._uid;
+		//	//当前选择 的用户就是 激活的用户
+		//	m_curSelectId = uid;
 
-			type = 1;
-		}
+		//	type = 1;
+		//}
 
+
+		return;
 	}
-	//else
-		//return;
 
+	m_waitVizitorMap.erase(iter);
 	//需要从等待列表删除 这个用户
 	if (tempNode != NULL && tempNode->data()._level >= 0)
 		pUserList->RemoveNode(tempNode);
 
 	if (pUser == NULL)
 	{
-		//m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, NULL));
 		return;
 	}
 
@@ -3501,14 +3501,10 @@ void CMainFrame::RecvAcceptChat(CWebUserObject* pWebUser, CUserObject* pUser)
 	UserListUI::Node* currentNode = pUserList->AddNode(text, uid, addNode);
 	pUserList->ExpandNode(addNode, true);
 
-	if (type == 0)
-		m_waitVizitorMap.erase(iter);
-	else if (type == 1)
-		m_allVisitorNodeMap.erase(iter);
+
 
 	//插入 用户map 同时删除 等等map
 	m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(uid, currentNode));
-
 	m_allVisitorUserMap.insert(pair<unsigned long, unsigned long>(pWebUser->webuserid, pUser->UserInfo.uid));
 
 	if (pUser->UserInfo.uid == m_manager->m_userInfo.UserInfo.uid)
@@ -3517,11 +3513,6 @@ void CMainFrame::RecvAcceptChat(CWebUserObject* pWebUser, CUserObject* pUser)
 		pUserList->SelectNode(currentNode);
 		OnItemClickEvent(pWebUser->webuserid, -1);
 	}
-
-
-
-	//显示聊天界面内容
-	//ShowClearMsg();
 
 
 }
