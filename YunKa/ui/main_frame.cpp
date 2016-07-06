@@ -198,7 +198,7 @@ LRESULT CMainFrame::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	if (uMsg == WM_KEYDOWN) // 发送消息框的Ctrl+V消息	
 	{
-        if ((wParam == 'V') && ::GetKeyState(VK_CONTROL) < 0)
+		if ((wParam == 'V') && ::GetKeyState(VK_CONTROL) < 0)
 		{
 			if ((m_pSendEdit != NULL) && m_pSendEdit->IsFocused())
 			{
@@ -207,6 +207,35 @@ LRESULT CMainFrame::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 			}
 		}
 
+
+		if (wParam == VK_RETURN)   //m_manager->m_sysConfig->m_nKeySendType == 0)
+		{
+
+			int state = ::GetKeyState(VK_CONTROL);
+
+			if (m_manager->m_sysConfig->m_nKeySendType == 0 && ::GetKeyState(VK_CONTROL) >= 0)
+			{
+				if (m_pSendEdit != NULL && m_pSendEdit->IsFocused())
+				{
+
+					OnBtnSendMessage(msg);
+					return true;
+				}
+			}
+			if (m_manager->m_sysConfig->m_nKeySendType == 1 && ::GetKeyState(VK_CONTROL) < 0)
+			{
+				if (m_pSendEdit != NULL && m_pSendEdit->IsFocused())
+				{
+					OnBtnSendMessage(msg);
+					return true;
+				}
+			}
+
+		}
+	}
+
+
+#if 0
 		if (wParam == VK_RETURN  && ::GetKeyState(VK_CONTROL) > 0)   //m_manager->m_sysConfig->m_nKeySendType == 0)
 		{
 			 
@@ -235,6 +264,8 @@ LRESULT CMainFrame::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 			}
 		}
 
+
+
 /*
 			if (m_controlKeyState == 0)
 
@@ -253,6 +284,8 @@ LRESULT CMainFrame::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 
 	}
+
+#endif
 
 //	if (uMsg == WM_NOTIFY && EN_PASTE == ((LPNMHDR)lParam)->code)
 //	{
@@ -3555,7 +3588,7 @@ lable:
 	}
 
 	FindVisitorFromOnlineNode(pWebUser);
-	UserListUI::Node* fatherNode = pOnlineNode->child(2);
+	UserListUI::Node* fatherNode = pOnlineNode->child(1);
 	UserListUI::Node* AddNode = pUserList->AddNode(text, pWebUser->webuserid, fatherNode);
 	pUserList->ExpandNode(fatherNode,true);
 
@@ -4094,6 +4127,16 @@ void CMainFrame::VisitorUserOnlineAndOffline(CWebUserObject* pWebUser, bool type
 	ANSIToUnicode(pWebUser->info.name, name);
 	char id[64] = { 0 };
 
+	//是否来自微信
+	if (pWebUser->m_bIsFrWX)
+	{
+		text.Format(_T("{x 4}{i user_wx.png 1 0}{x 4}%s"), name);
+	}
+	else
+	{
+		text.Format(_T("{x 4}{i user_web.png 1 0}{x 4}%s"), name);
+	}
+
 	if (type == true)
 	{
 
@@ -4107,15 +4150,7 @@ void CMainFrame::VisitorUserOnlineAndOffline(CWebUserObject* pWebUser, bool type
 		}
 		else
 			return;
-		//是否来自微信
-		if (pWebUser->m_bIsFrWX)
-		{
-			text.Format(_T("{x 4}{i user_wx.png 1 0}{x 4}%s"), name);
-		}
-		else
-		{
-			text.Format(_T("{x 4}{i user_web.png 1 0}{x 4}%s"), name);
-		}
+
 
 		FindVisitorFromOnlineNode(pWebUser);
 
@@ -4141,6 +4176,10 @@ void CMainFrame::VisitorUserOnlineAndOffline(CWebUserObject* pWebUser, bool type
 		{
 			m_visitorOnlineNode.insert(pair<string, UserListUI::Node*>(pWebUser->info.sid, addNode));
 		}
+
+		//加入在线访客的列表
+		UserListUI::Node* AddNode = pUserList->AddNode(text, pWebUser->webuserid, addNode);
+		pUserList->ExpandNode(addNode, true);
 	
 	}
 

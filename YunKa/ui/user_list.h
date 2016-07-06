@@ -206,7 +206,7 @@ public:
 
 	Node* GetRoot() { return _root; }
 
-	Node* AddNode(LPCTSTR text,int uid, Node* parent = NULL)
+	Node* AddNode(LPCTSTR text, unsigned long uid, Node* parent = NULL)
 	{
 		if (!parent) parent = _root;
 
@@ -280,7 +280,7 @@ public:
 	}
 
 
-	Node* AddNode(LPCTSTR text,int uid, int dex ,Node* parent = NULL )
+	Node* AddNode(LPCTSTR text, unsigned long uid, int dex, Node* parent = NULL)
 	{
 		if (!parent) parent = _root;
 
