@@ -189,7 +189,7 @@ public:    //主界面消息回调
 
 	virtual void RecvOnlineUsers(CGroupObject* pGroup);
 
-	virtual void RecvWebUserInfo(CWebUserObject* pWebUser);
+	virtual void RecvWebUserInfo(CWebUserObject* pWebUser, int updateNum=0);
 
 	virtual void RecvWebUserInInvite(CWebUserObject* pWebUser, CUserObject* pInviteUser);
 

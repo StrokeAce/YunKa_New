@@ -2976,7 +2976,7 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 
 }
 
-void CMainFrame::RecvWebUserInfo(CWebUserObject* pWebUser)
+void CMainFrame::RecvWebUserInfo(CWebUserObject* pWebUser, int updateNum)
 {
 
 }
