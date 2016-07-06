@@ -181,10 +181,6 @@ void CChatVisitor::SolveVisitorSystem(char *pInitBuff)
 	{
 		SolveVisitorSystemDown(pInitBuff);
 	}
-	else if ((int)strTemp.find("SYSTEMSET") == 0)
-	{
-		
-	}
 	else if ((int)strTemp.find("STOPRECVMSG") == 0)
 	{
 		SolveVisitorSystemStopRecvMsg(pInitBuff);
@@ -530,7 +526,7 @@ void CChatVisitor::SetVisitorOffline(CWebUserObject *pWebUser)
 		pWebUser->m_bConnected = FALSE;
 		pWebUser->onlineinfo.talkstatus = TALKSTATUS_NO;
 		pWebUser->info.status = STATUS_OFFLINE;
-		m_manager->m_handlerMsgs->RecvCloseChat(pWebUser);
+		m_manager->m_handlerMsgs->RecvOffline(pWebUser);
 	}
 	
 	pWebUser->m_bIsShow = true;

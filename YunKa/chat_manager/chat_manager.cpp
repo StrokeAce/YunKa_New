@@ -1087,12 +1087,16 @@ int CChatManager::RecvComSendMsg(PACK_HEADER packhead, char *pRecvBuff, int len)
 					if (RecvInfo.msg.strmobile[0] != '\0')
 					{
 						strcpy(pWebUser->info.name, RecvInfo.msg.strmobile);
+						if (strlen(pWebUser->info.name) < 2)
+						{
+							g_WriteLog.WriteLog(C_LOG_ERROR, "RecvComSendMsg2 name length：%d", strlen(pWebUser->info.name));
+						}
 					}
 					else
 					{
 						if (strlen(pWebUser->info.name) < 2)
 						{
-							g_WriteLog.WriteLog(C_LOG_ERROR, "RecvComSendMsg2 name length：%d", strlen(pWebUser->info.name));
+							g_WriteLog.WriteLog(C_LOG_ERROR, "RecvComSendMsg3 name length：%d", strlen(pWebUser->info.name));
 						}
 					}
 				}
@@ -1280,6 +1284,10 @@ int CChatManager::RecvFloatCreateChat(PACK_HEADER packhead, char *pRecvBuff, int
 	if (RecvInfo.webname[0] != '\0' && strcmp(RecvInfo.webname, pWebUser->info.name) != 0)
 	{
 		strcpy(pWebUser->info.name, RecvInfo.webname);
+		if (strlen(pWebUser->info.name) < 2)
+		{
+			g_WriteLog.WriteLog(C_LOG_ERROR, "RecvFloatCreateChat name length：%d", strlen(pWebUser->info.name));
+		}
 	}
 
 	SendTo_GetWebUserInfo(RecvInfo.uWebuin, RecvInfo.chatid);
@@ -2317,6 +2325,8 @@ int CChatManager::RecvFloatCloseChat(PACK_HEADER packhead, char *pRecvBuff, int 
 		if (!pWebUser->IsOnline())//这里是不是该用户彻底离线了
 		{
 			g_WriteLog.WriteLog(C_LOG_TRACE, "RecvFloatCloseChat 坐席离线(%u)访客离线", packhead.uin);
+
+			m_vistor->SetVisitorOffline(pWebUser);
 		}
 		else
 		{
@@ -2324,9 +2334,8 @@ int CChatManager::RecvFloatCloseChat(PACK_HEADER packhead, char *pRecvBuff, int 
 			//访客退回到在线列表
 			pWebUser->m_nWaitTimer = -20;
 			pWebUser->onlineinfo.talkstatus = TALKSTATUS_NO;
+			m_handlerMsgs->RecvCloseChat(pWebUser);
 		}
-
-		m_handlerMsgs->RecvChatInfo(pWebUser);
 	}
 
 	nError = 0;
@@ -3188,7 +3197,6 @@ void CChatManager::RecvComSendWorkBillMsg(unsigned long senduid, unsigned long r
 					m_handlerMsgs->RecvWebUserInfo(pWebUser);
 				}
 				SendGetWxUserInfoAndToken(pWebUser);
-				m_handlerMsgs->RecvWebUserInfo(pWebUser);
 			}
 
 			time_t tnow = time(NULL);
@@ -3276,12 +3284,11 @@ void CChatManager::SolveWebUserEarlyMsg(CWebUserObject *pWebUser)
 		if (pWebUser->webuserid == (*iter)->senduin)
 		{
 			pWebUser->m_nWaitTimer = 0;
-			//this->m_pFormMain->RecvComMsg(pWebUser, msginfo, true);
 			if (strlen(pWebUser->info.name) <= 0)
 			{
-				//strcpy(pWebUser->info.name, msginfo->strmobile);
-				//if (strlen(pWebUser->info.ipfromname) <= 0)
-				//	strcpy(pWebUser->info.ipfromname, pWebUser->info.name);
+				strcpy(pWebUser->info.name, (*iter)->strmobile);
+				if (strlen(pWebUser->info.ipfromname) <= 0)
+					strcpy(pWebUser->info.ipfromname, pWebUser->info.name);
 				if (strlen(pWebUser->info.name) < 2)
 				{
 					g_WriteLog.WriteLog(C_LOG_ERROR, "SolveWebUserEarlyMsg name length：%d", strlen(pWebUser->info.name));
@@ -5087,6 +5094,10 @@ void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RE
 				{
 					sprintf(formatMsg, "<video controls=\"controls\" class=\"msg_voice\" src=\"%s\" type = \"video/mp4\"></video>", msgContent.c_str());
 					sMsg = formatMsg;
+				}
+				else if (msgDataType == MSG_DATA_TYPE_LOCATION)
+				{
+
 				}
 				else
 				{
