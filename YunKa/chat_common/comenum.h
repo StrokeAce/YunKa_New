@@ -103,7 +103,7 @@ enum MSG_DATA_TYPE
 	MSG_DATA_TYPE_LOCATION,	/**< 位置 */
 	MSG_DATA_TYPE_FILE,		/**< 文件 */
 	MSG_DATA_TYPE_LINK,		/**< 链接 */
-	MSG_DATA_TYPE_EVENT		/**< 事件 */	
+	MSG_DATA_TYPE_EVENT,	/**< 事件 */
 };
 
 enum CODE_CAPTURE

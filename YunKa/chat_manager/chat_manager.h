@@ -136,7 +136,7 @@ public:
 	virtual void RecvOnlineUsers(CGroupObject* pGroup) = 0;
 
 	// 收到访客信息
-	virtual void RecvWebUserInfo(CWebUserObject* pWebUser) = 0;
+	virtual void RecvWebUserInfo(CWebUserObject* pWebUser, int updateNum) = 0;
 
 	// 收到坐席在邀请中的消息
 	virtual void RecvWebUserInInvite(CWebUserObject* pWebUser, CUserObject* pInviteUser) = 0;

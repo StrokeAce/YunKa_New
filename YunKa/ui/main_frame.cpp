@@ -1868,7 +1868,7 @@ void CMainFrame::ShowMySelfSendMsg(string strMsg, MSG_DATA_TYPE msgType, string 
 	}
 	else if (msgType == MSG_DATA_TYPE_FILE)
 	{
-		sprintf(contentMsg, "<img id=\"%s_image\" class=\"wait_image\" src=\"%s\"><span id=\"%s_span\" style=\"color:red\">%s</span>",
+		sprintf(contentMsg, "<img id=\"%s_image\" class=\"wait_image\" src=\"%s\"><span id=\"%s_span\" class=\"file_text\">%s</span>",
 			msgId.c_str(), imagePath.c_str(), msgId.c_str(), msg.c_str());
 		msg = contentMsg;
 	}

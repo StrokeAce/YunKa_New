@@ -1054,7 +1054,7 @@ int CChatManager::RecvComSendMsg(PACK_HEADER packhead, char *pRecvBuff, int len)
 					if (!pWebUser->m_bIsFrWX)
 					{
 						pWebUser->m_bIsFrWX = true;
-						m_handlerMsgs->RecvWebUserInfo(pWebUser);
+						m_handlerMsgs->RecvWebUserInfo(pWebUser,0);
 					}
 					pWxMsg = ParseWxMsg(pWebUser, RecvInfo.msg.strmsg, NULL, RecvInfo.msg.sendtime);
 
@@ -1633,25 +1633,25 @@ int CChatManager::RecvFloatChatMsg(PACK_HEADER packhead, char *pRecvBuff, int le
 		}
 	}
 
-	if (packhead.langtype == LANGUAGE_UTF8)
-	{
-		ConvertMsg(RecvInfo.strmsg, sizeof(RecvInfo.strmsg) - 1);
-
-		ConvertMsg(RecvInfo.nickname, sizeof(RecvInfo.nickname) - 1);
-	}
-
 	if (strcmp(RecvInfo.strfontinfo, "JSON=WX") == 0)
 	{
 		if (!pWebUser->m_bIsFrWX)
 		{
 			pWebUser->m_bIsFrWX = true;
-			m_handlerMsgs->RecvWebUserInfo(pWebUser);
+			m_handlerMsgs->RecvWebUserInfo(pWebUser, 0);
 		}
 		pWxMsg = ParseWxMsg(pWebUser, RecvInfo.strmsg, pAssistUser,RecvInfo.tMsgTime);
 
 		if (pWxMsg == NULL)
 		{
 			goto RETURN;
+		}
+		else
+		{
+			if (pWxMsg->MsgType == "location")
+			{
+				RecvInfo.nMsgDataType = MSG_DATA_TYPE_LOCATION;
+			}
 		}
 	}
 	else
@@ -1671,6 +1671,12 @@ int CChatManager::RecvFloatChatMsg(PACK_HEADER packhead, char *pRecvBuff, int le
 		TransferStrToFace(content);
 		ReplaceFaceId(content);
 		strncpy(RecvInfo.strmsg, content.c_str(), MAX_MSG_RECVLEN);
+	}
+
+	if (packhead.langtype == LANGUAGE_UTF8)
+	{
+		ConvertMsg(RecvInfo.strmsg, sizeof(RecvInfo.strmsg) - 1);
+		ConvertMsg(RecvInfo.nickname, sizeof(RecvInfo.nickname) - 1);
 	}
 
 	//访客发来消息
@@ -2971,7 +2977,7 @@ WxMsgBase* CChatManager::ParseWxMsg(CWebUserObject* pWebUser, char* msg, CUserOb
 			if (oldLen == 0 && newLen > 0)
 			{
 				strcpy(pWebUser->info.name, ((WxUserInfo*)pwxobj)->nickname.c_str());
-				m_handlerMsgs->RecvWebUserInfo(pWebUser);
+				m_handlerMsgs->RecvWebUserInfo(pWebUser,1);
 			}
 			
 			pWebUser->m_bIsGetInfo = true;
@@ -2986,7 +2992,6 @@ WxMsgBase* CChatManager::ParseWxMsg(CWebUserObject* pWebUser, char* msg, CUserOb
 		}
 		else if ("image" == pwxobj->MsgType)
 		{
-			//GetWxUserInfoAndToken(pWebUser);
 			string msgId = GetMsgId();
 			string imagePath = FullPath("SkinRes\\mainframe\\");
 			StringReplace(imagePath, "\\", "/");
@@ -3035,7 +3040,7 @@ WxMsgBase* CChatManager::ParseWxMsg(CWebUserObject* pWebUser, char* msg, CUserOb
 		else if ("location" == pwxobj->MsgType)
 		{
 			msgBase = (WxMsgBase*)pwxobj;
-			
+			strcpy(msg, ((WxMsgLocation*)pwxobj)->Label.c_str());
 		}
 		else if ("link" == pwxobj->MsgType)
 		{
@@ -3194,7 +3199,7 @@ void CChatManager::RecvComSendWorkBillMsg(unsigned long senduid, unsigned long r
 				if (!pWebUser->m_bIsFrWX)
 				{
 					pWebUser->m_bIsFrWX = true;
-					m_handlerMsgs->RecvWebUserInfo(pWebUser);
+					m_handlerMsgs->RecvWebUserInfo(pWebUser,0);
 				}
 				SendGetWxUserInfoAndToken(pWebUser);
 			}
@@ -4558,7 +4563,7 @@ void CChatManager::AfterUpload(unsigned long userId, MSG_RECV_TYPE userType, str
 				if (SendMsg(pWebUser, sSendTo, 0) == SYS_SUCCESS)
 				{
 					m_handlerMsgs->ResultSendMsg(msgId,true,pWebUser->webuserid,userType,msgDataType,mediaID);
-					sprintf(sSendTo, "<span style=\"color:red\">发送文件</span> <a style=\"color: blue;cursor:pointer\" href=\"%s\" target=\"_blank\">%s</a>",
+					sprintf(sSendTo, "<span class=\"file_text\">发送文件</span> <a class=\"file_link\" href=\"%s\" target=\"_blank\">%s</a>",
 						mediaID.c_str(), fileName.c_str());
 					AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SELF, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL,
 						msgDataType, sSendTo, GetTimeByMDAndHMS(0), NULL, NULL);
@@ -4570,7 +4575,7 @@ void CChatManager::AfterUpload(unsigned long userId, MSG_RECV_TYPE userType, str
 				{
 					char sSendTo[MAX_1024_LEN];
 					m_handlerMsgs->ResultSendMsg(msgId, true, pWebUser->webuserid, userType, msgDataType, mediaID);
-					sprintf(sSendTo, "<span style=\"color:red\">发送文件</span> <a style=\"color: blue;cursor:pointer\" href=\"%s\" target=\"_blank\">%s</a>",
+					sprintf(sSendTo, "<span class=\"file_text\">发送文件</span> <a class=\"file_link\" href=\"%s\" target=\"_blank\">%s</a>",
 						mediaID.c_str(), fileName.c_str());
 					AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SELF, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL,
 						msgDataType, sSendTo, GetTimeByMDAndHMS(0), NULL, NULL);
@@ -4585,7 +4590,7 @@ void CChatManager::AfterUpload(unsigned long userId, MSG_RECV_TYPE userType, str
 				{
 					char sSendTo[MAX_1024_LEN];
 					m_handlerMsgs->ResultSendMsg(msgId, true, pWebUser->webuserid, userType, msgDataType, mediaID);
-					sprintf(sSendTo, "<span style=\"color:red\">发送文件</span> <a style=\"color: blue;cursor:pointer\" href=\"%s\" target=\"_blank\">%s</a>",
+					sprintf(sSendTo, "<span class=\"file_text\">发送文件</span> <a class=\"file_link\" href=\"%s\" target=\"_blank\">%s</a>",
 						mediaID.c_str(), fileName.c_str());
 					AddMsgToList((IBaseObject*)pUser, MSG_FROM_SELF, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL,
 						msgDataType, sSendTo, GetTimeByMDAndHMS(0), NULL, NULL);
@@ -5053,7 +5058,7 @@ void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RE
 									int pos2 = fileUrl.find_last_of("/");
 									string fileName = fileUrl.substr(pos2 + 1, fileUrl.length() - pos2 - 1);
 
-									sprintf(formatMsg, "收到文件 <a style=\"color: blue;cursor:pointer\" href=\"%s\" target=\"_blank\">%s</a>",
+									sprintf(formatMsg, "收到文件 <a class=\"file_link\" href=\"%s\" target=\"_blank\">%s</a>",
 										fileUrl.c_str(), fileName.c_str());
 									msgContent = formatMsg;
 								}
@@ -5067,7 +5072,7 @@ void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RE
 							int pos1 = strMsg.find("userfile/");
 							vFileName = strMsg.substr(pos1 + 9, strMsg.length() - pos1 - 9);
 
-							sprintf(formatMsg, "收到文件 <a style=\"color: blue;cursor:pointer\" href=\"%s\" target=\"_blank\">%s</a>",
+							sprintf(formatMsg, "收到文件 <a class=\"file_link\" href=\"%s\" target=\"_blank\">%s</a>",
 								strMsg.c_str(), vFileName.c_str());
 							msgContent = formatMsg;
 						}
@@ -5097,7 +5102,36 @@ void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RE
 				}
 				else if (msgDataType == MSG_DATA_TYPE_LOCATION)
 				{
+					// 获取地图标注图标路径
+					CCodeConvert convert;
+					string placeMarking = FullPath("SkinRes\\mainframe\\location.png");
+					StringReplace(placeMarking,"\\", "/");
+					string place_marking;
+					convert.Gb2312ToUTF_8(place_marking, placeMarking.c_str(), placeMarking.length());
 
+					string weChatStaticMapFormat = m_initConfig.wechat_static_map;
+					char weChatStaticMap[MAX_256_LEN];
+					WxMsgLocation* wxLocation = (WxMsgLocation*)msgContentWx;
+					sprintf(weChatStaticMap,weChatStaticMapFormat.c_str(), wxLocation->Location_X.c_str(), wxLocation->Location_Y.c_str());
+
+					string weChatMapLocationFormat = m_initConfig.wechat_map_location;
+					char weChatMapLocation[MAX_512_LEN];
+					sprintf(weChatMapLocation, weChatMapLocationFormat.c_str(), wxLocation->Location_X.c_str(), wxLocation->Location_Y.c_str(), msgContent.c_str(), "当前位置");
+					string locationMsg = "<div class=\"location_relative\">";
+					locationMsg += "<img class=\"location_map_bg\" src=\"";
+					locationMsg += weChatStaticMap;
+					locationMsg += "\" ondblclick=window.RunMsgList(\"ViewDetails\",\"";
+					locationMsg += weChatMapLocation;
+					locationMsg += "\")><img class=\"location_map_middle\" src=\"";
+					locationMsg += place_marking.c_str();
+					locationMsg += "\" ondblclick = window.RunMsgList(\"ViewDetails\",\"";
+					locationMsg += weChatMapLocation;
+					locationMsg += "\")><div class=\"location_title_bg\" >";
+					locationMsg += "<div class=\"location_title\">";
+					locationMsg += msgContent;
+					locationMsg += "</div></div></div>";
+
+					convert.Gb2312ToUTF_8(sMsg, locationMsg.c_str(), locationMsg.length());
 				}
 				else
 				{

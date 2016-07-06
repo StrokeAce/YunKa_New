@@ -149,21 +149,9 @@ function AppendMsgToHistory(msgFrom, msgDataType, sname, time, content, userId, 
 			{
 				lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>"+ sname +"&nbsp;<img class = 'head_image' src='"+ head + "'></div><div class='msg_send_text'>"+msgcontent+"</div></div>";
 			}
-			else if(msgDataType == 2 || msgDataType == 3)
+			else
 			{
 			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;<img class = 'head_image' src='" + head + "'></div><div class='msg_send_image'>"+msgcontent+"</div></div>";
-			}
-			else if (msgDataType == 4)
-			{
-			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;<img class = 'head_image' src='" + head + "'></div><div class='msg_send_image'><video controls = 'controls' src = '" + msgcontent + " type = 'video/mp4'></video></div></div>";
-			}
-			else if ( msgDataType == 5)
-			{
-			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;<img class = 'head_image' src='" + head + "'></div><div class='msg_send_image'>" + msgcontent + "</div></div>";
-			}
-			else if (msgDataType == 6)
-			{
-			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;<img class = 'head_image' src='" + head + "'></div><div class='msg_send_image'>" + msgcontent + "</div></div>";
 			}
 			break;
 		}
@@ -176,17 +164,9 @@ function AppendMsgToHistory(msgFrom, msgDataType, sname, time, content, userId, 
 			{
 				lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='"+head+"'>&nbsp;"+sname+"<font class='time'>"+time+"</font></div><div class='msg_recv_text'>"+msgcontent+"</div></div>";
 			}
-			else if(msgDataType == 2 || msgDataType == 3 || msgDataType == 4)
+			else
 			{
 			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='"+head+"'>&nbsp;"+sname+"<font class='time'>"+time+"</font></div><div class='msg_recv_image'>"+msgcontent+"</div></div>";
-			}
-			else if (msgDataType == 5)
-			{
-			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "'>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'>" + msgcontent + "</div></div>";
-			}
-			else if (msgDataType == 6)
-			{
-			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "'>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'>" + msgcontent + "</div></div>";
 			}
 		}
 			break;
