@@ -3253,74 +3253,14 @@ void CMainFrame::RecvOnline(IBaseObject* pObj)
 	if (pObj->m_nEMObType == OBJECT_USER)
 	{
 		CUserObject* pUser = (CUserObject*)pObj;
-		int index = 0;
-		if (pUser->status == STATUS_ONLINE)  //当前坐席是离线状态 同时过来的状态是上线状态
-		{
-			//先删除当前的离线坐席 list 再添加上线的坐席状态
-
-			map<unsigned long, UserListUI::Node*>::iterator  iter = m_offlineNodeMap.find(pUser->UserInfo.uid);
-			if (iter == m_offlineNodeMap.end())
-				return;
-
-			UserListUI::Node* tempNode = iter->second;
-
-
-			//先删除
-			if (tempNode != NULL && tempNode->data()._level >= 0)
-				pUserList->RemoveNode(tempNode);
-
-			m_offlineNodeMap.erase(iter);
-
-			if (m_onlineNodeMap.size() > 0)
-			{
-				iter = m_onlineNodeMap.end();
-				iter--;
-
-				UserListUI::Node* mapNode = iter->second;
-				index = pUserList->GetNodeIndex(mapNode);
-			}
-			else
-				index = pUserList->GetNodeIndex(pMySelfeNode);
-
-			//再添加
-			AddHostUserList(pUserList, pUser, index);
-		}
+		HostUserOnlineAndOffline(pUser,true);
 	}
 
 	else if (pObj->m_nEMObType == OBJECT_WEBUSER)
 	{
 		CWebUserObject* pWebUser = (CWebUserObject*)pObj;
-		CDuiString text;
-		UserListUI::Node* tempNode;
-		WCHAR name[64] = { 0 };
-		ANSIToUnicode(pWebUser->info.name, name);
-
-		if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_NO)
-		{
-			tempNode = pOnlineNode->child(1);
-		}
-		else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_AUTOINVITE)
-		{
-			tempNode = pOnlineNode->child(0);
-		}
-		else
-			return;
-		//是否来自微信
-		if (pWebUser->m_bIsFrWX)
-		{
-			text.Format(_T("{x 4}{i user_wx.png 1 0}{x 4}%s"), name);
-		}
-		else
-		{
-			text.Format(_T("{x 4}{i user_web.png 1 0}{x 4}%s"), name);
-		}
-
-	
-		//添加等待列表
-		UserListUI::Node* AddNode = pUserList->AddNode(text, pWebUser->webuserid, tempNode);
-		pUserList->ExpandNode(tempNode, true);
-
-
+		
+		VisitorUserOnlineAndOffline(pWebUser, true);
 	}
 
 }
@@ -3331,65 +3271,13 @@ void CMainFrame::RecvOffline(IBaseObject* pObj)
 	if (pObj->m_nEMObType == OBJECT_USER)
 	{
 		CUserObject* pUser = (CUserObject*)pObj;
-		int index = 0;
-		if (pUser->status == STATUS_OFFLINE)  //当前坐席是在线状态 同时过来的状态是离线状态
-		{
-			//先删除当前的在线 坐席 list   再添加离线的坐席状态
-
-			map<unsigned long, UserListUI::Node*>::iterator  iter = m_onlineNodeMap.find(pUser->UserInfo.uid);
-			if (iter == m_onlineNodeMap.end())
-				return;
-
-
-			UserListUI::Node* tempNode = iter->second;
-#if 0
-			
-
-
-			for (int i = 0; i < tempNode->num_children; i++)
-			{
-
-				UserListUI::Node* child = tempNode->child[i];
-
-				for (int j = 0; j < child->num_children; j++)
-				{
-
-					UserListUI::Node* child1 = child->child[j];
-
-				}
-
-
-			}
-
-#endif
-
-			//先删除
-			if (tempNode != NULL && tempNode->data()._level >= 0)
-				pUserList->RemoveNode(tempNode);
-
-			m_onlineNodeMap.erase(iter);
-
-
-			if (m_offlineNodeMap.size() > 0)
-			{
-				iter = m_offlineNodeMap.end();
-				iter--;
-
-				UserListUI::Node* mapNode = iter->second;
-				index = pUserList->GetNodeIndex(mapNode);
-			}
-			else
-				index = pUserList->GetNodeIndex(pMySelfeNode);
-
-			//再添加
-			AddHostUserList(pUserList, pUser, index);
-		}
+		HostUserOnlineAndOffline(pUser, false);
 	}
 
 	else if (pObj->m_nEMObType == OBJECT_WEBUSER)
 	{
-
-
+		CWebUserObject* pWebUser = (CWebUserObject*)pObj;
+		VisitorUserOnlineAndOffline(pWebUser,false);
 	}
 }
 
@@ -3400,6 +3288,9 @@ void CMainFrame::RecvChatInfo(CWebUserObject* pWebUser, CUserObject* pUser)
 	CDuiString text;
 	WCHAR name[64] = { 0 };
 	ANSIToUnicode(pWebUser->info.name, name);
+
+	//查找是否在 在线列表里面
+	FindVisitorFromOnlineNode(pWebUser);
 
 	//首先得找一下 webuser id  如果已经在 数列表里 则先删除
 	UserListUI::Node* tempNode = GetOneUserNode(pWebUser->webuserid);
@@ -3478,6 +3369,23 @@ void CMainFrame::RecvChatInfo(CWebUserObject* pWebUser, CUserObject* pUser)
 		m_allVisitorUserMap.insert(pair<unsigned long, unsigned long>(pWebUser->webuserid, pUser->UserInfo.uid));
 	}
 
+
+	else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_NO)
+	{
+
+		//暂时先不处理 状态是0 的状况
+		g_WriteLog.WriteLog(C_LOG_ERROR, "RecvChatInfo error: talkstatus = 0 ");
+		return;
+
+		//FindVisitorFromOnlineNode(pWebUser);
+
+		//加入在线访客的列表
+		tempNode = pOnlineNode->child(1);
+		UserListUI::Node* AddNode = pUserList->AddNode(text, pWebUser->webuserid, tempNode);
+		pUserList->ExpandNode(tempNode, true);
+
+		m_visitorOnlineNode.insert(pair<string, UserListUI::Node*>(pWebUser->info.sid, AddNode));
+	}
 
 }
 
@@ -3590,6 +3498,9 @@ void CMainFrame::RecvCloseChat(CWebUserObject* pWebUser)
 	UserListUI::Node *tempNode = NULL;
 	int type = 0;
 	unsigned long uid = 0;
+	CDuiString text;
+	WCHAR name[64] = { 0 };
+	ANSIToUnicode(pWebUser->info.name, name);
 	map<unsigned long, UserListUI::Node*>::iterator iter = m_waitVizitorMap.find(pWebUser->webuserid);
 
 
@@ -3609,7 +3520,7 @@ void CMainFrame::RecvCloseChat(CWebUserObject* pWebUser)
 		iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
 
 		if (iter == m_allVisitorNodeMap.end())
-			return;
+			goto lable;
 
 		type = 1;
 	}
@@ -3624,19 +3535,32 @@ void CMainFrame::RecvCloseChat(CWebUserObject* pWebUser)
 
 
 	//从 会话中 删除 当前访客 信息
-	map<unsigned long, unsigned long>::iterator iterLong = m_allVisitorUserMap.find(pWebUser->webuserid);
-
 	if (type == 0)
 		m_waitVizitorMap.erase(iter);
 	else
-	{
 		m_allVisitorNodeMap.erase(iter);
 
-		if (iterLong == m_allVisitorUserMap.end())
-			return;
-		m_allVisitorUserMap.erase(iterLong);
+//最后一步 将退出的用户 加到在线访客中  已结束的列表中
+lable:
 
+
+	//是否来自微信
+	if (pWebUser->m_bIsFrWX)
+	{
+		text.Format(_T("{x 4}{i user_wx.png 1 0}{x 4}%s"), name);
 	}
+	else
+	{
+		text.Format(_T("{x 4}{i user_web.png 1 0}{x 4}%s"), name);
+	}
+
+	FindVisitorFromOnlineNode(pWebUser);
+	UserListUI::Node* fatherNode = pOnlineNode->child(2);
+	UserListUI::Node* AddNode = pUserList->AddNode(text, pWebUser->webuserid, fatherNode);
+	pUserList->ExpandNode(fatherNode,true);
+
+	m_visitorOnlineNode.insert(pair<string, UserListUI::Node*>(pWebUser->info.sid, AddNode));
+
 
 }
 
@@ -3761,7 +3685,6 @@ void CMainFrame::RecvInviteUser(CWebUserObject* pWebUser, CUserObject* pUser)
 
 void CMainFrame::ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, RESULT_STATUS status)
 {
-
 	map<unsigned long, UserListUI::Node*>::iterator iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
 	//没有找到
 	if (iter == m_allVisitorNodeMap.end())
@@ -3946,11 +3869,28 @@ void CMainFrame::ResultTransferUser(CWebUserObject* pWebUser, CUserObject* pUser
 
 
 
-
+//拒绝 接受会话
 void CMainFrame::RecvWebUserInInvite(CWebUserObject* pWebUser, CUserObject* pInviteUser)
 {
 
+
+	//直接将 web用户放入 访问者列表
+	map<string, UserListUI::Node*>::iterator iterSid = m_visitorOnlineNode.find(pWebUser->info.sid);
+	if (iterSid == m_visitorOnlineNode.end())
+	{
+		return;
+	}
+	UserListUI::Node* tempNode = iterSid->second;
+	m_visitorOnlineNode.erase(iterSid);
+	pUserList->RemoveNode(tempNode);
+
+	UserListUI::Node* addNode = pOnlineNode->child(1);
+	m_visitorOnlineNode.insert(pair<string, UserListUI::Node*>(pWebUser->info.sid, addNode));
+
+
 }
+
+
 
 /********************  回调接口的处理   end    ***********    ********************************************************************************************************************************/
 
@@ -4067,3 +4007,191 @@ void CMainFrame::ResultInviteWebUser(CWebUserObject* pWebUser, bool bAgree)
 {
 	
 }
+
+
+void CMainFrame::HostUserOnlineAndOffline(CUserObject* pUser, bool type)
+{
+	int index = 0;
+	if (type == true)
+	{
+
+		if (pUser->status == STATUS_ONLINE)  //当前坐席是离线状态 同时过来的状态是上线状态
+		{
+			//先删除当前的离线坐席 list 再添加上线的坐席状态
+
+			map<unsigned long, UserListUI::Node*>::iterator  iter = m_offlineNodeMap.find(pUser->UserInfo.uid);
+			if (iter == m_offlineNodeMap.end())
+				return;
+
+			UserListUI::Node* tempNode = iter->second;
+
+
+			//先删除
+			if (tempNode != NULL && tempNode->data()._level >= 0)
+				pUserList->RemoveNode(tempNode);
+
+			m_offlineNodeMap.erase(iter);
+
+			if (m_onlineNodeMap.size() > 0)
+			{
+				iter = m_onlineNodeMap.end();
+				iter--;
+
+				UserListUI::Node* mapNode = iter->second;
+				index = pUserList->GetNodeIndex(mapNode);
+			}
+			else
+				index = pUserList->GetNodeIndex(pMySelfeNode);
+
+			//再添加
+			AddHostUserList(pUserList, pUser, index);
+		}
+
+	}
+	else
+	{
+		int index = 0;
+		if (pUser->status == STATUS_OFFLINE)  //当前坐席是在线状态 同时过来的状态是离线状态
+		{
+			//先删除当前的在线 坐席 list   再添加离线的坐席状态
+
+			map<unsigned long, UserListUI::Node*>::iterator  iter = m_onlineNodeMap.find(pUser->UserInfo.uid);
+			if (iter == m_onlineNodeMap.end())
+				return;
+
+
+			UserListUI::Node* tempNode = iter->second;
+			//先删除
+			if (tempNode != NULL && tempNode->data()._level >= 0)
+				pUserList->RemoveNode(tempNode);
+
+			m_onlineNodeMap.erase(iter);
+
+
+			if (m_offlineNodeMap.size() > 0)
+			{
+				iter = m_offlineNodeMap.end();
+				iter--;
+
+				UserListUI::Node* mapNode = iter->second;
+				index = pUserList->GetNodeIndex(mapNode);
+			}
+			else
+				index = pUserList->GetNodeIndex(pMySelfeNode);
+
+			//再添加
+			AddHostUserList(pUserList, pUser, index);
+		}
+
+	}
+}
+
+void CMainFrame::VisitorUserOnlineAndOffline(CWebUserObject* pWebUser, bool type)
+{
+	CDuiString text;
+	UserListUI::Node* tempNode = NULL;
+	WCHAR name[64] = { 0 };
+	ANSIToUnicode(pWebUser->info.name, name);
+	char id[64] = { 0 };
+
+	if (type == true)
+	{
+
+		if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_NO)
+		{
+			tempNode = pOnlineNode->child(1);
+		}
+		else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_AUTOINVITE)
+		{
+			tempNode = pOnlineNode->child(0);
+		}
+		else
+			return;
+		//是否来自微信
+		if (pWebUser->m_bIsFrWX)
+		{
+			text.Format(_T("{x 4}{i user_wx.png 1 0}{x 4}%s"), name);
+		}
+		else
+		{
+			text.Format(_T("{x 4}{i user_web.png 1 0}{x 4}%s"), name);
+		}
+
+		FindVisitorFromOnlineNode(pWebUser);
+
+		//加入在线访客的列表
+		UserListUI::Node* AddNode = pUserList->AddNode(text, pWebUser->webuserid, tempNode);
+		pUserList->ExpandNode(tempNode, true);
+
+		m_visitorOnlineNode.insert(pair<string, UserListUI::Node*>(pWebUser->info.sid, AddNode));
+	}
+	else
+	{
+		FindVisitorFromOnlineNode(pWebUser);
+		UserListUI::Node* addNode = pOnlineNode->child(2);
+
+		if (pWebUser->webuserid > 0)
+		{
+			//sprintf(id, "%ul", pWebUser->webuserid);
+			//m_visitorOnlineNode.insert(pair<string, UserListUI::Node*>(id, addNode));
+
+			m_visitorOnlineNode.insert(pair<string, UserListUI::Node*>(pWebUser->info.sid, addNode));
+		}
+		else
+		{
+			m_visitorOnlineNode.insert(pair<string, UserListUI::Node*>(pWebUser->info.sid, addNode));
+		}
+	
+	}
+
+}
+
+
+void CMainFrame::FindVisitorFromOnlineNode(CWebUserObject* pWebUser)
+{
+	UserListUI::Node* tempNode = NULL;
+
+	//先查看是否是实在等待列表 然后查看是否在 会话列表  最后查看是否在 在线列表
+	if (pWebUser->webuserid > 0)
+	{
+
+		map<unsigned long, UserListUI::Node*>::iterator iterNode = m_waitVizitorMap.find(pWebUser->webuserid);
+		if (iterNode == m_waitVizitorMap.end())
+		{
+			iterNode = m_allVisitorNodeMap.find(pWebUser->webuserid);
+			if (iterNode != m_allVisitorNodeMap.end())
+			{
+				tempNode = iterNode->second;
+				m_allVisitorNodeMap.erase(iterNode);
+			}
+		}
+		else
+		{
+			tempNode = iterNode->second;
+			m_waitVizitorMap.erase(iterNode);
+		}
+
+
+		if (tempNode != NULL && tempNode->data()._level>=0)
+		{
+			pUserList->RemoveNode(tempNode);
+		}
+
+
+	}
+
+	map<string, UserListUI::Node*>::iterator iterSid = m_visitorOnlineNode.find(pWebUser->info.sid);
+	if (iterSid != m_visitorOnlineNode.end())
+	{
+		tempNode = iterSid->second;
+		m_visitorOnlineNode.erase(iterSid);
+
+		if (tempNode != NULL && tempNode->data()._level >= 0)
+		pUserList->RemoveNode(tempNode);
+
+	}
+
+
+}
+
+

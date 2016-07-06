@@ -218,6 +218,10 @@ public:
 	void CMainFrame::DeleteOneUserNode(unsigned long id);
 	void CMainFrame::OnItemClickEvent(unsigned long id,int type);
 
+	void CMainFrame::HostUserOnlineAndOffline(CUserObject* pUser, bool type);
+	void CMainFrame::VisitorUserOnlineAndOffline(CWebUserObject* pWebUser, bool type);
+	void CMainFrame::FindVisitorFromOnlineNode(CWebUserObject* pWebUser);
+
 	//判定当前的用户id 处于那种状态底下
 	TREENODEENUM  CMainFrame::CheckIdForNodeType(unsigned long id);
 
@@ -286,6 +290,8 @@ public:
 
 	UserListUI::Node* m_pLastOfflineNode;
 	UserListUI::Node* m_pLastOnlineNode;
+
+	map<string, UserListUI::Node*> m_visitorOnlineNode; //在线访客 
 
 	list<CUserObject* > m_upUser;
 	unsigned int m_recordWaitNumber;
