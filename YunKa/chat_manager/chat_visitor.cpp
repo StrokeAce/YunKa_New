@@ -128,11 +128,7 @@ int CChatVisitor::SendWebuserTalkEnd(CWebUserObject *pWebUser)
 
 bool CChatVisitor::ConnectToVisitorServer()
 {
-	m_socketEx.m_MsgRecvSuccID = WM_SOCKETEX_RECVSUCC;
-	m_socketEx.m_MsgRecvFailID = WM_SOCKETEX_RECVFAIL;
-	m_socketEx.m_MsgSocketCloseID = WM_SOCKETEX_CLOSE;
 	m_socketEx.m_bIM = false;
-
 	m_socketEx.Close();
 
 	for (int i = 0; i < 2; i++)

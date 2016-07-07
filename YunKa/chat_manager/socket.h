@@ -9,10 +9,6 @@
 class CMySocket
 {
 public:
-
-	DWORD m_MsgSocketCloseID, m_MsgRecvSuccID, m_MsgRecvFailID;
-
-public:
 	CMySocket();
 	virtual ~CMySocket();
 

@@ -2449,7 +2449,7 @@ int CChatManager::RecvSrvDown(PACK_HEADER packhead, char *pRecvBuff, int len)
 			return 0;
 
 		g_WriteLog.WriteLog(C_LOG_TRACE, "RecvSrvDown uid%u", m_userInfo.UserInfo.uid);
-		m_handlerMsgs->RecvOffline(&m_userInfo);
+		SetOfflineStatus();
 		if (RecvInfo.type >= SRVNORMAL_IPERROR)
 		{
 			m_lastError = "该用户已在其他地方进行登陆";
@@ -2838,6 +2838,7 @@ void CChatManager::SetOfflineStatus()
 	{
 		m_login->SetOffline();
 	}
+	m_handlerMsgs->RecvOffline(&m_userInfo);
 }
 
 void CChatManager::CloseAllSocket()

@@ -11,20 +11,13 @@
 
 CMySocket::CMySocket()
 {
-	m_MsgRecvSuccID = WM_SOCKET_RECVSUCC;
-	m_MsgRecvFailID = WM_SOCKET_RECVFAIL;
-	m_MsgSocketCloseID = WM_SOCKET_CLOSE;
 	m_bIM = true;
-
 	m_sLine = NULL;
 	m_nLineMaxLen = 0;
-
 	m_hSocket = INVALID_SOCKET;
-
 	m_bRecvThread = true;
 	m_szdomian = NULL;
 	m_port = 0;
-
 	m_bfirstpack = true;
 	m_bZlib = false;
 
@@ -81,6 +74,7 @@ void CMySocket::RecvThread(void *param)
 		if (pthis->m_hSocket != INVALID_SOCKET)
 		{
 			g_WriteLog.WriteLog(C_LOG_ERROR, "socketÊ§Ð§£¬µôÏß");
+			pthis->m_receiveObj->OnReceiveEvent(WM_SOCKET_RECVFAIL, 0);
 			pthis->Close();
 			pthis->OnClose();
 		}
@@ -358,7 +352,7 @@ void CMySocket::Close()
 void CMySocket::OnClose()
 {
 	g_WriteLog.WriteLog(C_LOG_TRACE, "CMySocket::OnClose m_bIM:%d", m_bIM);
-	//::SendMessage(m_hWnd, m_MsgSocketCloseID, 0, 0);
+	m_receiveObj->OnReceiveEvent(WM_SOCKET_CLOSE, 0);
 }
 
 void CMySocket::SetReceiveObject(IBaseReceive* receiveObj)

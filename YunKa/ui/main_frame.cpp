@@ -2545,10 +2545,18 @@ extern "C" _declspec(dllimport) void WAVToAMR(const char* wavPath);
 
 void CMainFrame::OnBtnVoice(TNotifyUI& msg)
 {
-	char strJsCode[MAX_256_LEN];
-	sprintf(strJsCode, "StartRecordAudio(\"%lu\",\"%d\");", m_curSelectId, MSG_RECV_WX);
-	CefString strCode(strJsCode), strUrl("");
-	m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->ExecuteJavaScript(strCode, strUrl, 0);
+	MSG_RECV_TYPE sendUserType = GetSendUserType(m_curSelectId);
+	if (sendUserType == MSG_RECV_ERROR || m_curSelectId <= 0 || sendUserType == MSG_RECV_WEB || sendUserType == MSG_RECV_CLIENT)
+	{
+		// 提示不能给该类型用户发语音消息
+	}
+	else
+	{
+		char strJsCode[MAX_256_LEN];
+		sprintf(strJsCode, "StartRecordAudio(\"%lu\",\"%d\");", m_curSelectId, MSG_RECV_WX);
+		CefString strCode(strJsCode), strUrl("");
+		m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->ExecuteJavaScript(strCode, strUrl, 0);
+	}
 }
 
 
