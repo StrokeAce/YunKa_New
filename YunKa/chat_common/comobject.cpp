@@ -909,6 +909,10 @@ bool CWebUserObject::IsExistCommonTalkId(unsigned long uid)
 
 bool CWebUserObject::IsOnline()
 {
+	if (cTalkedSatus == INTALKING || !m_mapUrlAndScriptFlagOb.empty())
+	{
+		return true;
+	}
 	return false;
 }
 
