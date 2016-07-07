@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Window size="267,310"  caption="0,0,0,36"  roundcorner="4,4" >
+
+	<!-- 缺省样式 -->
+    <Include source="Default.xml" />
+
+<VerticalLayout inset="4,4,4,4" bkcolor="#FF60B1FE">
+
+<HorizontalLayout height="32" inset="2,2,2,0"  >
+    <Label text="选择在线的公司客服" font="10" width="200" />
+    <Control />
+
+    <Button name="closeBtn_chat" width="42" maxheight="18"     normalimage="file='mainframe\\frame_btn_close_normal.bmp' mask='#FFFF00FF'"     hotimage="file='mainframe\\frame_btn_close_hot.bmp' mask='#FFFF00FF'"     pushedimage="file='mainframe\\frame_btn_close_down.bmp' mask='#FFFF00FF'"/>
+
+</HorizontalLayout>
+
+
+<HorizontalLayout  inset="2,2,2,0"  bkcolor="#FFF8F8F8">
+
+<VerticalLayout>
+<HorizontalLayout>
+ <OnlineUserList name="onlineSelectList" bkcolor="#FFF6F9FF" inset="2,2,2,2" bordercolor="#FFC0C0C0" bordersize="1" header="hidden" itemhotimage="file='1tree_hot.bmp' corner='2,1,2,1' " itemselectedimage="file='1tree_select.bmp' corner='2,1,2,1'" itemlinecolor="#FFE4EAF2" itemshowhtml="true" vscrollbar="true"  autovscroll="true" menu="false" >
+</OnlineUserList>
+</HorizontalLayout>
+
+</VerticalLayout>
+
+
+<VerticalLayout width="75">
+
+<Button name="conformChatInsideBtn" text="确定" float="true" pos="2, 10, 70, 30" tooltip="点击这里确定修改" normalimage="mainframe\\button_nor.bmp" hotimage="mainframe\\button_over.bmp" pushedimage="mainframe\\button_down.bmp" />
+
+<Button name="cancelChatInsideBtn" text="取消" float="true" pos="2, 40, 70, 60" tooltip="点击这里取消修改" normalimage="mainframe\\button_nor.bmp" hotimage="mainframe\\button_over.bmp" pushedimage="mainframe\\button_down.bmp" />
+
+</VerticalLayout>
+
+
+
+</HorizontalLayout>
+
+
+
+		
+</VerticalLayout>
+</Window>
