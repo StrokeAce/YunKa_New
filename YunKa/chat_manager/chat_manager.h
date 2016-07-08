@@ -496,18 +496,22 @@ public:
 	void UpLoadFile(unsigned long userId, MSG_RECV_TYPE userType, string msgId, string filePath,
 					MSG_DATA_TYPE = MSG_DATA_TYPE_IMAGE);
 
-	void DownLoadFile(CWebUserObject *pWebUser, MSG_DATA_TYPE nMsgDataType, string url, CUserObject *pAssistUser, unsigned long time,string msgId);
+	void DownLoadFile(IBaseObject* pUser, MSG_DATA_TYPE nMsgDataType, string url, CUserObject *pAssistUser, unsigned long time,string msgId);
 
 	void AfterUpload(unsigned long userId, MSG_RECV_TYPE userType, string msgId, string mediaID = "",
 					MSG_DATA_TYPE = MSG_DATA_TYPE_IMAGE, string fileId = "", string filePath = "",
 					string wxToken = "");
 
+	// 从表情转换到字符串
 	void TransferFaceToStr(string& msg, MSG_RECV_TYPE recvType);
 
+	// 从字符串替换到表情
 	void TransferStrToFace(string& msg);
 
+	// 从字符串替换到老版的表情
 	void TransferStrToOldFace(string& msg);
 
+	// 替换表情到服务器地址字符串，用于发送给web用户
 	void TransferFaceToServeStr(string& msg);
 
 	int GetFaceIndex(const char * faceStr);
@@ -517,7 +521,7 @@ public:
 	void Amr2Wav(string filePath);
 
 	void AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RECV_TYPE recvType,string msgId, MSG_TYPE msgType, MSG_DATA_TYPE msgDataType,
-					string msgContent="", string msgTime = "", CUserObject* pAssistUser = NULL, WxMsgBase* msgContentWx = NULL,
+					string msgContent="", unsigned long msgTime = 0, CUserObject* pAssistUser = NULL, WxMsgBase* msgContentWx = NULL,
 					bool bSave = true,bool bNotify = true,bool bSuccess = true);
 
 	string ReplaceToken(string srcStr, string replaceStr);
@@ -582,7 +586,8 @@ public:
 	int						m_nClientIndex;			// 访客的序列号，自增
 	HMODULE					m_hScreenDll;			// 截图句柄
 	HANDLE					m_hGetOnlineUserThread;	// 获取在线坐席的线程
-	CGroupObject			m_groupUser;			// 
-	HANDLE					m_sendFileThreadHandle;	// 
+	CGroupObject			m_groupUser;			// 获取的在线坐席的分组集合
+	HANDLE					m_sendFileThreadHandle;	// 发送文件线程句柄
+	unsigned short			m_packSeq;				// 包序列号,自增
 };
 

@@ -414,7 +414,7 @@ struct DOWNLOAD_INFO
 	string downLoadUrl;			// 下载文件的url
 	string msgId;				// 消息id
 	CWebUserObject *pWebUser;	// 消息的来源用户
-	string time;				// 发送时间
+	unsigned long time;			// 发送时间
 	CUserObject* pUser;			// 协助对象,可为空
 	MSG_DATA_TYPE msgDataType;  // 消息的数据类型
 	MSG_FROM_TYPE msgFromType;	// 消息来源类型

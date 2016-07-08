@@ -1613,6 +1613,19 @@ void CMainFrame::RecvMsg(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, string msgId,
 			pWebUserObj = (CWebUserObject *)pObj;
 			userId = pWebUserObj->webuserid;
 		}
+		else if (msgFrom == MSG_FROM_SYS)
+		{
+			if (pObj->m_nEMObType == OBJECT_WEBUSER)
+			{
+				pWebUserObj = (CWebUserObject *)pObj;
+				userId = pWebUserObj->webuserid;
+			}
+			else
+			{
+				pUserObj = (CUserObject *)pObj;
+				userId = pUserObj->UserInfo.uid;
+			}
+		}
 
 		if (userId != m_curSelectId)
 		{

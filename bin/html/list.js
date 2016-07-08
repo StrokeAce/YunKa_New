@@ -112,10 +112,9 @@ function OnClickUnreadMessage(e){
 	scrollViewToBottom();
 }
 
-function AppendPromptUnreadMessage(content){
-	var strprompt = TQGF.GetReplaceText(content,TQRES_PROMPT_MSG);
+function AppendPromptUnreadMessage(content) {
 	$prompt.style.display = "block";
-	$prompt.innerHTML = strprompt;
+	$prompt.innerHTML = content;
 	$prompt.onclick = OnClickUnreadMessage;
 }
 
@@ -124,20 +123,6 @@ function AppendMsgToHistory(msgFrom, msgDataType, sname, time, content, userId, 
 {
 	var lstmsg = document.createElement("div");
 	lstmsg.id = msgid;
-
-	var msgcontent = TQGF.GetReplaceText(content,TQRES_REPLACE_MSG);
-	msgcontent = TQGF.SaveHtmlElement(msgcontent);
-	if ( TQHtmlCheck.replace(msgcontent) )
-	{
-		msgcontent = TQGF.EncodeHtmlTags(msgcontent);
-		msgcontent = TQHtmlCheck.get();
-	} 
-	else 
-	{
-		msgcontent = TQGF.EncodeHtmlTags(msgcontent);
-	}
-	msgcontent = TQGF.ReplaceStringToFace(msgcontent);
-	msgcontent = TQGF.FormatMsg(msgcontent);
 	
 	switch (msgFrom)
 	{
@@ -147,11 +132,11 @@ function AppendMsgToHistory(msgFrom, msgDataType, sname, time, content, userId, 
 			head = head.replace(/\\/g, "\\\\");
 			if(msgDataType == 1)
 			{
-				lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>"+ sname +"&nbsp;<img class = 'head_image' src='"+ head + "'></div><div class='msg_send_text'>"+msgcontent+"</div></div>";
+			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;<img class = 'head_image' src='" + head + "'></div><div class='msg_send_text'>" + content + "</div></div>";
 			}
 			else
 			{
-			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;<img class = 'head_image' src='" + head + "'></div><div class='msg_send_image'>"+msgcontent+"</div></div>";
+			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;<img class = 'head_image' src='" + head + "'></div><div class='msg_send_image'>" + content + "</div></div>";
 			}
 			break;
 		}
@@ -162,18 +147,18 @@ function AppendMsgToHistory(msgFrom, msgDataType, sname, time, content, userId, 
 			// 接收消息
 			if(msgDataType == 1)
 			{
-				lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='"+head+"'>&nbsp;"+sname+"<font class='time'>"+time+"</font></div><div class='msg_recv_text'>"+msgcontent+"</div></div>";
+			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "'>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_text'>" + content + "</div></div>";
 			}
 			else
 			{
-			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='"+head+"'>&nbsp;"+sname+"<font class='time'>"+time+"</font></div><div class='msg_recv_image'>"+msgcontent+"</div></div>";
+			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "'>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'>" + content + "</div></div>";
 			}
 		}
 			break;
 	    case MSG_FROM_SYS:
 		{
 			// 提示消息
-			lstmsg.innerHTML = "<div class='msg_sys'><span class = 'msg_sys_background'>"+msgcontent+"</span><br></div>";
+		    lstmsg.innerHTML = "<div class='msg_sys'><span class = 'msg_sys_background'>" + content + "</span><br></div>";
 		}
 			break;
 		default:
@@ -182,14 +167,14 @@ function AppendMsgToHistory(msgFrom, msgDataType, sname, time, content, userId, 
 
 	$listbox.appendChild(lstmsg);
 	if (scrollToBottomFlag || msgFrom == MSG_FROM_SELF || msgFrom == MSG_FROM_SYS)
-  {
+    {
       scrollToBottomFlag = true;
       scrollViewToBottom();
-  } 
-  else 
-  {
-      AppendPromptUnreadMessage(msgcontent);
-  }
+    } 
+    else 
+	{
+	    AppendPromptUnreadMessage(content);
+    }
 }
 
 // 清空消息记录
@@ -207,12 +192,11 @@ function StartRecordAudio(userId,userType)
 	lstmsg.innerHTML = "<div style='position:fixed; bottom:0; width: 100%;height: 26px;background-color: #e2f2f2;'>" + 
 								"<div style='float: left;font-size: 14px;line-height: 26px'>正在录音...</div>" + 
 								"<div style='float: left;width: 120px;height: 12px;margin-top: 5px;border: 1px solid #d3d3d3;border-radius: 5px'>" + 
-									"<div class='linear' id='timebar' style='width: 120px;margin-top: -1px;margin-left: -1px;height: 12px;border: 1px solid #83949d;border-radius: 5px'></div>" + 
-								"</div>" + 
+								"<div class='linear' id='timebar' style='width: 120px;margin-top: -1px;margin-left: -1px;height: 12px;border: 1px solid #83949d;border-radius: 5px'></div></div>" +
 								"<div style='float: left;font-size: 14px; line-height: 26px';><span id='demo'></span>/60秒</div>" + 
 								"<div style='float: right;font-size: 14px; margin-right:10px; line-height: 26px; cursor:pointer' onclick='CancelRecord()'>取消</div>" + 
 								"<div style='float: right;font-size: 14px; margin-right:10px; line-height: 26px; cursor:pointer' onclick='SendAudio()'>发送</div>" + 
-							"</div>";
+							    "</div>";
 	
 	$preview.appendChild(lstmsg);
 	window.RunMsgList('StartRecord');
@@ -338,7 +322,7 @@ function ResultSendMsg(msgId, bSuccess, imagePath, filePath, recvUserType, msgDa
             oImg.src = "";
             var spanId = msgId + "_span";
             var oSpan = document.getElementById(spanId);
-            oSpan.innerHTML = "发送文件 <a style='color: blue;cursor:pointer' href='" + filePath + "' target='_blank'>" + imagePath + "</a>";
+            oSpan.innerHTML = "<span class='file_text'>发送文件 </span><a href='" + filePath + "'>" + imagePath + "</a>";
         }        
     }
 }
