@@ -59,7 +59,7 @@ void CSelectOnlineUserWnd::OnPrepare(TNotifyUI& msg)
 			ANSIToUnicode((*iteruser)->UserInfo.nickname, showText);
 			duiText = L"{x 12}";
 			duiText += showText;
-			m_pOnlineUserList->AddNode(showText, (*iteruser)->UserInfo.uid, group);
+			m_pOnlineUserList->AddNode(showText, (*iteruser)->UserInfo.uid,"", group);
 		}
 	}
 }

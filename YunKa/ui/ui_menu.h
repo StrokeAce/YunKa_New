@@ -95,6 +95,12 @@ public:
 		m_ControlValue = key;
 	}
 
+	void SetAttrData(CDuiString name, BOOL type)
+	{
+		m_MenuStateName = name;
+		m_menuType = type;
+	}
+
 
 
 public:
@@ -111,6 +117,10 @@ public:
 
 	CDuiString m_ControlName;
 	CDuiString m_ControlValue;
+
+	CDuiString m_MenuStateName;
+	bool  m_menuType;
+
 };
 
 class CListContainerElementUI;

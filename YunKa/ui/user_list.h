@@ -19,6 +19,7 @@ public:
 		unsigned long  _uid;
 		bool _expand;
 		CDuiString _text;
+		string     _sid;
 		CListLabelElementUI* _pListElement;
 	};
 
@@ -82,6 +83,7 @@ public:
 		_root->data()._level = -1;
 		_root->data()._expand = true;
 		_root->data()._pListElement = NULL;
+		_root->data()._sid = "";
 
 		m_listBKImage = _T("");
 		m_listName = _T("");
@@ -143,6 +145,7 @@ public:
 		_root->data()._level = -1;
 		_root->data()._expand = true;
 		_root->data()._pListElement = NULL;
+		_root->data()._sid = "";
 	}
 	void SetVisible(bool bVisible = true)
 	{
@@ -206,7 +209,7 @@ public:
 
 	Node* GetRoot() { return _root; }
 
-	Node* AddNode(LPCTSTR text, unsigned long uid, Node* parent = NULL)
+	Node* AddNode(LPCTSTR text, unsigned long uid,string sid = "", Node* parent = NULL)
 	{
 		if (!parent) parent = _root;
 
@@ -217,6 +220,7 @@ public:
 		else node->data()._expand = false;
 		node->data()._text = text;
 		node->data()._uid = uid;
+		node->data()._sid = sid;
 		node->data()._pListElement = pListElement;
 		
 		//设置空间高度
@@ -280,7 +284,7 @@ public:
 	}
 
 
-	Node* AddNode(LPCTSTR text, unsigned long uid, int dex, Node* parent = NULL)
+	Node* AddNode(LPCTSTR text, unsigned long uid, int dex, string sid="", Node* parent = NULL)
 	{
 		if (!parent) parent = _root;
 
@@ -292,6 +296,7 @@ public:
 		node->data()._text = text;
 		node->data()._uid = uid;
 		node->data()._pListElement = pListElement;
+		node->data()._sid = sid;
 		//设置空间高度
 		//pListElement->SetAttribute(L"height", L"30");
 		if (parent != _root) {

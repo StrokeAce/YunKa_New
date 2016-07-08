@@ -140,7 +140,18 @@ namespace DuiLib {
 		m_pOwner(NULL),
 		m_pLayout(),
 		m_xml(_T(""))
-	{}
+	{
+	
+		m_menuType = true;
+
+		m_ControlName = L"";
+		m_ControlValue = L"";
+
+	    m_MenuStateName = L"";
+	
+	
+	
+	}
 
 	BOOL CMenuWnd::Receive(ContextMenuParam param)
 	{
@@ -254,6 +265,8 @@ namespace DuiLib {
 					if (m_pOwner->GetItemAt(i)->GetInterface(kMenuElementUIInterfaceName) != NULL){
 						(static_cast<CMenuElementUI*>(m_pOwner->GetItemAt(i)))->SetOwner(m_pLayout);
 						m_pLayout->Add(static_cast<CControlUI*>(m_pOwner->GetItemAt(i)));
+
+					
 					}
 				}
 				m_pm.AttachDialog(m_pLayout);
@@ -280,6 +293,8 @@ namespace DuiLib {
 					if (m_pOwner->GetItemAt(it)->GetInterface(kMenuElementUIInterfaceName) != NULL){
 						CControlUI* pControl = static_cast<CControlUI*>(m_pOwner->GetItemAt(it));
 						SIZE sz = pControl->EstimateSize(szAvailable);
+
+			
 						cyFixed += sz.cy;
 
 						if (cxFixed < sz.cx)
@@ -426,6 +441,16 @@ namespace DuiLib {
 					control->SetBkImage(m_ControlValue);
 					control->Invalidate();
 				}
+
+				CMenuElementUI *menuControl = static_cast<CMenuElementUI*>(m_pm.FindControl(m_MenuStateName));
+				if (menuControl != NULL)
+				{	
+					menuControl->SetEnabled(m_menuType);
+					menuControl->Invalidate();
+				}
+
+
+
 		
 				MoveWindow(m_hWnd, rc.left, rc.top, rc.GetWidth(), rc.GetHeight(), FALSE);
 				SetWindowPos(m_hWnd, HWND_TOPMOST, rc.left, rc.top, rc.GetWidth(), rc.GetHeight(), SWP_SHOWWINDOW);
@@ -616,6 +641,8 @@ namespace DuiLib {
 					(static_cast<CMenuElementUI*>(GetItemAt(i)->GetInterface(kMenuElementUIInterfaceName)))->SetVisible(true);
 					(static_cast<CMenuElementUI*>(GetItemAt(i)->GetInterface(kMenuElementUIInterfaceName)))->SetInternVisible(true);
 
+					
+				
 					hasSubMenu = true;
 				}
 			}
@@ -686,6 +713,7 @@ namespace DuiLib {
 					(static_cast<CMenuElementUI*>(GetItemAt(i)->GetInterface(kMenuElementUIInterfaceName)))->SetVisible(true);
 					(static_cast<CMenuElementUI*>(GetItemAt(i)->GetInterface(kMenuElementUIInterfaceName)))->SetInternVisible(true);
 
+			
 					hasSubMenu = true;
 				}
 			}
