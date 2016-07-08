@@ -221,6 +221,7 @@ public:
 	void CMainFrame::HostUserOnlineAndOffline(CUserObject* pUser, bool type);
 	void CMainFrame::VisitorUserOnlineAndOffline(CWebUserObject* pWebUser, bool type);
 	void CMainFrame::FindVisitorFromOnlineNode(CWebUserObject* pWebUser);
+	BOOL CMainFrame::CheckItemForOnlineVisitor(UserListUI::Node *curNode);
 
 	//判定当前的用户id 处于那种状态底下
 	TREENODEENUM  CMainFrame::CheckIdForNodeType(unsigned long id);
@@ -232,19 +233,19 @@ public:
 
 	void CMainFrame::UpdateTopCenterButtonState(unsigned long id);
 	void CMainFrame::OnSelectUser(unsigned long id);
-	void CMainFrame::OnActiveUser(unsigned long id);
+	void CMainFrame::OnActiveUser(unsigned long id,string sid);
 
 //	void CMainFrame::ReplaceFaceId(string &msg);
 	void CMainFrame::ShowMySelfSendMsg(string strMsg, MSG_DATA_TYPE msgType, string msgId);
 	void CMainFrame::MoveAndRestoreMsgWnd(int type);
 	void CMainFrame::InitLibcef(void);
 	void CMainFrame::LoadBrowser(char* url);
-	void CMainFrame::ShowRightOptionFrameView(unsigned long id);
+	void CMainFrame::ShowRightOptionFrameView(unsigned long id,string sid);
 	void CMainFrame::ShowClearMsg();
 	void CMainFrame::ChangeShowUserMsgWnd(unsigned long id);
 	void CMainFrame::SetHandler();
 	MSG_RECV_TYPE  CMainFrame::GetSendUserType(unsigned long id);
-	void CMainFrame::CheckIdForUerOrWebuser(unsigned long id, CWebUserObject **pWebUser, CUserObject **pUser);
+	void CMainFrame::CheckIdForUerOrWebuser(unsigned long id,string sid, CWebUserObject **pWebUser, CUserObject **pUser);
 	string CMainFrame::CreateClientInfoHtml(WxUserInfo* pWxUser);
 	void CMainFrame::MoveAndRestoreRightFrameControl(int type); //0 max 1 retore
 	void CMainFrame::InitRightTalkList();
@@ -339,7 +340,6 @@ private:
 
 	unsigned long m_curSelectId;
 
-	unsigned long m_savedClickId;
 
 	string m_facePathUrl;
 	int  m_curSelectOptionBtn;
@@ -355,6 +355,10 @@ private:
 
 
 
+
+	UserListUI::Node*  m_curClickItemNode;
+	string m_curSavedSid;
+	unsigned long m_savedClickId;
 };
 
 

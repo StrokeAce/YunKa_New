@@ -71,7 +71,7 @@ void CSmallMenu::CreateMyAppMenu(POINT point)
 
 
 	//ClientToScreen(m_hMenuWnd, &cpoint);
-	pMenu->SetPath(L"menu\\menutest.xml");
+	pMenu->SetPath(L"menu\\small_menu.xml");
 	pMenu->Init(NULL, _T(""), _T("xml"), cpoint);
 
 }
