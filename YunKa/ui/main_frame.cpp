@@ -3066,7 +3066,7 @@ void CMainFrame::RecvWebUserInfo(CWebUserObject* pWebUser, int updateNum)
 
 void CMainFrame::OnActiveUser(unsigned long id,string sid)
 {
-	CUserObject	*pUser = m_manager->GetUserObjectByUid(m_selectUserId);
+
 	CWebUserObject *pWebUser = m_manager->GetWebUserObjectByUid(id);
 
 	if (pWebUser == NULL)
@@ -3109,6 +3109,8 @@ void CMainFrame::OnActiveUser(unsigned long id,string sid)
 	}
 	if (type == 0)
 	{
+		CUserObject	*pUser = m_recvUserObj;
+
 		if (pUser == NULL || pWebUser == NULL)
 			return;
 
@@ -3145,6 +3147,8 @@ void CMainFrame::OnActiveUser(unsigned long id,string sid)
 
 	else if (type == 1)
 	{
+		CUserObject	*pUser = m_recvUserObj;
+
 		if (pUser == NULL || pWebUser == NULL)
 			return;
 		m_manager->SendTo_TransferUserResult(pWebUser, pUser, true);
@@ -3738,10 +3742,15 @@ void CMainFrame::RecvInviteUser(CWebUserObject* pWebUser, CUserObject* pUser)
 {
 	//CUserObject	*pUser = m_manager->GetUserObjectByUid(9692111);
 	//CWebUserObject *pWebUser = m_manager->GetWebUserObjectByUid(m_curSelectId);
-	int type = -1;
 
 	if (pUser == NULL || pWebUser == NULL)
 		return;
+
+	m_recvUserObj = pUser;
+
+	int type = -1;
+
+
 
 	//放入邀请列表
 	//

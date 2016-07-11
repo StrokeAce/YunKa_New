@@ -359,6 +359,7 @@ private:
 	UserListUI::Node*  m_curClickItemNode;
 	string m_curSavedSid;
 	unsigned long m_savedClickId;
+	CUserObject *m_recvUserObj;
 };
 
 
