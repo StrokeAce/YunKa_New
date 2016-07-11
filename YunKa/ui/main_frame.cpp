@@ -1888,8 +1888,8 @@ void CMainFrame::ShowMySelfSendMsg(string strMsg, MSG_DATA_TYPE msgType, string 
 
 	if (msgType == MSG_DATA_TYPE_IMAGE)
 	{
-		sprintf(contentMsg, "<img id=\"%s_image\" class=\"wait_image\" src=\"%s\"><img class=\"msg_image\" src=\"%s\">",
-			msgId.c_str(), imagePath.c_str(), msg.c_str());
+		sprintf(contentMsg, "<img id=\"%s_image\" class=\"wait_image\" src=\"%s\"><img class=\"msg_image\" src=\"%s\" onclick=window.RunMsgList(\"ViewDetails\",\"%s\")>",
+			msgId.c_str(), imagePath.c_str(), msg.c_str(), imagePath.c_str());
 		msg = contentMsg;
 	}
 	else if (msgType == MSG_DATA_TYPE_VOICE)

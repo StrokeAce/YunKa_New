@@ -245,6 +245,8 @@ void CChatVisitor::SolveVisitorSCRIPTMSGApplyFail(char *pInitBuff)
 	//访客退回到在线列表
 	char msg[MAX_256_LEN];
 	GetInviteSysMsg(msg, pWebUser, invitename, RESPINVITE_FAIL);
+	m_manager->AddMsgToList(pWebUser, MSG_FROM_SYS, MSG_RECV_WEB, m_manager->GetMsgId(), MSG_TYPE_NORMAL,
+		MSG_DATA_TYPE_TEXT, msg, 0, NULL, NULL);
 	m_manager->m_handlerMsgs->ResultInviteWebUser(pWebUser,false);
 	return;
 }
@@ -515,6 +517,8 @@ void CChatVisitor::SetVisitorOffline(CWebUserObject *pWebUser)
 	if (!pWebUser->IsOnline())
 	{
 		sprintf(msg, "访客离开了");
+		m_manager->AddMsgToList(pWebUser, MSG_FROM_SYS, MSG_RECV_WEB, m_manager->GetMsgId(), MSG_TYPE_NORMAL, 
+			MSG_DATA_TYPE_TEXT, msg, 0, NULL, NULL);
 	}
 	
 	if (pWebUser->IsDisplay(m_manager->m_sysConfig, m_manager->m_userInfo.UserInfo.uid))
@@ -554,6 +558,8 @@ void CChatVisitor::SolveVisitorSystemDown(char *pInitBuff)
 		if (!pWebUser->IsOnline())
 		{
 			sprintf(msg, "访客离开了");
+			m_manager->AddMsgToList(pWebUser, MSG_FROM_SYS, MSG_RECV_WEB, m_manager->GetMsgId(), MSG_TYPE_NORMAL,
+				MSG_DATA_TYPE_TEXT, msg, 0, NULL, NULL);
 		}
 		pWebUser->DeleteScriptFlag(scriptflag);
 	}

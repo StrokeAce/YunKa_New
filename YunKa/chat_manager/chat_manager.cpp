@@ -1469,6 +1469,11 @@ int CChatManager::RecvFloatChatInfo(PACK_HEADER packhead, char *pRecvBuff, int l
 		pWebUser->info.status = STATUS_ONLINE;
 		pWebUser->m_nWaitTimer = 0;
 
+		char msg[MAX_256_LEN];
+		sprintf(msg, "%s请求对话", pWebUser->info.name);
+		AddMsgToList(pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, MSG_DATA_TYPE_TEXT,
+			msg, 0, NULL, NULL);
+
 		SendStartRecvFloatMsg(packhead.random, RecvInfo.uAdminId, RecvInfo.chatid, pWebUser->m_sNewSeq);
 		m_handlerMsgs->RecvChatInfo(pWebUser);
 	}
@@ -1481,10 +1486,15 @@ int CChatManager::RecvFloatChatInfo(PACK_HEADER packhead, char *pRecvBuff, int l
 			pWebUser->info.status = STATUS_ONLINE;
 			pWebUser->frominviteuid = m_nNextInviteUid;
 			pWebUser->m_nWaitTimer = 0;
-			CUserObject *pInviteUser = GetUserObjectByUid(m_nNextInviteUid);
+			pUser = GetUserObjectByUid(m_nNextInviteUid);
 			m_nNextInviteWebuserUid = 0;
 			m_nNextInviteUid = 0;
-			m_handlerMsgs->RecvInviteUser(pWebUser, &m_userInfo);
+			m_handlerMsgs->RecvInviteUser(pWebUser, pUser);
+
+			char msg[MAX_256_LEN];
+			GetInviteChatSysMsg(msg, pUser, pWebUser, INVITE_HELP, &m_userInfo);
+			AddMsgToList(pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, MSG_DATA_TYPE_TEXT,
+				msg, 0, NULL, NULL);
 		}
 		else
 		{
@@ -2034,6 +2044,7 @@ int CChatManager::RecvFloatTransFailed(PACK_HEADER packhead, char *pRecvBuff, in
 		if (m_userInfo.UserInfo.uid != pInviteUser->UserInfo.uid) 
 		{
 			sprintf(msg, "用户 %s 申请对话!", pWebUser->info.name);
+			// 提示
 		}
 	}
 
@@ -2082,11 +2093,11 @@ int CChatManager::RecvInviteRequest(PACK_HEADER packhead, char *pRecvBuff, int l
 	else
 	{
 		pWebUser->frominviteuid = packhead.uin;
-
 	}
 
 	if (RecvInfo.uInviteUser == m_userInfo.UserInfo.uid)
 	{
+		// 被别的客服邀请
 		pWebUser->onlineinfo.talkstatus = TALKSTATUS_INVITE;
 		pWebUser->inviteuid = m_userInfo.UserInfo.uid;
 		if (!pWebUser->m_bNewComm)
@@ -2097,10 +2108,17 @@ int CChatManager::RecvInviteRequest(PACK_HEADER packhead, char *pRecvBuff, int l
 
 		//这里必须先在htmleditor中显示，然后再移动位置，因为移动位置可能会导致区域的切换，其他地方同样考虑
 		GetInviteChatSysMsg(msg, pInviteUser, pWebUser, INVITE_HELP, pAcceptUser);
-
-		m_handlerMsgs->RecvInviteUser(pWebUser, pAcceptUser);
+		AddMsgToList(pWebUser, MSG_FROM_SYS, MSG_RECV_WEB, GetMsgId(), MSG_TYPE_NORMAL,
+			MSG_DATA_TYPE_TEXT, msg, 0, NULL, NULL);
+		m_handlerMsgs->RecvInviteUser(pWebUser, pInviteUser);
 	}
-
+	if (packhead.uin == m_userInfo.UserInfo.uid)
+	{
+		// 自己邀请的别的客服
+		GetInviteChatSysMsg(msg, pInviteUser, pWebUser, INVITE_HELP, pAcceptUser);
+		AddMsgToList(pWebUser, MSG_FROM_SYS, MSG_RECV_WEB, GetMsgId(), MSG_TYPE_NORMAL,
+			MSG_DATA_TYPE_TEXT, msg, 0, NULL, NULL);
+	}
 	nError = 0;
 RETURN:
 
@@ -2146,10 +2164,10 @@ int CChatManager::RecvInviteResult(PACK_HEADER packhead, char *pRecvBuff, int le
 		{
 			//发送方收到对方应答
 			pWebUser->inviteuid = m_userInfo.UserInfo.uid;
-
 			pWebUser->m_nWaitTimer = 0;
-
 			GetInviteChatSysMsg(msg, pInviteUser, pWebUser, INVITE_HELP_REFUSE, pAcceptUser);
+			AddMsgToList(pWebUser, MSG_FROM_SYS, MSG_RECV_WEB, GetMsgId(), MSG_TYPE_NORMAL,
+				MSG_DATA_TYPE_TEXT, msg, 0, NULL, NULL);
 		}
 
 		if (packhead.uin == m_userInfo.UserInfo.uid)
@@ -2173,6 +2191,8 @@ int CChatManager::RecvInviteResult(PACK_HEADER packhead, char *pRecvBuff, int le
 		pWebUser->onlineinfo.talkstatus = TALKSTATUS_TALK;
 
 		GetInviteChatSysMsg(msg, pInviteUser, pWebUser, INVITE_HELP_ACCEPT, pAcceptUser);
+		AddMsgToList(pWebUser, MSG_FROM_SYS, MSG_RECV_WEB, GetMsgId(), MSG_TYPE_NORMAL,
+			MSG_DATA_TYPE_TEXT, msg, 0, NULL, NULL);
 		if (!pWebUser->IsMutiUser())
 		{
 			pWebUser->AddCommonTalkId(RecvInfo.uInviteFrom);
@@ -3269,8 +3289,8 @@ void CChatManager::RecvComSendWorkBillMsg(unsigned long senduid, unsigned long r
 				pWebUser->talkuid = uTransuid;
 				char msg[MAX_256_LEN];
 				sprintf(msg, "访客 %s 转移到 %s", pWebUser->info.name, m_userInfo.UserInfo.nickname);
-				m_handlerMsgs->RecvMsg((IBaseObject*)pWebUser, MSG_FROM_SYS,GetMsgId(),MSG_TYPE_NORMAL,
-					MSG_DATA_TYPE_TEXT,msg,GetTimeByMDAndHMS(0),NULL,NULL);
+				AddMsgToList(pWebUser, MSG_FROM_SYS, MSG_RECV_WEB, GetMsgId(), MSG_TYPE_NORMAL,
+					MSG_DATA_TYPE_TEXT, msg, 0, NULL, NULL);
 				m_handlerMsgs->RecvTransferUser(pWebUser, &m_userInfo);
 				//m_tranferList[pWebUser->webuserid] = 0;
 				//KillTimer(TIMER_TRANS_TIMEOUT);
@@ -5131,7 +5151,7 @@ void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RE
 				}
 				else if (msgDataType == MSG_DATA_TYPE_IMAGE)
 				{
-					sprintf(formatMsg, "<img class=\"msg_image\" src=\"%s\">", msgContent.c_str());
+					sprintf(formatMsg, "<img class=\"msg_image\" src=\"%s\" onclick=window.RunMsgList(\"ViewDetails\",\"%s\")>", msgContent.c_str(), msgContent.c_str());
 					sMsg = formatMsg;
 				}
 				else if (msgDataType == MSG_DATA_TYPE_VOICE)
@@ -5252,7 +5272,7 @@ void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RE
 				else if (msgDataType == MSG_DATA_TYPE_IMAGE)
 				{
 					char formatMsg[MAX_1024_LEN];
-					sprintf(formatMsg, "<img class=\"msg_image\" src=\"%s\">", msgContent.c_str());
+					sprintf(formatMsg, "<img class=\"msg_image\" src=\"%s\" onclick=window.RunMsgList(\"ViewDetails\",\"%s\")>", msgContent.c_str(), msgContent.c_str());
 					sMsg = formatMsg;
 				}
 				else
