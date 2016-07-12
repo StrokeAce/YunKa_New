@@ -1718,14 +1718,7 @@ void CMainFrame::OnManagerButtonEvent(TNotifyUI& msg)
 	//接受
 	if (msg.pSender->GetName() == _T("managerbutton_1"))
 	{
-		if (m_curSelectId > 0)
-		{
-			map<unsigned long, UserListUI::Node*>::iterator iter = m_waitVizitorMap.find(m_curSelectId);
-			if (iter != m_waitVizitorMap.end())
-			{
-				m_manager->SendTo_AcceptChat(m_curSelectId);
-			}
-		}
+		AcceptChat();
 	}
 
 	//转接
@@ -2227,11 +2220,14 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 	//接受此对话
 	else if (controlName == L"menu_right_accept_chat")
 	{
+		AcceptChat();
 	}
 
 	//拒绝此对话
 	else if (controlName == L"menu_right_refuse_chat")
 	{
+
+		RefuseChat();
 	}
 
 	//显示全部
@@ -2509,9 +2505,10 @@ MSG_RECV_TYPE CMainFrame::GetSendUserType(unsigned long id)
 
 void CMainFrame::CheckIdForUerOrWebuser(unsigned long id,string sid,CWebUserObject **pWebUser,CUserObject **pUser)
 {
-	*pUser  = m_manager->GetUserObjectByUid(id);
+	if (id != 0)
+		*pUser  = m_manager->GetUserObjectByUid(id);
 
-	if (*pUser == NULL)
+	if (*pUser == NULL || id == 0)
 	{
 		*pWebUser = m_manager->GetWebUserObjectByUid(id);
 		if (*pWebUser == NULL)
@@ -4016,6 +4013,11 @@ void CMainFrame::RecvTransferUser(CWebUserObject* pWebUser, CUserObject* pUser)
 
 }
 
+void CMainFrame::ResultInviteWebUser(CWebUserObject* pWebUser, bool bAgree)
+{
+	//拒绝处理
+
+}
 
 //邀请转接的 最后一次 回调      
 void CMainFrame::ResultTransferUser(CWebUserObject* pWebUser, CUserObject* pUser, RESULT_STATUS status)
@@ -4213,10 +4215,7 @@ void CMainFrame::OnItemClickEvent(unsigned long id,int type)
 
 }
 
-void CMainFrame::ResultInviteWebUser(CWebUserObject* pWebUser, bool bAgree)
-{
-	
-}
+
 
 
 void CMainFrame::HostUserOnlineAndOffline(CUserObject* pUser, bool type)
@@ -4433,3 +4432,59 @@ BOOL CMainFrame::CheckItemForOnlineVisitor(UserListUI::Node *curNode)
 
 	return false;
 }
+
+
+void CMainFrame::AcceptChat()
+{
+	if (m_curSelectId > 0)
+	{
+		map<unsigned long, UserListUI::Node*>::iterator iter = m_waitVizitorMap.find(m_curSelectId);
+		if (iter != m_waitVizitorMap.end())
+		{
+			m_manager->SendTo_AcceptChat(m_curSelectId);
+		}
+	}
+
+}
+
+void CMainFrame::RefuseChat()
+{
+	CUserObject	*pUser = NULL;
+
+	if (m_curSelectId > 0)
+	{
+
+		CWebUserObject *pWebUser = m_manager->GetWebUserObjectByUid(m_curSelectId);
+		if (pWebUser != NULL)
+		{
+
+			switch (pWebUser->onlineinfo.talkstatus)
+			{
+			case TALKSTATUS_REQUEST:
+
+				break;
+
+			case TALKSTATUS_TRANSFER:
+				m_manager->SendTo_TransferUserResult(pWebUser, NULL, false);
+				break;
+
+			case TALKSTATUS_INVITE:
+				pUser = m_recvUserObj;
+				m_manager->SendTo_InviteUserResult(pWebUser, pUser, false);
+				break;
+
+
+			}
+
+
+			///m_manager->SendToRefuseChat()
+
+		}
+
+	}
+}
+
+
+
+
+

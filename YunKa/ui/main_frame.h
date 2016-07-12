@@ -223,6 +223,9 @@ public:
 	void CMainFrame::FindVisitorFromOnlineNode(CWebUserObject* pWebUser);
 	BOOL CMainFrame::CheckItemForOnlineVisitor(UserListUI::Node *curNode);
 
+	void CMainFrame::AcceptChat();
+	void CMainFrame::RefuseChat();
+
 	//判定当前的用户id 处于那种状态底下
 	TREENODEENUM  CMainFrame::CheckIdForNodeType(unsigned long id);
 
