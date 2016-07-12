@@ -1045,28 +1045,6 @@ void CMainFrame::OnItemRbClick(TNotifyUI &msg)
 		}
 
 
-
-/*
-		CMenuWnd2* pMenu = new CMenuWnd2();
-		if (pMenu == NULL) { return; }
-		POINT pt = { msg.ptMouse.x, msg.ptMouse.y };
-		//::ClientToScreen(*this, &pt);
-		pMenu->SetXMLPath(L"menu\\menu_right.xml");
-		pMenu->Init(msg.pSender, pt);
-		*/
-
-		/*
-		CMenuWnd* pMenu = new CMenuWnd(m_hMainWnd);
-		CPoint cpoint = msg.ptMouse;
-
-		//cpoint.y -= 65;
-		//ClientToScreen(m_hMenuWnd, &cpoint);
-		pMenu->SetPath(L"menu\\menu_right_4.xml");
-		pMenu->Init(NULL, _T(""), _T("xml"), cpoint);
-
-*/
-
-
 	}
 }
 
@@ -2164,7 +2142,8 @@ void CMainFrame::ChangeShowUserMsgWnd(unsigned long id)
 
 }
  
-//右键菜单的处理 根据控件的名字区分
+//右键菜单的处理 根据控件的名字区分   
+//右键菜单弹出处理 
 void CMainFrame::OnMenuEvent(CDuiString controlName)
 {
 	if (controlName.IsEmpty())
@@ -2175,76 +2154,173 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 
 	CheckIdForUerOrWebuser(m_savedClickId,m_curSavedSid,&pWebUser,&pUser);
 //选择 0 enter 发送消息 还是 1 CTRL enter 发送消息  
-	if (controlName == L"MenuElement_btn_send_menu_1")   //按enter 键发送
+	if (controlName == L"MenuElement_btn_send_menu_enter")   //按enter 键发送
 	{
 		if (m_manager->m_sysConfig->m_nKeySendType == 1)
 		    m_manager->m_sysConfig->m_nKeySendType = 0;
 	}
-	else if (controlName == L"MenuElement_btn_send_menu_2") //按Ctrl + enter 键发送
+	else if (controlName == L"MenuElement_btn_send_menu_ctrl_enter") //按Ctrl + enter 键发送
 	{
 		if (m_manager->m_sysConfig->m_nKeySendType == 0)
 		    m_manager->m_sysConfig->m_nKeySendType  =  1;
 	}
 
-	if (controlName == L"menu_hide_main_wnd")
+	//隐藏主窗口
+	else if (controlName == L"menu_hide_main_wnd")
 	{
 
 	}
+	//上线
 	else if (controlName == L"menu_online")
 	{
 
 	}
+	//繁忙
 	else if (controlName == L"menu_busy")
 	{
 	}
+	//离开
 	else if (controlName == L"menu_leave")
 	{
 	}
+	//注销
 	else if (controlName == L"menu_logout")
 	{
 	}
+	//退出
 	else if (controlName == L"menu_quit")
 	{
 	}
 
 
-	else if (controlName == L"menu_right_online_visitor_request_set")   //自定义邀请
+	//屏蔽此人
+	else if (controlName == L"menu_right_forbid_user")
+	{
+	}
+
+	//更新好友对象
+	else if (controlName == L"menu_right_update_friend")
+	{
+	}
+
+	//查找访客
+	else if (controlName == L"menu_right_find_visitor")
+	{
+	}
+
+	//更改访客名称
+	else if (controlName == L"menu_right_change_visitor_name")
+	{
+	}
+
+
+	//移除对话
+	else if (controlName == L"menu_right_move_chat")
+	{
+	}
+
+	//屏蔽此人
+	else if (controlName == L"menu_right_forbid_user")
+	{
+	}
+
+	//接受此对话
+	else if (controlName == L"menu_right_accept_chat")
+	{
+	}
+
+	//拒绝此对话
+	else if (controlName == L"menu_right_refuse_chat")
+	{
+	}
+
+	//显示全部
+	else if (controlName == L"menu_right_show_all")
+	{
+	}
+
+	//显示我的全部联系人
+	else if (controlName == L"MenuElement_right_my_history_visitor")
+	{
+	}
+
+	//只显示全部最近联系人
+	else if (controlName == L"MenuElement_right_all_history_visitor")
+	{
+	}
+
+	//只显示访问时间超过1分钟的联系人
+	else if (controlName == L"MenuElement_right_1_minute")
+	{
+	}
+	//只显示访问时间超过3分钟的联系人
+	else if (controlName == L"MenuElement_right_3_minute")
+	{
+	}
+
+	//只显示访问时间超过5分钟的联系人
+	else if (controlName == L"MenuElement_right_5_minute")
+	{
+	}
+
+	//只显示访问时间超过10分钟的联系人
+	else if (controlName == L"MenuElement_right_10_minute")
+	{
+	}
+
+	//用户设置
+	else if (controlName == L"MenuElement_right_user_set")
+	{
+	}
+
+
+
+
+
+
+
+	//自定义邀请
+	else if (controlName == L"menu_right_online_visitor_request_set") 
 	{
 
 	}
-	else if (controlName == L"menu_right_online_visitor_request_chat")  //邀请对话
+	//邀请对话
+	else if (controlName == L"menu_right_online_visitor_request_chat") 
 	{
 
 		if (pWebUser != NULL && pWebUser->info.status != STATUS_OFFLINE
 			&& (pWebUser->onlineinfo.talkstatus == TALKSTATUS_NO
 			|| pWebUser->onlineinfo.talkstatus == TALKSTATUS_AUTOINVITE))
 		{
-			//SendApplyAndAskToVisitorServer(pWebUser, APPLY_ASK, "", 0, 0);
+
 			m_manager->SendTo_InviteWebUser(pWebUser, APPLY_ASK, "");
 
 		}
 
 	}
-	else if (controlName == L"menu_right_online_visitor_do_chat")      //直接对话
+	//直接对话
+	else if (controlName == L"menu_right_online_visitor_do_chat") 
 	{
 		if (pWebUser != NULL && pWebUser->info.status != STATUS_OFFLINE
 			&& (pWebUser->onlineinfo.talkstatus == TALKSTATUS_NO
 			|| pWebUser->onlineinfo.talkstatus == TALKSTATUS_AUTOINVITE))
 		{
-			//SendApplyAndAskToVisitorServer(pWebUser, APPLY_OPEN, "", 0, 0);
+
 			m_manager->SendTo_InviteWebUser(pWebUser, APPLY_OPEN, "");
 		}
 
 
 	}
-	else if (controlName == L"menu_right_online_visitor_request_message")   //邀请留言
+
+	//邀请留言
+	else if (controlName == L"menu_right_online_visitor_request_message")  
 	{
 
 		if (pWebUser != NULL && pWebUser->info.status != STATUS_OFFLINE
 			&& (pWebUser->onlineinfo.talkstatus == TALKSTATUS_NO
 			|| pWebUser->onlineinfo.talkstatus == TALKSTATUS_AUTOINVITE))
 		{
-			//SendApplyAndAskToVisitorServer(pWebUser, MYGETNOTE, "", 0, 0);
+
 			m_manager->SendTo_InviteWebUser(pWebUser, MYGETNOTE, "");
 		}
 	}
@@ -2838,11 +2914,11 @@ void CMainFrame::OnBtnSelectSendType(TNotifyUI& msg)
 		path += L"\\SkinRes\\menu\\check.png";
 		if (m_manager->m_sysConfig->m_nKeySendType == 0)
 		{
-			pMenu->SetAttrData(L"MenuElement_btn_send_select_1", path);
+			pMenu->SetAttrData(L"MenuElement_btn_send_select_enter", path);
 		}
 		else
 		{
-			pMenu->SetAttrData(L"MenuElement_btn_send_select_2", path);
+			pMenu->SetAttrData(L"MenuElement_btn_send_select_ctrl_enter", path);
 		}
 		pMenu->SetPath((WCHAR*)xmlPath.GetData());
 		pMenu->Init(NULL, _T(""), _T("xml"), cpoint);
