@@ -864,9 +864,10 @@ int CChatManager::RecvSrvStatusFrdOffline(PACK_HEADER packhead, char *pRecvBuff,
 					g_WriteLog.WriteLog(C_LOG_ERROR,"RecvSrvStatusFrdOffline visit服务器未登录前，收到下线消息");
 				}
 
-				pWebUser->m_bConnected = true;
+				pWebUser->m_bConnected = false;
 				pWebUser->m_nWaitTimer = -20;
 				pWebUser->onlineinfo.talkstatus = TALKSTATUS_NO;
+				m_handlerMsgs->RecvOffline(pWebUser);
 			}
 		}
 	}
@@ -2364,7 +2365,7 @@ int CChatManager::RecvFloatCloseChat(PACK_HEADER packhead, char *pRecvBuff, int 
 			pWebUser->RemoveAllMutiUser();
 		pWebUser->onlineinfo.bInvited = false;
 		pWebUser->m_bNewComm = false;
-		pWebUser->m_bConnected = true;
+		pWebUser->m_bConnected = false;
 		pWebUser->onlineinfo.talkstatus = TALKSTATUS_NO;
 		pWebUser->cTalkedSatus = HASTALKED;
 		string strMsg = "";
@@ -3872,17 +3873,9 @@ void CChatManager::SendTo_CloseChat(unsigned long webuserid, int ntype)
 	if (pWebUser == NULL || pWebUser->onlineinfo.talkstatus == TALKSTATUS_NO)
 		return;
 
-	pWebUser->onlineinfo.talkstatus = TALKSTATUS_NO;
-	pWebUser->m_bConnected = false;
-	pWebUser->cTalkedSatus = HASTALKED;
-	pWebUser->m_nWaitTimer = -20;
-	pWebUser->m_resptimeoutmsgtimer = -20;
-	pWebUser->m_resptimeoutclosetimer = -20;
-	pWebUser->m_waitresptimeouttimer = -20;
-
 	char msg[MAX_256_LEN];
 	GetStopChatSysMsg(msg, pWebUser, ntype, &m_userInfo);
-	if (ntype != CHATCLOSE_INVISTEXIT)
+	if (pWebUser->onlineinfo.bInvited != CHATCLOSE_INVISTEXIT)
 	{
 
 		pWebUser->talkuid = 0;

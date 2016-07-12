@@ -232,7 +232,7 @@ bool CMySocket::OnRecvWebPack()
 		string spack = m_sRecvBuf.substr(0, posend);
 		m_sRecvBuf.erase(0, posend);
 
-		g_WriteLog.WriteLog(C_LOG_TRACE, "OnRecvWebPack recv %s", spack.c_str());
+		g_VisitLog.WriteLog(C_LOG_TRACE, "OnRecvWebPack recv %s", spack.c_str());
 
 		if (m_bfirstpack)
 		{

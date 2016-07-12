@@ -523,7 +523,7 @@ void CChatVisitor::SetVisitorOffline(CWebUserObject *pWebUser)
 	
 	if (pWebUser->IsDisplay(m_manager->m_sysConfig, m_manager->m_userInfo.UserInfo.uid))
 	{
-		pWebUser->m_bConnected = FALSE;
+		pWebUser->m_bConnected = false;
 		pWebUser->onlineinfo.talkstatus = TALKSTATUS_NO;
 		pWebUser->info.status = STATUS_OFFLINE;
 		m_manager->m_handlerMsgs->RecvOffline(pWebUser);
