@@ -15,7 +15,7 @@
 </HorizontalLayout>
 
 
-<HorizontalLayout inset="2,2,2,0" name="show_image_control"  bkcolor="#FF000000"> 
+<HorizontalLayout inset="2,2,2,0" name="show_image_control"  bkcolor="#FFF2F2F2"> 
  
 
 
