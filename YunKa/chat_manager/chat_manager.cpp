@@ -982,6 +982,7 @@ int CChatManager::RecvComSendMsg(PACK_HEADER packhead, char *pRecvBuff, int len)
 	MSG_FROM_TYPE msgFrom = MSG_FROM_WEBUSER;
 	CWebUserObject *pWebUser = NULL;
 	CUserObject *pUser = NULL;
+	WxMsgBase* pWxMsg = NULL;
 	string content;
 
 	nError = UnPack(&RecvInfo, pRecvBuff, len);
@@ -1052,7 +1053,6 @@ int CChatManager::RecvComSendMsg(PACK_HEADER packhead, char *pRecvBuff, int len)
 			}
 			else
 			{
-				WxMsgBase* pWxMsg = NULL;
 				if (strcmp(RecvInfo.msg.strfontinfo, "JSON=WX") == 0)
 				{
 					if (!pWebUser->m_bIsFrWX)
@@ -1278,6 +1278,10 @@ int CChatManager::RecvComSendMsg(PACK_HEADER packhead, char *pRecvBuff, int len)
 
 RETURN:
 	SendAckEx(RecvInfo.msg.seq, RecvInfo.msg.senduin, RecvInfo.sendip, RecvInfo.sendport);
+	if (pWxMsg)
+	{
+		delete pWxMsg;
+	}
 	nError = 0;
 	return 0;
 }
@@ -3098,7 +3102,10 @@ WxMsgBase* CChatManager::ParseWxMsg(CWebUserObject* pWebUser, char* msg, CUserOb
 		}
 		else if ("link" == pwxobj->MsgType)
 		{
-			msgBase = (WxMsgBase*)pwxobj;			
+			msgBase = (WxMsgBase*)pwxobj;
+			strcpy(msg, ((WxMsgLink*)pwxobj)->Title.c_str());
+			delete pwxobj;
+			return NULL;
 		}
 		else
 		{
@@ -5189,6 +5196,10 @@ void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RE
 					locationMsg += "</div></div></div>";
 
 					convert.Gb2312ToUTF_8(sMsg, locationMsg.c_str(), locationMsg.length());
+				}
+				else if (msgDataType == MSG_DATA_TYPE_LINK)
+				{
+					
 				}
 				else
 				{
