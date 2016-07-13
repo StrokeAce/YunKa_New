@@ -365,7 +365,12 @@ void CLoginWnd::LoginProgress(int percent)
 	}
 	else if (percent < 0 || percent>100)  //·µ»ØÊ§°Ü
 	{
-		MessageBox(this->GetHWND(),L"µÇÂ¼Ê§°Ü",L"µÇÂ¼Ê§°Ü",0);
+		WCHAR error[128] = {0};
+		string errMsg = m_manager->GetLastError();
+		
+		ANSIToUnicode(errMsg.c_str(),error);
+
+		MessageBox(this->GetHWND(), L"µÇÂ¼Ê§°Ü", error, 0);
 
 		m_pLoginBtn->SetEnabled(true);
 	}

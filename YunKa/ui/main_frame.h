@@ -13,7 +13,7 @@
 #include "face_list.h"
 #include "face_sel_dlg.h"
 #include "user_list.h"
-
+#include "show_big_image_dlg.h"
 
 
 #define MID_MANAGER_BUTTON_NUM    15
@@ -222,6 +222,7 @@ public:
 	void CMainFrame::VisitorUserOnlineAndOffline(CWebUserObject* pWebUser, bool type);
 	void CMainFrame::FindVisitorFromOnlineNode(CWebUserObject* pWebUser);
 	BOOL CMainFrame::CheckItemForOnlineVisitor(UserListUI::Node *curNode);
+	void CMainFrame::ShowBigImage();
 
 	void CMainFrame::AcceptChat();
 	void CMainFrame::RefuseChat();
@@ -363,6 +364,8 @@ private:
 	string m_curSavedSid;
 	unsigned long m_savedClickId;
 	CUserObject *m_recvUserObj;
+
+	CShowBigImageDlg *m_pShowImgDlg;
 };
 
 

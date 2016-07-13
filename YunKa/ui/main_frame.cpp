@@ -16,6 +16,7 @@
 #include <GdiPlus.h>
 
 
+
 #pragma comment(lib, "gdiplus.lib")
 
 
@@ -336,6 +337,10 @@ LRESULT CMainFrame::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
 			m_pWebURLHandler.isCreated = true;
 			m_pWebURLHandler.handler->ShowBrowser(SW_HIDE);
 		}
+		if (Handler_ShowImage == msg)
+			m_pShowImgDlg->m_pShowImageHandler.isCreated = true;
+
+		
 	}
 	else if (uMsg == ON_AFTER_LOAD)
 	{
@@ -353,6 +358,10 @@ LRESULT CMainFrame::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
 		{
 			m_pWebURLHandler.isLoaded = true;
 		}
+
+
+		if (Handler_ShowImage == msg)
+			m_pShowImgDlg->m_pShowImageHandler.isLoaded = true;
 		   
 	}
 	else if (uMsg == ON_JS_CALL_MFC)
@@ -2096,15 +2105,11 @@ void CMainFrame::ChangeShowUserMsgWnd(unsigned long id)
 	if (m_curSelectId == id || id == 0)//切换聊天对象显示 
 		return;
 
-
-	CheckIdForUerOrWebuser(id, m_curSavedSid, &pWebUser, &pUser);
-	
+	CheckIdForUerOrWebuser(id, m_curSavedSid, &pWebUser, &pUser);	
 	if (pUser == NULL && pWebUser == NULL)
 		return;
 	
-
 	ShowClearMsg();
-
 	//先寻找是不是坐席
 	if (pUser != NULL) //坐席
 	{
@@ -2194,6 +2199,7 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 	//更新好友对象
 	else if (controlName == L"menu_right_update_friend")
 	{
+		ShowBigImage();
 	}
 
 	//查找访客
@@ -2267,12 +2273,12 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 	//用户设置
 	else if (controlName == L"MenuElement_right_user_set")
 	{
+		CSelectVisitorWnd *dlg = new CSelectVisitorWnd();
+
+		dlg->Create(m_hWnd, _T(""), UI_WNDSTYLE_DIALOG, 0, 0, 0, 0, 0, NULL);
+		dlg->CenterWindow();
+		dlg->ShowModal();
 	}
-
-
-
-
-
 
 
 	//自定义邀请
@@ -2289,7 +2295,33 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 			|| pWebUser->onlineinfo.talkstatus == TALKSTATUS_AUTOINVITE))
 		{
 
-			m_manager->SendTo_InviteWebUser(pWebUser, APPLY_ASK, "");
+			if (m_manager->SendTo_InviteWebUser(pWebUser, APPLY_ASK, "") == 0)
+			{
+				map<string, UserListUI::Node*>::iterator iterSid = m_visitorOnlineNode.find(pWebUser->info.sid);
+				if (iterSid != m_visitorOnlineNode.end())
+				{
+					UserListUI::Node* tempNode = iterSid->second;
+					m_visitorOnlineNode.erase(iterSid);
+
+					CDuiString text = tempNode->data()._text;
+
+
+					if (tempNode != NULL && tempNode->data()._level >= 0)
+						pUserList->RemoveNode(tempNode);
+
+			
+					//加入邀请中列表
+					tempNode = pMySelfeNode->child(2);
+					UserListUI::Node* AddNode = pUserList->AddNode(text, pWebUser->webuserid, pWebUser->info.sid, tempNode);
+					pUserList->ExpandNode(tempNode, true);
+
+					m_visitorOnlineNode.insert(pair<string, UserListUI::Node*>(pWebUser->info.sid, AddNode));
+
+				}
+
+
+
+			}
 
 		}
 
@@ -2302,10 +2334,33 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 			|| pWebUser->onlineinfo.talkstatus == TALKSTATUS_AUTOINVITE))
 		{
 
-			m_manager->SendTo_InviteWebUser(pWebUser, APPLY_OPEN, "");
+			if (m_manager->SendTo_InviteWebUser(pWebUser, APPLY_OPEN, "") == 0)
+			{
+				map<string, UserListUI::Node*>::iterator iterSid = m_visitorOnlineNode.find(pWebUser->info.sid);
+				if (iterSid != m_visitorOnlineNode.end())
+				{
+					UserListUI::Node* tempNode = iterSid->second;
+					m_visitorOnlineNode.erase(iterSid);
+
+					CDuiString text = tempNode->data()._text;
+
+
+					if (tempNode != NULL && tempNode->data()._level >= 0)
+						pUserList->RemoveNode(tempNode);
+
+
+					//加入对话中列表
+					tempNode = pMySelfeNode->child(0);
+					UserListUI::Node* AddNode = pUserList->AddNode(text, pWebUser->webuserid, pWebUser->info.sid, tempNode);
+					pUserList->ExpandNode(tempNode, true);
+
+					m_visitorOnlineNode.insert(pair<string, UserListUI::Node*>(pWebUser->info.sid, AddNode));
+
+				}
+			}
+
+
 		}
-
-
 	}
 
 	//邀请留言
@@ -2316,7 +2371,6 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 			&& (pWebUser->onlineinfo.talkstatus == TALKSTATUS_NO
 			|| pWebUser->onlineinfo.talkstatus == TALKSTATUS_AUTOINVITE))
 		{
-
 			m_manager->SendTo_InviteWebUser(pWebUser, MYGETNOTE, "");
 		}
 	}
@@ -3220,11 +3274,11 @@ void CMainFrame::OnActiveUser(unsigned long id,string sid)
 
 	else if (type == 1)
 	{
-		CUserObject	*pUser = m_recvUserObj;
+		//CUserObject	*pUser = m_recvUserObj;
+		//if (pUser == NULL || pWebUser == NULL)
+		//	return;
 
-		if (pUser == NULL || pWebUser == NULL)
-			return;
-		m_manager->SendTo_TransferUserResult(pWebUser, pUser, true);
+		m_manager->SendTo_TransferUserResult(pWebUser, NULL, true);
 		//然后加到对话中 
 		map<unsigned long, UserListUI::Node*>::iterator iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
 		//没有找到
@@ -3569,7 +3623,6 @@ void CMainFrame::RecvChatInfo(CWebUserObject* pWebUser, CUserObject* pUser)
 
 	else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_NO)
 	{
-
 		//暂时先不处理 状态是0 的状况
 		g_WriteLog.WriteLog(C_LOG_ERROR, "RecvChatInfo error: talkstatus = 0 ");
 		return;
@@ -3673,8 +3726,6 @@ void CMainFrame::RecvAcceptChat(CWebUserObject* pWebUser, CUserObject* pUser)
 	//添加显示 list
 	UserListUI::Node* currentNode = pUserList->AddNode(text, uid, pWebUser->info.sid, addNode);
 	pUserList->ExpandNode(addNode, true);
-
-
 
 	//插入 用户map 同时删除 等等map
 	m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(uid, currentNode));
@@ -4016,6 +4067,11 @@ void CMainFrame::RecvTransferUser(CWebUserObject* pWebUser, CUserObject* pUser)
 void CMainFrame::ResultInviteWebUser(CWebUserObject* pWebUser, bool bAgree)
 {
 	//拒绝处理
+
+
+
+
+
 
 }
 
@@ -4484,6 +4540,20 @@ void CMainFrame::RefuseChat()
 	}
 }
 
+
+void CMainFrame::ShowBigImage()
+{
+
+    m_pShowImgDlg = new CShowBigImageDlg();
+
+	m_pShowImgDlg->Create(this->GetHWND(), _T(""), UI_WNDSTYLE_DIALOG, 0, 0, 0, 0, 0, NULL);
+	m_pShowImgDlg->CenterWindow();
+	m_pShowImgDlg->ShowModal();
+
+
+
+
+}
 
 
 
