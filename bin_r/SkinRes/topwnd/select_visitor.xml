@@ -7,7 +7,7 @@
 <VerticalLayout inset="4,4,4,4" bkcolor="#FF60B1FE">
 
 <HorizontalLayout height="32" inset="2,2,2,0"  >
-    <Label text="筛选访客-设置过滤器" font="10" width="200" />
+    <Label text="设置过滤器" font="10" width="200" />
     <Control />
 
     <Button name="closeBtn_visitor" width="42" maxheight="18"     normalimage="file='mainframe\\frame_btn_close_normal.bmp' mask='#FFFF00FF'"     hotimage="file='mainframe\\frame_btn_close_hot.bmp' mask='#FFFF00FF'"     pushedimage="file='mainframe\\frame_btn_close_down.bmp' mask='#FFFF00FF'"/>
