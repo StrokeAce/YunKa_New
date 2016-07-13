@@ -250,6 +250,7 @@
     <ClInclude Include="ui\rich_edit_util.h" />
     <ClInclude Include="ui\select_online_user_wnd.h" />
     <ClInclude Include="ui\select_visitor_wnd.h" />
+    <ClInclude Include="ui\show_big_image_dlg.h" />
     <ClInclude Include="ui\ui_crack.h" />
     <ClInclude Include="ui\ui_menu.h" />
     <ClInclude Include="ui\user_list.h" />
@@ -339,6 +340,7 @@
     <ClCompile Include="ui\rich_edit_util.cpp" />
     <ClCompile Include="ui\select_online_user_wnd.cpp" />
     <ClCompile Include="ui\select_visitor_wnd.cpp" />
+    <ClCompile Include="ui\show_big_image_dlg.cpp" />
     <ClCompile Include="ui\ui_crack.cpp" />
     <ClCompile Include="ui\ui_menu.cpp" />
     <ClCompile Include="ui\user_list.cpp" />

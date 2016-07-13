@@ -1071,6 +1071,8 @@ typedef std::list<void *>	PtrList;
 #define Handler_DisplayIamge "DisplayIamge" // 查看大图
 #define Handler_VisitorRelated "VisitorRelated" // 访客相关,包括访客信息、访客订单、查询订单、会话登单、聊天信息、辅助应答
 
+#define Handler_ShowImage  "ShowImage" // 显示图片
+
 /** Js调C++方法名 */
 #define Js_Call_MFC_Func_RestartSession "RestartSession"	// 重启二次会话
 #define Js_Call_MFC_Func_StartRecord "StartRecord" // 发送录音
