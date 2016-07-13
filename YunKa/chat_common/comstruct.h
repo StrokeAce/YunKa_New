@@ -395,6 +395,7 @@ struct WEBUSER_URL_INFO
 {
 	string url;				// 访问地址
 	unsigned long dwtime;	// 访问时间
+	string scriptFlag;
 };
 
 struct UPLOAD_INFO

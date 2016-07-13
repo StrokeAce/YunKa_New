@@ -636,7 +636,7 @@ void CChatVisitor::SolveVisitorSystemAlreadyApply(char *pInitBuff)
 	
 		//这里必须先在htmleditor中显示，然后再移动位置，因为移动位置可能会导致区域的切换，其他地方同样考虑
 		m_manager->GetInviteChatSysMsg(msg, pInviteUser, pWebUser, APPLY_ASK);
-		m_manager->m_handlerMsgs->RecvInviteUser(pWebUser,pInviteUser);
+		m_manager->m_handlerMsgs->RecvWebUserInInvite(pWebUser, pInviteUser);
 		break;
 	case APPLY_OPEN:
 		break;

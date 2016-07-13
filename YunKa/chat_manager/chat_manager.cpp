@@ -1699,6 +1699,10 @@ int CChatManager::RecvFloatChatMsg(PACK_HEADER packhead, char *pRecvBuff, int le
 			{
 				RecvInfo.nMsgDataType = MSG_DATA_TYPE_LOCATION;
 			}
+			else if (pWxMsg->MsgType == "link")
+			{
+				RecvInfo.nMsgDataType = MSG_DATA_TYPE_LINK;
+			}
 		}
 	}
 	else
@@ -3104,8 +3108,6 @@ WxMsgBase* CChatManager::ParseWxMsg(CWebUserObject* pWebUser, char* msg, CUserOb
 		{
 			msgBase = (WxMsgBase*)pwxobj;
 			strcpy(msg, ((WxMsgLink*)pwxobj)->Title.c_str());
-			delete pwxobj;
-			return NULL;
 		}
 		else
 		{
@@ -4172,7 +4174,7 @@ int CChatManager::SendCloseChat(CWebUserObject* pWebUser, int ntype)
 int CChatManager::SendTo_InviteWebUser(CWebUserObject *pWebUser, int type, string strText)
 {
 	int nError = SYS_FAIL;
-	if (pWebUser == NULL)
+	if (pWebUser != NULL)
 	{
 		if (m_sysConfig->IsWebuserSidForbid(pWebUser->info.sid))
 		{
@@ -4186,7 +4188,7 @@ int CChatManager::SendTo_InviteWebUser(CWebUserObject *pWebUser, int type, strin
 		if (pOb == NULL)
 			return nError;
 
-		string strScriptFlag = pOb->url;
+		string strScriptFlag = pOb->scriptFlag;
 		if (strText.empty())
 			strText = m_sysConfig->m_sInviteWords;
 
@@ -4849,15 +4851,7 @@ void CChatManager::DownLoadFile(IBaseObject* pObj, MSG_DATA_TYPE nMsgDataType, s
 					param->pThis = this;
 					param->filePath = convert.URLEncode(path.c_str());
 					MapWxTokens::iterator iter = m_mapTokens.find(pWebUser->m_pWxUserInfo->fromwxname);
-					if (iter != m_mapTokens.end())
-					{
-						//if (TokenIsDifferent(iter->second, url))
-						//{
-						//	// 重新拼url是将最新token替换上，防止下载图片无效
-						//	loadUrl = ReplaceToken(url, iter->second);
-						//}
-					}
-					else
+					if (iter == m_mapTokens.end())
 					{
 						SendGetWxUserInfoAndToken(pWebUser);
 					}
@@ -5170,8 +5164,6 @@ void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RE
 					CCodeConvert convert;
 					string placeMarking = FullPath("SkinRes\\mainframe\\location.png");
 					StringReplace(placeMarking,"\\", "/");
-					string place_marking;
-					convert.Gb2312ToUTF_8(place_marking, placeMarking.c_str(), placeMarking.length());
 
 					string weChatStaticMapFormat = m_initConfig.wechat_static_map;
 					char weChatStaticMap[MAX_256_LEN];
@@ -5187,7 +5179,7 @@ void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RE
 					locationMsg += "\" ondblclick=window.RunMsgList(\"ViewDetails\",\"";
 					locationMsg += weChatMapLocation;
 					locationMsg += "\")><img class=\"location_map_middle\" src=\"";
-					locationMsg += place_marking.c_str();
+					locationMsg += placeMarking.c_str();
 					locationMsg += "\" ondblclick = window.RunMsgList(\"ViewDetails\",\"";
 					locationMsg += weChatMapLocation;
 					locationMsg += "\")><div class=\"location_title_bg\" >";
@@ -5199,7 +5191,10 @@ void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RE
 				}
 				else if (msgDataType == MSG_DATA_TYPE_LINK)
 				{
-					
+					sprintf(formatMsg, "<span class=\"file_text\">链接：</span><a href=\"%s\" target=\"blank\">%s</a>", 
+						((WxMsgLink*)msgContentWx)->Url.c_str(), msgContent.c_str());
+					msgContent = formatMsg;
+					convert.Gb2312ToUTF_8(sMsg, msgContent.c_str(), msgContent.length());
 				}
 				else
 				{
@@ -5208,7 +5203,7 @@ void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RE
 			}
 			else
 			{
-				sMsg = msgContent;
+				convert.Gb2312ToUTF_8(sMsg, msgContent.c_str(), msgContent.length());
 			}
 
 			sprintf(callJsMsg, "AppendMsgToHistory('%d','%d','%s','%s','%s','%s','%s','%s','%s');",
@@ -5286,7 +5281,7 @@ void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RE
 			}
 			else
 			{
-				sMsg = msgContent;
+				convert.Gb2312ToUTF_8(sMsg, msgContent.c_str(), msgContent.length());
 			}
 
 			sprintf(callJsMsg, "AppendMsgToHistory('%d','%d','%s','%s','%s','%s','%s','%s');",
@@ -6233,7 +6228,8 @@ DWORD WINAPI CChatManager::SendFileThread(void *arg)
 		strURLFile.clear();
 		errInfo = "发送文件失败！";
 	}
-	pThis->AfterUpload(pUpFile->recvuid, pUpFile->recvType, pUpFile->msgId, strURLFile, MSG_DATA_TYPE_FILE);
+	pThis->AfterUpload(pUpFile->recvuid, pUpFile->recvType, pUpFile->msgId, strURLFile, MSG_DATA_TYPE_FILE, "", pUpFile->filePath);
+	delete pUpFile;
 	return 0;
 }
 

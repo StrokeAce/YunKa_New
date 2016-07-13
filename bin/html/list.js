@@ -132,7 +132,7 @@ function AppendMsgToHistory(msgFrom, msgDataType, sname, time, content, userId, 
 			head = head.replace(/\\/g, "\\\\");
 			if(msgDataType == 1)
 			{
-			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;<img class = 'head_image' src='" + head + "'></div><div class='msg_send_text'>" + content + "</div></div>";
+			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;<img class = 'head_image' src='" + head + "'></div><div class='msg_send_text'><div class='msg_text_background'>" + content + "</div></div></div>";
 			}
 			else
 			{
@@ -145,10 +145,14 @@ function AppendMsgToHistory(msgFrom, msgDataType, sname, time, content, userId, 
 	    case MSG_FROM_CLIENT:
 		{
 			// 接收消息
-			if(msgDataType == 1)
+		    if (msgDataType == 1)
 			{
-			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "'>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_text'>" + content + "</div></div>";
-			}
+		        lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "'>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_text'><div class='msg_text_background'>" + content + "</div></div></div>";
+		    }
+		    else if(msgDataType == 7)
+		    {
+		        lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "'>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_text'><div class='msg_link_background'>" + content + "</div></div></div>";
+		    }
 			else
 			{
 			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "'>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'>" + content + "</div></div>";
@@ -258,13 +262,6 @@ function CancelRecord()
     window.RunMsgList('CancelRecord');
 }
 
-// 重新发送语音
-function ReSendFile(filePath,userType,msgId,msgDataType,userId) 
-{
-	document.getElementById(msgId).innerHTML = "";
-	window.RunMsgList('ReSendFile',filePath,userType,msgId,msgDataType,userId);
-}
-
 // 重新接收语音 
 // filePath 下载文件的存储路径
 // url 下载的url
@@ -279,12 +276,6 @@ function ReRecvFile(url, msgFromType, msgId, msgDataType, msgFromUserId, assistU
     var oImg = document.getElementById(msgId + "_image");
     oImg.src = imagePath + "msg_wait.gif";
     window.RunMsgList('ReRecvFile', url, msgFromType, msgId, msgDataType, msgFromUserId, assistUserId);
-}
-
-function ReSendMsg(msgId,userId,userType,mediaID,msgDataType,fileId,filePath)
-{
-	document.getElementById(msgId).remove();
-	window.RunMsgList('ReSendMsg',msgId, userId, userType, mediaID, msgDataType, fileId, filePath);
 }
 
 function ReSendFile(filePath, recvUserType, msgId, msgDataType, userId,imagePath)
@@ -306,20 +297,20 @@ function ResultSendMsg(msgId, bSuccess, imagePath, filePath, recvUserType, msgDa
             window.RunMsgList('ReSendFile', filePath, recvUserType, msgId, msgDataType, userId);
             oImg.src = imagePath + "msg_wait.gif";
         }
+        if (msgDataType == 6)
+        {
+            var spanId = msgId + "_span";
+            var oSpan = document.getElementById(spanId);
+            oSpan.innerHTML = "<span class='file_text'>文件发送失败</span>";
+        }
     }
     else
     {
-        if (msgDataType == 2 || msgDataType == 3)
+        var imgId = msgId + "_image";
+        var oImg = document.getElementById(imgId);
+        oImg.src = "";
+        if (msgDataType == 6)
         {
-            var imgId = msgId + "_image";
-            var oImg = document.getElementById(imgId);
-            oImg.src = "";
-        }
-        else if (msgDataType == 6)
-        {
-            var imgId = msgId + "_image";
-            var oImg = document.getElementById(imgId);
-            oImg.src = "";
             var spanId = msgId + "_span";
             var oSpan = document.getElementById(spanId);
             oSpan.innerHTML = "<span class='file_text'>发送文件 </span><a href='" + filePath + "'>" + imagePath + "</a>";

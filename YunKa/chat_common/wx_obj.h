@@ -214,6 +214,8 @@ struct WxMsgLink:public WxMsgBase
 	string Description;	//  消息描述  
 	string Url;			//  消息链接  
 	bool ToSendJson(Json::Value &os) const;
+
+	bool ParseFromJson(const Json::Value &os);   //从json格式文本中解析消息
 };
 
 /*

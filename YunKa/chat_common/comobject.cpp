@@ -1075,6 +1075,7 @@ void CWebUserObject::AddScriptFlag(char *scriptflag, char *url)
 		WEBUSER_URL_INFO* info = new WEBUSER_URL_INFO();
 		info->dwtime = GetTimeLong();
 		info->url = url;
+		info->scriptFlag = scriptflag;
 		m_mapUrlAndScriptFlagOb.insert(MapWebUserFLag::value_type(scriptflag, info));
 	}
 }

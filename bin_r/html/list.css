@@ -97,6 +97,22 @@ a { text-decoration:none; }
     user-select: none;
     cursor: default;
 }
+.msg_text_background{
+	background-color: #ffffff;
+    padding: 5px;
+    border-radius: 3px;
+    user-select: none;
+    cursor: default;
+    border:1px #cdcdcb solid;
+}
+.msg_link_background{
+	background-color: #b0e0e6;
+    padding: 5px;
+    border-radius: 3px;
+    user-select: none;
+    cursor: default;
+    border:1px #cdcdcb solid;
+}
 .location_label_background{
 	background-color: #cccccc;
 	margin-top:5px;

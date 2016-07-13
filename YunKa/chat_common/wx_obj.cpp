@@ -398,24 +398,18 @@ bool WxMsgLink::ToSendJson(Json::Value &os) const
 	return true;
 }
 
-//////////////////////////////////////////////////////////////////////////
-
-/*
+bool WxMsgLink::ParseFromJson(const Json::Value &os)
 {
-"touser":"OPENID",
-"msgtype":"music",
-"music":
-{
-"title":"MUSIC_TITLE",
-"description":"MUSIC_DESCRIPTION",
-"musicurl":"MUSIC_URL",
-"hqmusicurl":"HQ_MUSIC_URL",
-"thumb_media_id":"THUMB_MEDIA_ID" 
-}
-}
+	if (!WxMsgBase::ParseFromJson(os)){
+		return false;
+	}
 
-*/
+	Title = GetStrFromJson(os, "title");
+	Description = GetStrFromJson(os, "description");
+	Url = GetStrFromJson(os, "url");
 
+	return true;
+}
 
 bool WxMsgMusic::ParseFromJson(const Json::Value &os)
 {
