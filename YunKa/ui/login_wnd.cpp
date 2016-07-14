@@ -370,7 +370,7 @@ void CLoginWnd::LoginProgress(int percent)
 		
 		ANSIToUnicode(errMsg.c_str(),error);
 
-		MessageBox(this->GetHWND(), L"µÇÂ¼Ê§°Ü", error, 0);
+		MessageBox(this->GetHWND(), error, L"µÇÂ¼Ê§°Ü", 0);
 
 		m_pLoginBtn->SetEnabled(true);
 	}

@@ -3268,6 +3268,8 @@ void CMainFrame::OnActiveUser(unsigned long id,string sid)
 		UserListUI::Node *tempChildNode = pMySelfeNode->child(0);
 		UserListUI::Node * addNode = pUserList->AddNode(text, pWebUser->webuserid,pWebUser->info.sid, tempChildNode);
 		m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, addNode));
+
+		pUserList->ExpandNode(tempChildNode, true);
 	}
 
 	else if (type == 1)
@@ -3297,6 +3299,8 @@ void CMainFrame::OnActiveUser(unsigned long id,string sid)
 		UserListUI::Node *tempChildNode = pMySelfeNode->child(0);
 		UserListUI::Node * addNode = pUserList->AddNode(text, pWebUser->webuserid, pWebUser->info.sid, tempChildNode);
 		m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, addNode));
+
+		pUserList->ExpandNode(tempChildNode,true);
 	}
 }
 
@@ -3667,26 +3671,28 @@ void CMainFrame::RecvAcceptChat(CWebUserObject* pWebUser, CUserObject* pUser)
 		m_curSelectId = uid;
 
 		type = 0;
+
+		m_waitVizitorMap.erase(iter);
 	}
 	else
 	{
-		//iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
-		//if (iter != m_allVisitorNodeMap.end())
-		//{
-		//	tempNode = iter->second;
-		//	text = tempNode->data()._text;
-		//	uid = tempNode->data()._uid;
-		//	//当前选择 的用户就是 激活的用户
-		//	m_curSelectId = uid;
+		iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
+		if (iter != m_allVisitorNodeMap.end())
+		{
+			tempNode = iter->second;
+			text = tempNode->data()._text;
+			uid = tempNode->data()._uid;
+			//当前选择 的用户就是 激活的用户
+			m_curSelectId = uid;
 
-		//	type = 1;
-		//}
+			type = 1;
+		}
 
 
-		return;
+		m_allVisitorNodeMap.erase(iter);
 	}
 
-	m_waitVizitorMap.erase(iter);
+
 	//需要从等待列表删除 这个用户
 	if (tempNode != NULL && tempNode->data()._level >= 0)
 		pUserList->RemoveNode(tempNode);
