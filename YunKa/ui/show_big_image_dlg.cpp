@@ -8,7 +8,7 @@
 
 CShowBigImageDlg::CShowBigImageDlg()
 {
-
+	isCreate = false;
 }
 
 
@@ -47,7 +47,7 @@ void CShowBigImageDlg::OnPrepare(TNotifyUI& msg)
 
 		RECT rect, padRect;
 		rect = PosWnd->GetPos();
-		m_pShowImageHandler.handler->CreateBrowser(this->GetHWND(), rect, utfUrl, Handler_ShowImage);
+		m_pShowImageHandler.handler->CreateBrowser(m_hWnd, rect, utfUrl, Handler_ShowImage);
 	}
 }
 
@@ -63,7 +63,9 @@ void CShowBigImageDlg::Notify(TNotifyUI& msg)
 	{
 		if (msg.pSender->GetName() == L"closeBtn_show_image" || msg.pSender->GetName() == L"conformSelectVisotorBtn")
 		{
-			Close();
+			//Close();
+
+			::PostMessage(m_hWnd, WM_HIDE_IMAGE_WND_MSG, NULL, NULL);
 		}
 	}
 	if (msg.sType == DUI_MSGTYPE_ITEMSELECT)
@@ -167,12 +169,20 @@ LRESULT CShowBigImageDlg::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 		bHandled = FALSE;
 	}
 	if (bHandled) return lRes;
+
+
+	lRes = HandleCustomMessage(uMsg, wParam, lParam, bHandled);
+	if (bHandled) 
+		return lRes;
+
 	if (m_pm.MessageHandler(uMsg, wParam, lParam, lRes)) return lRes;
 	return CWindowWnd::HandleMessage(uMsg, wParam, lParam);
 }
 
 LRESULT CShowBigImageDlg::MessageHandler(UINT uMsg, WPARAM wParam, LPARAM lParam, bool& bHandled)
 {
+
+
 
 	if (uMsg == WM_KEYDOWN) {
 		if (wParam == VK_RETURN) {
@@ -189,12 +199,34 @@ LRESULT CShowBigImageDlg::MessageHandler(UINT uMsg, WPARAM wParam, LPARAM lParam
 }
 
 
-
-LRESULT CShowBigImageDlg::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
+void CShowBigImageDlg::ShowBigImage()
 {
 
 
-	if (uMsg == ON_AFTER_CREATED)
+
+}
+
+
+void CShowBigImageDlg::ShowWnd(int type)
+{
+	m_pShowImageHandler.handler->ShowBrowser(type);
+
+	::ShowWindow(this->m_hWnd, type);
+}
+
+LRESULT CShowBigImageDlg::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
+{
+	if (uMsg == WM_HIDE_IMAGE_WND_MSG)
+	{
+		//if (m_pShowImgDlg)
+			//m_pShowImgDlg->ShowWindow(SW_HIDE);
+		//::ShowWindow(m_hWnd, SW_HIDE);
+		ShowWnd(SW_HIDE);
+	}
+	
+
+
+    if (uMsg == ON_AFTER_CREATED)
 	{
 		string msg = *(string*)wParam;
 

@@ -124,7 +124,6 @@ public:
 
 
 
-
 	LRESULT OnMouseMove(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 	DWORD GetBkColor();
@@ -365,7 +364,7 @@ private:
 	unsigned long m_savedClickId;
 	CUserObject *m_recvUserObj;
 
-	CShowBigImageDlg *m_pShowImgDlg;
+	CShowBigImageDlg m_pShowImgDlg;
 };
 
 

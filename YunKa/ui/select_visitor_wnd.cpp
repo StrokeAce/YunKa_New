@@ -140,7 +140,6 @@ LRESULT CSelectVisitorWnd::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam
 	case WM_NCPAINT:       lRes = OnNcPaint(uMsg, wParam, lParam, bHandled); break;
 	case WM_NCHITTEST:     lRes = OnNcHitTest(uMsg, wParam, lParam, bHandled); break;
 	case WM_SIZE:          lRes = OnSize(uMsg, wParam, lParam, bHandled); break;
-	case WM_MY_MESSAGE_NOTIFYICON:    HandleCustomMessage(uMsg, wParam, lParam,bHandled); break;
 	default:
 		bHandled = FALSE;
 	}

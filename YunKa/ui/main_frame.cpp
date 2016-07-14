@@ -57,6 +57,8 @@ CMainFrame::CMainFrame(CChatManager* manager) :m_manager(manager)
 	m_userListCount = m_recordListCount = 0;
 	m_activeList.clear();
 
+	//m_pShowImgDlg = NULL;
+
 }
 
 
@@ -315,6 +317,8 @@ LRESULT CMainFrame::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 LRESULT CMainFrame::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
 
+
+
 	if (uMsg == WM_SCREEN_CAPTURE_SUCCED) //截图完成后的消息操作
 	{
 		OnCtrlVEvent();
@@ -337,9 +341,6 @@ LRESULT CMainFrame::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
 			m_pWebURLHandler.isCreated = true;
 			m_pWebURLHandler.handler->ShowBrowser(SW_HIDE);
 		}
-		if (Handler_ShowImage == msg)
-			m_pShowImgDlg->m_pShowImageHandler.isCreated = true;
-
 		
 	}
 	else if (uMsg == ON_AFTER_LOAD)
@@ -360,9 +361,6 @@ LRESULT CMainFrame::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
 		}
 
 
-		if (Handler_ShowImage == msg)
-			m_pShowImgDlg->m_pShowImageHandler.isLoaded = true;
-		   
 	}
 	else if (uMsg == ON_JS_CALL_MFC)
 	{
@@ -3698,7 +3696,6 @@ void CMainFrame::RecvAcceptChat(CWebUserObject* pWebUser, CUserObject* pUser)
 		return;
 	}
 
-
 	//如果回调返回的user uid和自己的相同 则加到自己回话底下
 	if (pUser->UserInfo.uid == m_manager->m_userInfo.UserInfo.uid)
 	{
@@ -4543,17 +4540,38 @@ void CMainFrame::RefuseChat()
 
 void CMainFrame::ShowBigImage()
 {
+	if (!m_pShowImgDlg.isCreate)
+	{
+		RECT sysRect;
+		GetWindowRect(this->m_hWnd, &sysRect);
 
-    m_pShowImgDlg = new CShowBigImageDlg();
 
-	m_pShowImgDlg->Create(this->GetHWND(), _T(""), UI_WNDSTYLE_DIALOG, 0, 0, 0, 0, 0, NULL);
-	m_pShowImgDlg->CenterWindow();
-	m_pShowImgDlg->ShowModal();
+		m_pShowImgDlg.Create(this->m_hWnd, NULL, WS_CHILD | WS_POPUP, WS_EX_TOOLWINDOW);
+		int cx = 800;// +x;
+		int cy = 600;// +y;
+		int x =  (sysRect.right - cx) / 2;
+		int y =  (sysRect.bottom - cy) / 2;
+
+
+		::SetWindowPos((HWND)m_pShowImgDlg, NULL, x, y, cx, cy, NULL);
+		::ShowWindow((HWND)m_pShowImgDlg, SW_SHOW);
+		m_pShowImgDlg.isCreate = true;
+		m_pShowImgDlg.ShowBigImage();
+
+
+	}
+	else
+	{
+		m_pShowImgDlg.ShowWnd(SW_SHOW);
+		m_pShowImgDlg.ShowBigImage();
+	}
+
 
 
 
 
 }
+
 
 
 

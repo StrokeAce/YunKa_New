@@ -8,6 +8,7 @@
 #define   WND_Y                          700
 
 
+#define		WM_HIDE_IMAGE_WND_MSG	WM_USER + 2100
     
 #define   WM_MENU_START                  WM_USER+3000
 
