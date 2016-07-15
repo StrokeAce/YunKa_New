@@ -337,7 +337,7 @@ private:
 	HandlerInfo m_pVisitorRelatedHandler;;
 
 
-	HandlerInfo m_pShowImageHandler; // 消息列表
+	//HandlerInfo m_pShowImageHandler; // 消息列表
 
 	CDuiString m_sendMsgString;
 	HWND m_hMainWnd;
@@ -368,7 +368,7 @@ private:
 	unsigned long m_savedClickId;
 	CUserObject *m_recvUserObj;
 
-
+	CShowBigImageDlg *pShowImgDlg;
 	//CShowBigImageDlg m_pShowImgDlg;
 };
 

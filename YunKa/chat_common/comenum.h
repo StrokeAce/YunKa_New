@@ -49,6 +49,7 @@ enum TREENODEENUM
 enum VISITOR_TYPE
 {
 	DEFAULT_POS = 0,
+	VISITOR_REQ_ING,                       //请求中
 	VISITOR_TALKING_MYSELF,                //对话中
 	VISITOR_TALKING_OTHER,                 //对话中
 	VISITOR_TALKING_HELP_OTHER,            //是别人的协助对象 对话中

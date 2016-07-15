@@ -59,6 +59,8 @@ CMainFrame::CMainFrame(CChatManager* manager) :m_manager(manager)
 
 	//m_pShowImgDlg = NULL;
 
+	pShowImgDlg = NULL;
+
 }
 
 
@@ -344,12 +346,10 @@ LRESULT CMainFrame::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
 
 		if (Handler_ShowImage == msg)
 		{
-			m_pShowImageHandler.isCreated = true;
-			m_pShowImageHandler.handler->ShowBrowser(SW_SHOW);
+			//m_pShowImageHandler.isCreated = true;
+			//m_pShowImageHandler.handler->ShowBrowser(SW_SHOW);
 		}
-
 	
-		
 	}
 	else if (uMsg == ON_AFTER_LOAD)
 	{
@@ -370,8 +370,8 @@ LRESULT CMainFrame::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
 
 		if (Handler_ShowImage == msg)
 		{
-			m_pShowImageHandler.isLoaded = true;
-			m_pShowImageHandler.handler->ShowBrowser(SW_SHOW);
+			//m_pShowImageHandler.isLoaded = true;
+			//m_pShowImageHandler.handler->ShowBrowser(SW_SHOW);
 		}
 
 	}
@@ -689,26 +689,16 @@ void CMainFrame::InitLibcef(void)
 
 
 	//显示大图窗口
-	m_pShowImageHandler.handler = NULL;
-	m_pShowImageHandler.handleName = Handler_ShowImage;
-	m_pShowImageHandler.isLoaded = false;
-	m_pShowImageHandler.isCreated = false;
+	//m_pShowImageHandler.handler = NULL;
+	//m_pShowImageHandler.handleName = Handler_ShowImage;
+	//m_pShowImageHandler.isLoaded = false;
+	//m_pShowImageHandler.isCreated = false;
 
 
-	m_pShowImageHandler.handler = new ClientHandler();
-	m_pShowImageHandler.handler->m_isDisplayRefresh = false;
+	//m_pShowImageHandler.handler = new ClientHandler();
+	//m_pShowImageHandler.handler->m_isDisplayRefresh = false;
 
-	if (!m_pShowImageHandler.isCreated)
-	{
-		string localUrl = GetCurrentPath();
-		localUrl += ("\\html\\list.html");
-		CCodeConvert f_covet;
-		string utfUrl;
-		f_covet.Gb2312ToUTF_8(utfUrl, localUrl.c_str(), localUrl.length());
-
-		RECT rect{0,0,0,0};
-		m_pShowImageHandler.handler->CreateBrowser(m_hWnd, rect, utfUrl, Handler_ShowImage);
-	}
+	
 
 
 }
@@ -4223,18 +4213,14 @@ VISITOR_TYPE  CMainFrame::CheckIdForTalkType(unsigned long id)
 	VISITOR_TYPE type = DEFAULT_POS;
 	CUserObject *pUser = NULL;
 	CWebUserObject  *pWebUser = NULL;
-
 	UserListUI::Node* tempNode = NULL;
 
-	CheckIdForUerOrWebuser(id, m_curSavedSid, &pWebUser, &pUser);
-	
+	CheckIdForUerOrWebuser(id, m_curSavedSid, &pWebUser, &pUser);	
 	if (pWebUser == NULL)
 		return type;
 
-
 	if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_NO)   //在线访客 访问中  或者   已结束
 	{
-
 		map<string, UserListUI::Node*>::iterator iterSid = m_visitorOnlineNode.find(pWebUser->info.sid);
 		if (iterSid != m_visitorOnlineNode.end())
 		{
@@ -4242,7 +4228,6 @@ VISITOR_TYPE  CMainFrame::CheckIdForTalkType(unsigned long id)
 		}
 
 		//先删掉 转接中的用户 然后放入对话中
-
 		for (int j = 0; j < 2; j++)
 		{
 			UserListUI::Node *tempFatherNode = pOnlineNode->child(1);
@@ -4254,34 +4239,61 @@ VISITOR_TYPE  CMainFrame::CheckIdForTalkType(unsigned long id)
 					if (j==0)
 					    type = VISITOR_ONLINE_AUTO_VISITING;
 					else
-						type = VISITOR_ONLINE_AUTO_END;
-
-				
+						type = VISITOR_ONLINE_AUTO_END;			
 					break;
 				}
-
 			}
-
 		}
-
-
-		return  type;
-
+		//return  type;
 		//type = VISITOR_ONLINE_AUTO_VISITING;  //或者已结束     这两个 对上层的按钮处理是一样的
-
-
 	}
-	else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_AUTOINVITE)
+	else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_AUTOINVITE) //自动邀请中
 	{
 		type = VISITOR_ONLINE_AUTO_INVOTING;
 	}
 
 
 	
-	else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_REQUEST)
+	else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_REQUEST)  //请求中
+	{
+		type = VISITOR_REQ_ING;
+	}
+
+	else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_TALK)
+	{
+		unsigned  id = 0;
+		map<unsigned long, unsigned long >::iterator  iter = m_allVisitorUserMap.find(pWebUser->webuserid);
+		if (iter != m_allVisitorUserMap.end())
+			id = iter->second;
+
+
+		if (id == m_manager->m_userInfo.UserInfo.uid) //自己底下
+		{
+
+			list<unsigned long>::iterator iterList = m_activeList.begin();
+			for (; iterList != m_activeList.end(); iterList++)
+			{
+				if (*iterList == pWebUser->webuserid)
+				{
+					type = VISITOR_TALKING_HELP_OTHER;
+				}
+			}
+
+			if (type == DEFAULT_POS)
+			    type = VISITOR_TALKING_MYSELF;
+		}
+		else
+		{
+
+			type = VISITOR_TALKING_OTHER;
+		}
+	}
+
+	else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_TALK)
 	{
 
 	}
+
 
 
 	return  type;
@@ -4667,16 +4679,61 @@ void CMainFrame::RefuseChat()
 void CMainFrame::ShowBigImage()
 {
 
+	if (pShowImgDlg == NULL)
+	{
+
+		pShowImgDlg = new CShowBigImageDlg();
+		pShowImgDlg->Create(m_hWnd, _T(""), UI_WNDSTYLE_DIALOG, 0, 0, 0, 0, 0, NULL);
+		pShowImgDlg->CenterWindow();
+		//RECT rect;
+		//::GetWindowRect(m_hWnd, &rect);
 
 
-	CShowBigImageDlg *pShowImgDlg = new CShowBigImageDlg();
+		/*
+		if (!m_pShowImageHandler.isCreated)
+		{
+			string localUrl = GetCurrentPath();
+			localUrl += ("\\html\\list.html");
+			CCodeConvert f_covet;
+			string utfUrl;
+			f_covet.Gb2312ToUTF_8(utfUrl, localUrl.c_str(), localUrl.length());
 
-	pShowImgDlg->Create(m_hWnd, _T(""), UI_WNDSTYLE_DIALOG, 0, 0, 0, 0, 0, NULL);
-	pShowImgDlg->CenterWindow();
-	RECT rect = pShowImgDlg->GetPos();
+			RECT rect{ 0, 0, 0, 0 };
+			m_pShowImageHandler.handler->CreateBrowser(m_hWnd, rect, utfUrl, Handler_ShowImage);
+		}
+		m_pShowImageHandler.handler->MoveBrowser(rect);
+		m_pWebURLHandler.handler->ShowBrowser(SW_SHOW);
 
-	m_pShowImageHandler.handler->MoveBrowser(rect);
-	m_pWebURLHandler.handler->ShowBrowser(SW_SHOW);
+		*/
+		RECT sysRect;
+		GetWindowRect(m_hWnd, &sysRect);
+	
+		int cx = 800;// +x;
+		int cy = 600;// +y;
+		int x = (sysRect.right - cx) / 2;
+		int y = (sysRect.bottom - cy) / 2;
+
+
+		::SetWindowPos((HWND)pShowImgDlg, NULL, x, y, cx, cy, NULL);
+		::ShowWindow((HWND)pShowImgDlg, SW_SHOW);
+		pShowImgDlg->isCreate = true;
+		pShowImgDlg->ShowBigImage();
+
+	}
+
+	else
+	{
+		pShowImgDlg->ShowWnd(SW_SHOW);
+		//pShowImgDlg->ShowModal();
+		//m_pWebURLHandler.handler->ShowBrowser(SW_HIDE);
+
+		
+		//m_pShowImgDlg.ShowBigImage();
+
+
+	}
+
+
 
 	/*
 	if (!m_pShowImageHandler.isCreated)
@@ -4699,8 +4756,6 @@ void CMainFrame::ShowBigImage()
 	*/
 
 
-	pShowImgDlg->ShowModal();
-	m_pWebURLHandler.handler->ShowBrowser(SW_HIDE);
 
 #if 0
 

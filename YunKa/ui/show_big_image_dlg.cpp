@@ -23,7 +23,7 @@ CShowBigImageDlg::~CShowBigImageDlg()
 void CShowBigImageDlg::OnPrepare(TNotifyUI& msg)
 {
 
-#if 0
+#if 1
 	//聊天窗口 初始化
 	m_pShowImageHandler.handler = NULL;
 	m_pShowImageHandler.handleName = Handler_ShowImage;
@@ -78,9 +78,9 @@ void CShowBigImageDlg::Notify(TNotifyUI& msg)
 	{
 		if (msg.pSender->GetName() == L"closeBtn_show_image" )
 		{
-			Close();
+			//Close();
 
-			//::PostMessage(m_hWnd, WM_HIDE_IMAGE_WND_MSG, NULL, NULL);
+			::PostMessage(m_hWnd, WM_HIDE_IMAGE_WND_MSG, NULL, NULL);
 			//isCreate = false;
 			//PostQuitMessage(0);
 		}
@@ -226,9 +226,9 @@ void CShowBigImageDlg::ShowBigImage()
 
 void CShowBigImageDlg::ShowWnd(int type)
 {
-//	m_pShowImageHandler.handler->ShowBrowser(type);
+	m_pShowImageHandler.handler->ShowBrowser(type);
 
-	::ShowWindow(this->m_hWnd, type);
+	::ShowWindow(m_hWnd, type);
 }
 
 LRESULT CShowBigImageDlg::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
@@ -245,16 +245,16 @@ LRESULT CShowBigImageDlg::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM l
 
     if (uMsg == ON_AFTER_CREATED)
 	{
-		//string msg = *(string*)wParam;
+		string msg = *(string*)wParam;
 
-		//if (Handler_ShowImage == msg)
-			//m_pShowImageHandler.isCreated = true;
+		if (Handler_ShowImage == msg)
+			m_pShowImageHandler.isCreated = true;
 	}
 	else if (uMsg == ON_AFTER_LOAD)
 	{
-		//string msg = *(string*)wParam;
-		//if (Handler_ShowImage == msg)
-			//m_pShowImageHandler.isLoaded = true;
+		string msg = *(string*)wParam;
+		if (Handler_ShowImage == msg)
+			m_pShowImageHandler.isLoaded = true;
 	}
 
 
