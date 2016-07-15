@@ -698,6 +698,18 @@ void CMainFrame::InitLibcef(void)
 	m_pShowImageHandler.handler = new ClientHandler();
 	m_pShowImageHandler.handler->m_isDisplayRefresh = false;
 
+	if (!m_pShowImageHandler.isCreated)
+	{
+		string localUrl = GetCurrentPath();
+		localUrl += ("\\html\\list.html");
+		CCodeConvert f_covet;
+		string utfUrl;
+		f_covet.Gb2312ToUTF_8(utfUrl, localUrl.c_str(), localUrl.length());
+
+		RECT rect{0,0,0,0};
+		m_pShowImageHandler.handler->CreateBrowser(m_hWnd, rect, utfUrl, Handler_ShowImage);
+	}
+
 
 }
 
@@ -4663,6 +4675,10 @@ void CMainFrame::ShowBigImage()
 	pShowImgDlg->CenterWindow();
 	RECT rect = pShowImgDlg->GetPos();
 
+	m_pShowImageHandler.handler->MoveBrowser(rect);
+	m_pWebURLHandler.handler->ShowBrowser(SW_SHOW);
+
+	/*
 	if (!m_pShowImageHandler.isCreated)
 	{
 		string localUrl = GetCurrentPath();
@@ -4674,18 +4690,16 @@ void CMainFrame::ShowBigImage()
 
 		m_pShowImageHandler.handler->CreateBrowser(m_hWnd, rect, utfUrl, Handler_ShowImage);
 
-		m_pWebURLHandler.handler->ShowBrowser(SW_HIDE);
+		m_pWebURLHandler.handler->ShowBrowser(SW_SHOW);
 	}
 	else
 	{
 		m_pWebURLHandler.handler->ShowBrowser(SW_SHOW);
 	}
-
+	*/
 
 
 	pShowImgDlg->ShowModal();
-
-
 	m_pWebURLHandler.handler->ShowBrowser(SW_HIDE);
 
 #if 0
