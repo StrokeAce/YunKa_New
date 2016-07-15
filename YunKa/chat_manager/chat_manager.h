@@ -142,6 +142,7 @@ public:
 	virtual void RecvWebUserInInvite(CWebUserObject* pWebUser, CUserObject* pInviteUser) = 0;
 
 	virtual void ResultInviteWebUser(CWebUserObject* pWebUser, bool bAgree) = 0;
+
 };
 
 class CChatManager : public IBaseReceive

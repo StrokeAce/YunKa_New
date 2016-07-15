@@ -2918,6 +2918,11 @@ void CMainFrame::JsCallMFC(WPARAM wParam, LPARAM lParam)
 
 		m_manager->ReRecv_Msg(url, msgFromUserType, msgId, msgDataType, msgFromUserId, assistUserId, 0);
 	}
+	else if (wParam == JS_CALL_VIEW_DETAILS)
+	{
+		ShowBigImage();
+		delete[](char*)lParam;
+	}
 }
 
 extern "C" _declspec(dllimport) void CancelRecordWAV();

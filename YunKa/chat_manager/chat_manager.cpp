@@ -5176,11 +5176,11 @@ void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RE
 					string locationMsg = "<div class=\"location_relative\">";
 					locationMsg += "<img class=\"location_map_bg\" src=\"";
 					locationMsg += weChatStaticMap;
-					locationMsg += "\" ondblclick=window.RunMsgList(\"ViewDetails\",\"";
+					locationMsg += "\" onclick=window.RunMsgList(\"ViewDetails\",\"";
 					locationMsg += weChatMapLocation;
 					locationMsg += "\")><img class=\"location_map_middle\" src=\"";
 					locationMsg += placeMarking.c_str();
-					locationMsg += "\" ondblclick = window.RunMsgList(\"ViewDetails\",\"";
+					locationMsg += "\" onclick = window.RunMsgList(\"ViewDetails\",\"";
 					locationMsg += weChatMapLocation;
 					locationMsg += "\")><div class=\"location_title_bg\" >";
 					locationMsg += "<div class=\"location_title\">";
@@ -5892,7 +5892,10 @@ void CChatManager::TransferFaceToServeStr(string& msg)
 
 bool CChatManager::ParseTextMsg(CWebUserObject* pWebUser, string content, CUserObject* pAssistUser, unsigned long time)
 {
-	if ((int)content.find("[系统消息]") > -1)
+	if ((int)content.find("[系统消息]") > -1
+		|| (int)content.find("您网站来访客了") > -1 
+		|| (int)content.find("用户头像地址") > -1
+		|| (int)content.find("user_headimgurl") > -1)
 	{
 		return false;
 	}

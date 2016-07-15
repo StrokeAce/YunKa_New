@@ -334,6 +334,10 @@ function ResultRecvMsg(msgId, bSuccess, url, imagePath, filePath, msgFromType, m
     {
         var oImgMsg = document.getElementById(msgId + "_msg");
         oImgMsg.src = filePath;
+        oImgMsg.onclick = function ()
+        {
+            window.RunMsgList('ViewDetails', filePath);
+        }
         var oImgFail = document.getElementById(msgId + "_image");
         oImgFail.src = "";
     }
