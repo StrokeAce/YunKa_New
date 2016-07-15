@@ -3053,7 +3053,7 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 	CWebUserObject  *pWebUser = NULL;
 
 	CheckIdForUerOrWebuser(id, m_curSavedSid, &pWebUser, &pUser);
-	if (id == 0 || pUser != NULL)  //上层管理按钮 设置初始状态
+	if ((id == 0 && m_curSavedSid.length() == 0) || pUser != NULL)  //上层管理按钮 设置初始状态  选择的是 坐席 或者其他节点
 	{
 		for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
 		{
@@ -3083,9 +3083,14 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 		}
 		return;
 	}
+	
+	//以下是访客 节点
+	if (pWebUser == NULL)
+		return;
+
 	//如果在等待列表 显示 接受 屏蔽 邀请评价   这几个按钮
 	map<unsigned long, UserListUI::Node*>::iterator iter = m_waitVizitorMap.find(id);
-	if (iter != m_waitVizitorMap.end() ) 
+	if (iter != m_waitVizitorMap.end() || pWebUser->onlineinfo.talkstatus == TALKSTATUS_REQUEST)
 	{
 
 		for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
@@ -3108,6 +3113,9 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 	}
 	else
 	{
+		VISITOR_TYPE  type = CheckIdForTalkType(id);
+
+#if 0
 		TREENODEENUM  type = CheckIdForNodeType(id);
 		switch (type)
 		{
@@ -3183,6 +3191,7 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 
 			break;
 		}
+#endif
 
 	}
 
@@ -4170,7 +4179,75 @@ void CMainFrame::RecvWebUserInInvite(CWebUserObject* pWebUser, CUserObject* pInv
 
 /********************  回调接口的处理   end    ***********    ********************************************************************************************************************************/
 
+//判定当前的用户id 处于那种状态底下
+VISITOR_TYPE  CMainFrame::CheckIdForTalkType(unsigned long id)
+{
+	VISITOR_TYPE type = DEFAULT_POS;
+	CUserObject *pUser = NULL;
+	CWebUserObject  *pWebUser = NULL;
 
+	UserListUI::Node* tempNode = NULL;
+
+	CheckIdForUerOrWebuser(id, m_curSavedSid, &pWebUser, &pUser);
+	
+	if (pWebUser == NULL)
+		return type;
+
+
+	if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_NO)   //在线访客 访问中  或者   已结束
+	{
+
+		map<string, UserListUI::Node*>::iterator iterSid = m_visitorOnlineNode.find(pWebUser->info.sid);
+		if (iterSid != m_visitorOnlineNode.end())
+		{
+			tempNode = iterSid->second;
+		}
+
+		//先删掉 转接中的用户 然后放入对话中
+
+		for (int j = 0; j < 2; j++)
+		{
+			UserListUI::Node *tempFatherNode = pOnlineNode->child(1);
+			int num = tempFatherNode->num_children();
+			for (int i = 0; i < num; i++)
+			{
+				if (tempFatherNode->child(i) == tempNode)
+				{
+					if (j==0)
+					    type = VISITOR_ONLINE_AUTO_VISITING;
+					else
+						type = VISITOR_ONLINE_AUTO_END;
+
+				
+					break;
+				}
+
+			}
+
+		}
+
+
+		return  type;
+
+		//type = VISITOR_ONLINE_AUTO_VISITING;  //或者已结束     这两个 对上层的按钮处理是一样的
+
+
+	}
+	else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_AUTOINVITE)
+	{
+		type = VISITOR_ONLINE_AUTO_INVOTING;
+	}
+
+
+	
+	else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_REQUEST)
+	{
+
+	}
+
+
+
+}
 
 //判定当前的用户id 处于那种状态底下
 TREENODEENUM  CMainFrame::CheckIdForNodeType(unsigned long id)

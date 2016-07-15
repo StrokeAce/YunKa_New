@@ -14,7 +14,7 @@ CShowBigImageDlg::CShowBigImageDlg()
 
 CShowBigImageDlg::~CShowBigImageDlg()
 {
-
+	Close();
 }
 
 
@@ -23,6 +23,7 @@ CShowBigImageDlg::~CShowBigImageDlg()
 void CShowBigImageDlg::OnPrepare(TNotifyUI& msg)
 {
 
+#if 0
 	//聊天窗口 初始化
 	m_pShowImageHandler.handler = NULL;
 	m_pShowImageHandler.handleName = Handler_ShowImage;
@@ -49,6 +50,8 @@ void CShowBigImageDlg::OnPrepare(TNotifyUI& msg)
 		rect = PosWnd->GetPos();
 		m_pShowImageHandler.handler->CreateBrowser(m_hWnd, rect, utfUrl, Handler_ShowImage);
 	}
+
+#endif
 }
 
 
@@ -61,11 +64,11 @@ void CShowBigImageDlg::Notify(TNotifyUI& msg)
 
 	if (msg.sType == DUI_MSGTYPE_CLICK)
 	{
-		if (msg.pSender->GetName() == L"closeBtn_show_image" || msg.pSender->GetName() == L"conformSelectVisotorBtn")
+		if (msg.pSender->GetName() == L"closeBtn_show_image" )
 		{
-			//Close();
+			Close();
 
-			::PostMessage(m_hWnd, WM_HIDE_IMAGE_WND_MSG, NULL, NULL);
+			//::PostMessage(m_hWnd, WM_HIDE_IMAGE_WND_MSG, NULL, NULL);
 		}
 	}
 	if (msg.sType == DUI_MSGTYPE_ITEMSELECT)
@@ -209,7 +212,7 @@ void CShowBigImageDlg::ShowBigImage()
 
 void CShowBigImageDlg::ShowWnd(int type)
 {
-	m_pShowImageHandler.handler->ShowBrowser(type);
+//	m_pShowImageHandler.handler->ShowBrowser(type);
 
 	::ShowWindow(this->m_hWnd, type);
 }

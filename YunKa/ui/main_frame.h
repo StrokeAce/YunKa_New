@@ -228,6 +228,7 @@ public:
 
 	//判定当前的用户id 处于那种状态底下
 	TREENODEENUM  CMainFrame::CheckIdForNodeType(unsigned long id);
+	VISITOR_TYPE  CMainFrame::CheckIdForTalkType(unsigned long id);
 
 //接入聊天 相关处理
 	void CMainFrame::OnMenuEvent(CDuiString controlName);
