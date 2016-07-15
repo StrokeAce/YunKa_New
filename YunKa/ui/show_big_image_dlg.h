@@ -39,11 +39,13 @@ public:
 	LRESULT HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 	
 	void ShowWnd(int type);
-	void CShowBigImageDlg::ShowBigImage();
+	void CShowBigImageDlg::ShowBigImage(string url, MSG_DATA_TYPE msgDataType);
 public:
 	CChatManager* m_manager;
 
 	bool isCreate;
+	string m_url;
+	MSG_DATA_TYPE m_msgDataType;
 
 
 public:

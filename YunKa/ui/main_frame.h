@@ -221,7 +221,7 @@ public:
 	void CMainFrame::VisitorUserOnlineAndOffline(CWebUserObject* pWebUser, bool type);
 	void CMainFrame::FindVisitorFromOnlineNode(CWebUserObject* pWebUser);
 	BOOL CMainFrame::CheckItemForOnlineVisitor(UserListUI::Node *curNode);
-	void CMainFrame::ShowBigImage();
+	void CMainFrame::ShowBigImage(string url, MSG_DATA_TYPE msgDataType);
 
 	void CMainFrame::AcceptChat();
 	void CMainFrame::RefuseChat();

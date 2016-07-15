@@ -344,6 +344,13 @@ struct SEND_FILE_PARAMS
 	int recvUserType;			// 用户类型
 };
 
+// 查看大图传参
+struct VIEW_DETAILS_PARAMS
+{
+	string url;	// 路径
+	MSG_DATA_TYPE msgDataType;// 数据类型
+};
+
 // 重新发送媒体文件时，接收对象的信息传参
 struct RESEND_FILE_PARAMS
 {

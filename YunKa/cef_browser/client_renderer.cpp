@@ -65,12 +65,14 @@ public:
 				message->GetArgumentList()->SetString(0, Js_Call_MFC_Func_CancelRecord);
 				m_browser->SendProcessMessage(PID_BROWSER, message);
 			}
-			else if (arguments.size() == 2 && arguments[0]->GetStringValue() == Js_Call_MFC_Func_ViewDetails)
+			else if (arguments.size() == 3 && arguments[0]->GetStringValue() == Js_Call_MFC_Func_ViewDetails)
 			{
 				string url(arguments[1]->GetStringValue());
+				string msgDataType(arguments[2]->GetStringValue());
 				CefRefPtr<CefProcessMessage> message = CefProcessMessage::Create(kFocusedNodeChangedMessage);
 				message->GetArgumentList()->SetString(0, Js_Call_MFC_Func_ViewDetails);
 				message->GetArgumentList()->SetString(1, url);
+				message->GetArgumentList()->SetString(2, msgDataType);
 				m_browser->SendProcessMessage(PID_BROWSER, message);
 			}
 			else if (arguments.size() == 3 && arguments[0]->GetStringValue() == Js_Call_MFC_Func_ChangeChatObject)

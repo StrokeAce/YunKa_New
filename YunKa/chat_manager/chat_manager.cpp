@@ -5145,7 +5145,7 @@ void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RE
 				}
 				else if (msgDataType == MSG_DATA_TYPE_IMAGE)
 				{
-					sprintf(formatMsg, "<img class=\"msg_image\" src=\"%s\" onclick=window.RunMsgList(\"ViewDetails\",\"%s\")>", msgContent.c_str(), msgContent.c_str());
+					sprintf(formatMsg, "<img class=\"msg_image\" src=\"%s\" onclick=window.RunMsgList(\"ViewDetails\",\"%s\",\"2\")>", msgContent.c_str(), msgContent.c_str());
 					sMsg = formatMsg;
 				}
 				else if (msgDataType == MSG_DATA_TYPE_VOICE)
@@ -5178,11 +5178,11 @@ void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RE
 					locationMsg += weChatStaticMap;
 					locationMsg += "\" onclick=window.RunMsgList(\"ViewDetails\",\"";
 					locationMsg += weChatMapLocation;
-					locationMsg += "\")><img class=\"location_map_middle\" src=\"";
+					locationMsg += "\",\"5\")><img class=\"location_map_middle\" src=\"";
 					locationMsg += placeMarking.c_str();
 					locationMsg += "\" onclick = window.RunMsgList(\"ViewDetails\",\"";
 					locationMsg += weChatMapLocation;
-					locationMsg += "\")><div class=\"location_title_bg\" >";
+					locationMsg += "\",\"5\)><div class=\"location_title_bg\" >";
 					locationMsg += "<div class=\"location_title\">";
 					locationMsg += msgContent;
 					locationMsg += "</div></div></div>";
@@ -5271,7 +5271,7 @@ void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RE
 				else if (msgDataType == MSG_DATA_TYPE_IMAGE)
 				{
 					char formatMsg[MAX_1024_LEN];
-					sprintf(formatMsg, "<img class=\"msg_image\" src=\"%s\" onclick=window.RunMsgList(\"ViewDetails\",\"%s\")>", msgContent.c_str(), msgContent.c_str());
+					sprintf(formatMsg, "<img class=\"msg_image\" src=\"%s\" onclick=window.RunMsgList(\"ViewDetails\",\"%s\",\"2\")>", msgContent.c_str(), msgContent.c_str());
 					sMsg = formatMsg;
 				}
 				else

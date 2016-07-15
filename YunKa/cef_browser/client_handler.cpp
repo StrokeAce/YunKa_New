@@ -153,10 +153,6 @@ bool ClientHandler::OnProcessMessageReceived(
 		  {
 			  PostMessage(m_hWnd, ON_JS_CALL_MFC, JS_CALL_RESTART_SESSION, (LPARAM)msg_new);
 		  }
-		  else if (msg_param1 == Js_Call_MFC_Func_ViewDetails)
-		  {
-			  PostMessage(m_hWnd, ON_JS_CALL_MFC, JS_CALL_VIEW_DETAILS, (LPARAM)msg_new);
-		  }
 		  else
 		  {
 			  delete[] msg_new;
@@ -187,6 +183,17 @@ bool ClientHandler::OnProcessMessageReceived(
 			  sendFile->recvUserType = std::atoi(userType.c_str());
 
 			  PostMessage(m_hWnd, ON_JS_CALL_MFC, JS_CALL_CHANGE_CHAT_OBJECT, (LPARAM)sendFile);
+		  }
+		  else if (msg_param1 == Js_Call_MFC_Func_ViewDetails)
+		  {
+			  std::string url = message->GetArgumentList()->GetString(1);
+			  std::string msgDataType = message->GetArgumentList()->GetString(2);
+
+			  VIEW_DETAILS_PARAMS* viewDetails = new VIEW_DETAILS_PARAMS();
+			  viewDetails->url = url.c_str();
+			  viewDetails->msgDataType = (MSG_DATA_TYPE)std::atoi(msgDataType.c_str());
+
+			  PostMessage(m_hWnd, ON_JS_CALL_MFC, JS_CALL_VIEW_DETAILS, (LPARAM)viewDetails);
 		  }
 	  }
 	  else if (count == 6)

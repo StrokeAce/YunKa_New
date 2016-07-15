@@ -9,6 +9,7 @@
 CShowBigImageDlg::CShowBigImageDlg()
 {
 	isCreate = false;
+	m_msgDataType = MSG_DATA_TYPE_TEXT;
 }
 
 
@@ -37,18 +38,11 @@ void CShowBigImageDlg::OnPrepare(TNotifyUI& msg)
 
 	if (!m_pShowImageHandler.isCreated)
 	{
-		string localUrl = GetCurrentPath();
-		localUrl += ("\\html\\list.html");
-		CCodeConvert f_covet;
-		string utfUrl;
-		f_covet.Gb2312ToUTF_8(utfUrl, localUrl.c_str(), localUrl.length());
-
-
 		CControlUI *PosWnd = static_cast<CHorizontalLayoutUI*>(m_pm.FindControl(_T("show_image_control")));
 
 		RECT rect, padRect;
 		rect = PosWnd->GetPos();
-		m_pShowImageHandler.handler->CreateBrowser(m_hWnd, rect, utfUrl, Handler_ShowImage);
+		m_pShowImageHandler.handler->CreateBrowser(m_hWnd, rect, "about:blank", Handler_ShowImage);
 	}
 
 #endif
@@ -216,11 +210,24 @@ LRESULT CShowBigImageDlg::MessageHandler(UINT uMsg, WPARAM wParam, LPARAM lParam
 }
 
 
-void CShowBigImageDlg::ShowBigImage()
+void CShowBigImageDlg::ShowBigImage(string url, MSG_DATA_TYPE msgDataType)
 {
-
-
-
+	if (m_pShowImageHandler.isCreated)
+	{
+		if (msgDataType == MSG_DATA_TYPE_LOCATION)
+		{
+			m_pShowImageHandler.handler->GetBrowser()->GetMainFrame()->LoadURL(url);
+		}
+		else if (msgDataType == MSG_DATA_TYPE_IMAGE)
+		{
+			m_pShowImageHandler.handler->GetBrowser()->GetMainFrame()->LoadURL(url);
+		}
+	}
+	else
+	{
+		m_url = url;
+		m_msgDataType = msgDataType;
+	}
 }
 
 
@@ -249,6 +256,15 @@ LRESULT CShowBigImageDlg::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM l
 
 		if (Handler_ShowImage == msg)
 			m_pShowImageHandler.isCreated = true;
+
+		if (m_msgDataType == MSG_DATA_TYPE_LOCATION)
+		{
+			m_pShowImageHandler.handler->GetBrowser()->GetMainFrame()->LoadURL(m_url);
+		}
+		else if (m_msgDataType == MSG_DATA_TYPE_IMAGE)
+		{
+			m_pShowImageHandler.handler->GetBrowser()->GetMainFrame()->LoadURL(m_url);
+		}
 	}
 	else if (uMsg == ON_AFTER_LOAD)
 	{

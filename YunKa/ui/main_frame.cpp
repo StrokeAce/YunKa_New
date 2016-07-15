@@ -1894,8 +1894,8 @@ void CMainFrame::ShowMySelfSendMsg(string strMsg, MSG_DATA_TYPE msgType, string 
 
 	if (msgType == MSG_DATA_TYPE_IMAGE)
 	{
-		sprintf(contentMsg, "<img id=\"%s_image\" class=\"wait_image\" src=\"%s\"><img class=\"msg_image\" src=\"%s\" onclick=window.RunMsgList(\"ViewDetails\",\"%s\")>",
-			msgId.c_str(), imagePath.c_str(), msg.c_str(), imagePath.c_str());
+		sprintf(contentMsg, "<img id=\"%s_image\" class=\"wait_image\" src=\"%s\"><img class=\"msg_image\" src=\"%s\" onclick=window.RunMsgList(\"ViewDetails\",\"%s\",\"2\")>",
+			msgId.c_str(), imagePath.c_str(), msg.c_str(), msg.c_str());
 		msg = contentMsg;
 	}
 	else if (msgType == MSG_DATA_TYPE_VOICE)
@@ -2225,7 +2225,7 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 	//更新好友对象
 	else if (controlName == L"menu_right_update_friend")
 	{
-		ShowBigImage();
+		
 	}
 
 	//查找访客
@@ -2948,8 +2948,9 @@ void CMainFrame::JsCallMFC(WPARAM wParam, LPARAM lParam)
 	}
 	else if (wParam == JS_CALL_VIEW_DETAILS)
 	{
-		ShowBigImage();
-		delete[](char*)lParam;
+		VIEW_DETAILS_PARAMS* viewDetails = (VIEW_DETAILS_PARAMS*)lParam;
+		ShowBigImage(viewDetails->url, viewDetails->msgDataType);
+		delete viewDetails;
 	}
 }
 
@@ -4676,7 +4677,7 @@ void CMainFrame::RefuseChat()
 }
 
 
-void CMainFrame::ShowBigImage()
+void CMainFrame::ShowBigImage(string url, MSG_DATA_TYPE msgDataType)
 {
 
 	if (pShowImgDlg == NULL)
@@ -4717,7 +4718,7 @@ void CMainFrame::ShowBigImage()
 		::SetWindowPos((HWND)pShowImgDlg, NULL, x, y, cx, cy, NULL);
 		::ShowWindow((HWND)pShowImgDlg, SW_SHOW);
 		pShowImgDlg->isCreate = true;
-		pShowImgDlg->ShowBigImage();
+		pShowImgDlg->ShowBigImage(url, msgDataType);
 
 	}
 
@@ -4728,7 +4729,7 @@ void CMainFrame::ShowBigImage()
 		//m_pWebURLHandler.handler->ShowBrowser(SW_HIDE);
 
 		
-		//m_pShowImgDlg.ShowBigImage();
+		pShowImgDlg->ShowBigImage(url, msgDataType);
 
 
 	}
