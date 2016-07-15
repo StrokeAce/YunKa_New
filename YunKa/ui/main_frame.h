@@ -336,6 +336,9 @@ private:
 	HandlerInfo m_pWebURLHandler; // 访客历史 访客来电 访客留言 客户管理 统计分析 
 	HandlerInfo m_pVisitorRelatedHandler;;
 
+
+	HandlerInfo m_pShowImageHandler; // 消息列表
+
 	CDuiString m_sendMsgString;
 	HWND m_hMainWnd;
 
@@ -365,7 +368,8 @@ private:
 	unsigned long m_savedClickId;
 	CUserObject *m_recvUserObj;
 
-	CShowBigImageDlg m_pShowImgDlg;
+
+	//CShowBigImageDlg m_pShowImgDlg;
 };
 
 

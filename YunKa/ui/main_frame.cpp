@@ -341,6 +341,14 @@ LRESULT CMainFrame::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
 			m_pWebURLHandler.isCreated = true;
 			m_pWebURLHandler.handler->ShowBrowser(SW_HIDE);
 		}
+
+		if (Handler_ShowImage == msg)
+		{
+			m_pShowImageHandler.isCreated = true;
+			m_pShowImageHandler.handler->ShowBrowser(SW_SHOW);
+		}
+
+	
 		
 	}
 	else if (uMsg == ON_AFTER_LOAD)
@@ -360,6 +368,11 @@ LRESULT CMainFrame::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
 			m_pWebURLHandler.isLoaded = true;
 		}
 
+		if (Handler_ShowImage == msg)
+		{
+			m_pShowImageHandler.isLoaded = true;
+			m_pShowImageHandler.handler->ShowBrowser(SW_SHOW);
+		}
 
 	}
 	else if (uMsg == ON_JS_CALL_MFC)
@@ -672,6 +685,19 @@ void CMainFrame::InitLibcef(void)
 		m_pWebURLHandler.handler->CreateBrowser(this->m_hWnd, m_mainCenterAndRightRect, "about:blank", Handler_WebUrl);
 		m_pWebURLHandler.handler->ShowBrowser(SW_HIDE);
 	}
+
+
+
+	//显示大图窗口
+	m_pShowImageHandler.handler = NULL;
+	m_pShowImageHandler.handleName = Handler_ShowImage;
+	m_pShowImageHandler.isLoaded = false;
+	m_pShowImageHandler.isCreated = false;
+
+
+	m_pShowImageHandler.handler = new ClientHandler();
+	m_pShowImageHandler.handler->m_isDisplayRefresh = false;
+
 
 }
 
@@ -4246,7 +4272,7 @@ VISITOR_TYPE  CMainFrame::CheckIdForTalkType(unsigned long id)
 	}
 
 
-
+	return  type;
 }
 
 //判定当前的用户id 处于那种状态底下
@@ -4628,13 +4654,49 @@ void CMainFrame::RefuseChat()
 
 void CMainFrame::ShowBigImage()
 {
+
+
+
+	CShowBigImageDlg *pShowImgDlg = new CShowBigImageDlg();
+
+	pShowImgDlg->Create(m_hWnd, _T(""), UI_WNDSTYLE_DIALOG, 0, 0, 0, 0, 0, NULL);
+	pShowImgDlg->CenterWindow();
+	RECT rect = pShowImgDlg->GetPos();
+
+	if (!m_pShowImageHandler.isCreated)
+	{
+		string localUrl = GetCurrentPath();
+		localUrl += ("\\html\\list.html");
+		CCodeConvert f_covet;
+		string utfUrl;
+		f_covet.Gb2312ToUTF_8(utfUrl, localUrl.c_str(), localUrl.length());
+
+
+		m_pShowImageHandler.handler->CreateBrowser(m_hWnd, rect, utfUrl, Handler_ShowImage);
+
+		m_pWebURLHandler.handler->ShowBrowser(SW_HIDE);
+	}
+	else
+	{
+		m_pWebURLHandler.handler->ShowBrowser(SW_SHOW);
+	}
+
+
+
+	pShowImgDlg->ShowModal();
+
+
+	m_pWebURLHandler.handler->ShowBrowser(SW_HIDE);
+
+#if 0
+
 	if (!m_pShowImgDlg.isCreate)
 	{
 		RECT sysRect;
-		GetWindowRect(this->m_hWnd, &sysRect);
+		GetWindowRect(m_hWnd, &sysRect);
 
 
-		m_pShowImgDlg.Create(this->m_hWnd, NULL, WS_CHILD | WS_POPUP, WS_EX_TOOLWINDOW);
+		m_pShowImgDlg.Create(m_hWnd, NULL, WS_CHILD | WS_POPUP, WS_EX_TOOLWINDOW);
 		int cx = 800;// +x;
 		int cy = 600;// +y;
 		int x =  (sysRect.right - cx) / 2;
@@ -4654,7 +4716,7 @@ void CMainFrame::ShowBigImage()
 		m_pShowImgDlg.ShowBigImage();
 	}
 
-
+#endif
 
 
 

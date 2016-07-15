@@ -22,6 +22,8 @@ public:
 	};
 
 	void Notify(TNotifyUI& msg);
+	RECT CShowBigImageDlg::GetPos();
+
 	LRESULT OnCreate(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 
 	LRESULT OnNcActivate(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
@@ -47,7 +49,7 @@ public:
 public:
 
 	void OnPrepare(TNotifyUI& msg);
-	HandlerInfo m_pShowImageHandler; // 消息列表
+	//HandlerInfo m_pShowImageHandler; // 消息列表
 
 private:
 	CPaintManagerUI m_pm;

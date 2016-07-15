@@ -14,7 +14,7 @@ CShowBigImageDlg::CShowBigImageDlg()
 
 CShowBigImageDlg::~CShowBigImageDlg()
 {
-	Close();
+
 }
 
 
@@ -54,6 +54,18 @@ void CShowBigImageDlg::OnPrepare(TNotifyUI& msg)
 #endif
 }
 
+RECT CShowBigImageDlg::GetPos()
+{
+
+
+	CControlUI *PosWnd = static_cast<CHorizontalLayoutUI*>(m_pm.FindControl(_T("show_image_control")));
+
+	RECT rect, padRect;
+	rect = PosWnd->GetPos();
+
+	return rect;
+}
+
 
 void CShowBigImageDlg::Notify(TNotifyUI& msg)
 {
@@ -69,6 +81,8 @@ void CShowBigImageDlg::Notify(TNotifyUI& msg)
 			Close();
 
 			//::PostMessage(m_hWnd, WM_HIDE_IMAGE_WND_MSG, NULL, NULL);
+			//isCreate = false;
+			//PostQuitMessage(0);
 		}
 	}
 	if (msg.sType == DUI_MSGTYPE_ITEMSELECT)
@@ -231,16 +245,16 @@ LRESULT CShowBigImageDlg::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM l
 
     if (uMsg == ON_AFTER_CREATED)
 	{
-		string msg = *(string*)wParam;
+		//string msg = *(string*)wParam;
 
-		if (Handler_ShowImage == msg)
-			m_pShowImageHandler.isCreated = true;
+		//if (Handler_ShowImage == msg)
+			//m_pShowImageHandler.isCreated = true;
 	}
 	else if (uMsg == ON_AFTER_LOAD)
 	{
-		string msg = *(string*)wParam;
-		if (Handler_ShowImage == msg)
-			m_pShowImageHandler.isLoaded = true;
+		//string msg = *(string*)wParam;
+		//if (Handler_ShowImage == msg)
+			//m_pShowImageHandler.isLoaded = true;
 	}
 
 
