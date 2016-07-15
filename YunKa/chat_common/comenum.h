@@ -46,6 +46,29 @@ enum TREENODEENUM
 };
 
 
+enum VISITOR_TYPE
+{
+	DEFAULT_POS = 0,
+	VISITOR_TALKING_MYSELF,                //对话中
+	VISITOR_TALKING_OTHER,                 //对话中
+	VISITOR_TALKING_HELP_OTHER,            //是别人的协助对象 对话中
+    VISITOR_TRANING,                       //转接中
+	VISITOR_INVOTING,                      //邀请中
+	VISITOR_IN_TALK_ING,                   //内部对话中
+
+
+	VISITOR_ONLINE_AUTO_INVOTING,          //自动邀请中
+	VISITOR_ONLINE_AUTO_VISITING,          //访问中
+	VISITOR_ONLINE_AUTO_END,               //已结束  
+
+
+
+
+	VISITOR_END = 20
+
+};
+
+
 
 
 enum USER_STATUS
