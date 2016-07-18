@@ -864,32 +864,6 @@ void CMainFrame::OnClick(TNotifyUI& msg)
 		OnMaxBtn(msg);
 	}
 
-	else  if (msg.pSender->GetName() == L"acceptbutton")
-	{
-
-		///CLoginWnd* pLoginFrame = new CLoginWnd();
-		//pLoginFrame->Create(NULL, _T(""), UI_WNDSTYLE_DIALOG, 0, 0, 0, 0, 0, NULL);
-		//pLoginFrame->CenterWindow();
-		//int result = pLoginFrame->ShowModal();
-
-		//return;
-
-		//CMenuWnd* pMenu = new CMenuWnd(m_hWnd);
-		//CPoint point = msg.ptMouse;
-
-		//CMenuWnd* pMenu = new CMenuWnd(m_hWnd);
-		//CPoint point = msg.ptMouse;
-		//ClientToScreen(m_hWnd, &point);
-		//pMenu->Init(NULL, _T(""), _T("xml"), point);
-
-
-
-		//pMenu->Create(NULL, _T(""), WS_POPUP, 0, 0, 0, 0, 0, NULL);
-		//pMenu->CenterWindow();
-		//pMenu->ShowModal();
-
-	}
-
 	else  if (msg.pSender->GetName() == _T("sendMsgBtn_select"))
 	{
 		OnBtnSelectSendType(msg);
@@ -1072,6 +1046,42 @@ void CMainFrame::OnItemRbClick(TNotifyUI &msg)
 				break;
 		}
 
+	
+		CDuiString path = GetCurrentPathW();
+		path += L"\\SkinRes\\menu\\check.png";
+		CDuiString key;
+		switch (m_manager->m_sysConfig->m_nFilterType)
+		{
+		case VISITORFILTER_ALL:
+			key = L"label_right_set_filter_show_all";
+			break;
+
+		case VISITORFILTER_MYVISITOR:			//只显示我自己的访客，不显示访问中和已离开的人，在等待接待和显示
+			key = L"label_right_set_filter_show_my_visitor";
+			break;
+
+		case VISITORFILTER_ALLVISITOR:		//显示全部客服的访客，
+			key = L"label_right_set_filter_show_all_history_visitor";
+			break;
+
+		case VISITORFILTER_1MINUTES:
+			key = L"label_right_set_filter_1_minute_visitor";
+			break;
+
+		case VISITORFILTER_3MINUTES:
+			key = L"label_right_set_filter_3_minute_visitor";
+			break;
+		case VISITORFILTER_5MINUTES:
+			key = L"label_right_set_filter_5_minute_visitor";
+			break;
+		case VISITORFILTER_10MINUTES:
+			key = L"label_right_set_filter_10_minute_visitor";
+			break;
+		default:
+			key = L"label_right_set_filter_show_all";
+			break;
+		}
+
 		if (!xmlPath.IsEmpty())
 		{
 			CMenuWnd* pMenu = new CMenuWnd(m_hMainWnd);
@@ -1085,6 +1095,8 @@ void CMainFrame::OnItemRbClick(TNotifyUI &msg)
 			height = step * 30;
 			if (cpoint.y + height >= sysRect.bottom)
 				cpoint.y -= height;
+
+			pMenu->SetAttrData(key, path);
 
 			pMenu->Init(NULL, _T(""), _T("xml"), cpoint);
 		}
@@ -1634,14 +1646,17 @@ void CMainFrame::AddHostUserList(UserListUI * ptr, CUserObject *user)
 
 
 	taklString.Format(_T("{x 4}{i gameicons.png 18 10}{x 4}对话中"));
-	pUserTalkNode = pUserList->AddNode(taklString, user->UserInfo.uid,"", pUserNameNode);
+	//pUserTalkNode = pUserList->AddNode(taklString, user->UserInfo.uid,"", pUserNameNode);
+	pUserTalkNode = pUserList->AddNode(taklString, 0, "", pUserNameNode);
 
 	changeString.Format(_T("{x 4}{i gameicons.png 18 10}{x 4}转接中"));
-	pUserChangeNode = pUserList->AddNode(changeString, user->UserInfo.uid,"", pUserNameNode);
+	//pUserChangeNode = pUserList->AddNode(changeString, user->UserInfo.uid,"", pUserNameNode);
+	pUserChangeNode = pUserList->AddNode(changeString, 0, "", pUserNameNode);
 
 
 	acceptString.Format(_T("{x 4}{i gameicons.png 18 10}{x 4}邀请中"));
-	pUserAcceptNode = pUserList->AddNode(acceptString, user->UserInfo.uid,"", pUserNameNode);
+	//pUserAcceptNode = pUserList->AddNode(acceptString, user->UserInfo.uid,"", pUserNameNode);
+	pUserAcceptNode = pUserList->AddNode(acceptString, 0, "", pUserNameNode);
 
 
 	if (  user->status == STATUS_OFFLINE )    //离线
@@ -1649,7 +1664,6 @@ void CMainFrame::AddHostUserList(UserListUI * ptr, CUserObject *user)
 		m_offlineNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
 
 		//m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
-
 
 		pUserList->ExpandNode(pUserNameNode, false);
 
@@ -2332,35 +2346,42 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 	//显示全部
 	else if (controlName == L"menu_right_show_all")
 	{
+		m_manager->m_sysConfig->m_nFilterType = VISITORFILTER_ALL;
 	}
 
 	//显示我的全部联系人
 	else if (controlName == L"MenuElement_right_my_history_visitor")
 	{
+		m_manager->m_sysConfig->m_nFilterType = VISITORFILTER_MYVISITOR;
 	}
 
 	//只显示全部最近联系人
 	else if (controlName == L"MenuElement_right_all_history_visitor")
 	{
+		m_manager->m_sysConfig->m_nFilterType = VISITORFILTER_ALLVISITOR;
 	}
 
 	//只显示访问时间超过1分钟的联系人
 	else if (controlName == L"MenuElement_right_1_minute")
 	{
+		m_manager->m_sysConfig->m_nFilterType = VISITORFILTER_1MINUTES;
 	}
-	//只显示访问时间超过3分钟的联系人
+	//只显示访问时间超过3分钟的联系人    
 	else if (controlName == L"MenuElement_right_3_minute")
 	{
+		m_manager->m_sysConfig->m_nFilterType = VISITORFILTER_3MINUTES;
 	}
 
 	//只显示访问时间超过5分钟的联系人
 	else if (controlName == L"MenuElement_right_5_minute")
 	{
+		m_manager->m_sysConfig->m_nFilterType = VISITORFILTER_5MINUTES;
 	}
 
 	//只显示访问时间超过10分钟的联系人
 	else if (controlName == L"MenuElement_right_10_minute")
 	{
+		m_manager->m_sysConfig->m_nFilterType = VISITORFILTER_10MINUTES;
 	}
 
 	//用户设置
