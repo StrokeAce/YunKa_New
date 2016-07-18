@@ -1010,10 +1010,71 @@ void CMainFrame::OnItemRbClick(TNotifyUI &msg)
 
 	if (msg.pSender->GetName() == L"userlist")
 	{
-		//根据选择的对象不同 弹出相应的右键菜单
-		//UserListUI::Node* node = (UserListUI::Node*)msg.pSender->GetTag();
-		//pUserList->ExpandNode(node,!node->data()._expand);
-		
+		VISITOR_TYPE  type = CheckIdForTalkType(uid);
+		switch (type)
+		{//坐席状态
+			case HOST_USER_DEFAULT:
+			case VISITOR_TALKING_OTHER://对话中
+				xmlPath = L"menu\\menu_right_no_id.xml";
+				break;
+				
+			case HOST_USER_ONLINE:
+				xmlPath = L"menu\\menu_right_user_online.xml";
+				break;
+
+			case HOST_USER_OFFLINE:
+
+				xmlPath = L"menu\\menu_right_user_offline.xml";
+				break;
+
+			case HOST_USER_MYSELF:
+				xmlPath = L"menu\\menu_right_myself_node.xml";
+				break;
+			
+			case VISITOR_REQ_ING:
+			case VISITOR_TRANING:                       //转接中
+			case VISITOR_INVOTING:                      //邀请中
+				xmlPath = L"menu\\menu_right_wait_request.xml";
+				break;
+
+			case VISITOR_TALKING_MYSELF:
+				xmlPath = L"menu\\menu_right_talk_myself.xml";
+				break;
+
+			case VISITOR_TALKING_HELP_OTHER:           //是别人的协助对象 对话中
+				xmlPath = L"menu\\menu_right_talk_invote_other.xml";
+				break;
+	
+			case VISITOR_IN_TALK_ING:                   //内部对话中	
+				xmlPath = L"menu\\menu_right_inline_user_talk.xml";  
+				break;
+
+			case VISITOR_ONLINE_AUTO_INVOTING:          //自动邀请中
+			case VISITOR_ONLINE_AUTO_VISITING:          //访问中
+				xmlPath = L"menu\\menu_right_online_talk_visitor.xml";    //在线列表 用户的弹出菜单
+				break;
+
+			case VISITOR_ONLINE_AUTO_END:
+				xmlPath = L"menu\\menu_right_online_end_visitor.xml";
+				break;
+
+			default:
+				break;
+		}
+
+		if (!xmlPath.IsEmpty())
+		{
+			CMenuWnd* pMenu = new CMenuWnd(m_hMainWnd);
+			CPoint cpoint = msg.ptMouse;
+
+			ClientToScreen(this->m_hWnd, &cpoint);
+			pMenu->SetPath((WCHAR*)xmlPath.GetData());
+			pMenu->Init(NULL, _T(""), _T("xml"), cpoint);
+		}
+
+
+		   
+#if 0
 		CheckIdForUerOrWebuser(uid, m_curSavedSid,&pWebUser, &pUser);
 
 		//轮询查找 查找当前选择的 uid是 空 还是坐席 等待中的用户 等等
@@ -1068,17 +1129,7 @@ void CMainFrame::OnItemRbClick(TNotifyUI &msg)
 
 			}
 		}
-
-		if (!xmlPath.IsEmpty())
-		{
-			CMenuWnd* pMenu = new CMenuWnd(m_hMainWnd);
-			CPoint cpoint = msg.ptMouse;
-
-			ClientToScreen(this->m_hWnd, &cpoint);
-			pMenu->SetPath((WCHAR*)xmlPath.GetData());
-			pMenu->Init(NULL, _T(""), _T("xml"), cpoint);
-		}
-
+#endif
 
 	}
 }
@@ -2399,6 +2450,35 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 			m_manager->SendTo_InviteWebUser(pWebUser, MYGETNOTE, "");
 		}
 	}
+
+	//发送网页和图片
+	else if (controlName == L"menu_right_send_html_image")
+	{
+
+	}
+	//发送文件
+	else if (controlName == L"menu_right_send_file")
+	{
+
+	}
+	//转接此对话
+	else if (controlName == L"menu_right_invote_talk_to_other")
+	{
+
+	}
+
+	//邀请协助
+	else if (controlName == L"menu_right_request_other_help_talk")
+	{
+
+	}
+	//结束对话
+	else if (controlName == L"menu_right_finish_talk")
+	{
+
+	}
+
+	
 
 
 
@@ -4316,8 +4396,71 @@ VISITOR_TYPE  CMainFrame::CheckIdForTalkType(unsigned long id)
 	UserListUI::Node* tempNode = NULL;
 
 	CheckIdForUerOrWebuser(id, m_curSavedSid, &pWebUser, &pUser);	
-	if (pWebUser == NULL)
+
+	if (id == 0 && m_curSavedSid.empty())
 		return type;
+
+	//这一部分是 坐席位置判断
+	//先判断是不是 坐席 然后判断 状态
+	if (pUser != NULL)
+	{
+		//先查找是不是 自己
+		if (id == m_manager->m_userInfo.UserInfo.uid)
+			type = HOST_USER_MYSELF;
+		   
+		else
+		{
+			map<unsigned long, UserListUI::Node*>::iterator iter = m_onlineNodeMap.find(id);
+			if (iter != m_onlineNodeMap.end())
+				type = HOST_USER_ONLINE;
+			else
+			{
+				iter = m_offlineNodeMap.find(pUser->UserInfo.uid);
+
+				if (iter == m_offlineNodeMap.end())
+				{
+					type = HOST_USER_DEFAULT;
+				}
+				else
+					type = HOST_USER_OFFLINE;
+			}
+
+		}
+		return type;
+	}
+
+	//这一部分是 访客位置判断
+	if (pWebUser == NULL)
+	{
+		//这里多做一次 判断 因为有时候 根据sid 不能取到 webuser 的信息
+		map<string, UserListUI::Node*>::iterator iterSid = m_visitorOnlineNode.find(m_curSavedSid);
+		if (iterSid != m_visitorOnlineNode.end())
+		{
+			tempNode = iterSid->second;
+		}
+
+		//查找 用户 在 在线访客的哪个节点下面
+		for (int j = 0; j < 3; j++)
+		{
+			UserListUI::Node *tempFatherNode = pOnlineNode->child(j);
+			int num = tempFatherNode->num_children();
+			for (int i = 0; i < num; i++)
+			{
+				if (tempFatherNode->child(i) == tempNode)
+				{
+
+					type = (VISITOR_TYPE)(VISITOR_ONLINE_AUTO_INVOTING + j);
+					//if (j==0)
+					//    type = VISITOR_ONLINE_AUTO_VISITING;
+					//else
+					//	type = VISITOR_ONLINE_AUTO_END;			
+					break;
+				}
+			}
+		}
+		return type;
+	}
+		
 
 	if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_NO)   //在线访客 访问中  或者   已结束
 	{

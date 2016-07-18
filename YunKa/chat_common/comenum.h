@@ -49,6 +49,15 @@ enum TREENODEENUM
 enum VISITOR_TYPE
 {
 	DEFAULT_POS = 0,
+	HOST_USER_DEFAULT = 0,
+	//坐席状态
+	HOST_USER_ONLINE,
+	HOST_USER_OFFLINE,
+	HOST_USER_MYSELF,
+
+
+
+	//访客状态
 	VISITOR_REQ_ING,                       //请求中
 	VISITOR_TALKING_MYSELF,                //对话中
 	VISITOR_TALKING_OTHER,                 //对话中
@@ -65,7 +74,8 @@ enum VISITOR_TYPE
 
 
 
-	VISITOR_END = 20
+
+	VISITOR_END = 100
 
 };
 
