@@ -4,16 +4,19 @@
   <Font name="微软雅黑" size="12" bold="true"/>
     <Default name="Menu" value="inset=&quot;2,2,2,2&quot; itemtextpadding=&quot;30,0,0,0&quot; bkimage=&quot;file='menu\\menu_bk.png' restype='png' corner='30,8,8,8'&quot; hole=&quot;false&quot;" />
   <Menu>
-      <MenuElement name="menu_right_accept_chat" text="接受此对话" />
+      <MenuElement name="menu_right_online_visitor_request_set" enabled="false" text="自定义邀请" />
 
-      <MenuElement name="menu_right_refuse_chat" text="拒绝此对话" />
-
+      <MenuElement name="menu_right_online_visitor_request_chat" enabled="false" text="邀请对话" />
+      <MenuElement name="menu_right_online_visitor_do_chat" enabled="false" text="直接对话" />
+      <MenuElement   name="menu_right_online_visitor_request_message" enabled="false"  text="邀请留言" />
 
       <MenuElement name="menu_right_change_visitor_name" text="更改访客名称" />
-      <MenuElement  name="menu_right_move_chat"    text="移除对话" />
+       <MenuElement name="menu_right_find_visitor" text="查找访客" />
+
+      <MenuElement  name="menu_right_move_chat" enabled="false"    text="移除对话" />
      <MenuElement   name="menu_right_forbid_user" text="屏蔽此人" />
 
- <MenuElement name="menu_right_set_filter" text="设置访客过滤条件" >
+  <MenuElement name="menu_right_set_filter" text="设置访客过滤条件" >
         <MenuElement  name="menu_right_show_all"    text="显示全部">
           <HorizontalLayout>
           <Label name="label_right_set_filter_show_all" width="24"  bkimage="file='menu\\check.png'"  />
