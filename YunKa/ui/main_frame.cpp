@@ -3097,17 +3097,11 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 			//筛选访客按钮
 			if (i == 5 || i >= 8)
 			{
-				m_pManagerBtn[i].m_pManagerBtn->SetNormalImage(m_pManagerBtn[i].pushedImage);
-				m_pManagerBtn[i].m_pManagerBtn->SetHotImage(m_pManagerBtn[i].hotImage);
-				m_pManagerBtn[i].m_pManagerBtn->SetPushedImage(m_pManagerBtn[i].hotImage);
-				m_pManagerBtn[i].m_buttonState = 1;
+				SetManagerButtonState(i,1);
 			}
 			else
 			{
-				m_pManagerBtn[i].m_pManagerBtn->SetNormalImage(m_pManagerBtn[i].normalImage);
-				m_pManagerBtn[i].m_pManagerBtn->SetHotImage(m_pManagerBtn[i].normalImage);
-				m_pManagerBtn[i].m_pManagerBtn->SetPushedImage(m_pManagerBtn[i].normalImage);
-				m_pManagerBtn[i].m_buttonState = 0;
+				SetManagerButtonState(i, 0);
 			}
 		}
 		return;
@@ -3126,23 +3120,102 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 		{
 			if (i == 1 || i == 2|| i == 6 || i == 7)
 			{
-				m_pManagerBtn[i].m_pManagerBtn->SetNormalImage(m_pManagerBtn[i].normalImage);
-				m_pManagerBtn[i].m_pManagerBtn->SetHotImage(m_pManagerBtn[i].normalImage);
-				m_pManagerBtn[i].m_pManagerBtn->SetPushedImage(m_pManagerBtn[i].normalImage);
-				m_pManagerBtn[i].m_buttonState = 0;
+				SetManagerButtonState(i, 0);
 			}
 			else
 			{
-				m_pManagerBtn[i].m_pManagerBtn->SetNormalImage(m_pManagerBtn[i].pushedImage);
-				m_pManagerBtn[i].m_pManagerBtn->SetHotImage(m_pManagerBtn[i].hotImage);
-				m_pManagerBtn[i].m_pManagerBtn->SetPushedImage(m_pManagerBtn[i].hotImage);
-				m_pManagerBtn[i].m_buttonState = 1;
+				SetManagerButtonState(i, 1);
 			}
 		}
 	}
 	else
 	{
 		VISITOR_TYPE  type = CheckIdForTalkType(id);
+		switch (type)
+		{
+		case VISITOR_REQ_ING:
+			for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
+			{
+				if (i == 0)
+				{
+					SetManagerButtonState(i, 0);
+				}
+				else
+				{
+					SetManagerButtonState(i, 1);
+				}
+			}
+			break;
+		case VISITOR_TALKING_MYSELF:
+
+			break;
+
+
+		case VISITOR_TALKING_OTHER:
+			for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
+			{
+				if (i == 1 || i == 2 || i == 6 || i == 7)
+				{
+					SetManagerButtonState(i, 0);
+				}
+				else
+				{
+					SetManagerButtonState(i, 1);
+				}
+			}
+			break;
+
+		case VISITOR_TALKING_HELP_OTHER:
+
+			break;
+
+		case VISITOR_TRANING:
+
+			break;
+
+		case VISITOR_INVOTING:
+			break;
+
+		case VISITOR_IN_TALK_ING:
+			break;
+
+			
+		case VISITOR_ONLINE_AUTO_INVOTING:
+			for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
+			{
+				if (i == 0 || i == 1 || i == 2 || i == 6 || i == 7)
+				{
+					SetManagerButtonState(i, 0);
+				}
+				else
+				{
+					SetManagerButtonState(i, 1);
+				}
+			}
+			break;
+		case VISITOR_ONLINE_AUTO_VISITING:
+
+			break;
+		case VISITOR_ONLINE_AUTO_END:
+
+			break;
+		default:
+
+			for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
+			{
+				if (i == 5 || i >= 8)
+				{
+					SetManagerButtonState(i, 1);
+				}
+				else
+				{
+					SetManagerButtonState(i, 0);
+				}
+			}
+			break;
+		}
+
+
 
 #if 0
 		TREENODEENUM  type = CheckIdForNodeType(id);
@@ -4270,7 +4343,6 @@ VISITOR_TYPE  CMainFrame::CheckIdForTalkType(unsigned long id)
 
 		if (id == m_manager->m_userInfo.UserInfo.uid) //自己底下
 		{
-
 			list<unsigned long>::iterator iterList = m_activeList.begin();
 			for (; iterList != m_activeList.end(); iterList++)
 			{
@@ -4290,14 +4362,21 @@ VISITOR_TYPE  CMainFrame::CheckIdForTalkType(unsigned long id)
 		}
 	}
 
-	else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_TALK)
+	else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_INVITE)
 	{
+		type = VISITOR_INVOTING;
+	}
 
+	else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_TRANSFER)
+	{
+		type = VISITOR_TRANING;
 	}
 
 
 
 	return  type;
+
+
 }
 
 //判定当前的用户id 处于那种状态底下
@@ -4789,6 +4868,31 @@ void CMainFrame::ShowBigImage(string url, MSG_DATA_TYPE msgDataType)
 #endif
 
 
+
+}
+
+
+//0 为不可能 1为可用
+
+void CMainFrame::SetManagerButtonState(int i,int type)
+{
+	if (type == 0)
+	{
+
+		m_pManagerBtn[i].m_pManagerBtn->SetNormalImage(m_pManagerBtn[i].normalImage);
+		m_pManagerBtn[i].m_pManagerBtn->SetHotImage(m_pManagerBtn[i].normalImage);
+		m_pManagerBtn[i].m_pManagerBtn->SetPushedImage(m_pManagerBtn[i].normalImage);
+		m_pManagerBtn[i].m_buttonState = 0;
+
+
+	}
+	else
+	{
+		m_pManagerBtn[i].m_pManagerBtn->SetNormalImage(m_pManagerBtn[i].pushedImage);
+		m_pManagerBtn[i].m_pManagerBtn->SetHotImage(m_pManagerBtn[i].hotImage);
+		m_pManagerBtn[i].m_pManagerBtn->SetPushedImage(m_pManagerBtn[i].hotImage);
+		m_pManagerBtn[i].m_buttonState = 1;
+	}
 
 }
 
