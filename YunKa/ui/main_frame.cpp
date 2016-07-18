@@ -1007,6 +1007,8 @@ void CMainFrame::OnItemRbClick(TNotifyUI &msg)
 	string sid = m_curSavedSid;
 	CWebUserObject *pWebUser = NULL;
 	CUserObject *pUser = NULL;
+	int step = 0;
+	int height = 0;
 
 	if (msg.pSender->GetName() == L"userlist")
 	{
@@ -1016,18 +1018,21 @@ void CMainFrame::OnItemRbClick(TNotifyUI &msg)
 			case HOST_USER_DEFAULT:
 			case VISITOR_TALKING_OTHER://对话中
 				xmlPath = L"menu\\menu_right_no_id.xml";
+				step = 3;
 				break;
 				
 			case HOST_USER_ONLINE:
 				xmlPath = L"menu\\menu_right_user_online.xml";
+				step = 4;
 				break;
 
 			case HOST_USER_OFFLINE:
-
+				step = 4;
 				xmlPath = L"menu\\menu_right_user_offline.xml";
 				break;
 
 			case HOST_USER_MYSELF:
+				step = 8;
 				xmlPath = L"menu\\menu_right_myself_node.xml";
 				break;
 			
@@ -1035,10 +1040,12 @@ void CMainFrame::OnItemRbClick(TNotifyUI &msg)
 			case VISITOR_TRANING:                       //转接中
 			case VISITOR_INVOTING:                      //邀请中
 				xmlPath = L"menu\\menu_right_wait_request.xml";
+				step = 6;
 				break;
 
 			case VISITOR_TALKING_MYSELF:
 				xmlPath = L"menu\\menu_right_talk_myself.xml";
+				step = 7;
 				break;
 
 			case VISITOR_TALKING_HELP_OTHER:           //是别人的协助对象 对话中
@@ -1047,15 +1054,18 @@ void CMainFrame::OnItemRbClick(TNotifyUI &msg)
 	
 			case VISITOR_IN_TALK_ING:                   //内部对话中	
 				xmlPath = L"menu\\menu_right_inline_user_talk.xml";  
+				step = 8;
 				break;
 
 			case VISITOR_ONLINE_AUTO_INVOTING:          //自动邀请中
 			case VISITOR_ONLINE_AUTO_VISITING:          //访问中
+				step = 9;
 				xmlPath = L"menu\\menu_right_online_talk_visitor.xml";    //在线列表 用户的弹出菜单
 				break;
 
 			case VISITOR_ONLINE_AUTO_END:
 				xmlPath = L"menu\\menu_right_online_end_visitor.xml";
+				step = 5;
 				break;
 
 			default:
@@ -1066,9 +1076,16 @@ void CMainFrame::OnItemRbClick(TNotifyUI &msg)
 		{
 			CMenuWnd* pMenu = new CMenuWnd(m_hMainWnd);
 			CPoint cpoint = msg.ptMouse;
-
+		
 			ClientToScreen(this->m_hWnd, &cpoint);
 			pMenu->SetPath((WCHAR*)xmlPath.GetData());
+			RECT sysRect;
+			GetWindowRect(m_hWnd, &sysRect);
+
+			height = step * 30;
+			if (cpoint.y + height >= sysRect.bottom)
+				cpoint.y -= height;
+
 			pMenu->Init(NULL, _T(""), _T("xml"), cpoint);
 		}
 
