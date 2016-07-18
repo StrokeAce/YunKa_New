@@ -19,7 +19,7 @@
   <MenuElement name="menu_right_set_filter" text="设置访客过滤条件" >
         <MenuElement  name="menu_right_show_all"    text="显示全部">
           <HorizontalLayout>
-          <Label name="label_right_set_filter_show_all" width="24"  bkimage="file='menu\\check.png'"  />
+          <Label name="label_right_set_filter_show_all" width="24"  bkimage=""  />
           </HorizontalLayout>
       </MenuElement>
 
