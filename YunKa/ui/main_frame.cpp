@@ -2128,7 +2128,7 @@ void CMainFrame::ChangeShowUserMsgWnd(unsigned long id)
 	CWebUserObject *pWebUser = NULL;
 
 
-	if (m_curSelectId == id || id == 0)//切换聊天对象显示 
+	if (m_curSelectId == id || (id == 0 && m_curSavedSid.length() == 0) )//切换聊天对象显示 
 		return;
 
 	CheckIdForUerOrWebuser(id, m_curSavedSid, &pWebUser, &pUser);	
@@ -2160,7 +2160,6 @@ void CMainFrame::ChangeShowUserMsgWnd(unsigned long id)
 			ONE_MSG_INFO msgInfo = *iter;
 			CefString strCode(msgInfo.msg), strUrl("");
 			m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->ExecuteJavaScript(strCode, strUrl, 0);
-
 		}
 	}
 
@@ -3136,24 +3135,6 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 		case VISITOR_REQ_ING:
 			for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
 			{
-				if (i == 0)
-				{
-					SetManagerButtonState(i, 0);
-				}
-				else
-				{
-					SetManagerButtonState(i, 1);
-				}
-			}
-			break;
-		case VISITOR_TALKING_MYSELF:
-
-			break;
-
-
-		case VISITOR_TALKING_OTHER:
-			for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
-			{
 				if (i == 1 || i == 2 || i == 6 || i == 7)
 				{
 					SetManagerButtonState(i, 0);
@@ -3164,23 +3145,72 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 				}
 			}
 			break;
+		case VISITOR_TALKING_MYSELF:
+			for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
+			{
+				if (i == 0)
+				{
+					SetManagerButtonState(i, 0);
+				}
+				else
+				{
+					SetManagerButtonState(i, 1);
+				}
+			}
 
+			break;
+
+
+		case VISITOR_TALKING_OTHER:
 		case VISITOR_TALKING_HELP_OTHER:
-
+			for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
+			{
+				if (i==0||i == 1 || i == 2 || i == 6 || i == 7)
+				{
+					SetManagerButtonState(i, 0);
+				}
+				else
+				{
+					SetManagerButtonState(i, 1);
+				}
+			}
 			break;
 
 		case VISITOR_TRANING:
-
-			break;
-
 		case VISITOR_INVOTING:
+
+			for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
+			{
+				if ( i == 1 || i == 2 || i == 6 || i == 7)
+				{
+					SetManagerButtonState(i, 0);
+				}
+				else
+				{
+					SetManagerButtonState(i, 1);
+				}
+			}
 			break;
 
 		case VISITOR_IN_TALK_ING:
+			for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
+			{
+				if (i == 5 || i >= 8)
+				{
+					SetManagerButtonState(i, 1);
+				}
+				else
+				{
+					SetManagerButtonState(i, 0);
+				}
+			}
 			break;
 
 			
 		case VISITOR_ONLINE_AUTO_INVOTING:
+		case VISITOR_ONLINE_AUTO_VISITING:
+		case VISITOR_ONLINE_AUTO_END:
+
 			for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
 			{
 				if (i == 0 || i == 1 || i == 2 || i == 6 || i == 7)
@@ -3192,13 +3222,9 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 					SetManagerButtonState(i, 1);
 				}
 			}
-			break;
-		case VISITOR_ONLINE_AUTO_VISITING:
 
 			break;
-		case VISITOR_ONLINE_AUTO_END:
 
-			break;
 		default:
 
 			for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
@@ -4301,19 +4327,21 @@ VISITOR_TYPE  CMainFrame::CheckIdForTalkType(unsigned long id)
 			tempNode = iterSid->second;
 		}
 
-		//先删掉 转接中的用户 然后放入对话中
-		for (int j = 0; j < 2; j++)
+		//查找 用户 在 在线访客的哪个节点下面
+		for (int j = 0; j < 3; j++)
 		{
-			UserListUI::Node *tempFatherNode = pOnlineNode->child(1);
+			UserListUI::Node *tempFatherNode = pOnlineNode->child(j);
 			int num = tempFatherNode->num_children();
 			for (int i = 0; i < num; i++)
 			{
 				if (tempFatherNode->child(i) == tempNode)
 				{
-					if (j==0)
-					    type = VISITOR_ONLINE_AUTO_VISITING;
-					else
-						type = VISITOR_ONLINE_AUTO_END;			
+
+					type = (VISITOR_TYPE)(VISITOR_ONLINE_AUTO_INVOTING + j);
+					//if (j==0)
+					//    type = VISITOR_ONLINE_AUTO_VISITING;
+					//else
+					//	type = VISITOR_ONLINE_AUTO_END;			
 					break;
 				}
 			}
@@ -4469,9 +4497,9 @@ TREENODEENUM  CMainFrame::CheckIdForNodeType(unsigned long id)
 
 void CMainFrame::OnItemClickEvent(unsigned long id,int type)
 {
-	if (id > 0)
+	if (id >= 0)
 	{
-		if (m_curSelectId != id || type == -1)//切换聊天对象显示 
+		if (m_curSelectId != id || type == -1 || (id == 0 && m_curSavedSid.length() > 0) )//切换聊天对象显示 
 		{
 
 			ChangeShowUserMsgWnd(id);
@@ -4704,9 +4732,12 @@ BOOL CMainFrame::CheckItemForOnlineVisitor(UserListUI::Node *curNode)
 	return false;
 }
 
-
+//接受 
 void CMainFrame::AcceptChat()
 {
+	OnActiveUser(m_curSelectId, m_curSavedSid);
+
+	/*
 	if (m_curSelectId > 0)
 	{
 		map<unsigned long, UserListUI::Node*>::iterator iter = m_waitVizitorMap.find(m_curSelectId);
@@ -4715,7 +4746,7 @@ void CMainFrame::AcceptChat()
 			m_manager->SendTo_AcceptChat(m_curSelectId);
 		}
 	}
-
+	*/
 }
 
 void CMainFrame::RefuseChat()
