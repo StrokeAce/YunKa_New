@@ -373,6 +373,9 @@ private:
 
 	CShowBigImageDlg *pShowImgDlg;
 	//CShowBigImageDlg m_pShowImgDlg;
+
+	bool   m_wndShow;
+	int   m_wndType;
 };
 
 

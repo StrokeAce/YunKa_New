@@ -60,7 +60,8 @@ CMainFrame::CMainFrame(CChatManager* manager) :m_manager(manager)
 	//m_pShowImgDlg = NULL;
 
 	pShowImgDlg = NULL;
-
+	m_wndShow = 0;
+	m_wndType = -1;
 }
 
 
@@ -585,7 +586,7 @@ void CMainFrame::OnMaxBtn(TNotifyUI& msg)
 {
 
 	SendMessage(WM_SYSCOMMAND, SC_MAXIMIZE, 0);
-
+	m_wndType = 2;
 }
 
 
@@ -595,6 +596,7 @@ void CMainFrame::OnRestoreBtn(TNotifyUI& msg)
 
 	SendMessage(WM_SYSCOMMAND, SC_RESTORE, 0);
 
+	m_wndType = 1;
 }
 
 
@@ -1024,6 +1026,7 @@ void CMainFrame::OnItemRbClick(TNotifyUI &msg)
 
 			case VISITOR_TALKING_HELP_OTHER:           //是别人的协助对象 对话中
 				xmlPath = L"menu\\menu_right_talk_invote_other.xml";
+				step = 7;
 				break;
 	
 			case VISITOR_IN_TALK_ING:                   //内部对话中	
@@ -1039,7 +1042,7 @@ void CMainFrame::OnItemRbClick(TNotifyUI &msg)
 
 			case VISITOR_ONLINE_AUTO_END:
 				xmlPath = L"menu\\menu_right_online_end_visitor.xml";
-				step = 5;
+				step = 9;
 				break;
 
 			default:
@@ -2060,11 +2063,14 @@ void CMainFrame::ShowRightOptionFrameView(unsigned long id,string sid)
 	m_pVisitorRelatedHandler.handler->ShowBrowser(SW_SHOW);
 
 	//这里只判断 是不是访客用户 
-	pWebUser = m_manager->GetWebUserObjectByUid(id);
-	if (pWebUser == NULL)
+	if (id == 0)
 		pWebUser = m_manager->GetWebUserObjectBySid((char*)sid.c_str());
+	else
+		pWebUser = m_manager->GetWebUserObjectByUid(id);
 
-	if (id == 0 || pWebUser == NULL || !m_pVisitorRelatedHandler.isCreated)
+	
+
+	if ( (id == 0 && sid.empty()) || pWebUser == NULL || !m_pVisitorRelatedHandler.isCreated)
 	{
 		LoadBrowser(NULL);
 		return;
@@ -2210,7 +2216,7 @@ void CMainFrame::ChangeShowUserMsgWnd(unsigned long id)
 	CWebUserObject *pWebUser = NULL;
 
 
-	if (m_curSelectId == id || (id == 0 && m_curSavedSid.length() == 0) )//切换聊天对象显示 
+	if ((m_curSelectId == id && id!= 0) || (id == 0 && m_curSavedSid.length() == 0) )//切换聊天对象显示 
 		return;
 
 	CheckIdForUerOrWebuser(id, m_curSavedSid, &pWebUser, &pUser);	
@@ -2273,6 +2279,41 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 	//隐藏主窗口
 	else if (controlName == L"menu_hide_main_wnd")
 	{
+		if (m_wndShow == 0)
+		{
+			this->ShowWindow(SW_HIDE);
+			m_wndShow = true;
+		}
+		else
+		{
+			if (m_wndType == 2)
+				this->ShowWindow(SW_SHOWMAXIMIZED);
+			else
+				this->ShowWindow(SW_SHOW);
+
+
+			m_wndShow = false;
+				
+
+			//RECT rt;
+			//GetWindowRect(this->m_hWnd,&rt);
+
+			//int scx, scy;
+			//scx = GetSystemMetrics(SM_CXSCREEN);
+			//scy = GetSystemMetrics(SM_CYSCREEN);
+
+			//if (this->IsIconic())
+			//	ShowWindow(SW_RESTORE);
+			//else
+			//	ShowWindow(SW_SHOW);
+
+			//SetForegroundWindow();
+
+
+
+			//this->ShowInTaskbar(m_hWnd, true);;
+		}
+
 
 	}
 	//上线
