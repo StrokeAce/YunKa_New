@@ -233,7 +233,7 @@ public:
 
 	void CMainFrame::SetManagerButtonState(int i, int type);
 	void CMainFrame::CreateSmallTaskIcon(WCHAR *name);
-	void CMainFrame::ShowInTaskbar(HWND m_hWnd, BOOL bShow);
+	void CMainFrame::OnCancel();
 
 //接入聊天 相关处理
 	void CMainFrame::OnMenuEvent(CDuiString controlName);

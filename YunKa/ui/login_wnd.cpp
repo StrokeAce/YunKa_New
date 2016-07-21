@@ -266,7 +266,7 @@ LRESULT CLoginWnd::MessageHandler(UINT uMsg, WPARAM wParam, LPARAM lParam, bool&
 			}
 		}
 		else if (wParam == VK_ESCAPE) {
-			//PostQuitMessage(0);
+
 
 		}
 

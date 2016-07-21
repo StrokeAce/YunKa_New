@@ -38,6 +38,9 @@ public:
 	unsigned long m_currentSelectUserId;
 
 
+	int  m_showWnd;
+
+
 };
 
 

@@ -23,7 +23,6 @@
 
 CMainFrame::CMainFrame(CChatManager* manager) :m_manager(manager)
 {
-
 	//初始化
 	m_pFontBtn = m_pFaceBtn = m_pScreenBtn = pSendMsgBtn = m_pVoiceBtn = NULL;
 	m_pRightCommonWordCombo = m_pRightCommonTypeCombo = m_pRightCommonFindCombo = NULL;
@@ -719,6 +718,8 @@ void CMainFrame::OnPrepare(TNotifyUI& msg)
 	CDuiString typeString[4] = { _T("对话中"), _T("转接中"), _T("邀请中"), _T("内部对话") };
 	WCHAR  buf[128] = {0};
 
+
+	_globalSetting.m_showWnd = 1;
 	//cef窗口
 	InitLibcef();
 
@@ -2261,6 +2262,8 @@ void CMainFrame::ChangeShowUserMsgWnd(unsigned long id)
 //右键菜单弹出处理 
 void CMainFrame::OnMenuEvent(CDuiString controlName)
 {
+	TNotifyUI msg;
+
 	if (controlName.IsEmpty())
 		return;
 
@@ -2301,9 +2304,6 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 			else
 				::ShowWindow(this->m_hWnd, SW_SHOW);
 				
-
-			///SetForegroundWindow(this->m_hWnd);
-			//this->ShowInTaskbar(m_hWnd, true);
 		}
 	}
 	//上线
@@ -2311,6 +2311,10 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 	{
 		//m_frameSmallMenu.DeleteSmallIcon();
 		CreateSmallTaskIcon(DEFINE_SMALL_ICON_PATH);
+
+
+
+
 	}
 	//繁忙
 	else if (controlName == L"menu_busy")
@@ -2329,11 +2333,12 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 	{
 		//m_frameSmallMenu.DeleteSmallIcon();
 		CreateSmallTaskIcon(DEFINE_SMALL_OFFLINE_ICON_PATH);
+		OnCloseBtn(msg);
 	}
 	//退出
 	else if (controlName == L"menu_quit")
 	{
-		TNotifyUI msg;
+
 		OnCloseBtn(msg);
 	}
 
@@ -5160,40 +5165,12 @@ void CMainFrame::CreateSmallTaskIcon(WCHAR *name)
 }
 
 
-void CMainFrame::ShowInTaskbar(HWND m_hWnd, BOOL bShow)
+void CMainFrame::OnCancel()
 {
-	//在app的InitInstance中加入::CoInitialize(NULL);
-	DECLARE_INTERFACE_(ITaskbarList, IUnknown)
-	{
-		STDMETHOD(QueryInterface) (THIS_ REFIID riid, LPVOID * ppvObj) PURE;
-		STDMETHOD_(ULONG, AddRef) (THIS)PURE;
-		STDMETHOD_(ULONG, Release) (THIS)PURE;
-		STDMETHOD(ActivateTab)(HWND)PURE;
 
-		STDMETHOD(AddTab)(HWND)PURE;
-		STDMETHOD(DeleteTab)(HWND)PURE;
-		STDMETHOD(HrInit)(void)PURE;
-	};
-
-	HRESULT hr;
-	ITaskbarList *pTaskbarList;
-
-	hr = CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER,
-		IID_ITaskbarList, (void**)&pTaskbarList);
-
-	if (bShow)
-	{
-		pTaskbarList->AddTab(m_hWnd);
-	}
-	else
-	{
-		pTaskbarList->DeleteTab(m_hWnd);
-	}
-	pTaskbarList->Release();
 
 
 }
-
 
 
 
