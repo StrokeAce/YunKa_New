@@ -29,10 +29,15 @@ public:
 	void DeleteSmallIcon();
 	void CreateMyAppMenu(POINT point);
 	LRESULT HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
+	void CSmallMenu::SetMenuType(int type);
+
 
 private:
 	HWND m_hMenuWnd;
 
+	int m_showType;
+
+	POINT m_lpoint;
 
 
 

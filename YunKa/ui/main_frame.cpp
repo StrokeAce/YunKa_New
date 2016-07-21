@@ -61,7 +61,7 @@ CMainFrame::CMainFrame(CChatManager* manager) :m_manager(manager)
 
 	pShowImgDlg = NULL;
 	m_wndShow = 0;
-	m_wndType = -1;
+
 }
 
 
@@ -180,15 +180,9 @@ LRESULT CMainFrame::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	TNotifyUI msg = {};
 
-
-
-    if (uMsg == WM_FACE_CTRL_SEL)
+	if (uMsg == WM_SHOWWINDOW)
 	{
-
-		OnFaceCtrlSel(uMsg,wParam,lParam);
 	}
-
-
 	if (uMsg == WM_MOUSEMOVE)
 		OnMouseMove(uMsg, wParam, lParam);
 
@@ -319,10 +313,13 @@ LRESULT CMainFrame::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 LRESULT CMainFrame::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
+	if (uMsg == WM_FACE_CTRL_SEL)
+	{
 
+		OnFaceCtrlSel(uMsg, wParam, lParam);
+	}
 
-
-	if (uMsg == WM_SCREEN_CAPTURE_SUCCED) //截图完成后的消息操作
+	else if (uMsg == WM_SCREEN_CAPTURE_SUCCED) //截图完成后的消息操作
 	{
 		OnCtrlVEvent();
 	}
@@ -381,7 +378,7 @@ LRESULT CMainFrame::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
 		JsCallMFC(wParam, lParam);
 	}
 
-	if (uMsg == WM_MENU_START)
+	else if (uMsg == WM_MENU_START)
 	{ 
 		WCHAR *name = (WCHAR *)wParam;
 		CDuiString conName = name;
@@ -389,6 +386,10 @@ LRESULT CMainFrame::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
 
 		delete []name;
 	}
+
+
+
+
 
 
 	m_frameSmallMenu.HandleCustomMessage(uMsg, wParam, lParam);
@@ -586,7 +587,7 @@ void CMainFrame::OnMaxBtn(TNotifyUI& msg)
 {
 
 	SendMessage(WM_SYSCOMMAND, SC_MAXIMIZE, 0);
-	m_wndType = 2;
+
 }
 
 
@@ -596,7 +597,6 @@ void CMainFrame::OnRestoreBtn(TNotifyUI& msg)
 
 	SendMessage(WM_SYSCOMMAND, SC_RESTORE, 0);
 
-	m_wndType = 1;
 }
 
 
@@ -749,9 +749,13 @@ void CMainFrame::OnPrepare(TNotifyUI& msg)
 	//上层管理按钮 设置初始状态
 	UpdateTopCenterButtonState(0);
 
+	
 	//右下角小图标
-	m_frameSmallMenu.Init();
-	m_frameSmallMenu.CreateSmallIcon(this->m_hWnd, DEFINE_SMALL_ICON_PATH);
+	CreateSmallTaskIcon(DEFINE_SMALL_ICON_PATH);
+	//m_frameSmallMenu.Init();
+	//CDuiString path = GetCurrentPathW();
+	//path += DEFINE_SMALL_ICON_PATH;
+	//m_frameSmallMenu.CreateSmallIcon(this->m_hWnd, (WCHAR*)path.GetData());
 
 	//表情包初始化
 	wstring strPath = ZYM::CPath::GetCurDir() + _T("../bin/") _T("SkinRes\\Face\\FaceConfig.xml");
@@ -2281,61 +2285,56 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 	{
 		if (m_wndShow == 0)
 		{
-			this->ShowWindow(SW_HIDE);
+			
 			m_wndShow = true;
+			m_frameSmallMenu.SetMenuType(1);
+
+			::ShowWindow(this->m_hWnd, SW_HIDE);
 		}
 		else
 		{
-			if (m_wndType == 2)
-				this->ShowWindow(SW_SHOWMAXIMIZED);
-			else
-				this->ShowWindow(SW_SHOW);
-
-
 			m_wndShow = false;
+			m_frameSmallMenu.SetMenuType(0);
+		
+			if (::IsIconic(this->m_hWnd))	
+				::ShowWindow(this->m_hWnd, SW_RESTORE);
+			else
+				::ShowWindow(this->m_hWnd, SW_SHOW);
 				
 
-			//RECT rt;
-			//GetWindowRect(this->m_hWnd,&rt);
-
-			//int scx, scy;
-			//scx = GetSystemMetrics(SM_CXSCREEN);
-			//scy = GetSystemMetrics(SM_CYSCREEN);
-
-			//if (this->IsIconic())
-			//	ShowWindow(SW_RESTORE);
-			//else
-			//	ShowWindow(SW_SHOW);
-
-			//SetForegroundWindow();
-
-
-
-			//this->ShowInTaskbar(m_hWnd, true);;
+			///SetForegroundWindow(this->m_hWnd);
+			//this->ShowInTaskbar(m_hWnd, true);
 		}
-
-
 	}
 	//上线
 	else if (controlName == L"menu_online")
 	{
-
+		//m_frameSmallMenu.DeleteSmallIcon();
+		CreateSmallTaskIcon(DEFINE_SMALL_ICON_PATH);
 	}
 	//繁忙
 	else if (controlName == L"menu_busy")
 	{
+		//m_frameSmallMenu.DeleteSmallIcon();
+		CreateSmallTaskIcon(DEFINE_SMALL_BUSY_ICON_PATH);
 	}
 	//离开
 	else if (controlName == L"menu_leave")
 	{
+		//m_frameSmallMenu.DeleteSmallIcon();
+		CreateSmallTaskIcon(DEFINE_SMALL_LEAVE_ICON_PATH);
 	}
 	//注销
 	else if (controlName == L"menu_logout")
 	{
+		//m_frameSmallMenu.DeleteSmallIcon();
+		CreateSmallTaskIcon(DEFINE_SMALL_OFFLINE_ICON_PATH);
 	}
 	//退出
 	else if (controlName == L"menu_quit")
 	{
+		TNotifyUI msg;
+		OnCloseBtn(msg);
 	}
 
 
@@ -5149,6 +5148,51 @@ void CMainFrame::SetManagerButtonState(int i,int type)
 
 }
 
+
+void CMainFrame::CreateSmallTaskIcon(WCHAR *name)
+{
+	m_frameSmallMenu.DeleteSmallIcon();
+
+	m_frameSmallMenu.Init();
+	CDuiString path = GetCurrentPathW();
+	path += name;// DEFINE_SMALL_ICON_PATH;pe
+	m_frameSmallMenu.CreateSmallIcon(this->m_hWnd, (WCHAR*)path.GetData());
+}
+
+
+void CMainFrame::ShowInTaskbar(HWND m_hWnd, BOOL bShow)
+{
+	//在app的InitInstance中加入::CoInitialize(NULL);
+	DECLARE_INTERFACE_(ITaskbarList, IUnknown)
+	{
+		STDMETHOD(QueryInterface) (THIS_ REFIID riid, LPVOID * ppvObj) PURE;
+		STDMETHOD_(ULONG, AddRef) (THIS)PURE;
+		STDMETHOD_(ULONG, Release) (THIS)PURE;
+		STDMETHOD(ActivateTab)(HWND)PURE;
+
+		STDMETHOD(AddTab)(HWND)PURE;
+		STDMETHOD(DeleteTab)(HWND)PURE;
+		STDMETHOD(HrInit)(void)PURE;
+	};
+
+	HRESULT hr;
+	ITaskbarList *pTaskbarList;
+
+	hr = CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER,
+		IID_ITaskbarList, (void**)&pTaskbarList);
+
+	if (bShow)
+	{
+		pTaskbarList->AddTab(m_hWnd);
+	}
+	else
+	{
+		pTaskbarList->DeleteTab(m_hWnd);
+	}
+	pTaskbarList->Release();
+
+
+}
 
 
 

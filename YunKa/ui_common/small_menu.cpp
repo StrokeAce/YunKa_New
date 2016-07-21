@@ -8,7 +8,7 @@
 
 CSmallMenu::CSmallMenu()
 {
-
+	m_showType = 0;
 }
 
 CSmallMenu::~CSmallMenu()
@@ -27,6 +27,10 @@ void CSmallMenu::Init()
 
 }
 
+void CSmallMenu::SetMenuType(int type)
+{
+	m_showType = type;
+}
 
 void CSmallMenu::CreateSmallIcon(HWND hWnd, WCHAR *path)
 {
@@ -35,8 +39,8 @@ void CSmallMenu::CreateSmallIcon(HWND hWnd, WCHAR *path)
 	HICON hIconSmall = (HICON)::LoadImage(GetModuleHandle(NULL),
 		path,
 		IMAGE_ICON,
-		48,//::GetSystemMetrics(SM_CXSMICON),
-		48,//::GetSystemMetrics(SM_CYSMICON),
+		16,//::GetSystemMetrics(SM_CXSMICON),
+		16,//::GetSystemMetrics(SM_CYSMICON),
 		LR_LOADFROMFILE);
 
 	nid.cbSize = sizeof(NOTIFYICONDATA);//定义structure大小
@@ -45,7 +49,7 @@ void CSmallMenu::CreateSmallIcon(HWND hWnd, WCHAR *path)
 	nid.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP; //选择那几个参数被使用
 	nid.uCallbackMessage = WM_MY_MESSAGE_NOTIFYICON;     //用户自定义事件 #define WM_NOTIFYICON WM_USER+1(可以是任何整数）
 	nid.hIcon = hIconSmall;                 //托盘图标，可以是和window图标相同，也可以用LoadIcon来定义
-	lstrcpyn(nid.szTip, _T("界面测试程序"), sizeof(nid.szTip));
+	lstrcpyn(nid.szTip, _T("云咖"), sizeof(nid.szTip));
 	//szTip是char[64] 不能直接和 string划等号，所以要借助strcpy函数来赋值
 	//设置好DOTIFYICONDATA之后，就可以调用Shell_NotifyIcon函数了 其中 dwMessage 是有固定的几个选择，要添加托盘图标我们用NIM_ADD，第二个参数是一个指向NOTIFYICONDATA的结构指针
 	Shell_NotifyIcon(NIM_ADD, &nid);
@@ -71,10 +75,17 @@ void CSmallMenu::CreateMyAppMenu(POINT point)
 
 
 	//ClientToScreen(m_hMenuWnd, &cpoint);
-	pMenu->SetPath(L"menu\\small_menu.xml");
+	if (m_showType == 0)
+		pMenu->SetPath(L"menu\\small_menu_hide.xml");
+	else if (m_showType == 1)
+		pMenu->SetPath(L"menu\\small_menu_show.xml");
+
 	pMenu->Init(NULL, _T(""), _T("xml"), cpoint);
 
 }
+
+
+
 
 LRESULT CSmallMenu::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -106,9 +117,9 @@ LRESULT CSmallMenu::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 		//右键弹起时，显示菜单
 		else if (uMouseMsg == WM_RBUTTONUP)
 		{
-			POINT lpoint;
-			GetCursorPos(&lpoint);//得到鼠标位置
-			CreateMyAppMenu(lpoint);
+	
+			GetCursorPos(&m_lpoint);//得到鼠标位置
+			CreateMyAppMenu(m_lpoint);
 		}
 
 	}

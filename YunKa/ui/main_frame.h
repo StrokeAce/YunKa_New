@@ -232,6 +232,8 @@ public:
 	//0 为不可能 1为可用
 
 	void CMainFrame::SetManagerButtonState(int i, int type);
+	void CMainFrame::CreateSmallTaskIcon(WCHAR *name);
+	void CMainFrame::ShowInTaskbar(HWND m_hWnd, BOOL bShow);
 
 //接入聊天 相关处理
 	void CMainFrame::OnMenuEvent(CDuiString controlName);
@@ -375,7 +377,7 @@ private:
 	//CShowBigImageDlg m_pShowImgDlg;
 
 	bool   m_wndShow;
-	int   m_wndType;
+
 };
 
 

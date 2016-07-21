@@ -33,11 +33,11 @@
 
 //全局字符串定义 
 //小图标
-#define    DEFINE_SMALL_ICON_PATH                                               _T("E:\\Moliyun\\bin\\SkinRes\\small.ico")
+#define    DEFINE_SMALL_ICON_PATH                                               _T("\\SkinRes\\ico\\small.ico")
 
-
-
-
+#define    DEFINE_SMALL_BUSY_ICON_PATH                                          _T("\\SkinRes\\ico\\traybusy.ico")
+#define    DEFINE_SMALL_LEAVE_ICON_PATH                                         _T("\\SkinRes\\ico\\trayleave.ico")
+#define    DEFINE_SMALL_OFFLINE_ICON_PATH                                       _T("\\SkinRes\\ico\\trayoffline.ico")
 
 //消息定义
 #define WM_INIT_ROOM_USER_LIST_MSG                                                WM_USER+100
