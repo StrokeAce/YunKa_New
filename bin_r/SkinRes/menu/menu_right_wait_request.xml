@@ -4,9 +4,9 @@
   <Font name="微软雅黑" size="12" bold="true"/>
     <Default name="Menu" value="inset=&quot;2,2,2,2&quot; itemtextpadding=&quot;30,0,0,0&quot; bkimage=&quot;file='menu\\menu_bk.png' restype='png' corner='30,8,8,8'&quot; hole=&quot;false&quot;" />
   <Menu>
-      <MenuElement name="menu_right_accept_chat" text="接受此会话" />
+      <MenuElement name="menu_right_accept_chat" text="接受此对话" />
 
-      <MenuElement name="menu_right_refuse_chat" text="拒绝此会话" />
+      <MenuElement name="menu_right_refuse_chat" text="拒绝此对话" />
 
 
       <MenuElement name="menu_right_change_visitor_name" text="更改访客名称" />
@@ -16,7 +16,7 @@
  <MenuElement name="menu_right_set_filter" text="设置访客过滤条件" >
         <MenuElement  name="menu_right_show_all"    text="显示全部">
           <HorizontalLayout>
-          <Label name="label_right_set_filter_show_all" width="24"  bkimage="file='menu\\check.png'"  />
+          <Label name="label_right_set_filter_show_all" width="24"  bkimage=""  />
           </HorizontalLayout>
       </MenuElement>
 

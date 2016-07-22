@@ -728,7 +728,7 @@ bool CHttpLoad::Init()
 	curl_easy_setopt(m_curl, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(m_curl, CURLOPT_MAXREDIRS, 10L);
 	curl_easy_setopt(m_curl, CURLOPT_AUTOREFERER, 10L);
-	curl_easy_setopt(m_curl, CURLOPT_TIMEOUT, 6);
+	curl_easy_setopt(m_curl, CURLOPT_TIMEOUT, 6L);
 	curl_easy_setopt(m_curl, CURLOPT_COOKIEFILE, ""); /* just to start the cookie engine */
 
 	//If a zero-length string is set, then an Accept-Encoding: header containing all supported encodings is sent. 

@@ -137,6 +137,57 @@ bool WxMsgBase::ParseFromJson(const Json::Value &os)
 	return true;
 }
 
+bool UserAgentInfo::ToSendJson(Json::Value &jv) const
+{
+	jv["at"] = m_agenttype;
+	jv["pt"] = m_platformType;
+	if (!m_platformCPU.empty()){
+		jv["cpu"] = m_platformCPU;
+	}
+	if (!m_ScreenSize.empty()){
+		jv["ss"] = m_ScreenSize;
+	}
+	if (!m_mobileBrand.empty()){
+		jv["mb"] = m_mobileBrand;
+	}
+	if (!m_mobileModel.empty()){
+		jv["mm"] = m_mobileModel;
+	}
+	if (!m_netType.empty()){
+		jv["nt"] = m_netType;
+	}
+	if (!m_sLanguage.empty()){
+		jv["l"] = m_sLanguage;
+	}
+	if (!m_osName.empty()){
+		jv["os"] = m_osName;
+	}
+	if (!m_browseName.empty()){
+		jv["b"] = m_browseName;
+	}
+	if (!m_browserEmbedApp.empty())
+	{
+		jv["bea"] = m_browserEmbedApp;
+	}
+	return true;
+}
+
+bool UserAgentInfo::ParseFromJson(const Json::Value &jv)
+{
+	m_agenttype = GetStrFromJson(jv, "at");
+	m_platformType = GetStrFromJson(jv, "pt");
+	m_platformCPU = GetStrFromJson(jv, "cpu");
+	m_ScreenSize = GetStrFromJson(jv, "ss");
+	m_mobileBrand = GetStrFromJson(jv, "mb");
+	m_mobileModel = GetStrFromJson(jv, "mm");
+	m_netType = GetStrFromJson(jv, "nt");
+	m_sLanguage = GetStrFromJson(jv, "l");
+	m_osName = GetStrFromJson(jv, "os");
+	m_browseName = GetStrFromJson(jv, "b");
+	m_browserEmbedApp = GetStrFromJson(jv, "bea");
+	return true;
+}
+
 bool WxMsgBase::ToSendJson(Json::Value &os) const
 {
 	if (!WxObj::ToSendJson(os)){

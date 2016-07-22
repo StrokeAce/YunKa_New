@@ -112,7 +112,7 @@ bool CChatManager::ReadSystemConfig()
 	sprintf(sFile, "%s\\config.dat", strFile.c_str(), m_userInfo.UserInfo.uid);
 	if (!m_sysConfig->LoadData(sFile))
 	{
-		SetSystemConfigByInitconfig();		
+		SetSystemConfigByInitconfig();
 	}
 
 	m_sysConfig->m_sVisitorServer = m_initConfig.sVisitorServer;
@@ -1310,6 +1310,12 @@ int CChatManager::RecvFloatCreateChat(PACK_HEADER packhead, char *pRecvBuff, int
 		sprintf(RecvInfo.clienttid, "%lu", RecvInfo.uWebuin);
 		g_WriteLog.WriteLog(C_LOG_TRACE, "RecvFloatCreateChat clientid is empty,set as webuin:%u", RecvInfo.uWebuin);
 	}
+
+	if (packhead.langtype == LANGUAGE_UTF8)
+	{
+		ConvertMsg(RecvInfo.webname, sizeof(RecvInfo.webname) - 1);
+	}
+
 	pWebUser = GetWebUserObjectBySid(RecvInfo.clienttid);
 	if (pWebUser == NULL)
 	{
@@ -1437,6 +1443,11 @@ int CChatManager::RecvFloatChatInfo(PACK_HEADER packhead, char *pRecvBuff, int l
 		g_WriteLog.WriteLog(C_LOG_TRACE, "RecvFloatChatInfo uAdminId:%u,usort:%hu,uWebuin:%u,chatid:%s,clienttid:%s,webname:%s,uKefu:%u,uFromAdmin:%u,uFromSort:%hu",
 			RecvInfo.uAdminId, RecvInfo.sSort, RecvInfo.uWebUin, RecvInfo.chatid, RecvInfo.strClientId, RecvInfo.webnickname, RecvInfo.uKefuUin, RecvInfo.uFromAmdind, RecvInfo.sFromSort);
 
+	}
+
+	if (packhead.langtype == LANGUAGE_UTF8)
+	{
+		ConvertMsg(RecvInfo.webnickname, sizeof(RecvInfo.webnickname) - 1);
 	}
 
 	pWebUser = GetWebUserObjectByUid(RecvInfo.uWebUin);
@@ -1680,6 +1691,12 @@ int CChatManager::RecvFloatChatMsg(PACK_HEADER packhead, char *pRecvBuff, int le
 		}
 	}
 
+	if (packhead.langtype == LANGUAGE_UTF8)
+	{
+		ConvertMsg(RecvInfo.strmsg, sizeof(RecvInfo.strmsg) - 1);
+		ConvertMsg(RecvInfo.nickname, sizeof(RecvInfo.nickname) - 1);
+	}
+
 	if (strcmp(RecvInfo.strfontinfo, "JSON=WX") == 0)
 	{
 		if (!pWebUser->m_bIsFrWX)
@@ -1687,7 +1704,7 @@ int CChatManager::RecvFloatChatMsg(PACK_HEADER packhead, char *pRecvBuff, int le
 			pWebUser->m_bIsFrWX = true;
 			m_handlerMsgs->RecvWebUserInfo(pWebUser, 0);
 		}
-		pWxMsg = ParseWxMsg(pWebUser, RecvInfo.strmsg, pAssistUser,RecvInfo.tMsgTime);
+		pWxMsg = ParseWxMsg(pWebUser, RecvInfo.strmsg, pAssistUser, RecvInfo.tMsgTime);
 
 		if (pWxMsg == NULL)
 		{
@@ -1722,12 +1739,6 @@ int CChatManager::RecvFloatChatMsg(PACK_HEADER packhead, char *pRecvBuff, int le
 		TransferStrToFace(content);
 		ReplaceFaceId(content);
 		strncpy(RecvInfo.strmsg, content.c_str(), MAX_MSG_RECVLEN);
-	}
-
-	if (packhead.langtype == LANGUAGE_UTF8)
-	{
-		ConvertMsg(RecvInfo.strmsg, sizeof(RecvInfo.strmsg) - 1);
-		ConvertMsg(RecvInfo.nickname, sizeof(RecvInfo.nickname) - 1);
 	}
 
 	//访客发来消息
@@ -3013,7 +3024,7 @@ WxMsgBase* CChatManager::ParseWxMsg(CWebUserObject* pWebUser, char* msg, CUserOb
 {
 	//微信消息类型，utf8编码类型 
 	WxMsgBase* msgBase = NULL;
-	WxObj *pwxobj = ParseWxJsonMsg(msg);
+	WxObj *pwxobj = ParseWxJsonMsg(msg);	
 	MSG_FROM_TYPE msgFormType = MSG_FROM_WEBUSER;
 	if (pAssistUser)
 	{
@@ -3277,8 +3288,7 @@ void CChatManager::RecvComSendWorkBillMsg(unsigned long senduid, unsigned long r
 			}
 		}
 
-		nPos = strReturnParameters.find("transfer");
-		if (nPos >= 0)//转接中
+		if ((int)strReturnParameters.find("transfer") >= 0)//转接中
 		{
 			g_WriteLog.WriteLog(C_LOG_ERROR, "RecvComSendWorkBillMsg strReturnParameters: %s", strReturnParameters.c_str());
 			//正在转移
@@ -3306,6 +3316,15 @@ void CChatManager::RecvComSendWorkBillMsg(unsigned long senduid, unsigned long r
 				//KillTimer(TIMER_TRANS_TIMEOUT);
 				//SetTimer(TIMER_TRANS_TIMEOUT, 1000, NULL);
 			}
+		}
+		else if ((int)strReturnParameters.find("UserAgent") >= 0)
+		{
+			string userAgent;
+			int posAgent = strReturnParameters.find("UserAgent");
+			userAgent = strReturnParameters.substr(posAgent+9,strReturnParameters.length() - posAgent - 9);
+
+			UserAgentInfo *pObj = (UserAgentInfo*)ParseWxJsonMsg(userAgent.c_str());
+			pWebUser->useragent = pObj;
 		}
 		else if ((pWebUser->cTalkedSatus != INTALKING || !pWebUser->m_bConnected)
 			&& m_userInfo.UserInfo.uid == recvuid && !pWebUser->m_bNewComm)//非等待应答的会话
@@ -3884,9 +3903,8 @@ void CChatManager::SendTo_CloseChat(unsigned long webuserid, int ntype)
 
 	char msg[MAX_256_LEN];
 	GetStopChatSysMsg(msg, pWebUser, ntype, &m_userInfo);
-	if (pWebUser->onlineinfo.bInvited != CHATCLOSE_INVISTEXIT)
+	if (ntype != CHATCLOSE_INVISTEXIT)
 	{
-
 		pWebUser->talkuid = 0;
 		pWebUser->RemoveAllMutiUser();
 

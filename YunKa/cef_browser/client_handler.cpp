@@ -7,7 +7,6 @@
 #include <set>
 #include <sstream>
 #include <vector>
-
 #include "../chat_common/comstruct.h"
 #include <include/base/cef_bind.h>
 #include <include/cef_browser.h>
@@ -27,6 +26,7 @@
 #include "cef_browser/resource_util.h"
 #include "cef_browser/string_util.h"
 #include "cef_browser/window_test.h"
+#include "code_convert.h"
 
 namespace {
 
@@ -34,7 +34,8 @@ namespace {
 enum client_menu_ids 
 {
 	CLIENT_ID_COPY = MENU_ID_USER_FIRST,
-	CLIENT_ID_REFRESH
+	CLIENT_ID_REFRESH,
+	CLIENT_ID_CLIP_URL
 };
 
 const char kTestOrigin[] = "http://tests/";
@@ -280,7 +281,32 @@ void ClientHandler::OnBeforeContextMenu(
 {
 	CEF_REQUIRE_UI_THREAD();
 	model->Clear();
-	
+	CCodeConvert f_covet;
+	if ((params->GetTypeFlags() & (CM_TYPEFLAG_PAGE | CM_TYPEFLAG_FRAME)) != 0)
+	{
+		if (((params->GetMediaType() & CM_MEDIATYPE_IMAGE) != 0) ||
+			((params->GetTypeFlags() & CM_TYPEFLAG_SELECTION) != 0))
+		{
+			if (m_isDisplayCopy)
+			{
+				string copy = "复制";
+				string copyCvt;
+				f_covet.Gb2312ToUTF_8(copyCvt, copy.c_str(), copy.length());
+				model->AddItem(CLIENT_ID_COPY, copyCvt);
+			}
+		}
+		else
+		{
+			if (m_isDisplayRefresh)
+			{
+				string reFresh = "刷新";
+				string reFreshCvt;
+				f_covet.Gb2312ToUTF_8(reFreshCvt, reFresh.c_str(), reFresh.length());
+				model->AddItem(CLIENT_ID_REFRESH, reFreshCvt);
+			}
+		}
+		model->AddItem(CLIENT_ID_CLIP_URL, L"复制链接");
+	}
 }
 
 bool ClientHandler::OnContextMenuCommand(

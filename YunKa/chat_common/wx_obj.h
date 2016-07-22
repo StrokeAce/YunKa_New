@@ -97,6 +97,25 @@ struct WxAccessTokenInfo :public WxObj
 	virtual bool ParseFromJson(const Json::Value &jv);		//从json格式文本中解析消息
 };
 
+struct UserAgentInfo :public WxObj
+{
+	UserAgentInfo() :WxObj("useragent") {}
+	string		m_agenttype;    //会话来源：browser,wechat
+	string		m_platformType; //是否来源手机平台: pc,mobile,tablet,  空表示未知
+	string		m_platformCPU;  //平台字长 ： 32，64
+	string		m_ScreenSize;  //屏幕像素（分辨率）
+	string		m_mobileBrand;//手机品牌
+	string		m_mobileModel;//手机型号
+	string		m_netType;  //网络类型:2g,3g,4g,wifi
+	string		m_sLanguage;     //语言名称
+	string		m_osName;   // 操作系统名称：window7
+	string		m_browseName;  //浏览器名称
+	string		m_browserEmbedApp;    //浏览器宿主应用程序类型：AlipayClient，MicroMessenger，QQ
+
+	virtual bool ToSendJson(Json::Value &jv) const;
+	virtual bool ParseFromJson(const Json::Value &jv);
+};
+
 struct WxMsgBase:public WxObj
 {
 	WxMsgBase(const string& sztype):WxObj(sztype){}

@@ -1983,18 +1983,17 @@ void CMainFrame::ShowMySelfSendMsg(string strMsg, MSG_DATA_TYPE msgType, string 
 	}
 
 	string strName = m_manager->m_userInfo.UserInfo.nickname;
-	StringReplace(strName, "\\", "\\\\");
 	StringReplace(strName, "'", "&#039;");
 	StringReplace(strName, "\r\n", "<br>");
 	f_covet.Gb2312ToUTF_8(name, strName.c_str(), strName.length());
 
-	StringReplace(strMsg, "\\", "\\\\");
 	StringReplace(strMsg, "'", "&#039;");
 	StringReplace(strMsg, "\r\n", "<br>");
 	f_covet.Gb2312ToUTF_8(msg, strMsg.c_str(), strMsg.length());
 
 	imagePath = FullPath("SkinRes\\mainframe\\msg_wait.gif");
 	StringReplace(imagePath, "\\", "/");
+	StringReplace(msg, "\\", "/");
 
 	if (msgType == MSG_DATA_TYPE_IMAGE)
 	{

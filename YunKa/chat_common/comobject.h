@@ -220,6 +220,7 @@ public:
 	WEBUSER_INFO			info;
 	WEBONLINE_INFO			onlineinfo;
 	WEBUSEREX_INFO			exinfo;
+	UserAgentInfo*			useragent;
 	unsigned long			webuserid;
 	unsigned long			floatadminuid;				//漂浮框管理员号码
 	int						nlangtype;					//字符集

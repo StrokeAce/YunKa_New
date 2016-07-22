@@ -336,7 +336,7 @@ function ResultRecvMsg(msgId, bSuccess, url, imagePath, filePath, msgFromType, m
         oImgMsg.src = filePath;
         oImgMsg.onclick = function ()
         {
-            window.RunMsgList('ViewDetails', filePath);
+            window.RunMsgList('ViewDetails', filePath, msgDataType);
         }
         var oImgFail = document.getElementById(msgId + "_image");
         oImgFail.src = "";
