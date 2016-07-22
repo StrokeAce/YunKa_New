@@ -110,8 +110,11 @@ LRESULT CSmallMenu::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 		else if (uMouseMsg == WM_LBUTTONDBLCLK)
 		{
 			printf("显示主窗口");
-			SendMessage(m_hMenuWnd, WM_ACTIVATE, SC_RESTORE, 0);
-			ShowWindow(m_hMenuWnd, SW_SHOW);
+			//SendMessage(m_hMenuWnd, WM_ACTIVATE, SC_RESTORE, 0);
+			//ShowWindow(m_hMenuWnd, SW_SHOW);
+
+
+			::PostMessage(m_hMenuWnd, WM_DOUBLE_CLICK_SHOW_WND_MSG,0,0);
 			return 0L;
 		}
 		//右键弹起时，显示菜单

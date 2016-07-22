@@ -8,11 +8,13 @@
 #define   WND_Y                          700
 
 
-#define		WM_HIDE_IMAGE_WND_MSG	WM_USER + 2100
+#define	  WM_HIDE_IMAGE_WND_MSG	               WM_USER + 2100
     
-#define   WM_MENU_START                  WM_USER+3000
+#define   WM_MENU_START                        WM_USER+2101
+#define   WM_DOUBLE_CLICK_SHOW_WND_MSG         WM_USER+2102
 
-#define   WM_SCREEN_CAPTURE_SUCCED       WM_USER+3200
+
+#define   WM_SCREEN_CAPTURE_SUCCED             WM_USER+3200
 
 
 

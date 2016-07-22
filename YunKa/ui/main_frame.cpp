@@ -386,7 +386,17 @@ LRESULT CMainFrame::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
 		delete []name;
 	}
 
+	else if (uMsg == WM_DOUBLE_CLICK_SHOW_WND_MSG)
+	{
+		m_wndShow = false;
+		m_frameSmallMenu.SetMenuType(0);
 
+		if (::IsIconic(this->m_hWnd))
+			::ShowWindow(this->m_hWnd, SW_RESTORE);
+		else
+			::ShowWindow(this->m_hWnd, SW_SHOW);
+	}
+	
 
 
 
@@ -855,7 +865,11 @@ void CMainFrame::OnClick(TNotifyUI& msg)
 
 	if (msg.pSender->GetName() == DEF_CLOSE_WND_BUTTON)
 	{
-		OnCloseBtn(msg);
+		m_wndShow = true;
+		m_frameSmallMenu.SetMenuType(1);
+		::ShowWindow(this->m_hWnd, SW_HIDE);
+
+		//OnCloseBtn(msg);
 	}
 	else  if (msg.pSender->GetName() == DEF_MIN_WND_BUTTON)
 	{
