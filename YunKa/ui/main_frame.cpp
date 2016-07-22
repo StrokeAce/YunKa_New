@@ -2291,7 +2291,6 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 			
 			m_wndShow = true;
 			m_frameSmallMenu.SetMenuType(1);
-
 			::ShowWindow(this->m_hWnd, SW_HIDE);
 		}
 		else
@@ -2302,14 +2301,13 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 			if (::IsIconic(this->m_hWnd))	
 				::ShowWindow(this->m_hWnd, SW_RESTORE);
 			else
-				::ShowWindow(this->m_hWnd, SW_SHOW);
-				
+				::ShowWindow(this->m_hWnd, SW_SHOW);			
 		}
 	}
 	//上线
 	else if (controlName == L"menu_online")
 	{
-		//m_frameSmallMenu.DeleteSmallIcon();
+
 		CreateSmallTaskIcon(DEFINE_SMALL_ICON_PATH);
 
 
@@ -2319,19 +2317,19 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 	//繁忙
 	else if (controlName == L"menu_busy")
 	{
-		//m_frameSmallMenu.DeleteSmallIcon();
+
 		CreateSmallTaskIcon(DEFINE_SMALL_BUSY_ICON_PATH);
 	}
 	//离开
 	else if (controlName == L"menu_leave")
 	{
-		//m_frameSmallMenu.DeleteSmallIcon();
+
 		CreateSmallTaskIcon(DEFINE_SMALL_LEAVE_ICON_PATH);
 	}
 	//注销
 	else if (controlName == L"menu_logout")
 	{
-		//m_frameSmallMenu.DeleteSmallIcon();
+
 		CreateSmallTaskIcon(DEFINE_SMALL_OFFLINE_ICON_PATH);
 		OnCloseBtn(msg);
 	}
@@ -2585,30 +2583,23 @@ void CMainFrame::OnCtrlVEvent()
 			if (handle != NULL)
             {
 				SetCopyFileName(fileName);
-
 				BITMAP bm; // 得到位图对象
 				GetObject(handle, sizeof(BITMAP), &bm);
 				SaveBitmapToFile(handle, bm, fileName);
 				::CloseClipboard(); // 关闭剪贴板
 			}
-
 			ANSIToUnicode(fileName,WName);
 			_RichEdit_InsertFace(m_pSendEdit, WName, 0, m_savedImageIndex);
-
-			
+		
 			//m_editImageMap.insert(pair<unsigned long, WCHAR *>(m_savedImageIndex, WName));
 			SaveEditImageData(m_savedImageIndex,WName);
-
 			m_savedImageIndex += 1;
-
 		}
 	}
 	else if (IsClipboardFormatAvailable(CF_TEXT))
 	{
 		m_pSendEdit->PasteSpecial(CF_TEXT);
 	}
-
-
 
 
 #if 0
