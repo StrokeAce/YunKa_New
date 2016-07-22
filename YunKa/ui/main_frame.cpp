@@ -3566,6 +3566,8 @@ void CMainFrame::OnActiveUser(unsigned long id,string sid)
 		m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, addNode));
 
 		pUserList->ExpandNode(tempChildNode, true);
+
+		m_activeList.push_back(pWebUser->webuserid);
 	}
 
 	else if (type == 1)
@@ -4272,8 +4274,8 @@ void CMainFrame::ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, 
 			text.Format(_T("{x 4}{i gameicons.png 18 16}{i user_web.png 1 0}{x 4}%s"), name);
 		}
 
-		if (pUser->UserInfo.uid != m_manager->m_userInfo.UserInfo.uid)
-			m_activeList.push_back(pWebUser->webuserid);
+		//if (pUser->UserInfo.uid != m_manager->m_userInfo.UserInfo.uid)
+		
 
 		UserListUI::Node *tempChildNode = pMySelfeNode->child(0);
 
@@ -4593,12 +4595,12 @@ VISITOR_TYPE  CMainFrame::CheckIdForTalkType(unsigned long id)
 			{
 				if (*iterList == pWebUser->webuserid)
 				{
-					type = VISITOR_TALKING_HELP_OTHER;
+					type = VISITOR_TALKING_HELP_OTHER; // VISITOR_TALKING_MYSELF;
 				}
 			}
 
 			if (type == DEFAULT_POS)
-			    type = VISITOR_TALKING_MYSELF;
+				type = VISITOR_TALKING_MYSELF;
 		}
 		else
 		{
