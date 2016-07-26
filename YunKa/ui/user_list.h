@@ -284,6 +284,14 @@ public:
 	}
 
 
+	void UpdateNodeItem(LPCTSTR text, Node* node)
+	{
+		CListLabelElementUI* pListElement = node->data()._pListElement;
+		//pListElement->setit
+
+	}
+
+
 	Node* AddNode(LPCTSTR text, unsigned long uid, int dex, string sid="", Node* parent = NULL)
 	{
 		if (!parent) parent = _root;

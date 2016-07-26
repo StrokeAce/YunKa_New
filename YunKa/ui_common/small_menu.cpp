@@ -98,6 +98,7 @@ LRESULT CSmallMenu::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 		if (uMouseMsg == WM_LBUTTONDOWN)
 		{
 			printf("切换窗口状态");
+			::PostMessage(m_hMenuWnd, WM_DOUBLE_CLICK_SHOW_WND_MSG, 0, 0);
 		}
 
 		// 如果是单击右键，则显示菜单
@@ -114,7 +115,7 @@ LRESULT CSmallMenu::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 			//ShowWindow(m_hMenuWnd, SW_SHOW);
 
 
-			::PostMessage(m_hMenuWnd, WM_DOUBLE_CLICK_SHOW_WND_MSG,0,0);
+		
 			return 0L;
 		}
 		//右键弹起时，显示菜单

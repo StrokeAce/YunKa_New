@@ -3495,6 +3495,16 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 
 void CMainFrame::RecvWebUserInfo(CWebUserObject* pWebUser, int updateNum)
 {
+	//0 更新用户 类型  微信 web
+	if (updateNum == 0)
+	{
+	}
+	//1 更新用户名字
+	else if (updateNum == 1)
+	{
+
+	}
+
 
 }
 
@@ -5028,26 +5038,7 @@ void CMainFrame::ShowBigImage(string url, MSG_DATA_TYPE msgDataType)
 		pShowImgDlg = new CShowBigImageDlg();
 		pShowImgDlg->Create(m_hWnd, _T(""), UI_WNDSTYLE_DIALOG, 0, 0, 0, 0, 0, NULL);
 		pShowImgDlg->CenterWindow();
-		//RECT rect;
-		//::GetWindowRect(m_hWnd, &rect);
-
-
-		/*
-		if (!m_pShowImageHandler.isCreated)
-		{
-			string localUrl = GetCurrentPath();
-			localUrl += ("\\html\\list.html");
-			CCodeConvert f_covet;
-			string utfUrl;
-			f_covet.Gb2312ToUTF_8(utfUrl, localUrl.c_str(), localUrl.length());
-
-			RECT rect{ 0, 0, 0, 0 };
-			m_pShowImageHandler.handler->CreateBrowser(m_hWnd, rect, utfUrl, Handler_ShowImage);
-		}
-		m_pShowImageHandler.handler->MoveBrowser(rect);
-		m_pWebURLHandler.handler->ShowBrowser(SW_SHOW);
-
-		*/
+	
 		RECT sysRect;
 		GetWindowRect(m_hWnd, &sysRect);
 	
@@ -5067,69 +5058,12 @@ void CMainFrame::ShowBigImage(string url, MSG_DATA_TYPE msgDataType)
 	else
 	{
 		pShowImgDlg->ShowWnd(SW_SHOW);
-		//pShowImgDlg->ShowModal();
-		//m_pWebURLHandler.handler->ShowBrowser(SW_HIDE);
 
 		
 		pShowImgDlg->ShowBigImage(url, msgDataType);
 
 
 	}
-
-
-
-	/*
-	if (!m_pShowImageHandler.isCreated)
-	{
-		string localUrl = GetCurrentPath();
-		localUrl += ("\\html\\list.html");
-		CCodeConvert f_covet;
-		string utfUrl;
-		f_covet.Gb2312ToUTF_8(utfUrl, localUrl.c_str(), localUrl.length());
-
-
-		m_pShowImageHandler.handler->CreateBrowser(m_hWnd, rect, utfUrl, Handler_ShowImage);
-
-		m_pWebURLHandler.handler->ShowBrowser(SW_SHOW);
-	}
-	else
-	{
-		m_pWebURLHandler.handler->ShowBrowser(SW_SHOW);
-	}
-	*/
-
-
-
-#if 0
-
-	if (!m_pShowImgDlg.isCreate)
-	{
-		RECT sysRect;
-		GetWindowRect(m_hWnd, &sysRect);
-
-
-		m_pShowImgDlg.Create(m_hWnd, NULL, WS_CHILD | WS_POPUP, WS_EX_TOOLWINDOW);
-		int cx = 800;// +x;
-		int cy = 600;// +y;
-		int x =  (sysRect.right - cx) / 2;
-		int y =  (sysRect.bottom - cy) / 2;
-
-
-		::SetWindowPos((HWND)m_pShowImgDlg, NULL, x, y, cx, cy, NULL);
-		::ShowWindow((HWND)m_pShowImgDlg, SW_SHOW);
-		m_pShowImgDlg.isCreate = true;
-		m_pShowImgDlg.ShowBigImage();
-
-
-	}
-	else
-	{
-		m_pShowImgDlg.ShowWnd(SW_SHOW);
-		m_pShowImgDlg.ShowBigImage();
-	}
-
-#endif
-
 
 
 }
