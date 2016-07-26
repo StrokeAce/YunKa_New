@@ -54,7 +54,8 @@ CMainFrame::CMainFrame(CChatManager* manager) :m_manager(manager)
 	m_pLastOfflineNode = m_pLastOnlineNode = 0;
 	memset(m_pManagerBtn, 0, sizeof(m_pManagerBtn));
 	m_userListCount = m_recordListCount = 0;
-	m_activeList.clear();
+	m_invoteOtherList.clear();
+	m_invoteMyselfList.clear();
 
 	//m_pShowImgDlg = NULL;
 
@@ -3495,6 +3496,105 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 
 void CMainFrame::RecvWebUserInfo(CWebUserObject* pWebUser, int updateNum)
 {
+	unsigned fatherId = 0;
+	UserListUI::Node* tempNode = NULL;
+	UserListUI::Node* fatherNode = NULL;
+	CDuiString text;
+	WCHAR name[64] = { 0 };
+	ANSIToUnicode(pWebUser->info.name, name);
+	int textType = 0;
+	int fatherType = 0;
+
+	//先查看是否是实在等待列表 然后查看是否在 会话列表  最后查看是否在 在线列表
+	if (pWebUser->webuserid > 0)
+	{
+		map<unsigned long, UserListUI::Node*>::iterator iterNode = m_waitVizitorMap.find(pWebUser->webuserid);
+		if (iterNode == m_waitVizitorMap.end())
+		{
+			map<unsigned long, unsigned long>::iterator iter = m_allVisitorUserMap.find(pWebUser->webuserid);
+			if (iter == m_allVisitorUserMap.end())
+				return;
+
+			fatherId = iter->second;		
+			iterNode = m_allVisitorNodeMap.find(fatherId);
+			if ( iterNode == m_allVisitorNodeMap.end() )
+				return;
+			fatherNode = iterNode->second;
+
+			iterNode = m_allVisitorNodeMap.find(pWebUser->webuserid);
+			if (iterNode == m_allVisitorNodeMap.end())
+				return;
+			tempNode = iterNode->second;
+			m_allVisitorNodeMap.erase(iterNode);
+		}
+		else
+		{
+			fatherNode = pWaitForAccept;
+			fatherId = 0;
+			tempNode = iterNode->second;
+			m_waitVizitorMap.erase(iterNode);
+			fatherType = 1;
+		}
+
+		if (tempNode != NULL && tempNode->data()._level >= 0)
+		{
+			pUserList->RemoveNode(tempNode);
+		}
+	}
+
+	list<unsigned long>::iterator  iterList = m_invoteMyselfList.begin();
+	for (; iterList != m_invoteMyselfList.end(); iterList++)
+	{
+		if (*iterList == pWebUser->webuserid)
+		{
+			textType = 1;
+			break;
+		}
+	}
+	iterList = m_invoteOtherList.begin();
+	for (; iterList != m_invoteOtherList.end(); iterList++)
+	{
+		if (*iterList == pWebUser->webuserid)
+		{
+			textType = 2;
+			break;
+		}
+	}
+
+
+	if (textType == 0)
+	{
+		//是否来自微信
+		if (pWebUser->m_bIsFrWX)
+		{
+			text.Format(_T("{x 4}{i user_wx.png 1 0}{x 4}%s"), name);
+		}
+		else
+		{
+			text.Format(_T("{x 4}{i user_web.png 1 0}{x 4}%s"), name);
+		}
+	}
+	else  if (textType > 0)
+	{
+		if (pWebUser->m_bIsFrWX)
+		{
+			text.Format(_T("{x 4}{i gameicons.png 18 16}{i user_wx.png 1 0}{x 4}%s"), name);
+		}
+		else
+		{
+			text.Format(_T("{x 4}{i gameicons.png 18 16}{i user_wx.png 1 0}{x 4}%s"), name);
+		}
+	}
+
+
+	UserListUI::Node* addNode = pUserList->AddNode(text, pWebUser->webuserid, pWebUser->info.sid, fatherNode);
+	pUserList->ExpandNode(fatherNode, true);
+	if (fatherType == 1)
+	    m_waitVizitorMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, addNode));
+
+	m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, addNode));
+	m_allVisitorUserMap.insert(pair<unsigned long, unsigned long>(pWebUser->webuserid, fatherId));
+
 	//0 更新用户 类型  微信 web
 	if (updateNum == 0)
 	{
@@ -3505,14 +3605,11 @@ void CMainFrame::RecvWebUserInfo(CWebUserObject* pWebUser, int updateNum)
 
 	}
 
-
 }
 
 void CMainFrame::OnActiveUser(unsigned long id,string sid)
 {
-
 	CWebUserObject *pWebUser = m_manager->GetWebUserObjectByUid(id);
-
 	if (pWebUser == NULL)
 		pWebUser = m_manager->GetWebUserObjectBySid((char*)sid.c_str());
 
@@ -3583,16 +3680,13 @@ void CMainFrame::OnActiveUser(unsigned long id,string sid)
 		{
 			text.Format(_T("{x 4}{i gameicons.png 18 16}{i user_web.png 1 0}{x 4}%s"), name);
 		}
-
 		UserListUI::Node *tempChildNode = pMySelfeNode->child(0);
 		UserListUI::Node * addNode = pUserList->AddNode(text, pWebUser->webuserid,pWebUser->info.sid, tempChildNode);
 		m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, addNode));
 
 		pUserList->ExpandNode(tempChildNode, true);
-
-		m_activeList.push_back(pWebUser->webuserid);
+		m_invoteOtherList.push_back(pWebUser->webuserid);
 	}
-
 	else if (type == 1)
 	{
 		//CUserObject	*pUser = m_recvUserObj;
@@ -4076,15 +4170,26 @@ void CMainFrame::RecvCloseChat(CWebUserObject* pWebUser)
 	map<unsigned long, UserListUI::Node*>::iterator iter = m_waitVizitorMap.find(pWebUser->webuserid);
 
 
-	list<unsigned long>::iterator iterList = m_activeList.begin();
-	for (; iterList != m_activeList.end(); iterList++)
+	list<unsigned long>::iterator iterList = m_invoteOtherList.begin();
+	for (; iterList != m_invoteOtherList.end(); iterList++)
 	{
 		if (*iterList == pWebUser->webuserid)
 		{
-			m_activeList.erase(iterList);
+			m_invoteOtherList.erase(iterList);
 			break;
 		}
 	}
+
+	iterList = m_invoteMyselfList.begin();
+	for (; iterList != m_invoteMyselfList.end(); iterList++)
+	{
+		if (*iterList == pWebUser->webuserid)
+		{
+			m_invoteMyselfList.erase(iterList);
+			break;
+		}
+	}
+
 
 	//没有找到
 	if (iter == m_waitVizitorMap.end())
@@ -4140,12 +4245,22 @@ void CMainFrame::RecvReleaseChat(CWebUserObject* pWebUser)
 {
 	UserListUI::Node *tempNode = NULL;
 
-	list<unsigned long>::iterator iterList = m_activeList.begin();
-	for (; iterList != m_activeList.end(); iterList++)
+	list<unsigned long>::iterator iterList = m_invoteOtherList.begin();
+	for (; iterList != m_invoteOtherList.end(); iterList++)
 	{
 		if (*iterList == pWebUser->webuserid)
 		{
-			m_activeList.erase(iterList);
+			m_invoteOtherList.erase(iterList);
+			break;
+		}
+	}
+
+	iterList = m_invoteMyselfList.begin();
+	for (; iterList != m_invoteMyselfList.end(); iterList++)
+	{
+		if (*iterList == pWebUser->webuserid)
+		{
+			m_invoteMyselfList.erase(iterList);
 			break;
 		}
 	}
@@ -4299,7 +4414,7 @@ void CMainFrame::ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, 
 
 		//if (pUser->UserInfo.uid != m_manager->m_userInfo.UserInfo.uid)
 		
-
+		m_invoteMyselfList.push_back(pWebUser->webuserid);
 		UserListUI::Node *tempChildNode = pMySelfeNode->child(0);
 
 		UserListUI::Node * addNode = pUserList->AddNode(text, pWebUser->webuserid, pWebUser->info.sid, tempChildNode);
@@ -4613,8 +4728,8 @@ VISITOR_TYPE  CMainFrame::CheckIdForTalkType(unsigned long id)
 
 		if (id == m_manager->m_userInfo.UserInfo.uid) //自己底下
 		{
-			list<unsigned long>::iterator iterList = m_activeList.begin();
-			for (; iterList != m_activeList.end(); iterList++)
+			list<unsigned long>::iterator iterList = m_invoteOtherList.begin();
+			for (; iterList != m_invoteOtherList.end(); iterList++)
 			{
 				if (*iterList == pWebUser->webuserid)
 				{
@@ -4688,8 +4803,8 @@ TREENODEENUM  CMainFrame::CheckIdForNodeType(unsigned long id)
 				{
 					type = (TREENODEENUM)(i + MYSELF_CHILD_1);
 
-					list<unsigned long>::iterator iterList = m_activeList.begin();
-					for (; iterList != m_activeList.end(); iterList++)
+					list<unsigned long>::iterator iterList = m_invoteOtherList.begin();
+					for (; iterList != m_invoteOtherList.end(); iterList++)
 					{
 						if (*iterList == id)
 						{

@@ -291,7 +291,8 @@ public:
 	UserListUI::Node* pMySelfeNode;    //自己的node
 	map<unsigned long, UserListUI::Node*> m_waitVizitorMap;  //等待列表
 	map<unsigned long, UserListUI::Node*> m_allVisitorNodeMap;  //所有访客列表
-	list<unsigned long>m_activeList;     //存自己主动邀请协助的 id
+	list<unsigned long>m_invoteOtherList;     //存自己主动邀请协助的  id
+	list<unsigned long>m_invoteMyselfList;
 
 	map<unsigned long, unsigned long > m_allVisitorUserMap;   //所有访客的归属列表
 	list<unsigned long >m_acceptingsUserList;                 //邀请列表
