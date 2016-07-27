@@ -326,6 +326,9 @@ bool ClientHandler::OnContextMenuCommand(
     case CLIENT_ID_COPY:
 		browser->GetMainFrame()->Copy();
 		break;
+	case CLIENT_ID_CLIP_URL:
+		AddUrlToClipBoard(frame->GetURL());
+		break;
     default:
 		break;
   }
@@ -1103,6 +1106,31 @@ void ClientHandler::CreateMessageHandlers(MessageHandlerSet& handlers) {
 
   // Create the window test handlers.
   window_test::CreateMessageHandlers(handlers);
+}
+
+void ClientHandler::AddUrlToClipBoard(const CefString& url)
+{
+	//打开剪切板
+	if (OpenClipboard(NULL))
+	{
+		HGLOBAL hClip;
+		char *pBuf;
+
+		unsigned short url_len = url.size() + 1;
+		EmptyClipboard();
+		hClip = GlobalAlloc(GHND, url_len);
+		pBuf = (char*)GlobalLock(hClip);
+		//将内容写入全局内存空间
+		memcpy(pBuf, url.ToString().c_str(), url_len);
+		//将空间中的内容写入剪切板
+		SetClipboardData(CF_TEXT, hClip); //设置数据
+		//解锁全局内存空间
+		GlobalUnlock(hClip);//解锁
+		//释放全局内存空间
+		GlobalFree(hClip);
+		//关闭剪切板
+		CloseClipboard();
+	}
 }
 
 

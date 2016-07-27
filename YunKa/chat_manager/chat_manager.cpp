@@ -643,12 +643,12 @@ bool CChatManager::LoadINIResource()
 	//发送文件
 	LoadIniString("WebPages", "SendWebFileLink", m_initConfig.webpage_SendWebFileLink, len, sFile, "http://vip.tq.cn/upload/upload2.do?version=100");
 
-
 	LoadIniString("WebPages", "iconurl", m_initConfig.webpage_iconurl, len, sFile, "http://sysimages.tq.cn/clientimages/face/ywt_face.html");
 	LoadIniString("WebPages", "faqInfo", m_initConfig.webpage_faqInfo, len, sFile, "http://211.151.52.39:8080/vip/DoRequestXMLAction.do?action=faqInfo");
 	LoadIniString("WebPages", "faqSort", m_initConfig.webpage_faqSort, len, sFile, "http://211.151.52.39:8080/vip/DoRequestXMLAction.do?action=faqSort");
 	LoadIniString("WebPages", "faqAll", m_initConfig.webpage_faqall, len, sFile, "http://211.151.52.39:8080/vip/DoRequestXMLAction.do?action=faqAll");
 	LoadIniString("WebPages", "repickchat", m_initConfig.webpage_repickchaturl, len, sFile, "http://106.120.108.230:8031/wxcreatechat?uin=%lu&signature=%s&timestamp=%s&nonce=%s&admiuin=%lu&%s&msg=hello");
+	
 	//邀请评价evaluate
 	LoadIniString("WebPages", "evaluate", m_initConfig.webpage_evaluate, len, sFile, "http://106.120.108.230:8524/vip/scorebill.do?billid=%s&admin_uin=%u&action=scoreedit");
 
@@ -706,6 +706,10 @@ bool CChatManager::LoadINIResource()
 
 	// 微信文件下载url
 	LoadIniString("WebPages", "FileServerMediaFileId", m_initConfig.fileserver_media_fileid, len, sFile, "http://wxm.tq.cn/media/");
+
+	LoadIniString("WebPages", "AddressByRid", m_initConfig.address_by_rid, len, sFile, "http://passport.tq.cn/getserveraddrs.do?roomid=1&roomversion=1&strid=");
+
+	LoadIniString("WebPages", "AddressByUin", m_initConfig.address_by_uin, len, sFile, "http://passport.tq.cn/getserveraddrs.do?roomid=1&roomversion=1&uin=");
 
 	return true;
 }
@@ -4446,8 +4450,8 @@ void CChatManager::AfterUpload(unsigned long userId, MSG_RECV_TYPE userType, str
 
 		if (msgDataType == MSG_DATA_TYPE_IMAGE)
 		{
-			sprintf(contentMsg, "<img id = \"%s_image\" onclick=ReSendFile(\"%s\",\"%d\",\"%s\",\"%d\",\"%lu\",\"%s\") class=\"wait_image\" src=\"%smsg_fail.png\"><img class=\"msg_image\" src=\"%s\">",
-				msgId.c_str(), filePath.c_str(), userType, msgId.c_str(), MSG_DATA_TYPE_IMAGE, userId, imagePath.c_str(), imagePath.c_str(), filePath.c_str());
+			sprintf(contentMsg, "<img id = \"%s_image\" onclick=ReSendFile(\"%s\",\"%d\",\"%s\",\"%d\",\"%lu\",\"%s\") class=\"wait_image\" src=\"%smsg_fail.png\"><img class=\"msg_image\" src=\"%s\" onclick=window.RunMsgList(\"ViewDetails\",\"%s\",\"2\")>",
+				msgId.c_str(), filePath.c_str(), userType, msgId.c_str(), MSG_DATA_TYPE_IMAGE, userId, imagePath.c_str(), imagePath.c_str(), filePath.c_str(), filePath.c_str());
 			filePath = contentMsg;
 		}
 		else if (msgDataType == MSG_DATA_TYPE_VOICE)
@@ -5058,8 +5062,11 @@ void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RE
 	string name = "unKnown";
 	string sName;
 	string sMsg;
-	char callJsMsg[MAX_2048_LEN];
+	char callJsMsg[MAX_4096_LEN];
 	CCodeConvert convert;
+
+	if (msgContent.length() > MAX_2048_LEN)
+		return;
 	
 	if (msgType == MSG_TYPE_NORMAL)
 	{
@@ -5103,9 +5110,7 @@ void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RE
 				return;
 			}
 
-			StringReplace(name, "\\", "\\\\");
 			StringReplace(name, "'", "&#039;");
-			StringReplace(name, "\r\n", "<br>");
 			convert.Gb2312ToUTF_8(sName, name.c_str(), name.length());
 
 			if (bSuccess)
@@ -5158,6 +5163,7 @@ void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RE
 
 					StringReplace(msgContent, "'", "&#039;");
 					StringReplace(msgContent, "\r\n", "<br>");
+					StringReplace(msgContent, "\n", "<br>");
 
 					convert.Gb2312ToUTF_8(sMsg, msgContent.c_str(), msgContent.length());
 				}
@@ -5272,18 +5278,16 @@ void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RE
 				return;
 			}
 
-			StringReplace(name, "\\", "\\\\");
 			StringReplace(name, "'", "&#039;");
-			StringReplace(name, "\r\n", "<br>");
 			convert.Gb2312ToUTF_8(sName, name.c_str(), name.length());
 
 			if (bSuccess)
 			{
 				if (msgDataType == MSG_DATA_TYPE_TEXT)
 				{
-					StringReplace(msgContent, "\\", "\\\\");
 					StringReplace(msgContent, "'", "&#039;");
 					StringReplace(msgContent, "\r\n", "<br>");
+					StringReplace(msgContent, "\n", "<br>");
 					convert.Gb2312ToUTF_8(sMsg, msgContent.c_str(), msgContent.length());
 				}
 				else if (msgDataType == MSG_DATA_TYPE_IMAGE)
@@ -5681,8 +5685,8 @@ void CChatManager::GetOnlineUser()
 	char strURL[MAX_1024_LEN];
 	string strHtml = "";
 
-	sprintf(strURL,"%s&uin=%d&strid=%s&pwd=%s&cuin=0&rtt=%lu",m_initConfig.webpage_companyuser,
-		m_userInfo.UserInfo.uid, m_userInfo.UserInfo.sid, m_userInfo.UserInfo.pass,time(NULL));
+	sprintf(strURL,m_initConfig.webpage_companyuser, m_vip.c_str(), m_userInfo.UserInfo.uid, 
+		m_userInfo.UserInfo.sid, m_userInfo.UserInfo.pass,time(NULL));
 
 	CHttpLoad httpLoad;
 	if (httpLoad.HttpLoad(string(strURL), "", REQUEST_TYPE_GET, "", strHtml))
@@ -5915,7 +5919,7 @@ bool CChatManager::ParseTextMsg(CWebUserObject* pWebUser, string content, CUserO
 		|| (int)content.find("用户头像地址") > -1
 		|| (int)content.find("user_headimgurl") > -1)
 	{
-		return false;
+		return true;
 	}
 	string msgId = GetMsgId();
 	string imagePath = FullPath("SkinRes\\mainframe\\");
@@ -6031,7 +6035,7 @@ UINT WINAPI CChatManager::UpLoadFileToWxServerThread(void * pUpLoadInfo)
 						// 当task访问不成功时，依然认为文件上传成功，将该媒体消息发送给微信方
 						if (msgDataType == MSG_DATA_TYPE_IMAGE || msgDataType == MSG_DATA_TYPE_VOICE)
 						{
-							pThis->AfterUpload(userId, userType, msgId, mediaID, msgDataType, "", filePath);
+							pThis->AfterUpload(userId, userType, msgId, mediaID, msgDataType, "", filePath, wxToken);
 						}
 						else
 						{
@@ -6115,7 +6119,7 @@ UINT WINAPI CChatManager::UpLoadFileToServerThread(void * pUpLoadInfo)
 	{
 		g_WriteLog.WriteLog(C_LOG_ERROR, "上传文件到文件服务器失败：%s", resultCode.c_str());
 	}
-	pThis->AfterUpload(userId, userType, "", "", msgDataType, "", "");
+	pThis->AfterUpload(userId, userType, msgId, "", msgDataType, "", filePath);
 	return false;
 }
 
@@ -6308,4 +6312,49 @@ bool CChatManager::SendFileToUser(IBaseObject* pUser, string strPathFile, string
 	return false;
 }
 
+void CChatManager::SendTo_GetQuickReply(unsigned long uin)
+{
+	if (strlen(m_login->m_szAuthtoken) > 0)
+	{
+		if (m_GetQuickReplyThreadHandle != NULL)
+		{
+			TerminateThread(m_GetQuickReplyThreadHandle, 0);
+		}
+		m_GetQuickReplyThreadHandle = NULL;
 
+		QUICK_REPLY* qReply = new QUICK_REPLY();
+		qReply->uid = uin;
+		qReply->pThis = this;
+
+		m_GetQuickReplyThreadHandle = CreateThread(NULL, 0, GetQuickReplyThread, (void*)qReply, CREATE_SUSPENDED, NULL);
+		ResumeThread(m_GetQuickReplyThreadHandle);
+	}
+}
+
+DWORD WINAPI CChatManager::GetQuickReplyThread(void *arg)
+{
+	int tb_flag, turn_flag;
+	char strURL[MAX_1024_LEN];
+
+	CChatManager* pThis;
+
+	srand((unsigned)time(NULL));
+	int r1 = rand();
+
+	QUICK_REPLY* qReply = (QUICK_REPLY*)arg;
+	pThis = (CChatManager*)qReply->pThis;
+
+	turn_flag = 0;
+	if (qReply->uid == 0)
+		tb_flag = 0;
+	else
+		tb_flag = 1;
+	sprintf(strURL, pThis->m_initConfig.webpage_UniIdioms, pThis->m_userInfo.UserInfo.uid,
+		pThis->m_login->m_authAdminid, pThis->m_login->m_szAuthtoken, tb_flag, turn_flag, r1);
+
+	CHttpLoad load;
+	string returnCode;
+	load.HttpLoad((string)strURL, "", REQUEST_TYPE_GET,"", returnCode);
+
+	return 0;
+}

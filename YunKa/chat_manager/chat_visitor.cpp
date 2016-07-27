@@ -319,7 +319,7 @@ void CChatVisitor::SolveVisitorSCRIPTMSGTalkBegin(char *pInitBuff)
 	sprintf(msg, "%s 客服 %s(%u) 已与访客建立通话", GetTimeByMDAndHMS(0).c_str(), szKefuNmae, uKefu);
 
 	//重绘
-	if (pkefu != NULL&&pkefu->m_bFriend)
+	if (pkefu != NULL&& (pkefu->m_bFriend || pkefu->UserInfo.uid == m_manager->m_userInfo.UserInfo.uid))
 	{
 		pWebUser->cTalkedSatus = INTALKING;
 		pWebUser->info.status = TALKSTATUS_TALK;

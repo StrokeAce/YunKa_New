@@ -90,6 +90,8 @@ typedef struct INIT_CONF
 	char fileserver_media_upload[256];	// 文件服务器上传url
 	char fileserver_media_task[256];	// 向文件服务器获取文件id的url串
 	char fileserver_media_fileid[256];	// 文件上传到微信服务器后，其在文件服务器上相同文件的url串
+	char address_by_rid[MAX_256_LEN];
+	char address_by_uin[MAX_256_LEN];
 }INIT_CONF_T, *INIT_CONF_PT;
 
 //一个过滤器结构
@@ -435,6 +437,12 @@ struct UPFILETHREAD_STRUCT
 	MSG_RECV_TYPE recvType;
 	string msgId;
 	unsigned long recvuid;
+};
+
+struct QUICK_REPLY
+{
+	void* pThis;
+	unsigned long uid;
 };
 
 typedef struct {

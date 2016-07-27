@@ -403,7 +403,10 @@ void ScreenCapDlg::OnLButtonUp(UINT nFlags, CPoint point)
 		}*/
 		if(PtInRect(m_rcAction[5],point))
 		{
-			m_labels.pop_back();
+			if (m_labels.size() > 0)
+			{
+				m_labels.pop_back();
+			}
 		}
 		if(PtInRect(m_rcAction[6],point))
 		{

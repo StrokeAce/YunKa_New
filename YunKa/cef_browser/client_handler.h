@@ -356,6 +356,8 @@ class ClientHandler : public CefClient,
     int radio_item;
   } test_menu_state_;
 
+  void AddUrlToClipBoard(const CefString& url);
+
   // Returns the full download path for the specified file, or an empty path to
   // use the default temp directory.
   std::string GetDownloadPath(const std::string& file_name);

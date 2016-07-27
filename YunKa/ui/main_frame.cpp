@@ -1929,7 +1929,7 @@ void CMainFrame::OnManagerButtonEvent(TNotifyUI& msg)
 	else if (msg.pSender->GetName() == _T("managerbutton_10"))
 	{
 
-		sprintf(sURL, "%s&token=%s", m_manager->m_initConfig.webpage_SvrMsg, m_manager->m_login->m_szAuthtoken);
+		sprintf(sURL, m_manager->m_initConfig.webpage_SvrMsg, m_manager->m_vip.c_str(), m_manager->m_login->m_szAuthtoken);
 		ShowWebBrowser(sURL);
 	}
 
@@ -1938,31 +1938,31 @@ void CMainFrame::OnManagerButtonEvent(TNotifyUI& msg)
 	else if (msg.pSender->GetName() == _T("managerbutton_11"))
 	{
 
-		sprintf(sURL, "%s&kefu_uin=%lu&token=%s", m_manager->m_initConfig.webpage_querywebphone, m_manager->m_userInfo.UserInfo.uid, m_manager->m_login->m_szAuthtoken);
+		sprintf(sURL, m_manager->m_initConfig.webpage_querywebphone, m_manager->m_vip.c_str(), m_manager->m_userInfo.UserInfo.uid, m_manager->m_login->m_szAuthtoken);
 		ShowWebBrowser(sURL);
 	}
 	//访客留言
 	else if (msg.pSender->GetName() == _T("managerbutton_12"))
 	{
-		sprintf(sURL, "%s&action=query&result=0&kefu_uin=%lu&token=%s", m_manager->m_initConfig.webpage_note, m_manager->m_userInfo.UserInfo.uid, m_manager->m_login->m_szAuthtoken);
+		sprintf(sURL, m_manager->m_initConfig.webpage_note, m_manager->m_vip.c_str(), m_manager->m_userInfo.UserInfo.uid, m_manager->m_login->m_szAuthtoken);
 		ShowWebBrowser(sURL);
 	}
 	//客户管理
 	else if (msg.pSender->GetName() == _T("managerbutton_13"))
 	{
-		sprintf(sURL, "%s&token=%s", m_manager->m_initConfig.webpage_crm, m_manager->m_login->m_szAuthtoken);
+		sprintf(sURL, m_manager->m_initConfig.webpage_crm, m_manager->m_vip.c_str(), m_manager->m_login->m_szAuthtoken);
 		ShowWebBrowser(sURL);
 	}
 	//统计分析
 	else if (msg.pSender->GetName() == _T("managerbutton_14"))
 	{
-		sprintf(sURL, "%s&token=%s", m_manager->m_initConfig.webpage_workbillurl, m_manager->m_login->m_szAuthtoken);
+		sprintf(sURL, m_manager->m_initConfig.webpage_workbillurl, m_manager->m_vip.c_str(), m_manager->m_login->m_szAuthtoken);
 		ShowWebBrowser(sURL);
 	}
 	//管理中心
 	else if (msg.pSender->GetName() == _T("managerbutton_15"))
 	{
-		sprintf(sURL, "%s&token=%s", m_manager->m_initConfig.webpage_mgmt, m_manager->m_login->m_szAuthtoken);
+		sprintf(sURL, m_manager->m_initConfig.webpage_mgmt, m_manager->m_vip.c_str(), m_manager->m_login->m_szAuthtoken);
 		ShowWebBrowser(sURL);
 	}
 
@@ -2140,37 +2140,23 @@ void CMainFrame::ShowRightOptionFrameView(unsigned long id,string sid)
 			break;
 		case TYPESELECT_CLIENT:
 			_globalSetting.GetCurTimeString(strFrom, strEnd, 30);
-			if (m_manager->m_sysConfig->m_sStrServer == "tcp01.tq.cn" || m_manager->m_sysConfig->m_sStrServer == "211.151.52.48")//公网使用原来的链接
-			{
-				sprintf(showMsg, m_manager->m_initConfig.visitorpage_visitortail, pWebUser->chatid, pWebUser->webuserid, pWebUser->info.sid, 0, nTransFrom, strFrom.c_str(), strEnd.c_str(),/*pWebUser->floatadminuid*/  m_manager->m_userInfo.UserInfo.uid);
-			}
-			else//公司内部使用新开发修改的链接
-			{	
-				sprintf(showMsg, m_manager->m_initConfig.visitorpage_visitortail, pWebUser->chatid, pWebUser->info.sid, 0, nTransFrom);
-				//strURL.Format(pApp->m_InitConfig.visitorpage_visitortail, pWebUser->chatid, pWebUser->info.sid, 0, nTransFrom);
-			}
-				strUrl = showMsg;
-				break;
+			sprintf(showMsg, m_manager->m_initConfig.visitorpage_visitortail, m_manager->m_vip.c_str(),pWebUser->chatid, pWebUser->webuserid, pWebUser->info.sid, 0, nTransFrom, strFrom.c_str(), strEnd.c_str(),m_manager->m_userInfo.UserInfo.uid);
+			strUrl = showMsg;
+			break;
 		case TYPESELECT_CHATID:
-			sprintf(showMsg, m_manager->m_initConfig.visitorpage_visitorbill, pWebUser->chatid, pWebUser->webuserid, pWebUser->info.sid, 0, 0, strFrom.c_str(), strEnd.c_str());
+			sprintf(showMsg, m_manager->m_initConfig.visitorpage_visitorbill, m_manager->m_vip.c_str(),pWebUser->chatid, pWebUser->webuserid, pWebUser->info.sid, 0, 0, strFrom.c_str(), strEnd.c_str());
 			strUrl = showMsg;
 			break;
 		case TYPESELECT_CLIENTINFO:
-			//("http://vip.tq.cn/vip/visitorinfo.do?billid=%s&cuin=%lu&rand=%s&transtype=%d&transfrom=%lu&stime=%s&etime=%s")
 			//客户信息
-			if (m_manager->m_sysConfig->m_sStrServer == "tcp01.tq.cn" || m_manager->m_sysConfig->m_sStrServer == "211.151.52.48")
-				sprintf(showMsg, m_manager->m_initConfig.visitorpage_visitorinfo, pWebUser->chatid, pWebUser->webuserid, pWebUser->info.sid, 0, 0, strFrom.c_str(), strEnd.c_str(), pWebUser->info.sid);
-			else
-				sprintf(showMsg, m_manager->m_initConfig.visitorpage_visitorinfo, pWebUser->chatid, "", 0, 0, strFrom.c_str(), strEnd.c_str(), pWebUser->info.thirdid, pWebUser->info.sid);
-
-				//strURL.Format(pApp->m_InitConfig.visitorpage_visitorinfo, pWebUser->chatid, "", 0, 0, strFrom, strEnd, pWebUser->info.thirdid, pWebUser->info.sid);
+			sprintf(showMsg, m_manager->m_initConfig.visitorpage_visitorinfo, m_manager->m_vip.c_str(),pWebUser->chatid, pWebUser->webuserid, pWebUser->info.sid, 0, 0, strFrom.c_str(), strEnd.c_str(), pWebUser->info.sid);
 			strUrl = showMsg;
 			break;
 		case TYPESELECT_NOTICE:
 			//改成下订单
 			if (pWebUser->m_bIsFrWX)
 			{
-				sprintf(showMsg, m_manager->m_initConfig.visitorpage_visitororder, pWebUser->chatid, pWebUser->webuserid, pWebUser->info.sid, 0, 0, strFrom.c_str(), strEnd.c_str(), pWebUser->info.thirdid, pWebUser->m_sWxAppid, 0);
+				sprintf(showMsg, m_manager->m_initConfig.visitorpage_visitororder, m_manager->m_vip.c_str(),pWebUser->chatid, pWebUser->webuserid, pWebUser->info.sid, 0, 0, strFrom.c_str(), strEnd.c_str(), pWebUser->info.thirdid, pWebUser->m_sWxAppid, 0);
 				strUrl = showMsg;
 			}	
 			else
@@ -2189,7 +2175,7 @@ void CMainFrame::ShowRightOptionFrameView(unsigned long id,string sid)
 		case TYPESELECT_ORDER:
 		//查订单
 			//strURL.Format(pApp->m_InitConfig.visitorpage_visitororder, pWebUser->chatid, pWebUser->webuserid, pWebUser->info.sid, 0, 0, strFrom, strEnd, pWebUser->info.thirdid, pWebUser->m_sWxAppid, 1);
-			sprintf(showMsg, m_manager->m_initConfig.visitorpage_visitororder, pWebUser->chatid, pWebUser->webuserid, pWebUser->info.sid, 0, 0, strFrom.c_str(), strEnd.c_str(), pWebUser->info.thirdid, pWebUser->m_sWxAppid, 1);
+			sprintf(showMsg, m_manager->m_initConfig.visitorpage_visitororder, m_manager->m_vip.c_str(), pWebUser->chatid, pWebUser->webuserid, pWebUser->info.sid, 0, 0, strFrom.c_str(), strEnd.c_str(), pWebUser->info.thirdid, pWebUser->m_sWxAppid, 1);
 			strUrl = showMsg;
 
 

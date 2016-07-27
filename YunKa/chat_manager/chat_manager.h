@@ -264,6 +264,8 @@ public:
 
 	int SendTo_GetOnlineUser();
 
+	void SendTo_GetQuickReply(unsigned long uin);
+
 	// 获取上一次错误信息
 	string GetLastError();
 
@@ -545,6 +547,8 @@ public:
 
 	static DWORD WINAPI SendFileThread(void *arg);
 
+	static DWORD WINAPI GetQuickReplyThread(void *arg);
+
 	bool SendFileToUser(IBaseObject* pUser, string strPathFile, string msgId, MSG_RECV_TYPE userType);
 
 public:
@@ -561,12 +565,13 @@ public:
 	CChatVisitor*			m_vistor;				// 访客接待处理对象
 	string					m_sLogin;				// 登录名
 	string					m_password;				// 登录密码
-	string					m_server;				// 服务器地址
+	string					m_server;				// 服务器ip地址
+	string					m_vip;					// 服务器java系统访问地址
+	int						m_port;					// 服务器端口
 	string					m_lastError;			// 上一次错误信息
 	bool					m_bAutoLogin;			// 是否自动登录
 	bool					m_bKeepPwd;				// 是否记住密码
-	bool					m_bLoginSuccess;		// 是否已登录
-	int						m_port;					// 服务器端口		
+	bool					m_bLoginSuccess;		// 是否已登录			
 	unsigned short			m_usSrvRand;			// 服务器的随机数
 	unsigned short			m_usCltRand;			// 本次运行的随机数
 	MapUsers				m_mapUsers;				// 协助对象的存储集合
@@ -590,5 +595,6 @@ public:
 	CGroupObject			m_groupUser;			// 获取的在线坐席的分组集合
 	HANDLE					m_sendFileThreadHandle;	// 发送文件线程句柄
 	unsigned short			m_packSeq;				// 包序列号,自增
+	HANDLE					m_GetQuickReplyThreadHandle;
 };
 

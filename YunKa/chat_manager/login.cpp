@@ -4,6 +4,7 @@
 #include "./chat_manager.h"
 #include "../chat_common/comclt.h"
 #include "auth_error.h"
+#include "http_unit.h"
 
 CLogin::CLogin()
 {	
@@ -28,14 +29,51 @@ void CLogin::StartLogin(string loginName, string password, bool isAutoLogin, boo
 	}
 
 	unsigned int uin(0);
+	string addressInfo;
+	char getIpInfoUrl[MAX_1024_LEN];
+	string authIp;
+	CHttpLoad load;
+	unsigned short authPort = 80;
 
 	if (IsNumber(loginName))
 	{
 		uin = atol(loginName.c_str());
+		sprintf(getIpInfoUrl, m_manager->m_initConfig.address_by_uin, uin);
+	}
+	else
+	{
+		sprintf(getIpInfoUrl, m_manager->m_initConfig.address_by_rid, loginName.c_str());
+	}
+
+	if (load.HttpLoad(string(getIpInfoUrl), "", REQUEST_TYPE_GET, "", addressInfo))
+	{
+		char passport[MAX_128_LEN];
+		char tcpui[MAX_128_LEN];
+		char vip[MAX_128_LEN];
+		GetContentBetweenString(addressInfo.c_str(), "passport=", "monitor=", passport);
+		GetContentBetweenString(addressInfo.c_str(), "tcp_ui=", "http_ui=", tcpui);
+		GetContentBetweenString(addressInfo.c_str(), "vip=", "sysMessage_url=", vip);
+		string address = tcpui;
+		int pos = address.find(":");
+		m_manager->m_server = address.substr(0, pos).c_str();
+		string sPort = address.substr(pos + 1, address.length() - pos - 1);
+		m_manager->m_port = atol(sPort.c_str());
+
+		authIp = passport;
+		m_manager->m_vip = vip;
+
+		authIp = authIp.substr(0, authIp.length() - 1);
+		m_manager->m_vip = m_manager->m_vip.substr(0, m_manager->m_vip.length() - 1);
+	}
+	else
+	{
+		m_manager->m_handlerLogin->LoginProgress(-1);
+		m_manager->m_lastError = "获取服务器信息失败";
+		return;
 	}
 
 	// 认证
-	if (GetTqAuthToken(uin, loginName.c_str(), password.c_str()) != 1)
+	if (GetTqAuthToken(uin, loginName.c_str(), password.c_str(), authIp.c_str(), authPort) != 1)
 	{
 		m_manager->m_lastError = "认证失败";
 		m_manager->m_handlerLogin->LoginProgress(-1);
@@ -86,7 +124,7 @@ bool CLogin::CheckLoginInfo(string loginName, string password, bool isAutoLogin,
 	return true;
 }
 
-int CLogin::GetTqAuthToken(unsigned int &uin, const char *szStrid, const char *szPassWord)
+int CLogin::GetTqAuthToken(unsigned int &uin, const char *szStrid, const char *szPassWord,const char* ip, unsigned short port)
 {
 	int nlen = MAX_4096_LEN;
 	char recvbuf[MAX_4096_LEN] = { 0 };
@@ -94,7 +132,7 @@ int CLogin::GetTqAuthToken(unsigned int &uin, const char *szStrid, const char *s
 	char myip[100];
 
 	if (this->m_pTqAuthClient == NULL)
-		m_pTqAuthClient = new CTqAuthClient(m_manager->m_initConfig.sAuthAddr, m_manager->m_initConfig.nAuthPort, VERSION);
+		m_pTqAuthClient = new CTqAuthClient(ip, port, VERSION);
 	else if (strlen(m_szAuthtoken) > 0)
 	{
 		m_pTqAuthClient->Logout(m_szAuthtoken, recvbuf, nlen, butf8);

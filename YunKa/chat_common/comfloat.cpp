@@ -760,7 +760,6 @@ bool CFloatChatRelease::unpack()
 
 	if (version>=3075) //·þÎñÆ÷°æ±¾
 	{
-		unsigned short nReason;
 		m_Pack>>usReason;
 	}
 
