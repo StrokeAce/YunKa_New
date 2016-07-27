@@ -48,8 +48,8 @@ CChatManager::CChatManager()
 	m_vistor = NULL;
 	m_login = new CLogin();
 	m_login->m_manager = this;
-	m_nOnLineStatus = STATUS_OFFLINE;
-	m_nOnLineStatusEx = STATUS_OFFLINE;
+	m_nOnLineStatus = USER_STATUS_OFFLINE;
+	m_nOnLineStatusEx = USER_STATUS_OFFLINE;
 	m_mapTokens.clear();
 	m_mapUsers.clear();
 	m_mapWebUsers.clear();	
@@ -316,16 +316,16 @@ void CChatManager::OnReceiveEvent(int wParam, int lParam)
 
 	if (wParam == WM_SOCKET_CLOSE)
 	{
-		m_nOnLineStatus = STATUS_OFFLINE;
+		m_nOnLineStatus = USER_STATUS_OFFLINE;
 		g_WriteLog.WriteLog(C_LOG_TRACE, "OnReceiveEvent SetOfflineStatus");
 		SetOfflineStatus();
 	}
 	else if (wParam == WM_SOCKET_RECVFAIL)
 	{
-		if (m_nOnLineStatus == STATUS_OFFLINE)
+		if (m_nOnLineStatus == USER_STATUS_OFFLINE)
 			return;
 
-		m_nOnLineStatus = STATUS_OFFLINE;
+		m_nOnLineStatus = USER_STATUS_OFFLINE;
 		SetOfflineStatus();
 		g_WriteLog.WriteLog(C_LOG_TRACE, "OnReceiveEvent OnSocketRecvFail");
 	}
@@ -387,7 +387,7 @@ int CChatManager::RecvSrvRepUserinfo(PACK_HEADER packhead, char *pRecvBuff, int 
 
 	if (!m_bLoginSuccess)
 	{
-		pUser = AddUserObject(RecvInfo.uin, RecvInfo.strid, RecvInfo.UserInfo.info.nickname, STATUS_ONLINE, -1);
+		pUser = AddUserObject(RecvInfo.uin, RecvInfo.strid, RecvInfo.UserInfo.info.nickname, USER_STATUS_ONLINE, -1);
 
 		CCodeConvert convert;
 		string msg = "自己的消息记录";
@@ -809,14 +809,14 @@ int CChatManager::RecvSrvStatusFrdOnline(PACK_HEADER packhead, char *pRecvBuff, 
 			//这里不考虑很复杂，如果有新的用户，需要自动的刷新以下，以后再做实时地处理
 			pUser = AddUserObject(RecvInfo.uin, "", RecvInfo.nickname, RecvInfo.status, -1);
 
-			pUser->status = STATUS_ONLINE;
+			pUser->status = USER_STATUS_ONLINE;
 			strcpy(pUser->UserInfo.nickname, RecvInfo.nickname);
 			pUser->m_nFlag = 1;
 			pUser->DownLoadFace(m_initConfig.webpage_DownloadHeadImage);
 		}
 		else
 		{
-			pUser->status = STATUS_ONLINE;
+			pUser->status = USER_STATUS_ONLINE;
 			strcpy(pUser->UserInfo.nickname, RecvInfo.nickname);
 		}
 
@@ -870,7 +870,7 @@ int CChatManager::RecvSrvStatusFrdOffline(PACK_HEADER packhead, char *pRecvBuff,
 
 				pWebUser->m_bConnected = false;
 				pWebUser->m_nWaitTimer = -20;
-				pWebUser->onlineinfo.talkstatus = TALKSTATUS_NO;
+				pWebUser->onlineinfo.talkstatus = TALK_STATUS_NO;
 				m_handlerMsgs->RecvOffline(pWebUser);
 			}
 		}
@@ -881,19 +881,19 @@ int CChatManager::RecvSrvStatusFrdOffline(PACK_HEADER packhead, char *pRecvBuff,
 		if (pUser != NULL)
 		{
 			bool bexpand = false;
-			if (pUser->status != STATUS_OFFLINE)
+			if (pUser->status != USER_STATUS_OFFLINE)
 			{
 				bexpand = true;
 				pUser->m_bConnected = true;
-				pUser->talkstatus = TALKSTATUS_NO;
-				pUser->status = STATUS_OFFLINE;
+				pUser->talkstatus = TALK_STATUS_NO;
+				pUser->status = USER_STATUS_OFFLINE;
 			}
 
 			if (pUser->UserInfo.uid == m_userInfo.UserInfo.uid)
 			{
 				g_WriteLog.WriteLog(C_LOG_TRACE, "RecvSrvStatusFrdOffline uid:%u", m_userInfo.UserInfo.uid);
-				m_nOnLineStatus = STATUS_OFFLINE;
-				m_nOnLineStatusEx = STATUS_OFFLINE;
+				m_nOnLineStatus = USER_STATUS_OFFLINE;
+				m_nOnLineStatusEx = USER_STATUS_OFFLINE;
 			}
 
 			m_handlerMsgs->RecvOffline(pUser);
@@ -1142,13 +1142,13 @@ int CChatManager::RecvComSendMsg(PACK_HEADER packhead, char *pRecvBuff, int len)
 						}
 						pWebUser->cTalkedSatus = INTALKING;
 						pWebUser->talkuid = m_userInfo.UserInfo.uid;
-						pWebUser->onlineinfo.talkstatus = TALKSTATUS_TALK;
+						pWebUser->onlineinfo.talkstatus = TALK_STATUS_TALK;
 						pWebUser->transferuid = 0;
 						pWebUser->m_nWaitTimer = 0;
 						pWebUser->m_bConnected = true;
 						//访客来了，肯定不是离线
-						if (pWebUser->info.status == STATUS_OFFLINE)
-							pWebUser->info.status = STATUS_ONLINE;
+						if (pWebUser->info.userstatus == USER_STATUS_OFFLINE)
+							pWebUser->info.userstatus = USER_STATUS_ONLINE;
 
 						// 提示
 					}
@@ -1165,14 +1165,14 @@ int CChatManager::RecvComSendMsg(PACK_HEADER packhead, char *pRecvBuff, int len)
 
 						switch (m_nOnLineStatus)
 						{
-						case STATUS_BUSY:
-						case STATUS_WORK:
-						case STATUS_REFUSE_NEWWEBMSG:
+						case USER_STATUS_BUSY:
+						case USER_STATUS_WORK:
+						case USER_STATUS_REFUSE_NEWWEBMSG:
 							strResp = m_sysConfig->m_sUnnormalStatusMsg;
 							break;
-						case STATUS_LEAVE:
-						case STATUS_EATING:
-						case STATUS_OFFLINE:
+						case USER_STATUS_LEAVE:
+						case USER_STATUS_EATING:
+						case USER_STATUS_OFFLINE:
 							strResp = m_sysConfig->m_sUnnormalStatusMsg;
 							break;
 						}
@@ -1199,7 +1199,7 @@ int CChatManager::RecvComSendMsg(PACK_HEADER packhead, char *pRecvBuff, int len)
 					{
 						pWebUser->m_bConnected = false;
 						pWebUser->m_nWaitTimer = -20;
-						pWebUser->onlineinfo.talkstatus = TALKSTATUS_NO;
+						pWebUser->onlineinfo.talkstatus = TALK_STATUS_NO;
 					}
 				}
 
@@ -1217,7 +1217,7 @@ int CChatManager::RecvComSendMsg(PACK_HEADER packhead, char *pRecvBuff, int len)
 		pUser = GetUserObjectByUid(RecvInfo.msg.senduin);
 		if (pUser == NULL)
 		{
-			pUser = AddUserObject(RecvInfo.msg.senduin, "", RecvInfo.msg.strmobile, STATUS_ONLINE, -1);
+			pUser = AddUserObject(RecvInfo.msg.senduin, "", RecvInfo.msg.strmobile, USER_STATUS_ONLINE, -1);
 			if (pUser == NULL)
 			{
 				goto RETURN;
@@ -1323,7 +1323,7 @@ int CChatManager::RecvFloatCreateChat(PACK_HEADER packhead, char *pRecvBuff, int
 	pWebUser = GetWebUserObjectBySid(RecvInfo.clienttid);
 	if (pWebUser == NULL)
 	{
-		pWebUser = AddWebUserObject(RecvInfo.clienttid, RecvInfo.thirdid, RecvInfo.webname, "", "", STATUS_ONLINE, 0);
+		pWebUser = AddWebUserObject(RecvInfo.clienttid, RecvInfo.thirdid, RecvInfo.webname, "", "", USER_STATUS_ONLINE, 0);
 		pWebUser->m_onlinetime = 0;
 		pWebUser->m_bIsShow = false;
 	}
@@ -1358,13 +1358,13 @@ int CChatManager::RecvFloatCreateChat(PACK_HEADER packhead, char *pRecvBuff, int
 	pWebUser->gpid = packhead.random;
 	pWebUser->m_bNewComm = true;
 	pWebUser->m_sNewSeq = packhead.sendrandom; //这是消息id
-	pWebUser->info.status = STATUS_ONLINE;
+	pWebUser->info.userstatus = USER_STATUS_ONLINE;
 	pWebUser->talkuid = 0;//等待应答进来的会话，还没有接入客服
 	if (RecvInfo.uKefu == 0)
 	{
-		if (pWebUser->onlineinfo.talkstatus != TALKSTATUS_REQUEST)
+		if (pWebUser->onlineinfo.talkstatus != TALK_STATUS_REQUEST)
 		{
-			pWebUser->onlineinfo.talkstatus = TALKSTATUS_REQUEST;
+			pWebUser->onlineinfo.talkstatus = TALK_STATUS_REQUEST;
 			pWebUser->m_nWaitTimer = 0;
 
 			char msg[MAX_256_LEN];
@@ -1376,7 +1376,7 @@ int CChatManager::RecvFloatCreateChat(PACK_HEADER packhead, char *pRecvBuff, int
 	}
 	else
 	{
-		pWebUser->onlineinfo.talkstatus = TALKSTATUS_TALK;
+		pWebUser->onlineinfo.talkstatus = TALK_STATUS_TALK;
 		pUser = GetUserObjectByUid(RecvInfo.uKefu);
 
 		if (pUser != NULL &&(pUser->UserInfo.uid == m_userInfo.UserInfo.uid || pUser->m_bFriend))
@@ -1457,7 +1457,7 @@ int CChatManager::RecvFloatChatInfo(PACK_HEADER packhead, char *pRecvBuff, int l
 	pWebUser = GetWebUserObjectByUid(RecvInfo.uWebUin);
 	if (pWebUser == NULL)
 	{
-		pWebUser = AddWebUserObject(RecvInfo.strClientId, RecvInfo.strThirdId, RecvInfo.webnickname, "", "", STATUS_UNDEFINE, 0);
+		pWebUser = AddWebUserObject(RecvInfo.strClientId, RecvInfo.strThirdId, RecvInfo.webnickname, "", "", USER_STATUS_UNDEFINE, 0);
 		pWebUser->webuserid = RecvInfo.uWebUin;
 	}
 	else
@@ -1485,8 +1485,8 @@ int CChatManager::RecvFloatChatInfo(PACK_HEADER packhead, char *pRecvBuff, int l
 	if (RecvInfo.uKefuUin == 0)
 	{
 		//等待应答
-		pWebUser->onlineinfo.talkstatus = TALKSTATUS_REQUEST;
-		pWebUser->info.status = STATUS_ONLINE;
+		pWebUser->onlineinfo.talkstatus = TALK_STATUS_REQUEST;
+		pWebUser->info.userstatus = USER_STATUS_ONLINE;
 		pWebUser->m_nWaitTimer = 0;
 
 		char msg[MAX_256_LEN];
@@ -1501,9 +1501,9 @@ int CChatManager::RecvFloatChatInfo(PACK_HEADER packhead, char *pRecvBuff, int l
 	{
 		if (m_nNextInviteWebuserUid == pWebUser->webuserid)
 		{
-			pWebUser->onlineinfo.talkstatus = TALKSTATUS_INVITE;
+			pWebUser->onlineinfo.talkstatus = TALK_STATUS_INVITE;
 			pWebUser->inviteuid = m_userInfo.UserInfo.uid;
-			pWebUser->info.status = STATUS_ONLINE;
+			pWebUser->info.userstatus = USER_STATUS_ONLINE;
 			pWebUser->frominviteuid = m_nNextInviteUid;
 			pWebUser->m_nWaitTimer = 0;
 			pUser = GetUserObjectByUid(m_nNextInviteUid);
@@ -1557,8 +1557,8 @@ int CChatManager::RecvFloatChatInfo(PACK_HEADER packhead, char *pRecvBuff, int l
 					}
 
 					//正在对话
-					pWebUser->onlineinfo.talkstatus = TALKSTATUS_TALK;
-					pWebUser->info.status = STATUS_ONLINE;
+					pWebUser->onlineinfo.talkstatus = TALK_STATUS_TALK;
+					pWebUser->info.userstatus = USER_STATUS_ONLINE;
 					pWebUser->transferuid = 0;
 					pWebUser->talkuid = pUser->UserInfo.uid;//邀请用户的要改变talkid为自己的
 
@@ -1581,8 +1581,8 @@ int CChatManager::RecvFloatChatInfo(PACK_HEADER packhead, char *pRecvBuff, int l
 			else
 			{
 				//正在转移
-				pWebUser->onlineinfo.talkstatus = TALKSTATUS_TRANSFER;
-				pWebUser->info.status = STATUS_ONLINE;
+				pWebUser->onlineinfo.talkstatus = TALK_STATUS_TRANSFER;
+				pWebUser->info.userstatus = USER_STATUS_ONLINE;
 				pWebUser->transferuid = RecvInfo.uTansferingToKefu;
 				CUserObject *pAcceptUser = GetUserObjectByUid(RecvInfo.uTansferingToKefu);
 
@@ -1687,7 +1687,7 @@ int CChatManager::RecvFloatChatMsg(PACK_HEADER packhead, char *pRecvBuff, int le
 		if (pAssistUser == NULL)
 		{
 			// 根据uin和昵称先初始化坐席简单信息
-			pAssistUser = AddUserObject(packhead.uin, "", RecvInfo.nickname, STATUS_ONLINE, -1);
+			pAssistUser = AddUserObject(packhead.uin, "", RecvInfo.nickname, USER_STATUS_ONLINE, -1);
 			pAssistUser->DownLoadFace(m_initConfig.webpage_DownloadHeadImage);
 
 			// 然后更新该坐席的最新信息
@@ -1802,7 +1802,7 @@ int CChatManager::RecvFloatChatMsg(PACK_HEADER packhead, char *pRecvBuff, int le
 		//if (m_sysConfig->m_bAutoSearchKeyword)
 		{
 			//CUserObject *pUser = m_pFormKeyWord->GetCurSelUserOb();
-			//m_pFormKeyWord->ResetKeyWord((m_nOnLineStatus != STATUS_OFFLINE), pUser, RecvInfo.strmsg);
+			//m_pFormKeyWord->ResetKeyWord((m_nOnLineStatus != USER_STATUS_OFFLINE), pUser, RecvInfo.strmsg);
 		}
 
 		if (m_sysConfig->m_bAutoRespUnnormalStatus)
@@ -1811,14 +1811,14 @@ int CChatManager::RecvFloatChatMsg(PACK_HEADER packhead, char *pRecvBuff, int le
 
 			switch (this->m_nOnLineStatus)
 			{
-			case STATUS_BUSY:
-			case STATUS_WORK:
-			case STATUS_REFUSE_NEWWEBMSG:
+			case USER_STATUS_BUSY:
+			case USER_STATUS_WORK:
+			case USER_STATUS_REFUSE_NEWWEBMSG:
 				strResp = m_sysConfig->m_sUnnormalStatusMsg;
 				break;
-			case STATUS_LEAVE:
-			case STATUS_EATING:
-			case STATUS_OFFLINE:
+			case USER_STATUS_LEAVE:
+			case USER_STATUS_EATING:
+			case USER_STATUS_OFFLINE:
 				strResp = m_sysConfig->m_sUnnormalStatusMsg;
 				break;
 			}
@@ -1908,7 +1908,7 @@ int CChatManager::RecvFloatAcceptChat(PACK_HEADER packhead, char *pRecvBuff, int
 		pWebUser->m_nWaitTimer = -20;
 		pWebUser->m_bConnected = false;
 	}
-	pWebUser->onlineinfo.talkstatus = TALKSTATUS_TALK;
+	pWebUser->onlineinfo.talkstatus = TALK_STATUS_TALK;
 	pWebUser->transferuid = 0;
 	pWebUser->talkuid = packhead.uin;
 	if (pUser == NULL || (m_userInfo.UserInfo.uid != pUser->UserInfo.uid&&!pUser->m_bFriend))
@@ -1919,7 +1919,7 @@ int CChatManager::RecvFloatAcceptChat(PACK_HEADER packhead, char *pRecvBuff, int
 	else
 	{
 		pWebUser->cTalkedSatus = INTALKING;
-		pWebUser->onlineinfo.talkstatus = TALKSTATUS_TALK;
+		pWebUser->onlineinfo.talkstatus = TALK_STATUS_TALK;
 		if (packhead.uin == m_userInfo.UserInfo.uid)
 		{
 			//是自己接受邀请的访客
@@ -1986,9 +1986,9 @@ int CChatManager::RecvFloatTransQuest(PACK_HEADER packhead, char *pRecvBuff, int
 		pWebUser->floatadminuid = RecvInfo.uAdminId;
 		pWebUser->m_bNewComm = true;
 		pWebUser->gpid = packhead.random;
-		pWebUser->info.status = STATUS_ONLINE;
+		pWebUser->info.userstatus = USER_STATUS_ONLINE;
 		pWebUser->onlineinfo.bInvited = false;//转接过来，就不是邀请协助了
-		pWebUser->onlineinfo.talkstatus = TALKSTATUS_TRANSFER;
+		pWebUser->onlineinfo.talkstatus = TALK_STATUS_TRANSFER;
 		pWebUser->transferuid = RecvInfo.uToKefu;
 
 		if (pInviteUser != NULL)
@@ -2040,7 +2040,7 @@ int CChatManager::RecvFloatTransFailed(PACK_HEADER packhead, char *pRecvBuff, in
 		g_WriteLog.WriteLog(C_LOG_ERROR, "RecvFloatTransFailed GetWebUserObjectByID(%u) failed", RecvInfo.uWebuin);
 		goto RETURN;
 	}
-	pWebUser->onlineinfo.talkstatus = TALKSTATUS_TALK;//TALKSTATUS_REQUEST --> TALKSTATUS_TALK
+	pWebUser->onlineinfo.talkstatus = TALK_STATUS_TALK;
 
 	if (pInviteUser != NULL)
 	{
@@ -2122,7 +2122,7 @@ int CChatManager::RecvInviteRequest(PACK_HEADER packhead, char *pRecvBuff, int l
 	if (RecvInfo.uInviteUser == m_userInfo.UserInfo.uid)
 	{
 		// 被别的客服邀请
-		pWebUser->onlineinfo.talkstatus = TALKSTATUS_INVITE;
+		pWebUser->onlineinfo.talkstatus = TALK_STATUS_INVITE;
 		pWebUser->inviteuid = m_userInfo.UserInfo.uid;
 		if (!pWebUser->m_bNewComm)
 		{
@@ -2198,7 +2198,7 @@ int CChatManager::RecvInviteResult(PACK_HEADER packhead, char *pRecvBuff, int le
 		{
 			//我自己发出的拒绝包
 			pWebUser->m_bConnected = false;
-			pWebUser->onlineinfo.talkstatus = TALKSTATUS_NO;
+			pWebUser->onlineinfo.talkstatus = TALK_STATUS_NO;
 
 			pWebUser->inviteuid = 0;
 
@@ -2212,7 +2212,7 @@ int CChatManager::RecvInviteResult(PACK_HEADER packhead, char *pRecvBuff, int le
 	}
 	else//接受
 	{
-		pWebUser->onlineinfo.talkstatus = TALKSTATUS_TALK;
+		pWebUser->onlineinfo.talkstatus = TALK_STATUS_TALK;
 
 		GetInviteChatSysMsg(msg, pInviteUser, pWebUser, INVITE_HELP_ACCEPT, pAcceptUser);
 		AddMsgToList(pWebUser, MSG_FROM_SYS, MSG_RECV_WEB, GetMsgId(), MSG_TYPE_NORMAL,
@@ -2270,7 +2270,7 @@ int CChatManager::RecvFloatRelease(PACK_HEADER packhead, char *pRecvBuff, int le
 	pUser = GetUserObjectByUid(RecvInfo.uKefu);
 
 	pWebUser->cTalkedSatus = HASTALKED;
-	pWebUser->onlineinfo.talkstatus = TALKSTATUS_REQUEST;
+	pWebUser->onlineinfo.talkstatus = TALK_STATUS_REQUEST;
 	pWebUser->m_bConnected = false;
 	pWebUser->RemoveAllMutiUser();
 	if (!pWebUser->m_bNewComm)
@@ -2389,7 +2389,7 @@ int CChatManager::RecvFloatCloseChat(PACK_HEADER packhead, char *pRecvBuff, int 
 		pWebUser->onlineinfo.bInvited = false;
 		pWebUser->m_bNewComm = false;
 		pWebUser->m_bConnected = false;
-		pWebUser->onlineinfo.talkstatus = TALKSTATUS_NO;
+		pWebUser->onlineinfo.talkstatus = TALK_STATUS_NO;
 		pWebUser->cTalkedSatus = HASTALKED;
 		string strMsg = "";
 		if (CHATCLOSE_UNSUBSCRIBE == RecvInfo.usType)
@@ -2415,7 +2415,7 @@ int CChatManager::RecvFloatCloseChat(PACK_HEADER packhead, char *pRecvBuff, int 
 			g_WriteLog.WriteLog(C_LOG_TRACE, "RecvFloatCloseChat 坐席离线(%u)访客访问中", packhead.uin);
 			//访客退回到在线列表
 			pWebUser->m_nWaitTimer = -20;
-			pWebUser->onlineinfo.talkstatus = TALKSTATUS_NO;
+			pWebUser->onlineinfo.talkstatus = TALK_STATUS_NO;
 			m_handlerMsgs->RecvCloseChat(pWebUser);
 		}
 	}
@@ -2521,7 +2521,7 @@ int CChatManager::RecvSrvDown(PACK_HEADER packhead, char *pRecvBuff, int len)
 	g_WriteLog.WriteLog(C_LOG_TRACE, "RecvSrvDown uin:%u, type:%u, seq", RecvInfo.uin, RecvInfo.type, RecvInfo.seq);
 	if (RecvInfo.uin == m_userInfo.UserInfo.uid)
 	{
-		if (m_nOnLineStatus == STATUS_OFFLINE) 
+		if (m_nOnLineStatus == USER_STATUS_OFFLINE) 
 			return 0;
 
 		g_WriteLog.WriteLog(C_LOG_TRACE, "RecvSrvDown uid%u", m_userInfo.UserInfo.uid);
@@ -2586,7 +2586,7 @@ int CChatManager::RecvRepTransferClient(PACK_HEADER packhead, char *pRecvBuff, i
 	{
 		//当前坐席成功转移出去的会话
 		pWebUser->cTalkedSatus = HASTALKED;//通过话
-		pWebUser->onlineinfo.talkstatus = TALKSTATUS_TALK;
+		pWebUser->onlineinfo.talkstatus = TALK_STATUS_TALK;
 		pWebUser->m_nWaitTimer = 0;
 		pWebUser->m_bConnected = false;
 		pWebUser->transferuid = 0;
@@ -2642,15 +2642,15 @@ int CChatManager::RecvTransferClient(PACK_HEADER packhead, char *pRecvBuff, int 
 		{
 			g_WriteLog.WriteLog(C_LOG_TRACE, "RecvTransferClient CurrentKefu is the accept:%u", RecvInfo.recvinfo.id);
 			pWebUser->cTalkedSatus = INTALKING;
-			pWebUser->onlineinfo.talkstatus = TALKSTATUS_TALK;
+			pWebUser->onlineinfo.talkstatus = TALK_STATUS_TALK;
 			pWebUser->m_nWaitTimer = 0;
 			pWebUser->m_bConnected = true;
 			pWebUser->inviteuid = 0;
 			pWebUser->talkuid = m_userInfo.UserInfo.uid;
 
 			//转移的会话肯定是在线的
-			if (pWebUser->info.status == STATUS_OFFLINE)
-				pWebUser->info.status = STATUS_ONLINE;
+			if (pWebUser->info.userstatus == USER_STATUS_OFFLINE)
+				pWebUser->info.userstatus = USER_STATUS_ONLINE;
 
 			//访客邀请
 			sprintf(msg, "%s接受了访客%s的会话", m_userInfo.UserInfo.nickname, pWebUser->info.name);
@@ -2752,7 +2752,7 @@ void CChatManager::TimerProc(int timeId, LPVOID pThis)
 
 	if (timeId == TIMER_NORMAL)
 	{
-		if (chat_manager->m_nOnLineStatus == STATUS_OFFLINE)
+		if (chat_manager->m_nOnLineStatus == USER_STATUS_OFFLINE)
 			return;
 		if (chat_manager->m_nMyInfoIsGet >= 0)
 		{
@@ -2853,7 +2853,7 @@ void CChatManager::TimerSolveAck()
 	//30秒发送一次刺激包
 	if (m_nSendPing > 30)
 	{
-		if (m_nOnLineStatus != STATUS_OFFLINE)
+		if (m_nOnLineStatus != USER_STATUS_OFFLINE)
 		{
 			// 发送ping命令包，跟服务端进程能约定的ping包
 			if (SendPing() != 0)
@@ -2875,13 +2875,13 @@ void CChatManager::TimerSolveAck()
 			}
 		}
 
-		if (m_nOnLineStatusEx != STATUS_OFFLINE)
+		if (m_nOnLineStatusEx != USER_STATUS_OFFLINE)
 		{
 			// 发送网络层级的ping包，确认服务器是否能连接
 			if (m_vistor && m_vistor->SendPingToVisitorServer() != 0)
 			{
 				// 连接不上处理
-				m_nOnLineStatusEx = STATUS_OFFLINE;
+				m_nOnLineStatusEx = USER_STATUS_OFFLINE;
 				m_nLoginToVisitor = 0;
 			}
 		}
@@ -2905,8 +2905,8 @@ int CChatManager::SendPing()
 
 void CChatManager::SetOfflineStatus()
 {
-	m_nOnLineStatus = STATUS_OFFLINE;
-	m_nOnLineStatusEx = STATUS_OFFLINE;
+	m_nOnLineStatus = USER_STATUS_OFFLINE;
+	m_nOnLineStatusEx = USER_STATUS_OFFLINE;
 	SetAllUserOffline();
 	DeleteAllSrvInfo();
 	CloseAllSocket();
@@ -2951,7 +2951,7 @@ CWebUserObject * CChatManager::GetWebUserObjectBySid(char *sid)
 }
 
 CWebUserObject * CChatManager::AddWebUserObject(char *sid, char *thirdid, char *name,
-	char *scriptflag, char *url, unsigned char status, unsigned char floatauth)
+	char *scriptflag, char *url, USER_STATUS status, unsigned char floatauth)
 {
 	CWebUserObject* pWebUser = new CWebUserObject();
 
@@ -2964,7 +2964,7 @@ CWebUserObject * CChatManager::AddWebUserObject(char *sid, char *thirdid, char *
 	strcpy(pWebUser->info.name, name);
 	if (strlen(pWebUser->info.ipfromname) <= 0)
 		strcpy(pWebUser->info.ipfromname, name);
-	pWebUser->info.status = status;
+	pWebUser->info.userstatus = status;
 	pWebUser->SetForbid(m_sysConfig->IsWebuserSidForbid(sid));
 	pWebUser->RemoveAllMutiUser();
 
@@ -3240,8 +3240,8 @@ void CChatManager::RecvComSendWorkBillMsg(unsigned long senduid, unsigned long r
 				ChangeWebUserSid(pWebUser, sid, thirdid);
 			}
 			//来了访客，肯定是在线的
-			if (pWebUser->info.status == STATUS_OFFLINE)
-				pWebUser->info.status = STATUS_ONLINE;
+			if (pWebUser->info.userstatus == USER_STATUS_OFFLINE)
+				pWebUser->info.userstatus = USER_STATUS_ONLINE;
 			if (senduid > WEBUSER_UIN && pWebUser->webuserid != senduid)
 			{
 				pWebUser->webuserid = senduid;
@@ -3253,7 +3253,7 @@ void CChatManager::RecvComSendWorkBillMsg(unsigned long senduid, unsigned long r
 
 			if (pWebUser == NULL)
 			{
-				pWebUser = AddWebUserObject(sid, "", mobile, "", "", STATUS_ONLINE, 0);
+				pWebUser = AddWebUserObject(sid, "", mobile, "", "", USER_STATUS_ONLINE, 0);
 				g_WriteLog.WriteLog(C_LOG_ERROR,"RecvComSendWorkBillMsg 添加了空名字访客");
 			}
 			else
@@ -3307,8 +3307,8 @@ void CChatManager::RecvComSendWorkBillMsg(unsigned long senduid, unsigned long r
 			unsigned long uTransuid = GetIntFromJson(jv, "transfer");
 			if (pWebUser->transferuid != m_userInfo.UserInfo.uid)
 			{
-				pWebUser->onlineinfo.talkstatus = TALKSTATUS_TRANSFER;
-				pWebUser->info.status = STATUS_ONLINE;
+				pWebUser->onlineinfo.talkstatus = TALK_STATUS_TRANSFER;
+				pWebUser->info.userstatus = USER_STATUS_ONLINE;
 				pWebUser->transferuid = m_userInfo.UserInfo.uid;
 				pWebUser->talkuid = uTransuid;
 				char msg[MAX_256_LEN];
@@ -3346,7 +3346,7 @@ void CChatManager::RecvComSendWorkBillMsg(unsigned long senduid, unsigned long r
 
 			pWebUser->talkuid = m_userInfo.UserInfo.uid;
 
-			pWebUser->onlineinfo.talkstatus = TALKSTATUS_TALK;
+			pWebUser->onlineinfo.talkstatus = TALK_STATUS_TALK;
 			pWebUser->transferuid = 0;
 			pWebUser->m_nWaitTimer = 0;
 			pWebUser->m_bConnected = true;
@@ -3459,13 +3459,13 @@ int CChatManager::RecvComTransRequest(unsigned long senduid, COM_SEND_MSG& RecvI
 			strcpy(pWebUser->chatid, RecvInfo.strChatid);
 		pWebUser->talkuid = senduid;
 		pWebUser->m_bNewComm = false;
-		pWebUser->info.status = STATUS_ONLINE;
+		pWebUser->info.userstatus = USER_STATUS_ONLINE;
 		if (RecvInfo.msg.senduin > WEBUSER_UIN && pWebUser->webuserid != RecvInfo.msg.senduin)
 		{
 			pWebUser->webuserid = RecvInfo.msg.senduin;
 		}
 
-		pWebUser->onlineinfo.talkstatus = TALKSTATUS_TRANSFER;
+		pWebUser->onlineinfo.talkstatus = TALK_STATUS_TRANSFER;
 		pWebUser->transferuid = m_userInfo.UserInfo.uid;
 
 		//m_pFormMain->RecvTransferWebUser(pWebUser, pAcceptUser->UserInfo.nickname);
@@ -3765,7 +3765,7 @@ void CChatManager::LoginSuccess()
 
 	// 收到登录用户的信息包，登录成功
 	m_handlerLogin->LoginProgress(100);
-	m_nOnLineStatus = STATUS_ONLINE;	
+	m_nOnLineStatus = USER_STATUS_ONLINE;
 	m_timers->SetTimer(1000, TIMER_NORMAL);
 
 	if (m_bKeepPwd)
@@ -3793,7 +3793,7 @@ void CChatManager::LoginSuccess()
 	}
 
 	m_commUserInfo.UserInfo.compid = m_userInfo.UserInfo.compid;
-	m_nOnLineStatus = STATUS_ONLINE;
+	m_nOnLineStatus = USER_STATUS_ONLINE;
 	m_nSendPing = 0;
 	m_nSendPingFail = 0;
 
@@ -3824,7 +3824,7 @@ void CChatManager::TimerSolveLoginToVisitorServer()
 {
 	if (m_nLoginToVisitor < 0)
 		return;
-	if (m_nOnLineStatusEx != STATUS_OFFLINE)
+	if (m_nOnLineStatusEx != USER_STATUS_OFFLINE)
 	{
 		m_nLoginToVisitor = -20;
 		return;
@@ -3854,7 +3854,7 @@ void CChatManager::TimerSolveRequestTimerOut()
 
 		switch (iter->second->onlineinfo.talkstatus)
 		{
-		case TALKSTATUS_TALK:
+		case TALK_STATUS_TALK:
 			if (iter->second->m_bConnected && iter->second->talkuid == m_userInfo.UserInfo.uid)
 			{
 				if (m_sysConfig->m_bAutoResp && iter->second->m_resptimeoutmsgtimer >= 0)
@@ -3902,7 +3902,7 @@ void CChatManager::TimerSolveRequestTimerOut()
 void CChatManager::SendTo_CloseChat(unsigned long webuserid, int ntype)
 {
 	CWebUserObject* pWebUser = GetWebUserObjectByUid(webuserid);
-	if (pWebUser == NULL || pWebUser->onlineinfo.talkstatus == TALKSTATUS_NO)
+	if (pWebUser == NULL || pWebUser->onlineinfo.talkstatus == TALK_STATUS_NO)
 		return;
 
 	char msg[MAX_256_LEN];
@@ -5806,8 +5806,8 @@ int CChatManager::SendToRefuseChat(CWebUserObject *pWebUser, string strReason)
 		{
 			//删掉转接中的会话, 目前服务没有发送的拒绝返回包，无法判断对方是否收到拒绝包，只能在发送成功后删掉会话
 			pWebUser->m_bConnected = false;
-			pWebUser->onlineinfo.talkstatus = TALKSTATUS_NO;
-			pWebUser->info.status = STATUS_OFFLINE;
+			pWebUser->onlineinfo.talkstatus = TALK_STATUS_NO;
+			pWebUser->info.userstatus = USER_STATUS_OFFLINE;
 			pWebUser->transferuid = 0;
 		}
 	}
@@ -5827,7 +5827,7 @@ void CChatManager::SetAllUserOffline()
 		pUserOb = iTer_user->second;
 		if (pUserOb != NULL)
 		{
-			pUserOb->status = STATUS_OFFLINE;
+			pUserOb->status = USER_STATUS_OFFLINE;
 		}
 	}
 
@@ -5837,13 +5837,13 @@ void CChatManager::SetAllUserOffline()
 		pWebUserOb = iTer_webUser->second;
 		if (pWebUserOb != NULL)
 		{
-			pWebUserOb->onlineinfo.talkstatus = TALKSTATUS_NO;
-			pWebUserOb->info.status = STATUS_OFFLINE;
+			pWebUserOb->onlineinfo.talkstatus = TALK_STATUS_NO;
+			pWebUserOb->info.userstatus = USER_STATUS_OFFLINE;
 			pWebUserOb->m_bIsGetInfo = false;
 		}
 	}
 
-	m_userInfo.status = STATUS_OFFLINE;
+	m_userInfo.status = USER_STATUS_OFFLINE;
 }
 
 void CChatManager::DeleteAllSrvInfo()

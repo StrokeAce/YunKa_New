@@ -1156,7 +1156,7 @@ void CMainFrame::OnItemRbClick(TNotifyUI &msg)
 		{
 			if (pWebUser != NULL)
 			{
-				if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_REQUEST)
+				if (pWebUser->onlineinfo.talkstatus == TALK_STATUS_REQUEST)
 				{
 					xmlPath = L"menu\\menu_right_wait_request.xml";
 				}
@@ -1166,13 +1166,13 @@ void CMainFrame::OnItemRbClick(TNotifyUI &msg)
 				if (pUser == NULL)
 					return;
 
-				if (pUser->status == STATUS_OFFLINE)
+				if (pUser->status == USER_STATUS_OFFLINE)
 				{
 					//xmlPath = L"menu\\menu_right_4.xml";
 					xmlPath = L"menu\\menu_right_user_offline.xml";
 					
 				}
-				else if (pUser->status == STATUS_ONLINE)
+				else if (pUser->status == USER_STATUS_ONLINE)
 				{
 					//xmlPath = L"menu\\menu_right_5.xml";
 
@@ -1487,11 +1487,11 @@ void CMainFrame::AddHostUserList(UserListUI * ptr, CUserObject *user, int pos)
 	UserListUI::Node* pUserAcceptNode = NULL;
 	UserListUI::Node* pUserInTalkNode = NULL;
 
-	if (user->status == STATUS_OFFLINE) //离线
+	if (user->status == USER_STATUS_OFFLINE) //离线
 	{
 		onlineString = _T("(离线)");
 	}
-	else  if (user->status == STATUS_ONLINE)                 //在线
+	else  if (user->status == USER_STATUS_ONLINE)                 //在线
 	{
 		onlineString = _T("(在线)");
 	}
@@ -1512,7 +1512,7 @@ void CMainFrame::AddHostUserList(UserListUI * ptr, CUserObject *user, int pos)
 	acceptString.Format(_T("{x 4}{i gameicons.png 18 10}{x 4}邀请中"));
 	pUserAcceptNode = pUserList->AddNode(acceptString, 0,"",pUserNameNode);
 
-	if (user->status == STATUS_OFFLINE) //离线
+	if (user->status == USER_STATUS_OFFLINE) //离线
 	{
 		m_offlineNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
 
@@ -1524,7 +1524,7 @@ void CMainFrame::AddHostUserList(UserListUI * ptr, CUserObject *user, int pos)
 
 		pUserList->ExpandNode(pUserNameNode, false);
 	}
-	else  if (user->status == STATUS_ONLINE)     //在线
+	else  if (user->status == USER_STATUS_ONLINE)     //在线
 	{
 		m_onlineNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
 
@@ -1556,11 +1556,11 @@ void CMainFrame::AddMyselfToList(UserListUI * ptr, CUserObject *user)
 	UserListUI::Node* pUserAcceptNode = NULL;
 	UserListUI::Node* pUserInTalkNode = NULL;
 
-	if (user->status == STATUS_OFFLINE)  //离线
+	if (user->status == USER_STATUS_OFFLINE)  //离线
 	{
 		onlineString = OFFLINE_TEXT;
 	}
-	else  if (user->status == STATUS_ONLINE)                   //在线
+	else  if (user->status == USER_STATUS_ONLINE)                   //在线
 	{
 		onlineString = ONLINE_TEXT;
 	}
@@ -1613,7 +1613,7 @@ void CMainFrame::AddHostUserList(UserListUI * ptr, CUserObject *user)
 	UserListUI::Node* pUserAcceptNode = NULL;
 	UserListUI::Node* pUserInTalkNode = NULL;
 
-	if (user->status == STATUS_OFFLINE)  //离线
+	if (user->status == USER_STATUS_OFFLINE)  //离线
 	{
 		onlineString = _T("(离线)");
 
@@ -1642,7 +1642,7 @@ void CMainFrame::AddHostUserList(UserListUI * ptr, CUserObject *user)
 
 
 	}
-	else  if (user->status == STATUS_ONLINE)                   //在线
+	else  if (user->status == USER_STATUS_ONLINE)                   //在线
 	{
 		onlineString = _T("(在线)");
 
@@ -1682,7 +1682,7 @@ void CMainFrame::AddHostUserList(UserListUI * ptr, CUserObject *user)
 	pUserAcceptNode = pUserList->AddNode(acceptString, 0, "", pUserNameNode);
 
 
-	if (  user->status == STATUS_OFFLINE )    //离线
+	if (user->status == USER_STATUS_OFFLINE)    //离线
 	{
 		m_offlineNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
 
@@ -1691,7 +1691,7 @@ void CMainFrame::AddHostUserList(UserListUI * ptr, CUserObject *user)
 		pUserList->ExpandNode(pUserNameNode, false);
 
 	}
-	else  if (user->status == STATUS_ONLINE) //在线
+	else  if (user->status == USER_STATUS_ONLINE) //在线
 	{
 		m_onlineNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
 		//m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
@@ -2447,9 +2447,9 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 	else if (controlName == L"menu_right_online_visitor_request_chat") 
 	{
 
-		if (pWebUser != NULL && pWebUser->info.status != STATUS_OFFLINE
-			&& (pWebUser->onlineinfo.talkstatus == TALKSTATUS_NO
-			|| pWebUser->onlineinfo.talkstatus == TALKSTATUS_AUTOINVITE))
+		if (pWebUser != NULL && pWebUser->info.userstatus != USER_STATUS_OFFLINE
+			&& (pWebUser->onlineinfo.talkstatus == TALK_STATUS_NO
+			|| pWebUser->onlineinfo.talkstatus == TALK_STATUS_AUTOINVITE))
 		{
 
 			if (m_manager->SendTo_InviteWebUser(pWebUser, APPLY_ASK, "") == 0)
@@ -2486,9 +2486,9 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 	//直接对话
 	else if (controlName == L"menu_right_online_visitor_do_chat") 
 	{
-		if (pWebUser != NULL && pWebUser->info.status != STATUS_OFFLINE
-			&& (pWebUser->onlineinfo.talkstatus == TALKSTATUS_NO
-			|| pWebUser->onlineinfo.talkstatus == TALKSTATUS_AUTOINVITE))
+		if (pWebUser != NULL && pWebUser->info.userstatus != USER_STATUS_OFFLINE
+			&& (pWebUser->onlineinfo.talkstatus == TALK_STATUS_NO
+			|| pWebUser->onlineinfo.talkstatus == TALK_STATUS_AUTOINVITE))
 		{
 
 			if (m_manager->SendTo_InviteWebUser(pWebUser, APPLY_OPEN, "") == 0)
@@ -2524,9 +2524,9 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 	else if (controlName == L"menu_right_online_visitor_request_message")  
 	{
 
-		if (pWebUser != NULL && pWebUser->info.status != STATUS_OFFLINE
-			&& (pWebUser->onlineinfo.talkstatus == TALKSTATUS_NO
-			|| pWebUser->onlineinfo.talkstatus == TALKSTATUS_AUTOINVITE))
+		if (pWebUser != NULL && pWebUser->info.userstatus != USER_STATUS_OFFLINE
+			&& (pWebUser->onlineinfo.talkstatus == TALK_STATUS_NO
+			|| pWebUser->onlineinfo.talkstatus == TALK_STATUS_AUTOINVITE))
 		{
 			m_manager->SendTo_InviteWebUser(pWebUser, MYGETNOTE, "");
 		}
@@ -3266,7 +3266,7 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 
 	//如果在等待列表 显示 接受 屏蔽 邀请评价   这几个按钮
 	map<unsigned long, UserListUI::Node*>::iterator iter = m_waitVizitorMap.find(id);
-	if (iter != m_waitVizitorMap.end() || pWebUser->onlineinfo.talkstatus == TALKSTATUS_REQUEST)
+	if (iter != m_waitVizitorMap.end() || pWebUser->onlineinfo.talkstatus == TALK_STATUS_REQUEST)
 	{
 
 		for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
@@ -3972,7 +3972,7 @@ void CMainFrame::RecvChatInfo(CWebUserObject* pWebUser, CUserObject* pUser)
 
 	//先判断类型
 	//为接收的用户 在等待列表
-	if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_REQUEST)
+	if (pWebUser->onlineinfo.talkstatus == TALK_STATUS_REQUEST)
 	{
 		//添加等待列表
 		UserListUI::Node* tempNode = pUserList->AddNode(text, pWebUser->webuserid, pWebUser->info.sid, pWaitForAccept);
@@ -3985,7 +3985,7 @@ void CMainFrame::RecvChatInfo(CWebUserObject* pWebUser, CUserObject* pUser)
 		//m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, tempNode));
 	}
 	//已接收的在会话列表
-	else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_TALK)
+	else if (pWebUser->onlineinfo.talkstatus == TALK_STATUS_TALK)
 	{
 		if (pUser == NULL)
 		{
@@ -4023,7 +4023,7 @@ void CMainFrame::RecvChatInfo(CWebUserObject* pWebUser, CUserObject* pUser)
 	}
 
 
-	else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_NO)
+	else if (pWebUser->onlineinfo.talkstatus == TALK_STATUS_NO)
 	{
 		//暂时先不处理 状态是0 的状况
 		g_WriteLog.WriteLog(C_LOG_ERROR, "RecvChatInfo error: talkstatus = 0 ");
@@ -4270,7 +4270,7 @@ void CMainFrame::RecvReleaseChat(CWebUserObject* pWebUser)
 
 
 	CWebUserObject *webuser = pWebUser;
-	webuser->onlineinfo.talkstatus = TALKSTATUS_REQUEST;
+	webuser->onlineinfo.talkstatus = TALK_STATUS_REQUEST;
 	RecvChatInfo(pWebUser, NULL);
 
 
@@ -4661,7 +4661,7 @@ VISITOR_TYPE  CMainFrame::CheckIdForTalkType(unsigned long id)
 	}
 		
 
-	if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_NO)   //在线访客 访问中  或者   已结束
+	if (pWebUser->onlineinfo.talkstatus == TALK_STATUS_NO)   //在线访客 访问中  或者   已结束
 	{
 		map<string, UserListUI::Node*>::iterator iterSid = m_visitorOnlineNode.find(pWebUser->info.sid);
 		if (iterSid != m_visitorOnlineNode.end())
@@ -4691,19 +4691,19 @@ VISITOR_TYPE  CMainFrame::CheckIdForTalkType(unsigned long id)
 		//return  type;
 		//type = VISITOR_ONLINE_AUTO_VISITING;  //或者已结束     这两个 对上层的按钮处理是一样的
 	}
-	else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_AUTOINVITE) //自动邀请中
+	else if (pWebUser->onlineinfo.talkstatus == TALK_STATUS_AUTOINVITE) //自动邀请中
 	{
 		type = VISITOR_ONLINE_AUTO_INVOTING;
 	}
 
 
 	
-	else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_REQUEST)  //请求中
+	else if (pWebUser->onlineinfo.talkstatus == TALK_STATUS_REQUEST)  //请求中
 	{
 		type = VISITOR_REQ_ING;
 	}
 
-	else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_TALK)
+	else if (pWebUser->onlineinfo.talkstatus == TALK_STATUS_TALK)
 	{
 		unsigned  id = 0;
 		map<unsigned long, unsigned long >::iterator  iter = m_allVisitorUserMap.find(pWebUser->webuserid);
@@ -4732,12 +4732,12 @@ VISITOR_TYPE  CMainFrame::CheckIdForTalkType(unsigned long id)
 		}
 	}
 
-	else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_INVITE)
+	else if (pWebUser->onlineinfo.talkstatus == TALK_STATUS_INVITE)
 	{
 		type = VISITOR_INVOTING;
 	}
 
-	else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_TRANSFER)
+	else if (pWebUser->onlineinfo.talkstatus == TALK_STATUS_TRANSFER)
 	{
 		type = VISITOR_TRANING;
 	}
@@ -4865,7 +4865,7 @@ void CMainFrame::HostUserOnlineAndOffline(CUserObject* pUser, bool type)
 	if (type == true)
 	{
 
-		if (pUser->status == STATUS_ONLINE)  //当前坐席是离线状态 同时过来的状态是上线状态
+		if (pUser->status == USER_STATUS_ONLINE)  //当前坐席是离线状态 同时过来的状态是上线状态
 		{
 			//先删除当前的离线坐席 list 再添加上线的坐席状态
 
@@ -4901,7 +4901,7 @@ void CMainFrame::HostUserOnlineAndOffline(CUserObject* pUser, bool type)
 	else
 	{
 		int index = 0;
-		if (pUser->status == STATUS_OFFLINE)  //当前坐席是在线状态 同时过来的状态是离线状态
+		if (pUser->status == USER_STATUS_OFFLINE)  //当前坐席是在线状态 同时过来的状态是离线状态
 		{
 			//先删除当前的在线 坐席 list   再添加离线的坐席状态
 
@@ -4957,11 +4957,11 @@ void CMainFrame::VisitorUserOnlineAndOffline(CWebUserObject* pWebUser, bool type
 	if (type == true)
 	{
 		FindVisitorFromOnlineNode(pWebUser);
-		if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_NO)
+		if (pWebUser->onlineinfo.talkstatus == TALK_STATUS_NO)
 		{
 			tempNode = pOnlineNode->child(1);
 		}
-		else if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_AUTOINVITE)
+		else if (pWebUser->onlineinfo.talkstatus == TALK_STATUS_AUTOINVITE)
 		{
 			tempNode = pOnlineNode->child(0);
 		}
@@ -5104,15 +5104,15 @@ void CMainFrame::RefuseChat()
 
 			switch (pWebUser->onlineinfo.talkstatus)
 			{
-			case TALKSTATUS_REQUEST:
+			case TALK_STATUS_REQUEST:
 
 				break;
 
-			case TALKSTATUS_TRANSFER:
+			case TALK_STATUS_TRANSFER:
 				m_manager->SendTo_TransferUserResult(pWebUser, NULL, false);
 				break;
 
-			case TALKSTATUS_INVITE:
+			case TALK_STATUS_INVITE:
 				pUser = m_recvUserObj;
 				m_manager->SendTo_InviteUserResult(pWebUser, pUser, false);
 				break;

@@ -48,19 +48,19 @@ void CChatVisitor::OnReceiveEvent(int wParam, int lParam)
 
 	if (wParam == WM_SOCKET_CLOSE)
 	{
-		if (m_manager->m_nOnLineStatusEx != STATUS_OFFLINE)
+		if (m_manager->m_nOnLineStatusEx != USER_STATUS_OFFLINE)
 		{
-			m_manager->m_nOnLineStatusEx = STATUS_OFFLINE;
+			m_manager->m_nOnLineStatusEx = USER_STATUS_OFFLINE;
 			//继续连接
 			m_manager->m_nLoginToVisitor = 0;
 		}
 	}
 	else if (wParam == WM_SOCKET_RECVFAIL)
 	{
-		if (m_manager->m_nOnLineStatusEx == STATUS_OFFLINE)
+		if (m_manager->m_nOnLineStatusEx == USER_STATUS_OFFLINE)
 			return;
 
-		m_manager->m_nOnLineStatusEx = STATUS_OFFLINE;
+		m_manager->m_nOnLineStatusEx = USER_STATUS_OFFLINE;
 		m_manager->m_nLoginToVisitor = 0;
 	}
 }
@@ -236,10 +236,10 @@ void CChatVisitor::SolveVisitorSCRIPTMSGApplyFail(char *pInitBuff)
 		return;
 	}
 
-	if (pWebUser->onlineinfo.talkstatus == TALKSTATUS_INVITE)
+	if (pWebUser->onlineinfo.talkstatus == TALK_STATUS_INVITE)
 		pWebUser->m_refuseinvite = true;
 
-	pWebUser->onlineinfo.talkstatus = TALKSTATUS_NO;
+	pWebUser->onlineinfo.talkstatus = TALK_STATUS_NO;
 	pWebUser->m_nWaitTimer = -20;
 
 	//访客退回到在线列表
@@ -322,14 +322,16 @@ void CChatVisitor::SolveVisitorSCRIPTMSGTalkBegin(char *pInitBuff)
 	if (pkefu != NULL&& (pkefu->m_bFriend || pkefu->UserInfo.uid == m_manager->m_userInfo.UserInfo.uid))
 	{
 		pWebUser->cTalkedSatus = INTALKING;
-		pWebUser->info.status = TALKSTATUS_TALK;
+		pWebUser->info.userstatus = USER_STATUS_ONLINE;
 		pWebUser->talkuid = uKefu;
+		pWebUser->onlineinfo.talkstatus = TALK_STATUS_TALK;
 		m_manager->m_handlerMsgs->RecvChatInfo(pWebUser, pkefu);
 	}
 	else
 	{
 		pWebUser->cTalkedSatus = HASTALKED;
-		pWebUser->info.status = TALKSTATUS_NO;
+		pWebUser->info.userstatus = USER_STATUS_ONLINE;
+		pWebUser->onlineinfo.talkstatus = TALK_STATUS_NO;
 		pWebUser->talkuid = 0;
 	}
 }
@@ -362,7 +364,8 @@ void CChatVisitor::SolveVisitorSCRIPTMSGTalkEnd(char *pInitBuff)
 	sprintf(msg, "%s 客服 %s(%u) 与访客的通话已结束", GetTimeByMDAndHMS(0).c_str(), szKefuNmae, uKefu);
 
 	pWebUser->cTalkedSatus = HASTALKED;
-	pWebUser->info.status = TALKSTATUS_NO;
+	pWebUser->info.userstatus = USER_STATUS_OFFLINE;
+	pWebUser->onlineinfo.talkstatus = TALK_STATUS_NO;
 	pWebUser->talkuid = 0;
 
 	m_manager->m_handlerMsgs->RecvCloseChat(pWebUser);
@@ -387,7 +390,7 @@ void CChatVisitor::SolveVisitorSystemAdmin(char *pInitBuff)
 	}
 	else
 	{
-		m_manager->m_nOnLineStatusEx = STATUS_ONLINE;
+		m_manager->m_nOnLineStatusEx = USER_STATUS_ONLINE;
 
 		SendStartRecvMsgToVisitorServer();
 	}
@@ -437,7 +440,7 @@ void CChatVisitor::SolveVisitorSystemUp(char *pInitBuff)
 	pWebUser = m_manager->GetWebUserObjectBySid(webuser_upinfo.sid);
 	if (pWebUser == NULL)
 	{
-		pWebUser = m_manager->AddWebUserObject(webuser_upinfo.sid, "", webuser_upinfo.nickname, webuser_upinfo.scriptflag, webuser_upinfo.visiturl, STATUS_ONLINE, 0);
+		pWebUser = m_manager->AddWebUserObject(webuser_upinfo.sid, "", webuser_upinfo.nickname, webuser_upinfo.scriptflag, webuser_upinfo.visiturl, USER_STATUS_ONLINE, 0);
 		g_VisitLog.WriteLog(C_LOG_TRACE, "SolveVisitorSystemUp sid=%s,nickname=%s, scriptflag=%s, visiturl=%s", 
 			webuser_upinfo.sid, webuser_upinfo.nickname, webuser_upinfo.scriptflag, webuser_upinfo.visiturl);
 		pWebUser->info.nameflag = nameflag;
@@ -462,7 +465,7 @@ void CChatVisitor::SolveVisitorSystemUp(char *pInitBuff)
 
 	strcpy(pWebUser->info.sip, webuser_upinfo.sip);
 	pWebUser->AddScriptFlag(webuser_upinfo.scriptflag, webuser_upinfo.visiturl);
-	pWebUser->info.status = STATUS_ONLINE;
+	pWebUser->info.userstatus = USER_STATUS_ONLINE;
 	pWebUser->floatadminuid = webuser_upinfo.adminid;
 
 	pWebUser->nVisitNum = webuser_upinfo.ctimes;
@@ -473,9 +476,9 @@ void CChatVisitor::SolveVisitorSystemUp(char *pInitBuff)
 	if (pWebUser->cTalkedSatus != INTALKING)
 	{
 		if (webuser_upinfo.isautoinvit != 0)
-			pWebUser->onlineinfo.talkstatus = TALKSTATUS_AUTOINVITE;
+			pWebUser->onlineinfo.talkstatus = TALK_STATUS_AUTOINVITE;
 		else
-			pWebUser->onlineinfo.talkstatus = TALKSTATUS_NO;
+			pWebUser->onlineinfo.talkstatus = TALK_STATUS_NO;
 	}
 	
 	char msg[MAX_256_LEN];
@@ -491,8 +494,8 @@ void CChatVisitor::SolveVisitorSystemUp(char *pInitBuff)
 
 		switch (pWebUser->onlineinfo.talkstatus)
 		{
-		case TALKSTATUS_NO:
-		case TALKSTATUS_AUTOINVITE:
+		case TALK_STATUS_NO:
+		case TALK_STATUS_AUTOINVITE:
 		default:
 			str = pWebUser->info.name;
 			str += " 用户访问网页！";
@@ -524,8 +527,8 @@ void CChatVisitor::SetVisitorOffline(CWebUserObject *pWebUser)
 	if (pWebUser->IsDisplay(m_manager->m_sysConfig, m_manager->m_userInfo.UserInfo.uid))
 	{
 		pWebUser->m_bConnected = false;
-		pWebUser->onlineinfo.talkstatus = TALKSTATUS_NO;
-		pWebUser->info.status = STATUS_OFFLINE;
+		pWebUser->onlineinfo.talkstatus = TALK_STATUS_NO;
+		pWebUser->info.userstatus = USER_STATUS_OFFLINE;
 		m_manager->m_handlerMsgs->RecvOffline(pWebUser);
 	}
 	
@@ -579,9 +582,9 @@ RETURN:
 
 void CChatVisitor::SolveVisitorSystemStopRecvMsg(char *pInitBuff)
 {
-	if (m_manager->m_nOnLineStatusEx != STATUS_OFFLINE)
+	if (m_manager->m_nOnLineStatusEx != USER_STATUS_OFFLINE)
 	{
-		m_manager->m_nOnLineStatusEx = STATUS_OFFLINE;
+		m_manager->m_nOnLineStatusEx = USER_STATUS_OFFLINE;
 		m_manager->m_nLoginToVisitor = 0;
 	}
 }
@@ -627,7 +630,7 @@ void CChatVisitor::SolveVisitorSystemAlreadyApply(char *pInitBuff)
 	case APPLY_ASK:
 	
 		//表示客服的请求包，服务器处理了，将访客移到邀请中
-		pWebUser->onlineinfo.talkstatus = TALKSTATUS_INVITE;
+		pWebUser->onlineinfo.talkstatus = TALK_STATUS_INVITE;
 	
 		if (uid == m_manager->m_userInfo.UserInfo.uid)
 		{

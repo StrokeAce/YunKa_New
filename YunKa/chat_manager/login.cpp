@@ -303,7 +303,7 @@ int CLogin::SendLoginInfo(unsigned int uin)
 
 	strcpy(SendInfo.pwd, m_manager->m_password.c_str());
 
-	SendInfo.status = STATUS_ONLINE;
+	SendInfo.status = USER_STATUS_ONLINE;
 	SendInfo.langtype = 0;
 	SendInfo.bak = 0;
 

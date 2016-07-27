@@ -486,7 +486,7 @@ SRV_CONF_LOGON::SRV_CONF_LOGON(unsigned short ver)
 	memset(stridmail, 0, MAX_EMAIL_LEN);
 	memset(stridbak, 0, MAX_SID_LEN);
 
-	status  = STATUS_ONLINE;						//2  状态
+	status  = USER_STATUS_ONLINE;						//2  状态
 	memset(strStatus, 0, MAX_STATUS_LEN);//255 描述
 	memset(strMemo, 0, MAX_RESPONSE_LEN);
 	memset(strAddress, 0, MAX_URL_LEN);//255 下载地址
@@ -748,7 +748,7 @@ SRV_STATUS_USER::SRV_STATUS_USER(unsigned short ver)
 	status = 0;
 
 	SetVideo(0);
-	SetStatus(STATUS_OFFLINE);
+	SetStatus(USER_STATUS_OFFLINE);
 
 	externid = 0;		//外联公司编号
 	bak = 0;		//

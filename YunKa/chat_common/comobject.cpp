@@ -664,8 +664,8 @@ CUserObject::CUserObject()
 	m_nEMObType = OBJECT_USER;
 	memset(&UserInfo, '\0', sizeof(USER_INFO));
 	m_nWaitTimer = -20;
-	talkstatus = TALKSTATUS_NO;
-	status = STATUS_OFFLINE;
+	talkstatus = TALK_STATUS_NO;
+	status = USER_STATUS_OFFLINE;
 	strcpy(sstatus, "");
 	nTimer = 0;
 	nFlashFirstOnline = 0;

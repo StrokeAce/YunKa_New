@@ -22,7 +22,7 @@ CLT_LOGON::CLT_LOGON(unsigned short ver)
 	strcpy(strid, "");
 	strcpy(pwd,"");
 
-	status = STATUS_ONLINE;          //在线状态 3 hide,  2 online
+	status = USER_STATUS_ONLINE;          //在线状态 3 hide,  2 online
 	strcpy(strstatus, "");
 
 	connecttype = CONNECT_UDP;

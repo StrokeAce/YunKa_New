@@ -26,7 +26,7 @@ SRV_STATUS_FRDONLINE::SRV_STATUS_FRDONLINE(unsigned short ver)
 	status = 0;
 
 	SetVideo(0);
-	SetStatus(STATUS_OFFLINE);
+	SetStatus(USER_STATUS_OFFLINE);
 
 	m_Head.head.cmd = CMD_SRV_STATUS_FRDONLINE;
 

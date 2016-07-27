@@ -227,7 +227,7 @@ struct WEBONLINE_INFO
 {
 	WEBONLINE_INFO(){ bInvited = false; }
 	int				fd;						// tcp连接
-	TALKSTATUS		talkstatus;
+	TALK_STATUS		talkstatus;
 	bool		    bInvited;				// 被邀请进来的
 	unsigned int	timevisit;				// 用户访问时间
 	unsigned int	timerequest;			// 用户请求对话时间
@@ -258,7 +258,7 @@ struct WEBUSER_INFO
 	char			thirdid[MAX_THIRDID_LEN+1];		//第三方id
 	char			name[MAX_USERNAME_LEN+1];
 	char			nameflag;						//记录名字是否被修改 1 已修改
-	unsigned char	status;							// 0 TALKSTATUS_NO, 1 STATUS_OFFLINE 离线， 2 在线， 9 对话中
+	USER_STATUS		userstatus;							// 0 TALKSTATUS_NO, 1 STATUS_OFFLINE 离线， 2 在线， 9 对话中
 	char			sip[MAX_IPNUM_LEN+1];
 	char			ipfromname[MAX_USERNAME_LEN+1];	//ip来源
 	char			url[MAX_URL_LEN+1];				//来源的url

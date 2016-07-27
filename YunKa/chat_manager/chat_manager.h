@@ -393,7 +393,7 @@ public:
 	CWebUserObject *GetWebUserObjectByUid(unsigned long uid);
 
 	CWebUserObject *AddWebUserObject(char *sid, char *thirdid, char *name, char *scriptflag, char *url,
-		unsigned char status, unsigned char floatauth);
+		USER_STATUS status, unsigned char floatauth);
 
 	unsigned short GetPackSeq();	
 
