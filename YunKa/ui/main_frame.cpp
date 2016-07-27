@@ -3974,7 +3974,6 @@ void CMainFrame::RecvChatInfo(CWebUserObject* pWebUser, CUserObject* pUser)
 			m_allVisitorUserMap.erase(iter);
 	}
 
-
 	//是否来自微信
 	if (pWebUser->m_bIsFrWX)
 	{
