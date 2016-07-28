@@ -2545,18 +2545,22 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 	//转接此对话
 	else if (controlName == L"menu_right_invote_talk_to_other")
 	{
-
+		m_topWndType = 1;
+		//获取在线坐席数
+		m_manager->SendTo_GetOnlineUser();
 	}
 
 	//邀请协助
 	else if (controlName == L"menu_right_request_other_help_talk")
 	{
-
+		m_topWndType = 2;
+		//获取在线坐席数
+		m_manager->SendTo_GetOnlineUser();
 	}
 	//结束对话
 	else if (controlName == L"menu_right_finish_talk")
 	{
-
+		m_manager->SendTo_CloseChat(m_curSelectId, CHATCLOSE_USER);
 	}
 
 	
@@ -2711,7 +2715,7 @@ MSG_RECV_TYPE CMainFrame::GetSendUserType(unsigned long id)
 	CUserObject *pUser = NULL;
 	CWebUserObject  *pWebUser = NULL;
 
-	if (id == 0)
+	if (id == 0 && m_curSavedSid.empty())
 		return MSG_RECV_ERROR;
 
 	CheckIdForUerOrWebuser(id, m_curSavedSid, &pWebUser, &pUser);
@@ -3491,6 +3495,8 @@ void CMainFrame::RecvWebUserInfo(CWebUserObject* pWebUser, int updateNum)
 	int textType = 0;
 	int fatherType = 0;
 
+	UserListUI::Node* AddFatherNode = NULL;
+
 	//先查看是否是实在等待列表 然后查看是否在 会话列表  最后查看是否在 在线列表
 	if (pWebUser->webuserid > 0)
 	{
@@ -3502,10 +3508,14 @@ void CMainFrame::RecvWebUserInfo(CWebUserObject* pWebUser, int updateNum)
 				return;
 
 			fatherId = iter->second;		
-			iterNode = m_allVisitorNodeMap.find(fatherId);
-			if ( iterNode == m_allVisitorNodeMap.end() )
+			//iterNode = m_allVisitorNodeMap.find(fatherId);
+		//	if ( iterNode == m_allVisitorNodeMap.end() )
+			//	return
+			map<unsigned long, UserListUI::Node*>::iterator iterUser = m_onlineNodeMap.find(fatherId);
+			if (iterUser == m_onlineNodeMap.end())
 				return;
-			fatherNode = iterNode->second;
+
+			fatherNode = iterUser->second;
 
 			iterNode = m_allVisitorNodeMap.find(pWebUser->webuserid);
 			if (iterNode == m_allVisitorNodeMap.end())
@@ -3528,25 +3538,7 @@ void CMainFrame::RecvWebUserInfo(CWebUserObject* pWebUser, int updateNum)
 		}
 	}
 
-	list<unsigned long>::iterator  iterList = m_invoteMyselfList.begin();
-	for (; iterList != m_invoteMyselfList.end(); iterList++)
-	{
-		if (*iterList == pWebUser->webuserid)
-		{
-			textType = 1;
-			break;
-		}
-	}
-	iterList = m_invoteOtherList.begin();
-	for (; iterList != m_invoteOtherList.end(); iterList++)
-	{
-		if (*iterList == pWebUser->webuserid)
-		{
-			textType = 2;
-			break;
-		}
-	}
-
+	textType = CheckIdForInvoteMyselfOrOther(pWebUser->webuserid);
 
 	if (textType == 0)
 	{
@@ -3568,13 +3560,38 @@ void CMainFrame::RecvWebUserInfo(CWebUserObject* pWebUser, int updateNum)
 		}
 		else
 		{
-			text.Format(_T("{x 4}{i gameicons.png 18 16}{i user_wx.png 1 0}{x 4}%s"), name);
+			text.Format(_T("{x 4}{i gameicons.png 18 16}{i user_web.png 1 0}{x 4}%s"), name);
+		}
+	}
+
+	if (fatherType == 1)
+		AddFatherNode = fatherNode;
+	else  if (fatherType == 0)
+	{
+		if (pWebUser->onlineinfo.talkstatus == TALK_STATUS_TALK)
+		{
+			AddFatherNode = fatherNode->child(0);
+		}
+		else if (pWebUser->onlineinfo.talkstatus == TALK_STATUS_TRANSFER)
+		{
+			AddFatherNode = fatherNode->child(1);
+		}
+		else if (pWebUser->onlineinfo.talkstatus == TALK_STATUS_INVITE)
+		{
+			AddFatherNode = fatherNode->child(2);
+		
+		}
+		else if (pWebUser->onlineinfo.talkstatus == TALK_STATUS_NO)
+		{
+			AddFatherNode = fatherNode;
+			fatherId = 0;
 		}
 	}
 
 
-	UserListUI::Node* addNode = pUserList->AddNode(text, pWebUser->webuserid, pWebUser->info.sid, fatherNode);
-	pUserList->ExpandNode(fatherNode, true);
+
+	UserListUI::Node* addNode = pUserList->AddNode(text, pWebUser->webuserid, pWebUser->info.sid, AddFatherNode);
+	pUserList->ExpandNode(AddFatherNode, true);
 	if (fatherType == 1)
 	    m_waitVizitorMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, addNode));
 
@@ -3626,7 +3643,7 @@ void CMainFrame::OnActiveUser(unsigned long id,string sid)
 			{
 				if (id == *iterList)
 				{
-					//在邀请列表里删除 
+					//在转接列表里删除 
 					m_transferUserList.erase(iterList);
 					type = 1;
 					break;
@@ -3688,13 +3705,28 @@ void CMainFrame::OnActiveUser(unsigned long id,string sid)
 			return;
 		}
 		UserListUI::Node *tempNode = iter->second;
-		CDuiString text = tempNode->data()._text;
+		CDuiString text;
+		WCHAR name[64] = { 0 };
+		ANSIToUnicode(pWebUser->info.name, name);
 
 		//先在用户的对话列表中删除 
 		if (tempNode != NULL && tempNode->data()._level >= 0)
 			pUserList->RemoveNode(tempNode);
 
 		m_allVisitorNodeMap.erase(iter);
+
+		int type = CheckIdForInvoteMyselfOrOther(pWebUser->webuserid);
+		if (type > 0)
+			ReleaseChatIdForInvoteMyselfOrOther(pWebUser->webuserid);
+		//是否来自微信
+		if (pWebUser->m_bIsFrWX)
+		{
+			text.Format(_T("{x 4}{i user_wx.png 1 0}{x 4}%s"), name);
+		}
+		else
+		{
+			text.Format(_T("{x 4}{i user_web.png 1 0}{x 4}%s"), name);
+		}
 
 		//先删掉 转接中的用户 然后放入对话中
 		UserListUI::Node *tempChildNode = pMySelfeNode->child(0);
@@ -4080,14 +4112,24 @@ void CMainFrame::RecvAcceptChat(CWebUserObject* pWebUser, CUserObject* pUser)
 		if (iter != m_allVisitorNodeMap.end())
 		{
 			tempNode = iter->second;
-			text = tempNode->data()._text;
+			//text = tempNode->data()._text;
 			uid = tempNode->data()._uid;
 			//当前选择 的用户就是 激活的用户
 			m_curSelectId = uid;
-
 			type = 1;
-		}
 
+			WCHAR name[64] = { 0 };
+			ANSIToUnicode(pWebUser->info.name, name);
+			//是否来自微信
+			if (pWebUser->m_bIsFrWX)
+			{
+				text.Format(_T("{x 4}{i user_wx.png 1 0}{x 4}%s"), name);
+			}
+			else
+			{
+				text.Format(_T("{x 4}{i user_web.png 1 0}{x 4}%s"), name);
+			}
+		}
 
 		m_allVisitorNodeMap.erase(iter);
 	}
@@ -4154,27 +4196,7 @@ void CMainFrame::RecvCloseChat(CWebUserObject* pWebUser)
 	ANSIToUnicode(pWebUser->info.name, name);
 	map<unsigned long, UserListUI::Node*>::iterator iter = m_waitVizitorMap.find(pWebUser->webuserid);
 
-
-	list<unsigned long>::iterator iterList = m_invoteOtherList.begin();
-	for (; iterList != m_invoteOtherList.end(); iterList++)
-	{
-		if (*iterList == pWebUser->webuserid)
-		{
-			m_invoteOtherList.erase(iterList);
-			break;
-		}
-	}
-
-	iterList = m_invoteMyselfList.begin();
-	for (; iterList != m_invoteMyselfList.end(); iterList++)
-	{
-		if (*iterList == pWebUser->webuserid)
-		{
-			m_invoteMyselfList.erase(iterList);
-			break;
-		}
-	}
-
+	ReleaseChatIdForInvoteMyselfOrOther(pWebUser->webuserid);
 
 	//没有找到
 	if (iter == m_waitVizitorMap.end())
@@ -4230,26 +4252,9 @@ void CMainFrame::RecvReleaseChat(CWebUserObject* pWebUser)
 {
 	UserListUI::Node *tempNode = NULL;
 
-	list<unsigned long>::iterator iterList = m_invoteOtherList.begin();
-	for (; iterList != m_invoteOtherList.end(); iterList++)
-	{
-		if (*iterList == pWebUser->webuserid)
-		{
-			m_invoteOtherList.erase(iterList);
-			break;
-		}
-	}
+	ReleaseChatIdForInvoteMyselfOrOther(pWebUser->webuserid);
 
-	iterList = m_invoteMyselfList.begin();
-	for (; iterList != m_invoteMyselfList.end(); iterList++)
-	{
-		if (*iterList == pWebUser->webuserid)
-		{
-			m_invoteMyselfList.erase(iterList);
-			break;
-		}
-	}
-
+	
 
 	map<unsigned long, UserListUI::Node*>::iterator iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
 	//没有找到
@@ -4502,6 +4507,9 @@ void CMainFrame::ResultInviteWebUser(CWebUserObject* pWebUser, bool bAgree)
 //邀请转接的 最后一次 回调      
 void CMainFrame::ResultTransferUser(CWebUserObject* pWebUser, CUserObject* pUser, RESULT_STATUS status)
 {
+	CDuiString text;
+	WCHAR name[64] = { 0 };
+	ANSIToUnicode(pWebUser->info.name, name);
 
 	map<unsigned long, UserListUI::Node*>::iterator iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
 	//没有找到
@@ -4514,7 +4522,25 @@ void CMainFrame::ResultTransferUser(CWebUserObject* pWebUser, CUserObject* pUser
 	{
 		UserListUI::Node *tempNode = iter->second;
 
-		CDuiString text = tempNode->data()._text;
+		text = tempNode->data()._text;
+
+#if 0
+		//判定当前的转接对象 是不是在 协助列表里
+		int type = CheckIdForInvoteMyselfOrOther(pWebUser->webuserid);
+		if (type > 0)
+			ReleaseChatIdForInvoteMyselfOrOther(pWebUser->webuserid);
+
+		//是否来自微信
+		if (pWebUser->m_bIsFrWX)
+		{
+			text.Format(_T("{x 4}{i user_wx.png 1 0}{x 4}%s"), name);
+		}
+		else
+		{
+			text.Format(_T("{x 4}{i user_web.png 1 0}{x 4}%s"), name);
+		}
+#endif
+
 
 		//先在用户的对话列表中删除 
 		if (tempNode != NULL && tempNode->data()._level >= 0)
@@ -5213,4 +5239,54 @@ void CMainFrame::OnCancel()
 }
 
 
+int CMainFrame::CheckIdForInvoteMyselfOrOther(unsigned long id)
+{
+	int textType = 0;
 
+	list<unsigned long>::iterator  iterList = m_invoteMyselfList.begin();
+	for (; iterList != m_invoteMyselfList.end(); iterList++)
+	{
+		if (*iterList == id)
+		{
+			textType = 1;
+			break;
+		}
+	}
+	iterList = m_invoteOtherList.begin();
+	for (; iterList != m_invoteOtherList.end(); iterList++)
+	{
+		if (*iterList == id)
+		{
+			textType = 2;
+			break;
+		}
+	}
+
+	return textType;
+}
+
+int CMainFrame::ReleaseChatIdForInvoteMyselfOrOther(unsigned long id)
+{
+
+	list<unsigned long>::iterator iterList = m_invoteOtherList.begin();
+	for (; iterList != m_invoteOtherList.end(); iterList++)
+	{
+		if (*iterList == id)
+		{
+			m_invoteOtherList.erase(iterList);
+			break;
+		}
+	}
+
+	iterList = m_invoteMyselfList.begin();
+	for (; iterList != m_invoteMyselfList.end(); iterList++)
+	{
+		if (*iterList == id)
+		{
+			m_invoteMyselfList.erase(iterList);
+			break;
+		}
+	}
+
+	return 0;
+}

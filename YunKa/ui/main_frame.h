@@ -226,6 +226,9 @@ public:
 	void CMainFrame::AcceptChat();
 	void CMainFrame::RefuseChat();
 
+	int CMainFrame::CheckIdForInvoteMyselfOrOther(unsigned long id);
+	int CMainFrame::ReleaseChatIdForInvoteMyselfOrOther(unsigned long id);
+
 	//判定当前的用户id 处于那种状态底下
 	TREENODEENUM  CMainFrame::CheckIdForNodeType(unsigned long id);
 	VISITOR_TYPE  CMainFrame::CheckIdForTalkType(unsigned long id);
