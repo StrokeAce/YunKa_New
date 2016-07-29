@@ -795,8 +795,8 @@ string CChatVisitor::SolveVisitorInfoHtmlTxt(CWebUserObject *pWebUser, WEBUSER_U
 	str += "</td>";
 	str += "</tr>";
 
-	str += "</td>";
-	str += "<td width=50%>";
+	str += "<tr>";
+	str += "<td colspan=2 width=100%>";
 	sprintf(str1, "<LI><SPAN class=clientnamefont1>上次访问时间：</SPAN><SPAN class=clientfont1>%s</SPAN></LI>", pInfo->lastvtime);
 	str += str1;
 	str += "</td>";
@@ -804,7 +804,7 @@ string CChatVisitor::SolveVisitorInfoHtmlTxt(CWebUserObject *pWebUser, WEBUSER_U
 
 	str += "<tr>";
 	str += "<td colspan=2 width=100% >";
-	sprintf(str1, "<LI><SPAN class=clientnamefont1>当前网页：</SPAN><SPAN class=clientfont1><A title=%s href=\"%s\">%s</A></SPAN></LI>",
+	sprintf(str1, "<LI><SPAN class=clientnamefont1>当前网页：</SPAN><SPAN class=clientfont1><A title=%s href=\"%s\">yyyy</A></SPAN></LI>",
 		pInfo->webtitle, pInfo->visiturl, pInfo->visiturl);
 	str += str1;
 	str += "</td>";

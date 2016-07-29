@@ -6349,7 +6349,7 @@ DWORD WINAPI CChatManager::GetQuickReplyThread(void *arg)
 		tb_flag = 0;
 	else
 		tb_flag = 1;
-	sprintf(strURL, pThis->m_initConfig.webpage_UniIdioms, pThis->m_userInfo.UserInfo.uid,
+	sprintf(strURL, pThis->m_initConfig.webpage_UniIdioms, pThis->m_vip.c_str(),pThis->m_userInfo.UserInfo.uid,
 		pThis->m_login->m_authAdminid, pThis->m_login->m_szAuthtoken, tb_flag, turn_flag, r1);
 
 	CHttpLoad load;
