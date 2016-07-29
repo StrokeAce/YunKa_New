@@ -734,9 +734,6 @@ void CMainFrame::OnPrepare(TNotifyUI& msg)
 	//cef窗口
 	InitLibcef();
 
-	//ClearFile("*.jpg");
-
-
 	//聊天框中间栏按钮
 	m_pFontBtn = static_cast<CButtonUI*>(m_PaintManager.FindControl(_T("btnFont")));
 	m_pFaceBtn = static_cast<CButtonUI*>(m_PaintManager.FindControl(_T("btnFace")));
@@ -756,8 +753,6 @@ void CMainFrame::OnPrepare(TNotifyUI& msg)
 
 	MoveAndRestoreRightFrameControl(1);
 		
-
-
 	//上层管理按钮 设置初始状态
 	UpdateTopCenterButtonState(0);
 
@@ -837,6 +832,7 @@ void CMainFrame::OnPrepare(TNotifyUI& msg)
 	//请求坐席列表
 	SendMsgToGetList();
 
+	m_manager->SendTo_GetQuickReply(0);
 }
 
 
@@ -1449,8 +1445,6 @@ void CMainFrame::AddOnlineVisitor(UserListUI * ptr, CUserObject *user,int index)
 	UserListUI::Node* pVisiting = NULL;
 	UserListUI::Node* pOver = NULL;
 
-
-
 	nameString.Format(_T("{x 4}{i gameicons.png 18 0}{x 4} 在线访客"));
 	//第一个主节点 显示 名称 在线访客
 	if (index == -1)
@@ -1538,7 +1532,6 @@ void CMainFrame::AddHostUserList(UserListUI * ptr, CUserObject *user, int pos)
 
 
 	
-		
 
 }
 
@@ -1571,9 +1564,6 @@ void CMainFrame::AddMyselfToList(UserListUI * ptr, CUserObject *user)
 
 	nameString.Format(_T("{x 4}{i user_client.png 1 0}{x 4} %s %s"), strTemp.GetData(), onlineString);
 
-
-
-	
 
 	//第一个主节点 显示 名称 在线状态
 	pUserNameNode = ptr->AddNode(nameString,user->UserInfo.uid);
