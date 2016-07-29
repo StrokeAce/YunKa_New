@@ -4134,7 +4134,6 @@ void CMainFrame::RecvAcceptChat(CWebUserObject* pWebUser, CUserObject* pUser)
 		m_allVisitorNodeMap.erase(iter);
 	}
 
-
 	//需要从等待列表删除 这个用户
 	if (tempNode != NULL && tempNode->data()._level >= 0)
 		pUserList->RemoveNode(tempNode);
