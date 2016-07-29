@@ -5289,3 +5289,8 @@ int CMainFrame::ReleaseChatIdForInvoteMyselfOrOther(unsigned long id)
 
 	return 0;
 }
+
+void CMainFrame::RecvQuickReply(string quickReply)
+{
+
+}

@@ -6354,7 +6354,10 @@ DWORD WINAPI CChatManager::GetQuickReplyThread(void *arg)
 
 	CHttpLoad load;
 	string returnCode;
-	load.HttpLoad((string)strURL, "", REQUEST_TYPE_GET,"", returnCode);
+	if (load.HttpLoad((string)strURL, "", REQUEST_TYPE_GET, "", returnCode))
+	{
+		pThis->m_handlerMsgs->RecvQuickReply(returnCode);
+	}
 
 	return 0;
 }
