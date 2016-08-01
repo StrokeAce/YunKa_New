@@ -71,7 +71,7 @@ void CSmallMenu::CreateMyAppMenu(POINT point)
 	//TrackPopupMenu(hMenu, TPM_LEFTALIGN, point.x, point.y - 5, 0, m_hMenuWnd, NULL);
 	CMenuWnd* pMenu = new CMenuWnd(m_hMenuWnd);
 	CPoint cpoint = point;
-	cpoint.y -= 180;
+	cpoint.y -= 210;
 
 
 	//ClientToScreen(m_hMenuWnd, &cpoint);

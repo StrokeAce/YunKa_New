@@ -40,6 +40,8 @@ public:
 
 	int  m_showWnd;
 
+	int m_logoutState;
+
 
 };
 

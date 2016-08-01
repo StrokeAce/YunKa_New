@@ -2324,17 +2324,23 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 
 		CreateSmallTaskIcon(DEFINE_SMALL_LEAVE_ICON_PATH);
 	}
-	//注销
+	//切换账号
 	else if (controlName == L"menu_logout")
 	{
-
-		CreateSmallTaskIcon(DEFINE_SMALL_OFFLINE_ICON_PATH);
+		_globalSetting.m_logoutState = 1;
 		OnCloseBtn(msg);
 	}
+	//系统设置
+	else if (controlName == L"menu_sys_set")
+	{
+
+
+	}
+
 	//退出
 	else if (controlName == L"menu_quit")
 	{
-
+		_globalSetting.m_logoutState = 0;
 		OnCloseBtn(msg);
 	}
 
@@ -5322,7 +5328,7 @@ int CMainFrame::ParseGroup(CMarkupXml &xml, int id, int curitemid)
 	char title[MAX_256_LEN + 1];
 	int m, n = 0;
 	KEYWORDGROUP_INFO *pKeyWordGroupInfo;
-
+#if 0
 	while (xml.FindChildElem("item"))
 	{
 		groupid = (unsigned long)atol((char*)xml.GetChildAttrib("id").c_str());
@@ -5362,6 +5368,7 @@ int CMainFrame::ParseGroup(CMarkupXml &xml, int id, int curitemid)
 
 		xml.OutOfElem();
 	}
+#endif
 	return n;
 }
 
@@ -5374,11 +5381,11 @@ int CMainFrame::ParseGroupItem(CMarkupXml &xml, KEYWORDGROUP_INFO *pKeyWordGroup
 	unsigned long itemid;
 	char title[MAX_256_LEN + 1];
 	char memo[MAX_4096_LEN + 1];
-	int num;
+	int num = 0;
 	int is_shortcut;
 	char shotkey[MAX_256_LEN + 1];
 
-
+#if 0
 	num = 0;
 	while (xml.FindChildElem(sKey))
 	{
@@ -5405,6 +5412,6 @@ int CMainFrame::ParseGroupItem(CMarkupXml &xml, KEYWORDGROUP_INFO *pKeyWordGroup
 		}
 		num++;
 	}
-
+#endif
 	return num;
 }

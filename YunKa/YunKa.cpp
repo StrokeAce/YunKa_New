@@ -9,6 +9,7 @@
 #include "utils.h"
 #include "chat_manager.h"
 #include "cef_browser/cefclient.h"
+#include "common_utility.h"
 
 
 CefRefPtr<ClientApp> m_cefApp;
@@ -94,6 +95,15 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 
 	m_cefApp->Exit();
 	m_cefApp = NULL;
+
+	
+	if (_globalSetting.m_logoutState == 1)
+	{
+		CDuiString path = GetCurrentPathW();
+		path += L"\\YunKa.exe";
+		ShellExecute(NULL, L"open", path.GetData(), NULL, NULL, SW_SHOWNOACTIVATE);
+	}
+
 
 	return 0;
 }

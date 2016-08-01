@@ -13,6 +13,8 @@ CGlobalSetting::CGlobalSetting()
 	memset(m_userName, 0, sizeof(m_userName));
 
 	m_showWnd = 0;
+
+	m_logoutState = 0;
 }
 
 
