@@ -198,7 +198,7 @@ LRESULT CMainFrame::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	if (uMsg == WM_KEYDOWN) // 发送消息框的Ctrl+V消息	
 	{
-		if ((wParam == 'V') && ::GetKeyState(VK_CONTROL) < 0)
+		if ((wParam == 'V' || wParam == 'v') && ::GetKeyState(VK_CONTROL) < 0)
 		{
 			if ((m_pSendEdit != NULL) && m_pSendEdit->IsFocused())
 			{
@@ -206,6 +206,14 @@ LRESULT CMainFrame::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 				return TRUE;
 			}
 		}
+
+		if ((wParam == 'Q' ||  wParam == 'q') && ::GetKeyState(VK_CONTROL) < 0)
+		{
+		
+			OnBtnScreen(msg);
+			return TRUE;
+		}
+
 
 
 		if (wParam == VK_RETURN)   //m_manager->m_sysConfig->m_nKeySendType == 0)
@@ -5282,5 +5290,121 @@ int CMainFrame::ReleaseChatIdForInvoteMyselfOrOther(unsigned long id)
 
 void CMainFrame::RecvQuickReply(string quickReply)
 {
+	//WCHAR *xmlData = NULL;
+	//int length = quickReply.length();
 
+	//xmlData = new WCHAR[length * 2 + 1];
+
+	//ANSIToUnicode(quickReply.c_str(),xmlData);
+
+	//CMarkup xml(xmlData);
+	//unsigned long curitemid = 1000;
+	//unsigned long id = 0;
+
+	//ParseGroup(xml, id, curitemid);
+
+	//delete[]xmlData;
+
+
+	CMarkupXml   xml((char*)quickReply.c_str());
+
+
+
+
+
+}
+
+
+int CMainFrame::ParseGroup(CMarkupXml &xml, int id, int curitemid)
+{
+	int type;
+	unsigned long groupid, uid, parentid, tb_flag;
+	char title[MAX_256_LEN + 1];
+	int m, n = 0;
+	KEYWORDGROUP_INFO *pKeyWordGroupInfo;
+
+	while (xml.FindChildElem("item"))
+	{
+		groupid = (unsigned long)atol((char*)xml.GetChildAttrib("id").c_str());
+		uid = (unsigned long)atol((char*)xml.GetChildAttrib("uin").c_str());
+		parentid = (unsigned long)atol((char*)xml.GetChildAttrib("parent_sort_id").c_str());
+		type = atoi(xml.GetChildAttrib("type").c_str());
+		strncpy(title, xml.GetChildAttrib("text").c_str(), MAX_256_LEN);
+		tb_flag = atoi(xml.GetChildAttrib("tb_flag").c_str());
+
+		pKeyWordGroupInfo = m_pApp->AddKeyWordGroupInfo(groupid, 0, 0, id, parentid, type, title);
+
+		xml.IntoElem();
+		m = ParseGroup(xml, id, curitemid);
+		curitemid += m;
+		n += m;
+		switch (type)
+		{
+		case 0:
+			m = ParseGroupItem(xml, pKeyWordGroupInfo, "Quickreply", 0, curitemid);
+			curitemid += m;
+			n += m;
+			break;
+		case 1:
+			if (strlen(pKeyWordGroupInfo->name) <= 0)
+				sprintf(pKeyWordGroupInfo->name, "%s", "推送网址");
+
+			m = ParseGroupItem(xml, pKeyWordGroupInfo, "SendURL", 1, curitemid);
+			curitemid += m;
+			n += m;
+			break;
+		case 2:
+			m = ParseGroupItem(xml, pKeyWordGroupInfo, "SendFile", 2, curitemid);
+			curitemid += m;
+			n += m;
+			break;
+		}
+
+		xml.OutOfElem();
+	}
+	return n;
+}
+
+int CMainFrame::ParseGroupItem(CMarkupXml &xml, KEYWORDGROUP_INFO *pKeyWordGroupInfo, char *sKey, int type, int curitemid)
+{
+
+	if (pKeyWordGroupInfo == NULL || sKey == NULL)
+		return 0;
+
+	unsigned long itemid;
+	char title[MAX_256_LEN + 1];
+	char memo[MAX_4096_LEN + 1];
+	int num;
+	int is_shortcut;
+	char shotkey[MAX_256_LEN + 1];
+
+
+	num = 0;
+	while (xml.FindChildElem(sKey))
+	{
+		pKeyWordGroupInfo->type = type;
+
+		itemid = (unsigned long)atol(xml.GetChildAttrib("id"));
+		if (itemid == 0)
+			itemid = curitemid++;
+
+		is_shortcut = (unsigned long)atol(xml.GetChildAttrib("is_shortcut"));
+
+		strncpy(title, xml.GetChildAttrib("title"), MAX_256_LEN);
+		strncpy(memo, xml.GetChildData(), MAX_4096_LEN);
+		strncpy(shotkey, xml.GetChildAttrib("keyboard"), MAX_256_LEN);
+
+		KEYWORD_INFO *pKeyInfo = m_pApp->AddKeyWordInfo(itemid, 0, 0, pKeyWordGroupInfo->userid, pKeyWordGroupInfo->id, type, title, memo);
+		//		if( is_shortcut != 0)
+		if (strlen(shotkey) > 0)
+		{
+			//			pKeyInfo->hotkey = is_shortcut;
+			pKeyInfo->hotkey = 1;
+			strncpy(shotkey, xml.GetChildAttrib("keyboard"), MAX_256_LEN);
+			ParseHotKeyString(shotkey, pKeyInfo->ctrl, pKeyInfo->alt, pKeyInfo->shift, pKeyInfo->code);
+		}
+		num++;
+	}
+
+	return num;
 }

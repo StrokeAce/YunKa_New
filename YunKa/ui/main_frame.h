@@ -240,6 +240,9 @@ public:
 	void CMainFrame::CreateSmallTaskIcon(WCHAR *name);
 	void CMainFrame::OnCancel();
 
+	int CMainFrame::ParseGroup(CMarkupXml &xml, int id, int curitemid);
+	int CMainFrame::ParseGroupItem(CMarkupXml &xml, KEYWORDGROUP_INFO *pKeyWordGroupInfo, char *sKey, int type, int curitemid);
+
 //接入聊天 相关处理
 	void CMainFrame::OnMenuEvent(CDuiString controlName);
 	void CMainFrame::OnCtrlVEvent();
