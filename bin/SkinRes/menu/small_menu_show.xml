@@ -8,7 +8,9 @@
 	<MenuElement name="menu_online"  text="上线"/>
 	<MenuElement name="menu_busy"  text="繁忙"/>
 	<MenuElement name="menu_leave"  text="离开"/>
-	<MenuElement name="menu_logout"  text="注销"/>
+
+	<MenuElement name="menu_logout"  text="切换账号"/>
+	<MenuElement name="menu_sys_set"  text="系统设置"/>
         <MenuElement name="menu_quit"  text="退出"/>
   </Menu>
 </Window>

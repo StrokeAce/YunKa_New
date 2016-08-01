@@ -7,7 +7,7 @@
      	<MenuElement name="menu_online"  text="上线"/>
 	<MenuElement name="menu_busy"  text="繁忙"/>
 	<MenuElement name="menu_leave"  text="离开"/>
-	<MenuElement name="menu_logout"  text="注销"/>
+	<MenuElement name="menu_logout"  text="切换账号"/>
         <MenuElement   name="menu_right_forbid_user" text="屏蔽此人" />
 
         <MenuElement   name="menu_right_update_friend" text="更新好友对象"/>
