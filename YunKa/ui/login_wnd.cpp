@@ -362,6 +362,7 @@ void CLoginWnd::LoginProgress(int percent)
 		//µÇÂ¼³É¹¦ 
 		//m_hLoginMenu.DeleteSmallIcon();
 		Close();
+
 	}
 	else if (percent < 0 || percent>100)  //·µ»ØÊ§°Ü
 	{
