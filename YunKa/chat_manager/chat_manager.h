@@ -77,7 +77,6 @@ public:
 	// Parameter: msgTime 收到消息的时间
 	// Parameter: pAssistUser 协助对象，当消息为协助对象发来时，需要该参数
 	// Parameter: msgContentWx 微信消息，当非文字的微信消息时，需要该参数
-	// Parameter: bSuccess 是否成功接收消息
 	//************************************
 	virtual void RecvMsg(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, string msgId, MSG_TYPE msgType, MSG_DATA_TYPE msgDataType, string msgContent,
 		string msgTime = "", CUserObject* pAssistUser = NULL, WxMsgBase* msgContentWx = NULL) = 0;
@@ -87,6 +86,12 @@ public:
 	// Qualifier: 接收一条语音或图片等媒体文件消息的结果
 	// Parameter: msgId 消息id
 	// Parameter: bSuccess 是否接收成功
+	// Parameter: url 文件的下载url
+	// Parameter: msgFromUserId 消息发送者的id
+	// Parameter: assistUserId 协助对象的id
+	// Parameter: filePath 文件本地保存路径，接收失败时为空
+	// Parameter: msgFromType 消息发送者类型
+	// Parameter: msgDataType 消息的数据类型
 	//************************************
 	virtual void ResultRecvMsg(string msgId, bool bSuccess, string url, unsigned long msgFromUserId,
 		unsigned long assistUserId, string filePath, MSG_FROM_TYPE msgFromType, MSG_DATA_TYPE msgDataType) = 0;
@@ -96,9 +101,13 @@ public:
 	// Qualifier: 发送一条消息的结果
 	// Parameter: msgId 消息id
 	// Parameter: bSuccess 是否发送成功
+	// Parameter: userId 消息接收者的id
+	// Parameter: userType 消息接收者的类型
+	// Parameter: msgDataType 消息的数据类型
+	// Parameter: msg 消息内容
 	//************************************
-	virtual void ResultSendMsg(string msgId, bool bSuccess = true,unsigned long userId=0,MSG_RECV_TYPE userType= MSG_RECV_WX,
-								MSG_DATA_TYPE msgDataType= MSG_DATA_TYPE_IMAGE, string msg="") = 0;
+	virtual void ResultSendMsg(string msgId, bool bSuccess = true, unsigned long userId=0,
+		MSG_RECV_TYPE userType= MSG_RECV_WX,MSG_DATA_TYPE msgDataType= MSG_DATA_TYPE_IMAGE, string msg="") = 0;
 
 	//************************************
 	// Method:    ResultScreenCapture
@@ -120,7 +129,7 @@ public:
 	// Qualifier: 邀请协助的结果
 	// Parameter: pWebUser 邀请协助会话的聊天访客
 	// Parameter: pUser 被邀请的协助者
-	// Parameter: bSuccess true 接受邀请,false 拒绝邀请
+	// Parameter: status 邀请协助的状态
 	//************************************
 	virtual void ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, RESULT_STATUS status) = 0;
 
@@ -132,17 +141,19 @@ public:
 	//************************************
 	virtual void RecvTransferUser(CWebUserObject* pWebUser, CUserObject* pUser) = 0;
 
-	// 收到在线坐席信息
+	// 收到在线坐席信息列表
 	virtual void RecvOnlineUsers(CGroupObject* pGroup) = 0;
 
-	// 收到访客信息
+	// 收到访客信息更新的事件
 	virtual void RecvWebUserInfo(CWebUserObject* pWebUser, WEBUSER_INFO_NOTIFY_TYPE type) = 0;
 
 	// 收到坐席在邀请中的消息
 	virtual void RecvWebUserInInvite(CWebUserObject* pWebUser, CUserObject* pInviteUser) = 0;
 
+	// 收到邀请邀请web访客会话的结果
 	virtual void ResultInviteWebUser(CWebUserObject* pWebUser, bool bAgree) = 0;
 
+	// 收到辅助应答的配置内容
 	virtual void RecvQuickReply(string quickReply) = 0;
 
 };
@@ -248,13 +259,6 @@ public:
 	// 发起会话转接到其他坐席的请求
 	int SendTo_TransferRequestUser(CWebUserObject* pWebUser, CUserObject* pAcceptUser);
 
-	// 发送获取某个访客信息的消息
-	int SendToGetWorkBill(unsigned long webuserid, const char *chatid, char *szMsg = "", unsigned int chatkefuid = 0);
-
-	int SendToTransferUser(CUserObject *pAcceptUser, CWebUserObject *pWebUser, unsigned long acceptuin = 0);
-
-	int SendToRefuseChat(CWebUserObject *pWebUser, string strReason = "NO");
-
 	//************************************
 	// Method:    SendTo_InviteUserResult
 	// Qualifier: 发送是否接受该坐席的会话转接
@@ -267,6 +271,13 @@ public:
 	int SendTo_GetOnlineUser();
 
 	void SendTo_GetQuickReply(unsigned long uin);
+
+	// 发送获取某个访客信息的消息
+	int SendToGetWorkBill(unsigned long webuserid, const char *chatid, char *szMsg = "", unsigned int chatkefuid = 0);
+
+	int SendToTransferUser(CUserObject *pAcceptUser, CWebUserObject *pWebUser, unsigned long acceptuin = 0);
+
+	int SendToRefuseChat(CWebUserObject *pWebUser, string strReason = "NO");
 
 	// 获取上一次错误信息
 	string GetLastError();
@@ -528,25 +539,25 @@ public:
 	//************************************
 	// Method:    AddMsgToList
 	// Qualifier: 添加一条消息
-	// Parameter: pObj 会话中的访客
-	// Parameter: msgFrom 会话关闭的原因，例如：CHATCLOSE_USER
-	// Parameter: recvType 
-	// Parameter: msgId 
-	// Parameter: msgType 
-	// Parameter: msgDataType 
-	// Parameter: msgContent 
-	// Parameter: msgTime 
-	// Parameter: pAssistUser 
-	// Parameter: msgContentWx 
-	// Parameter: bSave 
-	// Parameter: bNotify 
-	// Parameter: bSuccess 
+	// Parameter: pObj 消息所属的用户
+	// Parameter: msgFrom 消息发送者的用户类型
+	// Parameter: recvType 消息接收者的用户类型
+	// Parameter: msgId 消息id
+	// Parameter: msgType 消息类型
+	// Parameter: msgDataType 消息数据类型
+	// Parameter: msgContent 消息内容
+	// Parameter: msgTime 消息时间
+	// Parameter: pAssistUser 协助对象
+	// Parameter: msgContentWx 微信消息体
+	// Parameter: bSave	消息是否保存
+	// Parameter: bNotify 消息是否通知界面
+	// Parameter: bAgain 消息内容是否需要再次处理
 	//************************************
 	void AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RECV_TYPE recvType,string msgId, 
 					MSG_TYPE msgType, MSG_DATA_TYPE msgDataType,string msgContent="",
 					unsigned long msgTime = 0, CUserObject* pAssistUser = NULL, 
 					WxMsgBase* msgContentWx = NULL,bool bSave = true,
-					bool bNotify = true,bool bSuccess = true);
+					bool bNotify = true,bool bAgain = true);
 
 	string ReplaceToken(string srcStr, string replaceStr);
 

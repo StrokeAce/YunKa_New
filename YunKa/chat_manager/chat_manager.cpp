@@ -3240,7 +3240,7 @@ void CChatManager::RecvComSendWorkBillMsg(unsigned long senduid, unsigned long r
 				strcpy(pWebUser->info.thirdid, thirdid);
 			}
 
-			if (pWebUser->webuserid == 0)
+			if (pWebUser->webuserid == 0 && m_bFrameInit)
 			{
 				pWebUser->webuserid = senduid;
 				m_handlerMsgs->RecvWebUserInfo(pWebUser, NOTIFY_ID);
@@ -5025,7 +5025,7 @@ void CChatManager::DownLoadFile(IBaseObject* pObj, MSG_DATA_TYPE nMsgDataType, s
 
 void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RECV_TYPE recvType,string msgId, 
 	MSG_TYPE msgType, MSG_DATA_TYPE msgDataType, string msgContent, unsigned long msgTime, CUserObject* pAssistUser,
-	WxMsgBase* msgContentWx, bool bSave, bool bNotify, bool bSuccess)
+	WxMsgBase* msgContentWx, bool bSave, bool bNotify, bool bAgain)
 {
 	ONE_MSG_INFO ongMsg;
 	ongMsg.msgId = msgId;
@@ -5084,7 +5084,7 @@ void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RE
 			StringReplace(name, "'", "&#039;");
 			convert.Gb2312ToUTF_8(sName, name.c_str(), name.length());
 
-			if (bSuccess)
+			if (bAgain)
 			{
 				char formatMsg[MAX_1024_LEN];
 				if (msgDataType == MSG_DATA_TYPE_TEXT)
@@ -5252,7 +5252,7 @@ void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RE
 			StringReplace(name, "'", "&#039;");
 			convert.Gb2312ToUTF_8(sName, name.c_str(), name.length());
 
-			if (bSuccess)
+			if (bAgain)
 			{
 				if (msgDataType == MSG_DATA_TYPE_TEXT)
 				{
