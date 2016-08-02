@@ -798,7 +798,7 @@ int CChatManager::RecvSrvStatusFrdOnline(PACK_HEADER packhead, char *pRecvBuff, 
 		ConvertMsg(RecvInfo.nickname, sizeof(RecvInfo.nickname) - 1);
 	}
 
-	g_WriteLog.WriteLog(C_LOG_TRACE, "RecvSrvStatusFrdOnline: uin:%lu,nickname:%s,status:%d,szRand:%,szThirdId", 
+	g_WriteLog.WriteLog(C_LOG_TRACE, "RecvSrvStatusFrdOnline: uin:%lu,nickname:%s,status:%d,szRand:%s,szThirdId:%s", 
 		RecvInfo.uin,RecvInfo.nickname,RecvInfo.status,RecvInfo.szRand,RecvInfo.szThirdId);
 
 	if (RecvInfo.uin > WEBUSER_UIN)
@@ -3262,11 +3262,12 @@ void CChatManager::RecvComSendWorkBillMsg(unsigned long senduid, unsigned long r
 				strcpy(pWebUser->info.thirdid, thirdid);
 			}
 
-			if (pWebUser->webuserid == 0)
+			if (pWebUser->webuserid != senduid)
 			{
+				pWebUser->webuserid = senduid;
 				m_handlerMsgs->RecvWebUserInfo(pWebUser, NOTIFY_ID);
 			}
-			pWebUser->webuserid = senduid;
+			
 			SolveWebUserEarlyMsg(pWebUser);
 		}
 
@@ -3339,16 +3340,6 @@ void CChatManager::RecvComSendWorkBillMsg(unsigned long senduid, unsigned long r
 		else if ((pWebUser->cTalkedSatus != INTALKING || !pWebUser->m_bConnected)
 			&& m_userInfo.UserInfo.uid == recvuid && !pWebUser->m_bNewComm)//非等待应答的会话
 		{
-			if (m_vistor)
-			{
-				m_vistor->SendWebuserTalkBegin(pWebUser);
-			}
-			else
-			{
-				g_WriteLog.WriteLog(C_LOG_ERROR, "RecvComSendWorkBillMsg visit服务器未登录前，收到新会话");
-				return;
-			}
-
 			pWebUser->cTalkedSatus = INTALKING;
 			pWebUser->talkuid = m_userInfo.UserInfo.uid;
 			pWebUser->onlineinfo.talkstatus = TALK_STATUS_TALK;
@@ -4096,7 +4087,7 @@ int CChatManager::SendGetChatHisMsg(unsigned long webuserid, const char *chatid)
 
 std::string CChatManager::GetLastError()
 {
-	return "";
+	return m_lastError;
 }
 
 int CChatManager::ReRecv_Msg(string url, MSG_FROM_TYPE msgFromUserType, string msgId, MSG_DATA_TYPE nMsgDataType,

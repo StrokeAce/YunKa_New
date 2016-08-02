@@ -1,8 +1,9 @@
 #include "../stdafx.h"
 #include "login.h"
 #include "http_parse.h"
-#include "./chat_manager.h"
+#include "chat_manager.h"
 #include "../chat_common/comclt.h"
+#include "../chat_common/commsg.h"
 #include "auth_error.h"
 #include "http_unit.h"
 
@@ -24,7 +25,7 @@ void CLogin::StartLogin(string loginName, string password, bool isAutoLogin, boo
 {
 	if (!CheckLoginInfo(loginName, password, isAutoLogin, isKeepPwd))
 	{
-		m_manager->m_handlerLogin->LoginProgress(-1);
+		SetLoginProgress(-1);
 		return;
 	}
 
@@ -67,20 +68,23 @@ void CLogin::StartLogin(string loginName, string password, bool isAutoLogin, boo
 	}
 	else
 	{
-		m_manager->m_handlerLogin->LoginProgress(-1);
+		SetLoginProgress(-1);
 		m_manager->m_lastError = "获取服务器信息失败";
 		return;
 	}
 
 	// 认证
-	if (GetTqAuthToken(uin, loginName.c_str(), password.c_str(), authIp.c_str(), authPort) != 1)
+	int nState = GetTqAuthToken(uin, loginName.c_str(), password.c_str(), authIp.c_str(), authPort);
+	if (nState != 1)
 	{
-		m_manager->m_lastError = "认证失败";
-		m_manager->m_handlerLogin->LoginProgress(-1);
+		char errorInfo[MAX_128_LEN];
+		sprintf(errorInfo, "认证失败：%s", GetAuthStrError(nState));
+		m_manager->m_lastError = errorInfo;
+		SetLoginProgress(-1);
 		return;
 	}
 
-	m_manager->m_handlerLogin->LoginProgress(20);
+	SetLoginProgress(20);
 
 	if (!IsNumber(loginName))
 	{
@@ -94,14 +98,14 @@ void CLogin::StartLogin(string loginName, string password, bool isAutoLogin, boo
 	if (CheckLoginFlag(uin, loginName))
 	{
 		m_manager->m_lastError = "该帐号在本地已经登录";
-		m_manager->m_handlerLogin->LoginProgress(-1);
+		SetLoginProgress(-1);
 		return;
 	}
 
 	// 登录
 	if (!LoginToRealServer(m_manager->m_server, m_manager->m_port, uin))
 	{
-		m_manager->m_handlerLogin->LoginProgress(-1);
+		SetLoginProgress(-1);
 	}
 }
 
@@ -263,12 +267,12 @@ bool CLogin::LoginToRealServer(string strServer, int nPort, unsigned int uin)
 	if ((nError = ConnectToServer(strServer, nPort)) != 0)
 		return false;
 
-	m_manager->m_handlerLogin->LoginProgress(40);
+	SetLoginProgress(40);
 
 	if ((nError = SendLoginInfo(uin)) != 0)
 		return false;
 
-	m_manager->m_handlerLogin->LoginProgress(60);
+	SetLoginProgress(60);
 	return true;
 }
 
@@ -357,5 +361,18 @@ void CLogin::SetOffline()
 		bool butf8(true);
 		m_pTqAuthClient->Logout(m_szAuthtoken, recvbuf, nlen, butf8);
 		strcpy(m_szAuthtoken, "");
+	}
+}
+
+void CLogin::SetLoginProgress(int percent)
+{
+	if (m_manager && m_manager->m_handlerLogin)
+	{
+		m_manager->m_handlerLogin->LoginProgress(percent);
+	}
+	
+	if (m_manager && m_manager->m_timers && percent == -1)
+	{
+		m_manager->m_timers->KillTimer(TIMER_LOGIN);
 	}
 }

@@ -34,6 +34,8 @@ private:
 	int ConnectToServer(string sip, unsigned short port);
 
 	int SendLoginInfo(unsigned int uin);
+
+	void SetLoginProgress(int percent);
 	
 public:
 	CChatManager*		m_manager;
