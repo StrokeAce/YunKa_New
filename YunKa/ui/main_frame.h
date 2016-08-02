@@ -29,6 +29,28 @@
 
 
 
+typedef struct SHORT_ANSWER_DATA
+{
+	char title[128];
+	char value[1024];
+
+}SHORT_ANSWER_DATA;
+
+
+
+typedef struct SHORT_ANSWER_STRUCT
+{
+
+	char key[128];
+	vector<SHORT_ANSWER_DATA> m_value;
+
+}SHORT_ANSWER_STRUCT;
+
+
+
+
+
+
 typedef struct CONTROL_ATTR
 {
 	int centerFrameWitdh;
@@ -243,6 +265,12 @@ public:
 	int CMainFrame::ParseGroup(CMarkupXml &xml, int id, int curitemid);
 	int CMainFrame::ParseGroupItem(CMarkupXml &xml, KEYWORDGROUP_INFO *pKeyWordGroupInfo, char *sKey, int type, int curitemid);
 
+	KEYWORDGROUP_INFO *CMainFrame::AddKeyWordGroupInfo(unsigned long id, int sort, unsigned long compid, unsigned long uid, unsigned long parentid, unsigned char type, char *name);
+	KEYWORD_INFO *CMainFrame::AddKeyWordInfo(unsigned long id, int sort, unsigned long compid,unsigned long uid, unsigned long groupid, unsigned char type,char *name, char *memo);
+
+	void CMainFrame::DoRightShortAnswerList(string str);
+
+
 //接入聊天 相关处理
 	void CMainFrame::OnMenuEvent(CDuiString controlName);
 	void CMainFrame::OnCtrlVEvent();
@@ -294,7 +322,6 @@ public:
 	map<unsigned long, UserListUI::Node*> m_onlineNodeMap; //在线坐席
 	map<unsigned long, UserListUI::Node*> m_offlineNodeMap; //离线坐席
 	UserListUI::Node* pOnlineNode ;   //在线访客 
-	UserListUI::Node* pWaitForStart;  //等待开始
 	UserListUI::Node* pWaitForAccept;  //等待应答
 	UserListUI::Node* pMySelfeNode;    //自己的node
 	map<unsigned long, UserListUI::Node*> m_waitVizitorMap;  //等待列表
@@ -306,6 +333,9 @@ public:
 	list<unsigned long >m_acceptingsUserList;                 //邀请列表
 	list<unsigned long >m_transferUserList;                 //邀请列表
 
+	vector<SHORT_ANSWER_STRUCT> m_savedShortAnswer;
+	vector<SHORT_ANSWER_STRUCT> m_pushWebUrl;
+	SHORT_ANSWER_STRUCT m_answerData;
 
 	UserListUI::Node* m_pLastOfflineNode;
 	UserListUI::Node* m_pLastOnlineNode;

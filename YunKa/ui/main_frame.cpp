@@ -30,7 +30,7 @@ CMainFrame::CMainFrame(CChatManager* manager) :m_manager(manager)
 	m_MainCenterRightWND = NULL;
 	m_pSendEdit = NULL;
 
-	pOnlineNode = pWaitForStart = pMySelfeNode = NULL;
+	pOnlineNode = pWaitForAccept = pMySelfeNode = NULL;
 
 	m_recordWaitNumber = 0;
 
@@ -781,10 +781,13 @@ void CMainFrame::OnPrepare(TNotifyUI& msg)
 	pUserList->SetListBKImage(_T("file = 'mainframe\\tree_top.png' corner = '2,1,2,1' fade = '100'"));
 	pUserList->SetListName(_T("userlist"));
 	pWaitForAccept = NULL;
-	pWaitForStart = pUserList->AddNode(_T("{x 4}{i gameicons.png 18 0}{x 4}等待开始"),0);
-	pWaitForAccept = pUserList->AddNode(_T("{x 4}{i gameicons.png 18 14}{x 4}等待应答"),0,"",pWaitForStart);
+	pWaitForAccept = pUserList->AddNode(_T("{x 4}{i gameicons.png 18 0}{x 4}等待开始"), 0);
+	//先添加自己的位置
+	AddMyselfToList(pUserList, &m_manager->m_userInfo);
+	//再添加最后一个的位置
+	AddOnlineVisitor(pUserList, NULL, -1);
 
-	InitRightTalkList();
+
 
 #if 0	
 	UserListUI::Node* pCategoryNode = NULL;
@@ -994,7 +997,9 @@ void CMainFrame::OnItemActive(TNotifyUI &msg)
 		{
 			UserListUI::Node* node = (UserListUI::Node*)msg.pSender->GetTag();
 			m_pTalkList->ExpandNode(node, !node->data()._expand);
+			string sidText = node->data()._sid;
 
+			DoRightShortAnswerList(sidText);
 		}
 	}
 }
@@ -1425,11 +1430,7 @@ void CMainFrame::OnBtnSendMessage(TNotifyUI& msg)
 //请求坐席列表
 void CMainFrame::SendMsgToGetList()
 {
-	//先添加自己的位置
-	AddMyselfToList(pUserList, &m_manager->m_userInfo);
 
-	//再添加最后一个的位置
-	AddOnlineVisitor(pUserList, NULL, -1);
 
 	//AddOnlineVisitor(pUserList,NULL,-1);
 	//获取坐席列表
@@ -2468,7 +2469,7 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 					CDuiString text = tempNode->data()._text;
 
 
-					if (tempNode != NULL && tempNode->data()._level >= 0)
+					if (tempNode != NULL && tempNode->data()._level >= 0 && tempNode->data()._level <= 5)
 						pUserList->RemoveNode(tempNode);
 
 			
@@ -2507,7 +2508,7 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 					CDuiString text = tempNode->data()._text;
 
 
-					if (tempNode != NULL && tempNode->data()._level >= 0)
+					if (tempNode != NULL && tempNode->data()._level >= 0 && tempNode->data()._level <= 5)
 						pUserList->RemoveNode(tempNode);
 
 
@@ -2977,54 +2978,39 @@ void CMainFrame::MoveAndRestoreRightFrameControl(int type)
 
 void CMainFrame::InitRightTalkList()
 {
-	m_pTalkList = static_cast<UserListUI*>(m_PaintManager.FindControl(_T("talklist")));
+	WCHAR addTitle[1024] = { 0 };
+	WCHAR title[1024] = { 0 };
+	char savedStr[128] = {0};
 
+	m_pTalkList = static_cast<UserListUI*>(m_PaintManager.FindControl(_T("talklist")));
 	m_pTalkList->SetListName(_T("talklist"));
 
-	UserListUI::Node*  TalkList1 = m_pTalkList->AddNode(_T("早起签到"), 0);
-	UserListUI::Node*  TalkList2 = m_pTalkList->AddNode(_T("晚安签到"), 0);
-	UserListUI::Node*  TalkList3 = m_pTalkList->AddNode(_T("云咖平台回复语"), 0);
-	UserListUI::Node*  TalkList4 = m_pTalkList->AddNode(_T("顺风车"), 0);
-	UserListUI::Node*  TalkList5 = m_pTalkList->AddNode(_T("服务时间"), 0);
-	UserListUI::Node*  TalkList6 = m_pTalkList->AddNode(_T("八妹说"), 0);
-	UserListUI::Node*  TalkList7 = m_pTalkList->AddNode(_T("测试"), 0);
+	for (int i = 0; i < m_savedShortAnswer.size(); i++)
+	{
 
-	//以下数据作为测试数据 暂时显示 后面再修改 lxh
-	m_pTalkList->AddNode(_T("{x 12}早起签到成功回复语"),0,"", TalkList1);
-	m_pTalkList->AddNode(_T("{x 12}早起团报名链接"), 0, "",TalkList1);
+		SHORT_ANSWER_STRUCT data = m_savedShortAnswer[i];
 
+		ANSIToUnicode(data.key, title);
+		sprintf(savedStr,"%d", i );
+		UserListUI::Node*  TalkList = m_pTalkList->AddNode(title, 0, savedStr);
+		for (int j = 0; j < data.m_value.size(); j++)
+		{
+			SHORT_ANSWER_DATA ansData = data.m_value[j];
+			ANSIToUnicode(ansData.title, title);
+			
+			wsprintf(addTitle, _T("{x 12}%s"), title);
 
+			sprintf(savedStr, "%d-%d", i,j);
+			m_pTalkList->AddNode(addTitle, 0, savedStr, TalkList);
 
-	m_pTalkList->AddNode(_T("{x 12}晚安签到中奖"), 0, "", TalkList2);
-	m_pTalkList->AddNode(_T("{x 12}晚安签到中奖1"), 0, "", TalkList2);
-	m_pTalkList->AddNode(_T("{x 12}晚安签到中奖2"), 0, "", TalkList2);
-	m_pTalkList->AddNode(_T("{x 12}晚安签到中奖3"), 0, "", TalkList2);
-	m_pTalkList->AddNode(_T("{x 12}晚安签到中奖4"), 0, "", TalkList2);
-	m_pTalkList->AddNode(_T("{x 12}晚安签到中奖5"), 0, "", TalkList2);
-	m_pTalkList->AddNode(_T("{x 12}晚安签到中奖6"), 0, "", TalkList2);
-	m_pTalkList->AddNode(_T("{x 12}晚安签到中奖7"), 0, "", TalkList2);
-	m_pTalkList->AddNode(_T("{x 12}晚安签到中奖8"), 0, "", TalkList2);
-	m_pTalkList->AddNode(_T("{x 12}晚安签到中奖9"), 0, "", TalkList2);
-	m_pTalkList->AddNode(_T("{x 12}晚安签到中奖10"), 0, "", TalkList2);
+		}
 
-	m_pTalkList->AddNode(_T("{x 12}云咖平台不能支持的回复"), 0, "", TalkList3);
+		if (i == 0)
+			m_pTalkList->ExpandNode(TalkList, true);
+		else
+		    m_pTalkList->ExpandNode(TalkList, false);
+	}
 
-	m_pTalkList->AddNode(_T("{x 12}发送66顺风车的回复"), 0, "", TalkList4);
-	m_pTalkList->AddNode(_T("{x 12}发送66顺风车广告语"), 0,"", TalkList4);
-	m_pTalkList->AddNode(_T("{x 12}发送投票的回复"), 0, "", TalkList4);
-
-	m_pTalkList->AddNode(_T("{x 12}9588服务时间回复语"), 0, "", TalkList5);
-	m_pTalkList->AddNode(_T("{x 12}云咖9588服务时间回复语"), 0, "", TalkList5);
-
-	m_pTalkList->AddNode(_T("{x 12}八妹说的话"), 0, "", TalkList6);
-	m_pTalkList->AddNode(_T("{x 12}测试"), 0, "", TalkList7);
-
-	m_pTalkList->ExpandNode(TalkList2, false);
-	m_pTalkList->ExpandNode(TalkList3, false);	
-	m_pTalkList->ExpandNode(TalkList4, false);	
-	m_pTalkList->ExpandNode(TalkList5, false);	
-	m_pTalkList->ExpandNode(TalkList6, false);
-	m_pTalkList->ExpandNode(TalkList7, false);
 }
 
 void CMainFrame::JsCallMFC(WPARAM wParam, LPARAM lParam)
@@ -3537,7 +3523,7 @@ void CMainFrame::RecvWebUserInfo(CWebUserObject* pWebUser, WEBUSER_INFO_NOTIFY_T
 			fatherType = 1;
 		}
 
-		if (tempNode != NULL && tempNode->data()._level >= 0)
+		if (tempNode != NULL && tempNode->data()._level >= 0 && tempNode->data()._level <= 5)
 		{
 			pUserList->RemoveNode(tempNode);
 		}
@@ -3674,7 +3660,7 @@ void CMainFrame::OnActiveUser(unsigned long id,string sid)
 		UserListUI::Node *tempNode = iter->second;
 		CDuiString text = L"";
 		//先在用户的对话列表中删除 
-		if (tempNode != NULL && tempNode->data()._level >= 0)
+		if (tempNode != NULL && tempNode->data()._level >= 0 && tempNode->data()._level <= 5)
 			pUserList->RemoveNode(tempNode);
 
 		m_allVisitorNodeMap.erase(iter);
@@ -3715,7 +3701,7 @@ void CMainFrame::OnActiveUser(unsigned long id,string sid)
 		ANSIToUnicode(pWebUser->info.name, name);
 
 		//先在用户的对话列表中删除 
-		if (tempNode != NULL && tempNode->data()._level >= 0)
+		if (tempNode != NULL && tempNode->data()._level >= 0 && tempNode->data()._level <= 5)
 			pUserList->RemoveNode(tempNode);
 
 		m_allVisitorNodeMap.erase(iter);
@@ -3983,7 +3969,7 @@ void CMainFrame::RecvChatInfo(CWebUserObject* pWebUser, CUserObject* pUser)
 	UserListUI::Node* tempNode = GetOneUserNode(pWebUser->webuserid);
 	if (tempNode != NULL)
 	{
-		if ( tempNode->data()._level >= 0)
+		if (tempNode->data()._level >= 0 && tempNode->data()._level <= 5)
 			pUserList->RemoveNode(tempNode);
 
 		DeleteOneUserNode(pWebUser->webuserid);
@@ -4136,7 +4122,7 @@ void CMainFrame::RecvAcceptChat(CWebUserObject* pWebUser, CUserObject* pUser)
 	}
 
 	//需要从等待列表删除 这个用户
-	if (tempNode != NULL && tempNode->data()._level >= 0)
+	if (tempNode != NULL && tempNode->data()._level >= 0 && tempNode->data()._level <= 5)
 		pUserList->RemoveNode(tempNode);
 
 	if (pUser == NULL)
@@ -4210,7 +4196,7 @@ void CMainFrame::RecvCloseChat(CWebUserObject* pWebUser)
 	}
 	tempNode = iter->second;
 
-	if (tempNode != NULL && tempNode->data()._level >= 0)
+	if (tempNode != NULL && tempNode->data()._level >= 0 && tempNode->data()._level <= 5)
 	{
 		//从坐席列表底下删除 然后加入等待列表
 		pUserList->RemoveNode(tempNode);
@@ -4267,7 +4253,7 @@ void CMainFrame::RecvReleaseChat(CWebUserObject* pWebUser)
 
 	m_allVisitorNodeMap.erase(iter);
 
-	if (tempNode != NULL && tempNode->data()._level >= 0)
+	if (tempNode != NULL && tempNode->data()._level >= 0 && tempNode->data()._level <= 5)
 	{
 		//从坐席列表底下删除 然后加入等待列表
 		pUserList->RemoveNode(tempNode);
@@ -4341,7 +4327,7 @@ void CMainFrame::RecvInviteUser(CWebUserObject* pWebUser, CUserObject* pUser)
 	}
 
 	//先在用户的对话列表中删除 
-	if (tempNode != NULL && tempNode->data()._level >= 0)
+	if (tempNode != NULL && tempNode->data()._level >= 0 && tempNode->data()._level <= 5)
 		pUserList->RemoveNode(tempNode);
 	m_allVisitorNodeMap.erase(iter);
 
@@ -4383,7 +4369,7 @@ void CMainFrame::ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, 
 		UserListUI::Node *tempNode = iter->second;
 
 		//先在用户的对话列表中删除 
-		if (tempNode != NULL && tempNode->data()._level >= 0)
+		if (tempNode != NULL && tempNode->data()._level >= 0 && tempNode->data()._level <= 5)
 			pUserList->RemoveNode(tempNode);
 
 		m_allVisitorNodeMap.erase(iter);
@@ -4475,7 +4461,7 @@ void CMainFrame::RecvTransferUser(CWebUserObject* pWebUser, CUserObject* pUser)
 	}
 
 	//先在用户的对话列表中删除 
-	if (tempNode != NULL && tempNode->data()._level >= 0)
+	if (tempNode != NULL && tempNode->data()._level >= 0 && tempNode->data()._level <= 5)
 		pUserList->RemoveNode(tempNode);
 
 	m_allVisitorNodeMap.erase(iter);
@@ -4543,7 +4529,7 @@ void CMainFrame::ResultTransferUser(CWebUserObject* pWebUser, CUserObject* pUser
 
 
 		//先在用户的对话列表中删除 
-		if (tempNode != NULL && tempNode->data()._level >= 0)
+		if (tempNode != NULL && tempNode->data()._level >= 0 && tempNode->data()._level <= 5)
 			pUserList->RemoveNode(tempNode);
 
 		m_allVisitorNodeMap.erase(iter);
@@ -4903,7 +4889,7 @@ void CMainFrame::HostUserOnlineAndOffline(CUserObject* pUser, bool type)
 
 
 			//先删除
-			if (tempNode != NULL && tempNode->data()._level >= 0)
+			if (tempNode != NULL && tempNode->data()._level >= 0 && tempNode->data()._level <= 5)
 				pUserList->RemoveNode(tempNode);
 
 			m_offlineNodeMap.erase(iter);
@@ -4938,7 +4924,7 @@ void CMainFrame::HostUserOnlineAndOffline(CUserObject* pUser, bool type)
 
 			UserListUI::Node* tempNode = iter->second;
 			//先删除
-			if (tempNode != NULL && tempNode->data()._level >= 0)
+			if (tempNode != NULL && tempNode->data()._level >= 0 && tempNode->data()._level <= 5)
 				pUserList->RemoveNode(tempNode);
 
 			m_onlineNodeMap.erase(iter);
@@ -5068,7 +5054,7 @@ void CMainFrame::FindVisitorFromOnlineNode(CWebUserObject* pWebUser)
 		tempNode = iterSid->second;
 		m_visitorOnlineNode.erase(iterSid);
 
-		if (tempNode != NULL && tempNode->data()._level >= 0)
+		if (tempNode != NULL && tempNode->data()._level >= 0 && tempNode->data()._level <= 5)
 		pUserList->RemoveNode(tempNode);
 
 	}
@@ -5293,27 +5279,16 @@ int CMainFrame::ReleaseChatIdForInvoteMyselfOrOther(unsigned long id)
 
 void CMainFrame::RecvQuickReply(string quickReply)
 {
-	//WCHAR *xmlData = NULL;
-	//int length = quickReply.length();
-
-	//xmlData = new WCHAR[length * 2 + 1];
-
-	//ANSIToUnicode(quickReply.c_str(),xmlData);
-
-	//CMarkup xml(xmlData);
-	//unsigned long curitemid = 1000;
-	//unsigned long id = 0;
-
-	//ParseGroup(xml, id, curitemid);
-
-	//delete[]xmlData;
+	unsigned long curitemid = 1000;
+	unsigned long id = 0;
 
 
+	//解析xml
 	CMarkupXml   xml((char*)quickReply.c_str());
+	m_savedShortAnswer.clear();
+	ParseGroup(xml,id,curitemid);
 
-
-
-
+	InitRightTalkList();
 
 }
 
@@ -5325,7 +5300,8 @@ int CMainFrame::ParseGroup(CMarkupXml &xml, int id, int curitemid)
 	char title[MAX_256_LEN + 1];
 	int m, n = 0;
 	KEYWORDGROUP_INFO *pKeyWordGroupInfo;
-#if 0
+
+
 	while (xml.FindChildElem("item"))
 	{
 		groupid = (unsigned long)atol((char*)xml.GetChildAttrib("id").c_str());
@@ -5335,12 +5311,15 @@ int CMainFrame::ParseGroup(CMarkupXml &xml, int id, int curitemid)
 		strncpy(title, xml.GetChildAttrib("text").c_str(), MAX_256_LEN);
 		tb_flag = atoi(xml.GetChildAttrib("tb_flag").c_str());
 
-		pKeyWordGroupInfo = m_pApp->AddKeyWordGroupInfo(groupid, 0, 0, id, parentid, type, title);
+		pKeyWordGroupInfo = AddKeyWordGroupInfo(groupid, 0, 0, id, parentid, type, title);
+
+		memset(m_answerData.key, 0, sizeof(m_answerData.key));
+		m_answerData.m_value.clear();
 
 		xml.IntoElem();
-		m = ParseGroup(xml, id, curitemid);
-		curitemid += m;
-		n += m;
+		//m = ParseGroup(xml, id, curitemid);
+		//curitemid += m;
+		//n += m;
 		switch (type)
 		{
 		case 0:
@@ -5362,16 +5341,27 @@ int CMainFrame::ParseGroup(CMarkupXml &xml, int id, int curitemid)
 			n += m;
 			break;
 		}
-
 		xml.OutOfElem();
+
+
+		if (groupid > 0)
+		{
+			strcpy(m_answerData.key, title);
+			m_savedShortAnswer.push_back(m_answerData);
+		}
+		else if (groupid == 0)
+		{
+			strcpy(m_answerData.key, xml.GetChildAttrib("title").c_str());
+			m_pushWebUrl.push_back(m_answerData);
+		}
+	
 	}
-#endif
+
 	return n;
 }
 
 int CMainFrame::ParseGroupItem(CMarkupXml &xml, KEYWORDGROUP_INFO *pKeyWordGroupInfo, char *sKey, int type, int curitemid)
 {
-
 	if (pKeyWordGroupInfo == NULL || sKey == NULL)
 		return 0;
 
@@ -5382,33 +5372,117 @@ int CMainFrame::ParseGroupItem(CMarkupXml &xml, KEYWORDGROUP_INFO *pKeyWordGroup
 	int is_shortcut;
 	char shotkey[MAX_256_LEN + 1];
 
-#if 0
-	num = 0;
+
 	while (xml.FindChildElem(sKey))
 	{
 		pKeyWordGroupInfo->type = type;
 
-		itemid = (unsigned long)atol(xml.GetChildAttrib("id"));
+		itemid = (unsigned long)atol(xml.GetChildAttrib("id").c_str());
 		if (itemid == 0)
 			itemid = curitemid++;
 
-		is_shortcut = (unsigned long)atol(xml.GetChildAttrib("is_shortcut"));
+		is_shortcut = (unsigned long)atol(xml.GetChildAttrib("is_shortcut").c_str());
 
-		strncpy(title, xml.GetChildAttrib("title"), MAX_256_LEN);
-		strncpy(memo, xml.GetChildData(), MAX_4096_LEN);
-		strncpy(shotkey, xml.GetChildAttrib("keyboard"), MAX_256_LEN);
+		strncpy(title, xml.GetChildAttrib("title").c_str(), MAX_256_LEN);
+		strncpy(memo, xml.GetChildData().c_str(), MAX_4096_LEN);
+		strncpy(shotkey, xml.GetChildAttrib("keyboard").c_str(), MAX_256_LEN);
+		SHORT_ANSWER_DATA data;
+		strcpy(data.title, title);
+		strcpy(data.value, memo);
 
-		KEYWORD_INFO *pKeyInfo = m_pApp->AddKeyWordInfo(itemid, 0, 0, pKeyWordGroupInfo->userid, pKeyWordGroupInfo->id, type, title, memo);
+		m_answerData.m_value.push_back(data);
+
+		KEYWORD_INFO *pKeyInfo = AddKeyWordInfo(itemid, 0, 0, pKeyWordGroupInfo->userid, pKeyWordGroupInfo->id, type, title, memo);
 		//		if( is_shortcut != 0)
 		if (strlen(shotkey) > 0)
 		{
 			//			pKeyInfo->hotkey = is_shortcut;
 			pKeyInfo->hotkey = 1;
-			strncpy(shotkey, xml.GetChildAttrib("keyboard"), MAX_256_LEN);
-			ParseHotKeyString(shotkey, pKeyInfo->ctrl, pKeyInfo->alt, pKeyInfo->shift, pKeyInfo->code);
+			strncpy(shotkey, xml.GetChildAttrib("keyboard").c_str(), MAX_256_LEN);
+		//	ParseHotKeyString(shotkey, (BOOL&)pKeyInfo->ctrl, (BOOL&)pKeyInfo->alt, (BOOL&)pKeyInfo->shift, pKeyInfo->code);
 		}
 		num++;
 	}
-#endif
+
 	return num;
 }
+
+KEYWORD_INFO *CMainFrame::AddKeyWordInfo(unsigned long id, int sort, unsigned long compid,unsigned long uid, unsigned long groupid, unsigned char type,char *name, char *memo)
+{
+	KEYWORD_INFO *pInfo = NULL;
+
+
+	if (pInfo == NULL)
+	{
+		pInfo = new KEYWORD_INFO;
+		memset(pInfo, '\0', sizeof(KEYWORD_INFO));
+
+		pInfo->id = id;
+	}
+
+	pInfo->sort = sort;
+	pInfo->compid = compid;
+	pInfo->userid = uid;
+	pInfo->groupid = groupid;
+	pInfo->type = type;
+
+	strcpy(pInfo->name, name);
+	strcpy(pInfo->memo, memo);
+
+
+	return pInfo;
+}
+
+KEYWORDGROUP_INFO *CMainFrame::AddKeyWordGroupInfo(unsigned long id, int sort, unsigned long compid, unsigned long uid, unsigned long parentid, unsigned char type, char *name)
+{
+	KEYWORDGROUP_INFO *pInfo = NULL;
+
+	if (pInfo == NULL)
+	{
+		pInfo = new KEYWORDGROUP_INFO;
+		memset(pInfo, '\0', sizeof(KEYWORDGROUP_INFO));
+
+		pInfo->id = id;
+	}
+
+	pInfo->sort = sort;
+	pInfo->compid = compid;
+	pInfo->userid = uid;
+	pInfo->parentid = parentid;
+	pInfo->type = type;
+	strcpy(pInfo->name, name);
+
+	return pInfo;
+}
+
+
+void CMainFrame::DoRightShortAnswerList(string str)
+{
+	int key = 0, value = 0;
+	WCHAR text[1024] = {0};
+
+	int index = str.find("-");
+	if (index == -1)
+		return;
+	
+	string keyText = str.substr(0, index);
+	index += 1;
+	string valueText = str.substr(index, str.length() - index);
+
+
+	key = atoi(keyText.c_str());
+	value = atoi(valueText.c_str());
+
+	if (key >= m_savedShortAnswer.size() || value >= m_savedShortAnswer[key].m_value.size())
+		return;
+
+	string getString = m_savedShortAnswer[key].m_value[value].value;
+
+	ANSIToUnicode(getString.c_str(),text);
+	m_pSendEdit->SetText(text);
+	m_pSendEdit->SetFocus();
+
+
+}
+
+
