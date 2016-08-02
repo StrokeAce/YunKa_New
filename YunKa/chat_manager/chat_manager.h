@@ -136,7 +136,7 @@ public:
 	virtual void RecvOnlineUsers(CGroupObject* pGroup) = 0;
 
 	// 收到访客信息
-	virtual void RecvWebUserInfo(CWebUserObject* pWebUser, int updateNum) = 0;
+	virtual void RecvWebUserInfo(CWebUserObject* pWebUser, WEBUSER_INFO_NOTIFY_TYPE type) = 0;
 
 	// 收到坐席在邀请中的消息
 	virtual void RecvWebUserInInvite(CWebUserObject* pWebUser, CUserObject* pInviteUser) = 0;
@@ -186,9 +186,6 @@ public:
 
 	// 发送获取某个坐席信息的消息
 	int SendTo_GetUserInfo(unsigned long uid);
-
-	// 发送获取某个访客信息的消息
-	int SendTo_GetWebUserInfo(unsigned long webuserid, const char *chatid, char *szMsg = "", unsigned int chatkefuid = 0);
 
 	// 发送获取某个会话信息的消息
 	int SendTo_GetWebUserChatInfo(unsigned short gpid, unsigned long adminid, char *chatid);
@@ -250,6 +247,9 @@ public:
 
 	// 发起会话转接到其他坐席的请求
 	int SendTo_TransferRequestUser(CWebUserObject* pWebUser, CUserObject* pAcceptUser);
+
+	// 发送获取某个访客信息的消息
+	int SendToGetWorkBill(unsigned long webuserid, const char *chatid, char *szMsg = "", unsigned int chatkefuid = 0);
 
 	int SendToTransferUser(CUserObject *pAcceptUser, CWebUserObject *pWebUser, unsigned long acceptuin = 0);
 
@@ -597,6 +597,8 @@ public:
 	CGroupObject			m_groupUser;			// 获取的在线坐席的分组集合
 	HANDLE					m_sendFileThreadHandle;	// 发送文件线程句柄
 	unsigned short			m_packSeq;				// 包序列号,自增
-	HANDLE					m_GetQuickReplyThreadHandle;
+	HANDLE					m_hQuickReplyHandle;	// 辅助应答线程句柄
+	bool					m_bFrameInit;			// 界面是否初始化完成
+	list<unsigned long>		m_listEarlyChat;		// 保存初始化完成之前收到的会话
 };
 

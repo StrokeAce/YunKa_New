@@ -30,6 +30,7 @@ CChatManager::CChatManager()
 {
 	m_bExit = false;
 	m_bLoginSuccess = false;
+	m_bFrameInit = false;
 	m_server = "tcp01.tq.cn";
 	m_port = 443;
 	m_usSrvRand = 0;
@@ -193,11 +194,10 @@ void CChatManager::OnReceive(void* wParam, void* lParam)
 
 	COM_HEAD_PACK Head;
 	Head.head = *((PACK_HEADER*)RecvBuf);
-	g_WriteLog.WriteLog(C_LOG_TRACE, "OnReceive logondlg recv Cmd:%.4x", Head.head.cmd);
 
 	switch (Head.head.cmd)
 	{
-	case CMD_SRV_CONF_LOGON: // 登录确认
+	case CMD_SRV_CONF_LOGON: // 登录确认 90
 		nError = RecvSrvConfLogon(Head.head, RecvBuf + nPackHeadLen, TcpPackHead.len - nPackHeadLen);
 		if (nError != 0)
 		{
@@ -205,14 +205,14 @@ void CChatManager::OnReceive(void* wParam, void* lParam)
 		}
 		m_handlerLogin->LoginProgress(80);
 		break;
-	case CMD_SRV_REP_USERINFO: // 用户信息包
+	case CMD_SRV_REP_USERINFO: // 用户信息包 280
 		nError = RecvSrvRepUserinfo(Head.head, RecvBuf + nPackHeadLen, TcpPackHead.len - nPackHeadLen);
 		if (nError != 0)
 		{
 			goto FAIL;
 		}
 		break;
-	case CMD_SRV_DENY_LOGON: // 拒绝登录
+	case CMD_SRV_DENY_LOGON: // 拒绝登录 100
 		nError = RecvSrvDenyLogon(Head.head, RecvBuf + nPackHeadLen, TcpPackHead.len - nPackHeadLen, nErrType);
 		if (nError != 0)
 		{
@@ -224,7 +224,7 @@ void CChatManager::OnReceive(void* wParam, void* lParam)
 			goto FAIL;
 		}
 		break;
-	case CMD_SRV_CONF_LOGOFF:   // 登出确认包
+	case CMD_SRV_CONF_LOGOFF:   // 登出确认包 40
 		nError = RecvSrvConfLogOff(Head.head, RecvBuf + nPackHeadLen, TcpPackHead.len - nPackHeadLen);
 		break;
 	case CMD_SRV_STATUS_FRDONLINE: // 好友上线
@@ -245,7 +245,7 @@ void CChatManager::OnReceive(void* wParam, void* lParam)
 	case CMD_FLOAT_CHATINFO: // 会话详细信息
 		nError = RecvFloatChatInfo(Head.head, RecvBuf + nPackHeadLen, TcpPackHead.len - nPackHeadLen);
 		break;
-	case CMD_COM_SEND_MSG: // 会话消息,非等待应答策略
+	case CMD_COM_SEND_MSG: // 会话消息,非等待应答策略 3840
 		nError = RecvComSendMsg(Head.head, RecvBuf + nPackHeadLen, TcpPackHead.len - nPackHeadLen);
 		break;
 	case CMD_FLOAT_CHATMSG: // 会话消息,等待应答策略
@@ -307,6 +307,7 @@ void CChatManager::OnReceive(void* wParam, void* lParam)
 
 FAIL:
 	m_handlerLogin->LoginProgress(-1);
+	CloseAllSocket();
 	return;
 }
 
@@ -368,7 +369,7 @@ int CChatManager::RecvSrvConfLogon(PACK_HEADER packhead, char *pRecvBuff, int le
 	char lognmame[100] = { 0 };
 	sprintf(lognmame, "_%s(%u)_emocss.log", RecvInfo.strid, RecvInfo.uin);
 	g_WriteLog.InitLog(GetCurrentPath() + "\\log", lognmame, C_LOG_ALL);
-
+	g_WriteLog.WriteLog(C_LOG_TRACE, "登录成功！");
 	return nError;
 }
 
@@ -384,6 +385,10 @@ int CChatManager::RecvSrvRepUserinfo(PACK_HEADER packhead, char *pRecvBuff, int 
 	{
 		goto RETURN;
 	}
+
+	g_WriteLog.WriteLog(C_LOG_TRACE, "RecvSrvRepUserinfo uid=%u,sid=%s,nickname=%s,username=%s,langtype=%u", RecvInfo.uin,
+		RecvInfo.UserInfo.info.sid, RecvInfo.UserInfo.info.nickname, RecvInfo.UserInfo.info.username, RecvInfo.UserInfo.info.langtype);
+
 
 	if (!m_bLoginSuccess)
 	{
@@ -405,7 +410,7 @@ int CChatManager::RecvSrvRepUserinfo(PACK_HEADER packhead, char *pRecvBuff, int 
 		// 下载头像
 		pUser->DownLoadFace(m_initConfig.webpage_DownloadHeadImage);
 
-		LoginSuccess();
+		LoginSuccess();	
 	}
 	else
 	{
@@ -415,9 +420,6 @@ int CChatManager::RecvSrvRepUserinfo(PACK_HEADER packhead, char *pRecvBuff, int 
 			// 转码
 			ConvertMsg(RecvInfo.UserInfo.info.nickname, sizeof(RecvInfo.UserInfo.info.nickname) - 1);
 		}
-
-		g_WriteLog.WriteLog(C_LOG_TRACE, "RecvSrvRepUserinfo uid=%u,sid=%s,nickname=%s,username=%s,langtype=%u", RecvInfo.uin,
-			RecvInfo.UserInfo.info.sid, RecvInfo.UserInfo.info.nickname, RecvInfo.UserInfo.info.username, RecvInfo.UserInfo.info.langtype);
 
 		if (RecvInfo.uin > WEBUSER_UIN)
 		{
@@ -756,7 +758,7 @@ int CChatManager::SendPackTo(CPackInfo *pPackInfo, unsigned long recvuid, unsign
 	memset(&TcpPackHead, '\0', sizeof(TCP_PACK_HEADER));
 	TcpPackHead.len = pPackInfo->m_Pack.GetPackLength();
 
-	g_WriteLog.WriteLog(C_LOG_TRACE, "SendOnePack send pack cmd:%.4X", pPackInfo->m_Head.head.cmd);
+	g_WriteLog.WriteLog(C_LOG_TRACE, "SendOnePack send pack cmd:%d", pPackInfo->m_Head.head.cmd);
 
 	nSendLen = m_socket.SendImPack((char *)(pPackInfo->m_Pack.GetPackBuff()), TcpPackHead, nError);
 	if (nSendLen != TcpPackHead.len + nTcpPackHeadLen)
@@ -796,10 +798,12 @@ int CChatManager::RecvSrvStatusFrdOnline(PACK_HEADER packhead, char *pRecvBuff, 
 		ConvertMsg(RecvInfo.nickname, sizeof(RecvInfo.nickname) - 1);
 	}
 
+	g_WriteLog.WriteLog(C_LOG_TRACE, "RecvSrvStatusFrdOnline: uin:%lu,nickname:%s,status:%d,szRand:%,szThirdId", 
+		RecvInfo.uin,RecvInfo.nickname,RecvInfo.status,RecvInfo.szRand,RecvInfo.szThirdId);
+
 	if (RecvInfo.uin > WEBUSER_UIN)
 	{
-		//访客对话开始
-		g_WriteLog.WriteLog(C_LOG_TRACE, "RecvSrvStatusFrdOnline: RecvInfo.uin > WEBUSER_UIN");
+		//访客对话开始		
 	}
 	else
 	{
@@ -991,15 +995,11 @@ int CChatManager::RecvComSendMsg(PACK_HEADER packhead, char *pRecvBuff, int len)
 
 	nError = UnPack(&RecvInfo, pRecvBuff, len);
 
-	if (nError != 0)
+	if (nError != 0 || !m_bLoginSuccess)
 	{
 		g_WriteLog.WriteLog(C_LOG_ERROR, "RecvComSendMsg unpack failed,Cmd:%.4x", packhead.cmd);
 		goto RETURN;
 	}
-
-	g_WriteLog.WriteLog(C_LOG_TRACE, "RecvComSendMsg chatid:%s,Rand:%s,Thirdid:%s,recvuin:%u,senduin:%u,strfontinfo:%s,msgtype:%d,msg:%s",
-		RecvInfo.strChatid, RecvInfo.strRand, RecvInfo.strThirdid, RecvInfo.msg.recvuin,
-		RecvInfo.msg.senduin, RecvInfo.msg.strfontinfo, RecvInfo.msg.msgtype, RecvInfo.msg.strmsg);
 
 	//先显示内容， 再移动item
 	if (packhead.langtype == 4)
@@ -1008,6 +1008,10 @@ int CChatManager::RecvComSendMsg(PACK_HEADER packhead, char *pRecvBuff, int len)
 
 		ConvertMsg(RecvInfo.msg.strmobile, sizeof(RecvInfo.msg.strmobile) - 1);
 	}
+
+	g_WriteLog.WriteLog(C_LOG_TRACE, "RecvComSendMsg chatid:%s,Rand:%s,Thirdid:%s,recvuin:%u,senduin:%u,strfontinfo:%s,msgtype:%d,msg:%s",
+		RecvInfo.strChatid, RecvInfo.strRand, RecvInfo.strThirdid, RecvInfo.msg.recvuin,
+		RecvInfo.msg.senduin, RecvInfo.msg.strfontinfo, RecvInfo.msg.msgtype, RecvInfo.msg.strmsg);
 
 	content = RecvInfo.msg.strmsg;
 	TransferStrToFace(content);
@@ -1041,7 +1045,7 @@ int CChatManager::RecvComSendMsg(PACK_HEADER packhead, char *pRecvBuff, int len)
 				string l_msg = RecvInfo.msg.strmsg;
 				if (l_msg != "null")
 				{
-					SendTo_GetWebUserInfo(RecvInfo.msg.senduin, RecvInfo.strChatid);
+					SendToGetWorkBill(RecvInfo.msg.senduin, RecvInfo.strChatid);
 
 					int pos = l_msg.find("\"msgtype\":\"userinfo\"");
 					int pos1 = l_msg.find("\"msgtype\":\"wxactoken\"");
@@ -1062,7 +1066,7 @@ int CChatManager::RecvComSendMsg(PACK_HEADER packhead, char *pRecvBuff, int len)
 					if (!pWebUser->m_bIsFrWX)
 					{
 						pWebUser->m_bIsFrWX = true;
-						m_handlerMsgs->RecvWebUserInfo(pWebUser,0);
+						m_handlerMsgs->RecvWebUserInfo(pWebUser, NOTIFY_IS_WX);
 					}
 					pWxMsg = ParseWxMsg(pWebUser, RecvInfo.msg.strmsg, NULL, RecvInfo.msg.sendtime);
 
@@ -1079,7 +1083,7 @@ int CChatManager::RecvComSendMsg(PACK_HEADER packhead, char *pRecvBuff, int len)
 				if (strstr(RecvInfo.msg.strmsg, "[系统消息]") != NULL
 					&& strstr(RecvInfo.msg.strmsg, "您网站来访客了") != NULL)
 				{
-					SendTo_GetWebUserInfo(RecvInfo.msg.senduin, RecvInfo.strChatid);
+					SendToGetWorkBill(RecvInfo.msg.senduin, RecvInfo.strChatid);
 				}
 
 				if (pWebUser->info.name[0] == '\0')
@@ -1337,7 +1341,7 @@ int CChatManager::RecvFloatCreateChat(PACK_HEADER packhead, char *pRecvBuff, int
 		}
 	}
 
-	SendTo_GetWebUserInfo(RecvInfo.uWebuin, RecvInfo.chatid);
+	SendToGetWorkBill(RecvInfo.uWebuin, RecvInfo.chatid);
 
 	pWebUser->cTalkedSatus = INTALKING;
 	if (RecvInfo.uFromAdmin == 0)
@@ -1466,7 +1470,7 @@ int CChatManager::RecvFloatChatInfo(PACK_HEADER packhead, char *pRecvBuff, int l
 	}
 
 	// 只要收到会话信息，一律去服务器获取work_bill包
-	SendTo_GetWebUserInfo(pWebUser->webuserid, RecvInfo.chatid, strMsg);
+	SendToGetWorkBill(pWebUser->webuserid, RecvInfo.chatid, strMsg);
 	if (pWebUser->m_nEMObType != OBJECT_WEBUSER)
 	{
 		pWebUser->m_nEMObType = OBJECT_WEBUSER;
@@ -1667,7 +1671,7 @@ int CChatManager::RecvFloatChatMsg(PACK_HEADER packhead, char *pRecvBuff, int le
 
 	if (pWebUser->m_sWxAppid.empty()) //WxAppid为空，去服务端获取
 	{
-		SendTo_GetWebUserInfo(pWebUser->webuserid, RecvInfo.chatid);
+		SendToGetWorkBill(pWebUser->webuserid, RecvInfo.chatid);
 	}	
 
 	if (RecvInfo.strRand[0] != 0)
@@ -1706,7 +1710,7 @@ int CChatManager::RecvFloatChatMsg(PACK_HEADER packhead, char *pRecvBuff, int le
 		if (!pWebUser->m_bIsFrWX)
 		{
 			pWebUser->m_bIsFrWX = true;
-			m_handlerMsgs->RecvWebUserInfo(pWebUser, 0);
+			m_handlerMsgs->RecvWebUserInfo(pWebUser, NOTIFY_IS_WX);
 		}
 		pWxMsg = ParseWxMsg(pWebUser, RecvInfo.strmsg, pAssistUser, RecvInfo.tMsgTime);
 
@@ -2627,7 +2631,7 @@ int CChatManager::RecvTransferClient(PACK_HEADER packhead, char *pRecvBuff, int 
 	if (pWebUser == NULL)//获取WorkBill
 	{
 		g_WriteLog.WriteLog(C_LOG_TRACE, "RecvTransferClient pWebUser==NULL");
-		SendTo_GetWebUserInfo(RecvInfo.clientinfo.id, RecvInfo.szChatId);
+		SendToGetWorkBill(RecvInfo.clientinfo.id, RecvInfo.szChatId);
 	}
 	else
 	{
@@ -2675,6 +2679,8 @@ int CChatManager::SendTo_GetShareList()
 
 	if (!m_bLoginSuccess)
 		return SYS_ERROR_BEFORE_LOGIN;
+
+	m_bFrameInit = true;
 
 	COM_FLOAT_SHARELIST SendInfo(VERSION);
 	return SendPackTo(&SendInfo);
@@ -2990,7 +2996,7 @@ CWebUserObject * CChatManager::GetWebUserObjectByUid(unsigned long uid)
 	return NULL;
 }
 
-int CChatManager::SendTo_GetWebUserInfo(unsigned long webuserid, const char *chatid, char *szMsg, unsigned int chatkefuid)
+int CChatManager::SendToGetWorkBill(unsigned long webuserid, const char *chatid, char *szMsg, unsigned int chatkefuid)
 {
 	int nError = 0;
 	COM_SEND_MSG SendInfo(VERSION);
@@ -3017,7 +3023,7 @@ int CChatManager::SendTo_GetWebUserInfo(unsigned long webuserid, const char *cha
 	SendInfo.version = VERSION;
 	SendInfo.msg.senduin = m_userInfo.UserInfo.uid;
 	strncpy(SendInfo.msg.strmsg, jv.toStyledString().c_str(), MAX_MSG_RECVLEN);
-	g_WriteLog.WriteLog(C_LOG_TRACE, "SendTo_GetWebUserInfo recvuin:%u,senduin:%u，szMsg=%s", SendInfo.msg.recvuin, SendInfo.msg.senduin, szMsg);
+	g_WriteLog.WriteLog(C_LOG_TRACE, "SendToGetWorkBill recvuin:%u,senduin:%u，szMsg=%s", SendInfo.msg.recvuin, SendInfo.msg.senduin, szMsg);
 
 	nError = SendPackTo(&SendInfo);
 
@@ -3054,7 +3060,7 @@ WxMsgBase* CChatManager::ParseWxMsg(CWebUserObject* pWebUser, char* msg, CUserOb
 			if (oldLen == 0 && newLen > 0)
 			{
 				strcpy(pWebUser->info.name, ((WxUserInfo*)pwxobj)->nickname.c_str());
-				m_handlerMsgs->RecvWebUserInfo(pWebUser,1);
+				m_handlerMsgs->RecvWebUserInfo(pWebUser, NOTIFY_NAME);
 			}
 			
 			pWebUser->m_bIsGetInfo = true;
@@ -3242,10 +3248,6 @@ void CChatManager::RecvComSendWorkBillMsg(unsigned long senduid, unsigned long r
 			//来了访客，肯定是在线的
 			if (pWebUser->info.userstatus == USER_STATUS_OFFLINE)
 				pWebUser->info.userstatus = USER_STATUS_ONLINE;
-			if (senduid > WEBUSER_UIN && pWebUser->webuserid != senduid)
-			{
-				pWebUser->webuserid = senduid;
-			}
 		}
 		else
 		{
@@ -3253,14 +3255,17 @@ void CChatManager::RecvComSendWorkBillMsg(unsigned long senduid, unsigned long r
 
 			if (pWebUser == NULL)
 			{
-				pWebUser = AddWebUserObject(sid, "", mobile, "", "", USER_STATUS_ONLINE, 0);
-				g_WriteLog.WriteLog(C_LOG_ERROR,"RecvComSendWorkBillMsg 添加了空名字访客");
+				pWebUser = AddWebUserObject(sid, thirdid, mobile, "", "", USER_STATUS_ONLINE, 0);
 			}
 			else
 			{
 				strcpy(pWebUser->info.thirdid, thirdid);
 			}
 
+			if (pWebUser->webuserid == 0)
+			{
+				m_handlerMsgs->RecvWebUserInfo(pWebUser, NOTIFY_ID);
+			}
 			pWebUser->webuserid = senduid;
 			SolveWebUserEarlyMsg(pWebUser);
 		}
@@ -3277,7 +3282,7 @@ void CChatManager::RecvComSendWorkBillMsg(unsigned long senduid, unsigned long r
 				if (!pWebUser->m_bIsFrWX)
 				{
 					pWebUser->m_bIsFrWX = true;
-					m_handlerMsgs->RecvWebUserInfo(pWebUser,0);
+					m_handlerMsgs->RecvWebUserInfo(pWebUser, NOTIFY_IS_WX);
 				}
 				SendGetWxUserInfoAndToken(pWebUser);
 			}
@@ -3290,6 +3295,16 @@ void CChatManager::RecvComSendWorkBillMsg(unsigned long senduid, unsigned long r
 				SendGetChatHisMsg(senduid, billid);// 如果是非等待应答的才需要去获取消息记录
 				pWebUser->tGetNormalChatHismsgTime = tnow;
 			}
+		}
+
+		if ((int)strReturnParameters.find("UserAgent") >= 0)
+		{
+			string userAgent;
+			int posAgent = strReturnParameters.find("UserAgent");
+			userAgent = strReturnParameters.substr(posAgent + 9, strReturnParameters.length() - posAgent - 9);
+
+			UserAgentInfo *pObj = (UserAgentInfo*)ParseWxJsonMsg(userAgent.c_str());
+			pWebUser->useragent = pObj;
 		}
 
 		if ((int)strReturnParameters.find("transfer") >= 0)//转接中
@@ -3321,15 +3336,6 @@ void CChatManager::RecvComSendWorkBillMsg(unsigned long senduid, unsigned long r
 				//SetTimer(TIMER_TRANS_TIMEOUT, 1000, NULL);
 			}
 		}
-		else if ((int)strReturnParameters.find("UserAgent") >= 0)
-		{
-			string userAgent;
-			int posAgent = strReturnParameters.find("UserAgent");
-			userAgent = strReturnParameters.substr(posAgent+9,strReturnParameters.length() - posAgent - 9);
-
-			UserAgentInfo *pObj = (UserAgentInfo*)ParseWxJsonMsg(userAgent.c_str());
-			pWebUser->useragent = pObj;
-		}
 		else if ((pWebUser->cTalkedSatus != INTALKING || !pWebUser->m_bConnected)
 			&& m_userInfo.UserInfo.uid == recvuid && !pWebUser->m_bNewComm)//非等待应答的会话
 		{
@@ -3340,28 +3346,25 @@ void CChatManager::RecvComSendWorkBillMsg(unsigned long senduid, unsigned long r
 			else
 			{
 				g_WriteLog.WriteLog(C_LOG_ERROR, "RecvComSendWorkBillMsg visit服务器未登录前，收到新会话");
+				return;
 			}
 
 			pWebUser->cTalkedSatus = INTALKING;
-
 			pWebUser->talkuid = m_userInfo.UserInfo.uid;
-
 			pWebUser->onlineinfo.talkstatus = TALK_STATUS_TALK;
 			pWebUser->transferuid = 0;
 			pWebUser->m_nWaitTimer = 0;
 			pWebUser->m_bConnected = true;
 
-			if (m_bLoginSuccess)
+			if (m_bLoginSuccess && m_bFrameInit)
 			{
 				m_handlerMsgs->RecvChatInfo(pWebUser, &m_userInfo);
 			}
-			
-			//if (nRet < 0)
-			//	m_pFormUser->m_TreeListUser.DeleteItemByLParam((LPARAM)pWebUser);
-			//else
-			//	AddMultiWebUserToList(pWebUser);//把接入的会话移动到会话列表中
-			
-			// 提示
+			else
+			{
+				// 在界面未初始化完成之前，会话保存起来，等初始化完成后在做添加
+				m_listEarlyChat.push_back(pWebUser->webuserid);
+			}
 		}
 	}
 }
@@ -3451,7 +3454,7 @@ int CChatManager::RecvComTransRequest(unsigned long senduid, COM_SEND_MSG& RecvI
 		g_WriteLog.WriteLog(C_LOG_TRACE, "RecvComTransRequest pWebUser==NULL");
 		char strMsg[MAX_256_LEN];
 		sprintf(strMsg, "{\"transfer\":%u}", senduid);
-		SendTo_GetWebUserInfo(RecvInfo.msg.senduin, RecvInfo.strChatid, strMsg, senduid);
+		SendToGetWorkBill(RecvInfo.msg.senduin, RecvInfo.strChatid, strMsg, senduid);
 	}
 	else if (RecvInfo.msg.recvuin == m_userInfo.UserInfo.uid && pWebUser->transferuid != m_userInfo.UserInfo.uid)//当前坐席是接受者，移动到转接中。。。
 	{
@@ -3467,8 +3470,6 @@ int CChatManager::RecvComTransRequest(unsigned long senduid, COM_SEND_MSG& RecvI
 
 		pWebUser->onlineinfo.talkstatus = TALK_STATUS_TRANSFER;
 		pWebUser->transferuid = m_userInfo.UserInfo.uid;
-
-		//m_pFormMain->RecvTransferWebUser(pWebUser, pAcceptUser->UserInfo.nickname);
 
 		m_handlerMsgs->RecvTransferUser(pWebUser, pAcceptUser);
 		
@@ -3551,7 +3552,7 @@ CWebUserObject * CChatManager::ChangeWebUserSid(CWebUserObject *pWebUser, char *
 
 	if (strlen(pWebUser->info.sid) <= 0)
 	{
-		g_WriteLog.WriteLog(C_LOG_ERROR, "ChangeWebUserSid ");
+		g_WriteLog.WriteLog(C_LOG_ERROR, "ChangeWebUserSid 没有sid");
 	}
 	else
 	{
@@ -5139,7 +5140,7 @@ void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RE
 									int pos2 = fileUrl.find_last_of("/");
 									string fileName = fileUrl.substr(pos2 + 1, fileUrl.length() - pos2 - 1);
 
-									sprintf(formatMsg, "收到文件 <a class=\"file_link\" href=\"%s\" target=\"_blank\">%s</a>",
+									sprintf(formatMsg, "<span class=\"file_text\">收到文件 </span><a class=\"file_link\" href=\"%s\" target=\"_blank\">%s</a>",
 										fileUrl.c_str(), fileName.c_str());
 									msgContent = formatMsg;
 								}
@@ -5153,7 +5154,7 @@ void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RE
 							int pos1 = strMsg.find("userfile/");
 							vFileName = strMsg.substr(pos1 + 9, strMsg.length() - pos1 - 9);
 
-							sprintf(formatMsg, "收到文件 <a class=\"file_link\" href=\"%s\" target=\"_blank\">%s</a>",
+							sprintf(formatMsg, "<span class=\"file_text\">收到文件 </span><a class=\"file_link\" href=\"%s\" target=\"_blank\">%s</a>",
 								strMsg.c_str(), vFileName.c_str());
 							msgContent = formatMsg;
 						}
@@ -5759,6 +5760,7 @@ bool CChatManager::TokenIsDifferent(string oldToken, string newToken)
 
 int CChatManager::StartLoginVisitor()
 {
+	g_WriteLog.WriteLog(C_LOG_TRACE, "开始登录visitor服务器.....");
 	if (m_vistor == NULL)
 	{
 		m_vistor = new CChatVisitor();
@@ -5944,7 +5946,7 @@ bool CChatManager::ParseTextMsg(CWebUserObject* pWebUser, string content, CUserO
 		}
 		return true;
 	}
-	else if ((int)content.find("http:") > -1 && ((int)content.find(".jpg") > -1 ||
+	else if ((int)content.find("http:") > -1 && (int)content.find("收到文件") < 0 && ((int)content.find(".jpg") > -1 ||
 		(int)content.find(".jpeg") > -1 || (int)content.find(".bmp") > -1 ||
 		(int)content.find(".png") > -1))
 	{
@@ -6316,18 +6318,18 @@ void CChatManager::SendTo_GetQuickReply(unsigned long uin)
 {
 	if (strlen(m_login->m_szAuthtoken) > 0)
 	{
-		if (m_GetQuickReplyThreadHandle != NULL)
+		if (m_hQuickReplyHandle != NULL)
 		{
-			TerminateThread(m_GetQuickReplyThreadHandle, 0);
+			TerminateThread(m_hQuickReplyHandle, 0);
 		}
-		m_GetQuickReplyThreadHandle = NULL;
+		m_hQuickReplyHandle = NULL;
 
 		QUICK_REPLY* qReply = new QUICK_REPLY();
 		qReply->uid = uin;
 		qReply->pThis = this;
 
-		m_GetQuickReplyThreadHandle = CreateThread(NULL, 0, GetQuickReplyThread, (void*)qReply, CREATE_SUSPENDED, NULL);
-		ResumeThread(m_GetQuickReplyThreadHandle);
+		m_hQuickReplyHandle = CreateThread(NULL, 0, GetQuickReplyThread, (void*)qReply, CREATE_SUSPENDED, NULL);
+		ResumeThread(m_hQuickReplyHandle);
 	}
 }
 

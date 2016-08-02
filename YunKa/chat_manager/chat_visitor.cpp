@@ -502,7 +502,7 @@ void CChatVisitor::SolveVisitorSystemUp(char *pInitBuff)
 			break;
 		}
 
-		if (pWebUser->cTalkedSatus != INTALKING)
+		if (pWebUser->cTalkedSatus != INTALKING && m_manager->m_bLoginSuccess)
 		{
 			m_manager->m_handlerMsgs->RecvOnline(pWebUser);
 		}
@@ -717,10 +717,7 @@ string CChatVisitor::SolveVisitorInfoHtmlTxt(CWebUserObject *pWebUser, WEBUSER_U
 	str += STRING_HTML_META;
 	str += STRING_HTML_BASE;
 	str += STRING_HTML_STYLE;
-	str += "</head><body>";
-
-	sprintf(str1, "<table width=100% border=0  cellspacing=0>");
-	str += str1;
+	str += "</head><body><table width=100% border=0  cellspacing=0>";
 
 	str += "<tr>";
 	str += "<td colspan=2 width=100% >";
@@ -804,8 +801,8 @@ string CChatVisitor::SolveVisitorInfoHtmlTxt(CWebUserObject *pWebUser, WEBUSER_U
 
 	str += "<tr>";
 	str += "<td colspan=2 width=100% >";
-	sprintf(str1, "<LI><SPAN class=clientnamefont1>当前网页：</SPAN><SPAN class=clientfont1><A title=%s href=\"%s\">yyyy</A></SPAN></LI>",
-		pInfo->webtitle, pInfo->visiturl, pInfo->visiturl);
+	sprintf(str1, "<LI><SPAN class=clientnamefont1>当前网页：</SPAN><SPAN class=clientfont1><A href=\"%s\">%s</A></SPAN></LI>",
+	pInfo->visiturl, pInfo->visiturl);
 	str += str1;
 	str += "</td>";
 	str += "</tr>";
@@ -845,8 +842,7 @@ string CChatVisitor::SolveVisitorInfoHtmlTxt(CWebUserObject *pWebUser, WEBUSER_U
 	str += "</td>";
 	str += "</tr>";
 
-	sprintf(str1, "</table>");
-	str += "</body></html>";
+	str += "</table></body></html>";
 
 	return str;
 }

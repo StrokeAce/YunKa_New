@@ -146,4 +146,12 @@ enum RESULT_STATUS
 	INVITE_ING			// 邀请中
 };
 
+// 通知界面访客信息有更新
+enum WEBUSER_INFO_NOTIFY_TYPE
+{
+	NOTIFY_NAME,	// 名字的更新
+	NOTIFY_IS_WX,	// 用户类型的更新
+	NOTIFY_ID		// 用户webuserid的更细
+};
+
 #endif

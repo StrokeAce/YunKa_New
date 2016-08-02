@@ -1745,6 +1745,7 @@ void CMainFrame::RecvMsg(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, string msgId,
 
 		if (userId != m_curSelectId)
 		{
+			g_WriteLog.WriteLog(C_LOG_ERROR,"RecvMsg userId:%lu, m_curSelectId:%lu", userId, m_curSelectId);
 			return;
 		}
 
@@ -3488,7 +3489,7 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 
 }
 
-void CMainFrame::RecvWebUserInfo(CWebUserObject* pWebUser, int updateNum)
+void CMainFrame::RecvWebUserInfo(CWebUserObject* pWebUser, WEBUSER_INFO_NOTIFY_TYPE type)
 {
 	unsigned fatherId = 0;
 	UserListUI::Node* tempNode = NULL;
@@ -3603,11 +3604,11 @@ void CMainFrame::RecvWebUserInfo(CWebUserObject* pWebUser, int updateNum)
 	m_allVisitorUserMap.insert(pair<unsigned long, unsigned long>(pWebUser->webuserid, fatherId));
 
 	//0 更新用户 类型  微信 web
-	if (updateNum == 0)
+	if (type == NOTIFY_IS_WX)
 	{
 	}
 	//1 更新用户名字
-	else if (updateNum == 1)
+	else if (type == NOTIFY_NAME)
 	{
 
 	}
@@ -3918,11 +3919,7 @@ void CMainFrame::RecvUserInfo(CUserObject* pWebUser)
 
 		//获取会话消息
 		m_manager->SendTo_GetListChatInfo();
-
-
-		m_manager->StartLoginVisitor();
-
-	}
+		m_manager->StartLoginVisitor();	}
 
 
 }

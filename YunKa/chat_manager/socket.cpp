@@ -185,7 +185,7 @@ bool CMySocket::OnReceive()
 bool CMySocket::OnRecvImPack()
 {
 	int ndatasize = m_sRecvBuf.size();
-	g_WriteLog.WriteLog(C_LOG_TRACE, "the recv buffersize is %d", ndatasize);
+	/*g_WriteLog.WriteLog(C_LOG_TRACE, "the recv buffersize is %d", ndatasize); 缓存块大小日志*/
 
 	int nTcpPackHeadLen = sizeof(TCP_PACK_HEADER);
 	while (ndatasize > nTcpPackHeadLen)
@@ -208,7 +208,7 @@ bool CMySocket::OnRecvImPack()
 
 		static  unsigned  int  npacknumseq = 0;
 
-		g_WriteLog.WriteLog(C_LOG_TRACE, "OnRecvImPack recv cmd:%.4x ,%u", phead->cmd, ++npacknumseq);
+		g_WriteLog.WriteLog(C_LOG_TRACE, "OnRecvImPack recv cmd:%d ,%u", phead->cmd, ++npacknumseq);
 
 		m_receiveObj->OnReceive((void*)pTcpPackHead, (void*)(m_sRecvBuf.c_str() + nTcpPackHeadLen));
 

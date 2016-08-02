@@ -188,7 +188,7 @@ public:    //主界面消息回调
 
 	virtual void RecvOnlineUsers(CGroupObject* pGroup);
 
-	virtual void RecvWebUserInfo(CWebUserObject* pWebUser, int updateNum=0);
+	virtual void RecvWebUserInfo(CWebUserObject* pWebUser, WEBUSER_INFO_NOTIFY_TYPE type);
 
 	virtual void RecvWebUserInInvite(CWebUserObject* pWebUser, CUserObject* pInviteUser);
 
