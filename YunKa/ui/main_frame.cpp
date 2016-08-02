@@ -1430,9 +1430,50 @@ void CMainFrame::OnBtnSendMessage(TNotifyUI& msg)
 //请求坐席列表
 void CMainFrame::SendMsgToGetList()
 {
+	CDuiString text;
+	WCHAR name[64] = { 0 };
+
+	UserListUI::Node* pUserTalkNode = pMySelfeNode->child(0);
+
+	//这里查找有没有 没有接入的对话 
+	list<unsigned long>::iterator iter = m_manager->m_listEarlyChat.begin();
+	for (; iter != m_manager->m_listEarlyChat.end(); iter++)
+	{
+		unsigned long id = *iter;
+		if (id > 0)
+		{
+			CWebUserObject *pWebUser = NULL;
+
+			pWebUser = m_manager->GetWebUserObjectByUid(id);
+			if (pWebUser == NULL)
+				return;
 
 
-	//AddOnlineVisitor(pUserList,NULL,-1);
+			ANSIToUnicode(pWebUser->info.name, name);
+			//是否来自微信
+			if (pWebUser->m_bIsFrWX)
+			{
+				text.Format(_T("{x 4}{i user_wx.png 1 0}{x 4}%s"), name);
+			}
+			else
+			{
+				text.Format(_T("{x 4}{i user_web.png 1 0}{x 4}%s"), name);
+			}
+
+			UserListUI::Node* addNode = pUserList->AddNode(text, pWebUser->webuserid, pWebUser->info.sid, pUserTalkNode);
+			pUserList->ExpandNode(pUserTalkNode, true);
+
+
+			m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, addNode));
+			m_allVisitorUserMap.insert(pair<unsigned long, unsigned long>(pWebUser->webuserid, m_manager->m_userInfo.UserInfo.uid));
+
+		}
+
+	}
+
+
+
+
 	//获取坐席列表
 	m_manager->SendTo_GetShareList();
 
@@ -1595,44 +1636,7 @@ void CMainFrame::AddMyselfToList(UserListUI * ptr, CUserObject *user)
 	pMySelfeNode = pUserNameNode;
 	pUserList->ExpandNode(pMySelfeNode, true);
 
-	//这里查找有没有 没有接入的对话 
-	list<unsigned long>::iterator iter = m_manager->m_listEarlyChat.begin();
-	for (; iter != m_manager->m_listEarlyChat.end(); iter++)
-	{
-		unsigned long id = *iter;
-		if (id > 0)
-		{
-			CWebUserObject *pWebUser = NULL;
-
-			pWebUser = m_manager->GetWebUserObjectByUid(id);
-			if (pWebUser == NULL)
-				return;
-			
 	
-			ANSIToUnicode(pWebUser->info.name, name);
-				//是否来自微信
-			if (pWebUser->m_bIsFrWX)
-			{
-				text.Format(_T("{x 4}{i user_wx.png 1 0}{x 4}%s"), name);
-			}
-			else
-			{
-				text.Format(_T("{x 4}{i user_web.png 1 0}{x 4}%s"), name);
-			}
-
-			UserListUI::Node* addNode = pUserList->AddNode(text, pWebUser->webuserid, pWebUser->info.sid, pUserTalkNode);
-			pUserList->ExpandNode(pUserTalkNode, true);
-	
-
-			m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, addNode));
-			m_allVisitorUserMap.insert(pair<unsigned long, unsigned long>(pWebUser->webuserid, m_manager->m_userInfo.UserInfo.uid));
-
-		}
-
-	}
-
-
-
 	//m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
 }
 
