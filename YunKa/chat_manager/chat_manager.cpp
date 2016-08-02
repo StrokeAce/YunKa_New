@@ -1229,59 +1229,34 @@ int CChatManager::RecvComSendMsg(PACK_HEADER packhead, char *pRecvBuff, int len)
 
 			// 下载该坐席的头像
 			pUser->DownLoadFace(m_initConfig.webpage_DownloadHeadImage);			
-			pUser->m_nWaitTimer = 0;
-
-			string sMsg = RecvInfo.msg.strmsg;
-			if ((int)sMsg.find(m_initConfig.fileserver_media_fileid) > -1)
-			{
-				string msgId = GetMsgId();
-				string imagePath = FullPath("SkinRes\\mainframe\\");
-				StringReplace(imagePath, "\\", "/");
-
-				char contentMsg[MAX_1024_LEN];
-				sprintf(contentMsg, "<img id=\"%s_msg\" class=\"msg_image\" src=\"%srecv_image_fail.jpg\"><img id=\"%s_image\" class=\"wait_image\" src=\"%smsg_wait.gif\">",
-					msgId.c_str(), imagePath.c_str(), msgId.c_str(), imagePath.c_str());
-				AddMsgToList(pUser, msgFrom, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL, MSG_DATA_TYPE_IMAGE, contentMsg, RecvInfo.msg.sendtime, NULL, NULL, false, true, false);
-				DownLoadFile(pUser, MSG_DATA_TYPE_IMAGE, sMsg, NULL, RecvInfo.msg.sendtime, msgId);
-				goto RETURN;
-			}
-
-			AddMsgToList((IBaseObject*)pUser, msgFrom, MSG_RECV_ERROR, GetMsgId(), msgType, MSG_DATA_TYPE_TEXT,
-				RecvInfo.msg.strmsg, RecvInfo.msg.sendtime, NULL, NULL);
-			if ((RecvInfo.msg.bak == MSG_BAK_NORMAL || RecvInfo.msg.bak == MSG_BAK_AUTOANSER) && !(pUser->m_bInnerTalk))
-			{
-				pUser->m_bInnerTalk = true;
-			}
 		}
-		else
+
+		strncpy(pUser->UserInfo.nickname, RecvInfo.msg.strmobile, MAX_USERNAME_LEN);
+		pUser->m_nWaitTimer = 0;
+
+		string sMsg = RecvInfo.msg.strmsg;
+		if ((int)sMsg.find(m_initConfig.fileserver_media_fileid) > -1)
 		{
-			strncpy(pUser->UserInfo.nickname, RecvInfo.msg.strmobile, MAX_USERNAME_LEN);//此处会返回“系统”两字
-			pUser->m_nWaitTimer = 0;
+			string msgId = GetMsgId();
+			string imagePath = FullPath("SkinRes\\mainframe\\");
+			StringReplace(imagePath, "\\", "/");
 
-			string sMsg = RecvInfo.msg.strmsg;
-			if ((int)sMsg.find(m_initConfig.fileserver_media_fileid) > -1)
-			{
-				string msgId = GetMsgId();
-				string imagePath = FullPath("SkinRes\\mainframe\\");
-				StringReplace(imagePath, "\\", "/");
-
-				char contentMsg[MAX_1024_LEN];
-				sprintf(contentMsg, "<img id=\"%s_msg\" class=\"msg_image\" src=\"%srecv_image_fail.jpg\"><img id=\"%s_image\" class=\"wait_image\" src=\"%smsg_wait.gif\">",
-					msgId.c_str(), imagePath.c_str(), msgId.c_str(), imagePath.c_str());
-				AddMsgToList(pUser, msgFrom, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL, MSG_DATA_TYPE_IMAGE, contentMsg, RecvInfo.msg.sendtime, NULL, NULL, false, true, false);
-				DownLoadFile(pUser, MSG_DATA_TYPE_IMAGE, sMsg, NULL, RecvInfo.msg.sendtime, msgId);
-				goto RETURN;
-			}
-
-			AddMsgToList((IBaseObject*)pUser, msgFrom, MSG_RECV_ERROR, GetMsgId(), msgType, MSG_DATA_TYPE_TEXT,
-				RecvInfo.msg.strmsg, RecvInfo.msg.sendtime, NULL, NULL);
-
-			if ((RecvInfo.msg.bak == MSG_BAK_NORMAL || RecvInfo.msg.bak == MSG_BAK_AUTOANSER) && !(pUser->m_bInnerTalk))
-			{
-				pUser->m_bInnerTalk = true;
-			}
+			char contentMsg[MAX_1024_LEN];
+			sprintf(contentMsg, "<img id=\"%s_msg\" class=\"msg_image\" src=\"%srecv_image_fail.jpg\"><img id=\"%s_image\" class=\"wait_image\" src=\"%smsg_wait.gif\">",
+				msgId.c_str(), imagePath.c_str(), msgId.c_str(), imagePath.c_str());
+			AddMsgToList(pUser, msgFrom, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL, MSG_DATA_TYPE_IMAGE,
+				contentMsg, RecvInfo.msg.sendtime, NULL, NULL, false, true, false);
+			DownLoadFile(pUser, MSG_DATA_TYPE_IMAGE, sMsg, NULL, RecvInfo.msg.sendtime, msgId);
+			goto RETURN;
 		}
-		// 提示
+
+		AddMsgToList((IBaseObject*)pUser, msgFrom, MSG_RECV_ERROR, GetMsgId(), msgType, MSG_DATA_TYPE_TEXT,
+			RecvInfo.msg.strmsg, RecvInfo.msg.sendtime, NULL, NULL);
+
+		if ((RecvInfo.msg.bak == MSG_BAK_NORMAL || RecvInfo.msg.bak == MSG_BAK_AUTOANSER) && !(pUser->m_bInnerTalk))
+		{
+			pUser->m_bInnerTalk = true;
+		}
 	}
 
 RETURN:
@@ -1374,8 +1349,8 @@ int CChatManager::RecvFloatCreateChat(PACK_HEADER packhead, char *pRecvBuff, int
 			char msg[MAX_256_LEN];
 			sprintf(msg, "用户 %s 申请对话!", pWebUser->info.name);
 
-			AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, MSG_DATA_TYPE_TEXT,
-				msg, 0, NULL, NULL);
+			AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), 
+				MSG_TYPE_NORMAL, MSG_DATA_TYPE_TEXT,msg, 0, NULL, NULL);
 		}
 	}
 	else
@@ -1407,8 +1382,8 @@ int CChatManager::RecvFloatCreateChat(PACK_HEADER packhead, char *pRecvBuff, int
 			char msg[MAX_256_LEN];
 			sprintf(msg, "%s接受了访客%s的会话", pUser->UserInfo.nickname, pWebUser->info.name);
 			
-			AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, MSG_DATA_TYPE_TEXT,
-				msg, 0, NULL, NULL);
+			AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, 
+				MSG_DATA_TYPE_TEXT, msg, 0, NULL, NULL);
 		}
 	}
 
@@ -1569,8 +1544,8 @@ int CChatManager::RecvFloatChatInfo(PACK_HEADER packhead, char *pRecvBuff, int l
 					char msg[MAX_256_LEN];
 					sprintf(msg, "%s接受了访客%s的会话", pUser->UserInfo.nickname, pWebUser->info.name);
 
-					AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, MSG_DATA_TYPE_TEXT,
-						msg, 0, NULL, NULL);
+					AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL,
+						MSG_DATA_TYPE_TEXT,	msg, 0, NULL, NULL);
 
 					if (RecvInfo.uKefuUin&&pUser->m_bFriend
 						|| !RecvInfo.uKefuUin&&!pWebUser->m_bNotResponseUser)
@@ -1601,8 +1576,8 @@ int CChatManager::RecvFloatChatInfo(PACK_HEADER packhead, char *pRecvBuff, int l
 				else if (pAcceptUser != NULL)
 					sprintf(msg, "访客 %s 转移到 %s", pWebUser->info.name, pAcceptUser->UserInfo.nickname);
 
-				AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, MSG_DATA_TYPE_TEXT,
-					msg, 0, NULL, NULL);
+				AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL,
+					MSG_DATA_TYPE_TEXT,	msg, 0, NULL, NULL);
 
 				m_handlerMsgs->RecvTransferUser(pWebUser,pAcceptUser);
 			}
@@ -1938,8 +1913,8 @@ int CChatManager::RecvFloatAcceptChat(PACK_HEADER packhead, char *pRecvBuff, int
 		char msg[MAX_256_LEN];
 		sprintf(msg, "%s接受了访客%s的会话", pUser->UserInfo.nickname, pWebUser->info.name);
 
-		AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, MSG_DATA_TYPE_TEXT,
-			msg, 0, NULL, NULL);
+		AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, 
+			MSG_DATA_TYPE_TEXT,	msg, 0, NULL, NULL);
 
 		//读取会话历史消息，并接受新的消息
 		SendStartRecvFloatMsg(packhead.random, RecvInfo.uAdminId, RecvInfo.chatid, pWebUser->m_sNewSeq);
@@ -2000,8 +1975,8 @@ int CChatManager::RecvFloatTransQuest(PACK_HEADER packhead, char *pRecvBuff, int
 		else
 			sprintf(msg, "访客 %s 转移到 %s", pWebUser->info.name, pAcceptUser->UserInfo.nickname);
 
-		AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, MSG_DATA_TYPE_TEXT,
-			msg, 0, NULL, NULL);
+		AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, 
+			MSG_DATA_TYPE_TEXT,	msg, 0, NULL, NULL);
 		
 		m_handlerMsgs->RecvTransferUser(pWebUser, pAcceptUser);
 	}
@@ -2009,8 +1984,8 @@ int CChatManager::RecvFloatTransQuest(PACK_HEADER packhead, char *pRecvBuff, int
 	{
 		sprintf(msg, "已发起转接请求到%s", pAcceptUser->UserInfo.nickname);
 
-		AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, MSG_DATA_TYPE_TEXT,
-			msg, 0, NULL, NULL);
+		AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, 
+			MSG_DATA_TYPE_TEXT,	msg, 0, NULL, NULL);
 	}
 	nError = 0;
 RETURN:
@@ -2065,8 +2040,8 @@ int CChatManager::RecvFloatTransFailed(PACK_HEADER packhead, char *pRecvBuff, in
 		pWebUser->cTalkedSatus = INTALKING;
 		pWebUser->transferuid = 0;
 
-		AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, MSG_DATA_TYPE_TEXT,
-			msg, 0, NULL, NULL);
+		AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL,
+			MSG_DATA_TYPE_TEXT,	msg, 0, NULL, NULL);
 
 		// 转接超时会话回到发起转移坐席，不是等待应答
 		if (m_userInfo.UserInfo.uid != pInviteUser->UserInfo.uid) 
@@ -2303,8 +2278,8 @@ int CChatManager::RecvFloatRelease(PACK_HEADER packhead, char *pRecvBuff, int le
 		pWebUser->cTalkedSatus = INTALKING;
 		sprintf(msg, "客服 %s(%lu) 对访客 %s 的接待终止", !pUser ? RecvInfo.szKefuName : pUser->UserInfo.nickname, RecvInfo.uKefu, pWebUser->info.name);
 	}
-	AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, MSG_DATA_TYPE_TEXT,
-		msg, 0, NULL, NULL);
+	AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL,
+		MSG_DATA_TYPE_TEXT,	msg, 0, NULL, NULL);
 	m_handlerMsgs->RecvReleaseChat(pWebUser);
 	nError = 0;
 RETURN:
@@ -2381,8 +2356,8 @@ int CChatManager::RecvFloatCloseChat(PACK_HEADER packhead, char *pRecvBuff, int 
 			sprintf(msg, "用户(%u)退出会话", packhead.uin);
 		}
 
-		AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, MSG_DATA_TYPE_TEXT,
-			msg, 0, NULL, NULL);
+		AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, 
+			MSG_DATA_TYPE_TEXT,	msg, 0, NULL, NULL);
 		pWebUser->RemoveMutiUser(packhead.uin);
 	}
 	else
@@ -2405,8 +2380,8 @@ int CChatManager::RecvFloatCloseChat(PACK_HEADER packhead, char *pRecvBuff, int 
 			strMsg = "访客会话已结束";
 		}
 
-		AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, MSG_DATA_TYPE_TEXT,
-			strMsg.c_str(), 0, NULL, NULL);
+		AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL,
+			MSG_DATA_TYPE_TEXT,	strMsg.c_str(), 0, NULL, NULL);
 
 		if (!pWebUser->IsOnline())//这里是不是该用户彻底离线了
 		{
@@ -2564,8 +2539,8 @@ int CChatManager::RecvRepTransferClient(PACK_HEADER packhead, char *pRecvBuff, i
 	{
 		sprintf(msg, "转接失败%s", RecvInfo.reason);
 		
-		AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, MSG_DATA_TYPE_TEXT,
-			msg, 0, NULL, NULL);
+		AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL,
+			MSG_DATA_TYPE_TEXT,msg, 0, NULL, NULL);
 
 		g_WriteLog.WriteLog(C_LOG_TRACE, "RecvRepTransferClient chatid:%s,rand:%u,szThirdid:%s,recvuid:%u, webuid:%u,senduid:%u,result:%u,reason:%s",
 			RecvInfo.szChatId, RecvInfo.szRand, RecvInfo.szThirdid, RecvInfo.recvinfo.id, RecvInfo.clientinfo.id, RecvInfo.sendinfo.id, RecvInfo.result, RecvInfo.reason);
@@ -2600,8 +2575,8 @@ int CChatManager::RecvRepTransferClient(PACK_HEADER packhead, char *pRecvBuff, i
 		else
 			sprintf(msg, "访客 %s 转移到 %s", pWebUser->info.name, pAcceptUser->UserInfo.nickname);
 		
-		AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, MSG_DATA_TYPE_TEXT,
-			msg, 0, NULL, NULL);
+		AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL,
+			MSG_DATA_TYPE_TEXT,	msg, 0, NULL, NULL);
 	}
 
 	nError = 0;
@@ -2659,8 +2634,8 @@ int CChatManager::RecvTransferClient(PACK_HEADER packhead, char *pRecvBuff, int 
 			//访客邀请
 			sprintf(msg, "%s接受了访客%s的会话", m_userInfo.UserInfo.nickname, pWebUser->info.name);
 			
-			AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, MSG_DATA_TYPE_TEXT,
-				msg, 0, NULL, NULL);
+			AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL,
+				MSG_DATA_TYPE_TEXT,	msg, 0, NULL, NULL);
 		}
 		else
 		{
@@ -3083,7 +3058,8 @@ WxMsgBase* CChatManager::ParseWxMsg(CWebUserObject* pWebUser, char* msg, CUserOb
 			sprintf(contentMsg, "<img id=\"%s_msg\" class=\"msg_image\" src=\"%srecv_image_fail.jpg\"><img id=\"%s_image\" class=\"wait_image\" src=\"%smsg_wait.gif\">",
 				msgId.c_str(),imagePath.c_str(), msgId.c_str(), imagePath.c_str());
 
-			AddMsgToList((IBaseObject*)pWebUser, msgFormType, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL, MSG_DATA_TYPE_IMAGE, contentMsg, time, pAssistUser, NULL, false, true, false);
+			AddMsgToList((IBaseObject*)pWebUser, msgFormType, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL, 
+				MSG_DATA_TYPE_IMAGE, contentMsg, time, pAssistUser, NULL, false, true, false);
 			DownLoadFile(pWebUser, MSG_DATA_TYPE_IMAGE, ((WxMsgImage*)pwxobj)->MediaUrl, pAssistUser, time, msgId);
 			delete pwxobj;
 			return NULL;
@@ -3098,7 +3074,8 @@ WxMsgBase* CChatManager::ParseWxMsg(CWebUserObject* pWebUser, char* msg, CUserOb
 			sprintf(contentMsg, "<audio id=\"%s_msg\" class=\"msg_voice\" controls=\"controls\" src=\"\" type=\"audio/mpeg\"></audio><img id=\"%s_image\" class=\"wait_image\" src=\"%smsg_wait.gif\">",
 				msgId.c_str(), msgId.c_str(), imagePath.c_str());
 
-			AddMsgToList((IBaseObject*)pWebUser, msgFormType, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL, MSG_DATA_TYPE_VOICE, contentMsg, time, pAssistUser, NULL, false, true, false);
+			AddMsgToList((IBaseObject*)pWebUser, msgFormType, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL, 
+				MSG_DATA_TYPE_VOICE, contentMsg, time, pAssistUser, NULL, false, true, false);
 
 			DownLoadFile(pWebUser, MSG_DATA_TYPE_VOICE, ((WxMsgVoice*)pwxobj)->MediaUrl, pAssistUser, time, msgId);
 			delete pwxobj;
@@ -3114,7 +3091,8 @@ WxMsgBase* CChatManager::ParseWxMsg(CWebUserObject* pWebUser, char* msg, CUserOb
 			sprintf(contentMsg, "<video id=\"%s_msg\" class=\"msg_voice\" controls=\"controls\" src=\"\" type=\"video/mp4\"></video><img id=\"%s_image\" class=\"wait_image\" src=\"%smsg_wait.gif\">",
 				msgId.c_str(), msgId.c_str(), imagePath.c_str());
 
-			AddMsgToList((IBaseObject*)pWebUser, msgFormType, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL, MSG_DATA_TYPE_VIDEO, contentMsg, time, pAssistUser, NULL, false, true, false);
+			AddMsgToList((IBaseObject*)pWebUser, msgFormType, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL, 
+				MSG_DATA_TYPE_VIDEO, contentMsg, time, pAssistUser, NULL, false, true, false);
 
 			DownLoadFile(pWebUser, MSG_DATA_TYPE_VIDEO, ((WxMsgVideo*)pwxobj)->MediaUrl, pAssistUser, time, msgId);
 			delete pwxobj;
@@ -3192,8 +3170,8 @@ int CChatManager::SendAutoRespMsg(CWebUserObject *pWebUser, const char *msg, BOO
 
 	if (SendMsg(pWebUser, msg) == SYS_SUCCESS)
 	{
-		AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SELF, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, MSG_DATA_TYPE_TEXT,
-			msg, 0, NULL, NULL);
+		AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SELF, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, 
+			MSG_DATA_TYPE_TEXT,	msg, 0, NULL, NULL);
 
 		if (bClearTimer && pWebUser != NULL)
 		{
@@ -3204,8 +3182,8 @@ int CChatManager::SendAutoRespMsg(CWebUserObject *pWebUser, const char *msg, BOO
 	}
 	else
 	{
-		AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SELF, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, MSG_DATA_TYPE_TEXT,
-			"自动回复消息失败！", 0, NULL, NULL);
+		AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SELF, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL,
+			MSG_DATA_TYPE_TEXT,	"自动回复消息失败！", 0, NULL, NULL);
 	}
 
 	return rtn;
@@ -3262,10 +3240,14 @@ void CChatManager::RecvComSendWorkBillMsg(unsigned long senduid, unsigned long r
 				strcpy(pWebUser->info.thirdid, thirdid);
 			}
 
-			if (pWebUser->webuserid != senduid)
+			if (pWebUser->webuserid == 0)
 			{
 				pWebUser->webuserid = senduid;
 				m_handlerMsgs->RecvWebUserInfo(pWebUser, NOTIFY_ID);
+			}
+			else
+			{
+				pWebUser->webuserid = senduid;
 			}
 			
 			SolveWebUserEarlyMsg(pWebUser);
@@ -3332,7 +3314,7 @@ void CChatManager::RecvComSendWorkBillMsg(unsigned long senduid, unsigned long r
 				AddMsgToList(pWebUser, MSG_FROM_SYS, MSG_RECV_WEB, GetMsgId(), MSG_TYPE_NORMAL,
 					MSG_DATA_TYPE_TEXT, msg, 0, NULL, NULL);
 				m_handlerMsgs->RecvTransferUser(pWebUser, &m_userInfo);
-				//m_tranferList[pWebUser->webuserid] = 0;
+
 				//KillTimer(TIMER_TRANS_TIMEOUT);
 				//SetTimer(TIMER_TRANS_TIMEOUT, 1000, NULL);
 			}
@@ -3467,7 +3449,6 @@ int CChatManager::RecvComTransRequest(unsigned long senduid, COM_SEND_MSG& RecvI
 		//获取历史消息
 
 		//设置超时定时器
-		//m_TranfserList[pWebUser->webuserid] = 0;
 		//KillTimer(TIMER_TRANS_TIMEOUT);
 		//SetTimer(TIMER_TRANS_TIMEOUT, 1000, NULL);
 	}
@@ -3914,8 +3895,8 @@ void CChatManager::SendTo_CloseChat(unsigned long webuserid, int ntype)
 		{
 			if (SendMsg(pWebUser, "|ForceClose()|", MSG_BAK_INPUTING, "") == SYS_SUCCESS)
 			{
-				AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SELF, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, MSG_DATA_TYPE_TEXT,
-					msg, 0, NULL, NULL);
+				AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SELF, MSG_RECV_ERROR, GetMsgId(),
+					MSG_TYPE_NORMAL, MSG_DATA_TYPE_TEXT,msg, 0, NULL, NULL);
 			}
 			if (m_vistor)
 			{
@@ -4012,8 +3993,8 @@ int CChatManager::SendTo_Msg(unsigned long userId, MSG_RECV_TYPE userType, strin
 			{
 				StringReplace(msg, "\\", "/");
 				ReplaceFaceId(msg);
-				AddMsgToList((IBaseObject*)pUser, MSG_FROM_SELF, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL, MSG_DATA_TYPE_TEXT,
-					msg, 0, NULL, NULL);
+				AddMsgToList((IBaseObject*)pUser, MSG_FROM_SELF, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL, 
+					MSG_DATA_TYPE_TEXT,	msg, 0, NULL, NULL);
 			}			
 			break;
 		case MSG_DATA_TYPE_IMAGE:
@@ -4040,8 +4021,8 @@ int CChatManager::SendTo_Msg(unsigned long userId, MSG_RECV_TYPE userType, strin
 			{
 				StringReplace(msg, "\\", "/");
 				ReplaceFaceId(msg);
-				AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SELF, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, MSG_DATA_TYPE_TEXT,
-					msg, 0, NULL, NULL);
+				AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SELF, MSG_RECV_ERROR, GetMsgId(), 
+					MSG_TYPE_NORMAL, MSG_DATA_TYPE_TEXT,msg, 0, NULL, NULL);
 			}
 			break;
 		case MSG_DATA_TYPE_IMAGE:
@@ -4120,8 +4101,8 @@ int CChatManager::SendTo_AcceptChat(unsigned long webuserid)
 	{
 		if (m_sysConfig->IsWebuserSidForbid(pWebUser->info.sid))
 		{
-			AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, MSG_DATA_TYPE_TEXT,
-				"该访客已被您屏蔽，请先解除屏蔽后再接受对话请求!", 0, NULL, NULL);
+			AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, 
+				MSG_DATA_TYPE_TEXT,	"该访客已被您屏蔽，请先解除屏蔽后再接受对话请求!", 0, NULL, NULL);
 		}
 		else
 		{
@@ -4192,8 +4173,8 @@ int CChatManager::SendTo_InviteWebUser(CWebUserObject *pWebUser, int type, strin
 	{
 		if (m_sysConfig->IsWebuserSidForbid(pWebUser->info.sid))
 		{
-			AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, MSG_DATA_TYPE_TEXT,
-				"该访客已被您屏蔽，请先解除屏蔽后再邀请!", 0, NULL, NULL);
+			AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, 
+				MSG_DATA_TYPE_TEXT,"该访客已被您屏蔽，请先解除屏蔽后再邀请!", 0, NULL, NULL);
 			return nError;
 		}
 
@@ -4477,7 +4458,7 @@ void CChatManager::AfterUpload(unsigned long userId, MSG_RECV_TYPE userType, str
 			{
 				if (!fileId.empty())
 				{
-					// 拼出该url串
+					// 拼出图片在文件服务器上的url
 					msgSendTo = m_initConfig.fileserver_media_fileid + fileId;
 
 					// 生成发送给微信的消息
@@ -4541,7 +4522,7 @@ void CChatManager::AfterUpload(unsigned long userId, MSG_RECV_TYPE userType, str
 			}
 			else if (userType == MSG_RECV_CLIENT)
 			{
-				// 拼出该url串
+				// 拼出在文件服务器上的url
 				msgSendTo = m_initConfig.fileserver_media_fileid + mediaID;
 				if (SendMsg(pUser, msgSendTo.c_str(), 0) == SYS_SUCCESS)
 				{
@@ -4560,7 +4541,6 @@ void CChatManager::AfterUpload(unsigned long userId, MSG_RECV_TYPE userType, str
 			{
 				if (!fileId.empty())
 				{
-					// 拼出该url串
 					msgSendTo = m_initConfig.fileserver_media_fileid + fileId;
 
 					WxMsgVoice* voiceObj = new WxMsgVoice("voice");
@@ -4635,7 +4615,6 @@ void CChatManager::AfterUpload(unsigned long userId, MSG_RECV_TYPE userType, str
 			}
 			else if (userType == MSG_RECV_CLIENT)
 			{
-				// 拼出该url串
 				char sSendTo[MAX_1024_LEN];
 				sprintf(sSendTo, "<span class=\"file_text\">收到文件 </span><a href=\"%s\">%s</a>", mediaID.c_str(), fileName.c_str());
 				if (SendMsg(pUser, sSendTo, 0) == SYS_SUCCESS)
@@ -4893,7 +4872,7 @@ void CChatManager::DownLoadFile(IBaseObject* pObj, MSG_DATA_TYPE nMsgDataType, s
 						msgId.c_str(), imagePath.c_str(), msgId.c_str(), url.c_str(), msgFromType, msgId.c_str(),
 						MSG_DATA_TYPE_IMAGE, pWebUser->webuserid, assistUid, imagePath.c_str(), imagePath.c_str());
 
-					// 保存该条未下载记录
+					// 保存该条未下载成功的记录
 					AddMsgToList((IBaseObject*)pWebUser, msgFromType, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL,
 						nMsgDataType, contentMsg, time, pAssistUser, NULL, true, false, false);
 				}
@@ -4933,7 +4912,7 @@ void CChatManager::DownLoadFile(IBaseObject* pObj, MSG_DATA_TYPE nMsgDataType, s
 						msgId.c_str(), imagePath.c_str(), msgId.c_str(), url.c_str(), msgFromType, msgId.c_str(),
 						MSG_DATA_TYPE_IMAGE, pWebUser->webuserid, assistUid, imagePath.c_str(), imagePath.c_str());
 
-					// 保存该条未下载记录
+					// 保存该条未下载成功记录
 					AddMsgToList((IBaseObject*)pWebUser, msgFromType, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL,
 						nMsgDataType, contentMsg, time, pAssistUser, NULL, true, false, false);
 				}
@@ -4985,7 +4964,7 @@ void CChatManager::DownLoadFile(IBaseObject* pObj, MSG_DATA_TYPE nMsgDataType, s
 					msgId.c_str(), msgId.c_str(), url.c_str(), MSG_FROM_WEBUSER, msgId.c_str(), MSG_DATA_TYPE_VOICE,
 					pWebUser->webuserid, assistUid, imagePath.c_str(), imagePath.c_str());
 
-				// 保存该条未下载记录
+				// 保存该条未下载成功记录
 				AddMsgToList((IBaseObject*)pWebUser, msgFromType, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL,
 					nMsgDataType, contentMsg, time, pAssistUser, NULL, true, false, false);
 			}
@@ -5036,7 +5015,7 @@ void CChatManager::DownLoadFile(IBaseObject* pObj, MSG_DATA_TYPE nMsgDataType, s
 					msgId.c_str(), msgId.c_str(), url.c_str(), MSG_FROM_WEBUSER, msgId.c_str(), MSG_DATA_TYPE_VIDEO,
 					pWebUser->webuserid, assistUid, imagePath.c_str(), imagePath.c_str());
 
-				// 保存该条未下载记录
+				// 保存该条未下载成功记录
 				AddMsgToList((IBaseObject*)pWebUser, msgFromType, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL,
 					nMsgDataType, contentMsg, time, pAssistUser, NULL, true, false, false);
 			}
@@ -5932,7 +5911,8 @@ bool CChatManager::ParseTextMsg(CWebUserObject* pWebUser, string content, CUserO
 			sprintf(contentMsg, "<img id=\"%s_msg\" class=\"msg_image\" src=\"%srecv_image_fail.jpg\"><img id=\"%s_image\" class=\"wait_image\" src=\"%smsg_wait.gif\">",
 				msgId.c_str(), imagePath.c_str(), msgId.c_str(), imagePath.c_str());
 
-			AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_ASSIST, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL, MSG_DATA_TYPE_IMAGE, contentMsg, 0, pAssistUser, NULL, false, true, false);
+			AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_ASSIST, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL, 
+				MSG_DATA_TYPE_IMAGE, contentMsg, 0, pAssistUser, NULL, false, true, false);
 			DownLoadFile(pWebUser, MSG_DATA_TYPE_IMAGE, imageUrl, pAssistUser, time, msgId);
 		}
 		return true;
@@ -5946,7 +5926,8 @@ bool CChatManager::ParseTextMsg(CWebUserObject* pWebUser, string content, CUserO
 		sprintf(contentMsg, "<img id=\"%s_msg\" class=\"msg_image\" src=\"%srecv_image_fail.jpg\"><img id=\"%s_image\" class=\"wait_image\" src=\"%smsg_wait.gif\">",
 			msgId.c_str(), imagePath.c_str(), msgId.c_str(), imagePath.c_str());
 
-		AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_WEBUSER, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL, MSG_DATA_TYPE_IMAGE, contentMsg, 0, pAssistUser, NULL, false, true, false);
+		AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_WEBUSER, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL, 
+			MSG_DATA_TYPE_IMAGE, contentMsg, 0, pAssistUser, NULL, false, true, false);
 		DownLoadFile(pWebUser, MSG_DATA_TYPE_IMAGE, content, pAssistUser, time, msgId);
 
 		return true;
@@ -6191,7 +6172,8 @@ UINT WINAPI CChatManager::DownLoadFileFromServerThread(void * para)
 		manager->m_handlerMsgs->ResultRecvMsg(msgId, true, url, webUserId, userId, addPath, msgFrom, msgDataType);
 
 		// 保存该条记录
-		manager->AddMsgToList(pObj, msgFrom, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL, msgDataType, addPath, time, pUser, NULL, true, false, true);
+		manager->AddMsgToList(pObj, msgFrom, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL, msgDataType, 
+			addPath, time, pUser, NULL, true, false);
 		return true;
 	}
 	else

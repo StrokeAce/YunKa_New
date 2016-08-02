@@ -461,7 +461,7 @@ public:
 	int SendGetChatHisMsg(unsigned long webuserid, const char *chatid);//获取非等待应答会话的会话历史消息
 
 	//************************************
-	// Method:    SendTo_CloseChat
+	// Method:    SendCloseChat
 	// Qualifier: 发起关闭会话
 	// Parameter: pWebUser 会话中的访客
 	// Parameter: ntype 会话关闭的原因，例如：CHATCLOSE_USER
@@ -525,9 +525,28 @@ public:
 
 	void Amr2Wav(string filePath);
 
-	void AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RECV_TYPE recvType,string msgId, MSG_TYPE msgType, MSG_DATA_TYPE msgDataType,
-					string msgContent="", unsigned long msgTime = 0, CUserObject* pAssistUser = NULL, WxMsgBase* msgContentWx = NULL,
-					bool bSave = true,bool bNotify = true,bool bSuccess = true);
+	//************************************
+	// Method:    AddMsgToList
+	// Qualifier: 添加一条消息
+	// Parameter: pObj 会话中的访客
+	// Parameter: msgFrom 会话关闭的原因，例如：CHATCLOSE_USER
+	// Parameter: recvType 
+	// Parameter: msgId 
+	// Parameter: msgType 
+	// Parameter: msgDataType 
+	// Parameter: msgContent 
+	// Parameter: msgTime 
+	// Parameter: pAssistUser 
+	// Parameter: msgContentWx 
+	// Parameter: bSave 
+	// Parameter: bNotify 
+	// Parameter: bSuccess 
+	//************************************
+	void AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RECV_TYPE recvType,string msgId, 
+					MSG_TYPE msgType, MSG_DATA_TYPE msgDataType,string msgContent="",
+					unsigned long msgTime = 0, CUserObject* pAssistUser = NULL, 
+					WxMsgBase* msgContentWx = NULL,bool bSave = true,
+					bool bNotify = true,bool bSuccess = true);
 
 	string ReplaceToken(string srcStr, string replaceStr);
 
