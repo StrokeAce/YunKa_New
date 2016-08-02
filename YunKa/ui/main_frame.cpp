@@ -1551,7 +1551,8 @@ void CMainFrame::AddMyselfToList(UserListUI * ptr, CUserObject *user)
 	CDuiString nameString, taklString, changeString, acceptString, inTalkString;
 	CDuiString onlineString;
 	CDuiString strTemp;
-
+	CDuiString text;
+	WCHAR name[64] = { 0 };
 	UserListUI::Node* pUserNameNode = NULL;
 	UserListUI::Node* pUserTalkNode = NULL;
 	UserListUI::Node* pUserChangeNode = NULL;
@@ -1593,6 +1594,44 @@ void CMainFrame::AddMyselfToList(UserListUI * ptr, CUserObject *user)
 
 	pMySelfeNode = pUserNameNode;
 	pUserList->ExpandNode(pMySelfeNode, true);
+
+	//这里查找有没有 没有接入的对话 
+	list<unsigned long>::iterator iter = m_manager->m_listEarlyChat.begin();
+	for (; iter != m_manager->m_listEarlyChat.end(); iter++)
+	{
+		unsigned long id = *iter;
+		if (id > 0)
+		{
+			CWebUserObject *pWebUser = NULL;
+
+			pWebUser = m_manager->GetWebUserObjectByUid(id);
+			if (pWebUser == NULL)
+				return;
+			
+	
+			ANSIToUnicode(pWebUser->info.name, name);
+				//是否来自微信
+			if (pWebUser->m_bIsFrWX)
+			{
+				text.Format(_T("{x 4}{i user_wx.png 1 0}{x 4}%s"), name);
+			}
+			else
+			{
+				text.Format(_T("{x 4}{i user_web.png 1 0}{x 4}%s"), name);
+			}
+
+			UserListUI::Node* addNode = pUserList->AddNode(text, pWebUser->webuserid, pWebUser->info.sid, pUserTalkNode);
+			pUserList->ExpandNode(pUserTalkNode, true);
+	
+
+			m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, addNode));
+			m_allVisitorUserMap.insert(pair<unsigned long, unsigned long>(pWebUser->webuserid, m_manager->m_userInfo.UserInfo.uid));
+
+		}
+
+	}
+
+
 
 	//m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
 }
@@ -3488,9 +3527,13 @@ void CMainFrame::RecvWebUserInfo(CWebUserObject* pWebUser, WEBUSER_INFO_NOTIFY_T
 
 	UserListUI::Node* AddFatherNode = NULL;
 
-	//先查看是否是实在等待列表 然后查看是否在 会话列表  最后查看是否在 在线列表
-	if (pWebUser->webuserid > 0)
+	if (pWebUser->webuserid == 0)
+		return;
+	
+	//1 更新用户名字  2 更新用户类型
+	if (type == NOTIFY_IS_WX || type == NOTIFY_NAME)
 	{
+		//先查看是否是实在等待列表 然后查看是否在 会话列表  最后查看是否在 在线列表
 		map<unsigned long, UserListUI::Node*>::iterator iterNode = m_waitVizitorMap.find(pWebUser->webuserid);
 		if (iterNode == m_waitVizitorMap.end())
 		{
@@ -3498,10 +3541,8 @@ void CMainFrame::RecvWebUserInfo(CWebUserObject* pWebUser, WEBUSER_INFO_NOTIFY_T
 			if (iter == m_allVisitorUserMap.end())
 				return;
 
-			fatherId = iter->second;		
-			//iterNode = m_allVisitorNodeMap.find(fatherId);
-		//	if ( iterNode == m_allVisitorNodeMap.end() )
-			//	return
+			fatherId = iter->second;
+
 			map<unsigned long, UserListUI::Node*>::iterator iterUser = m_onlineNodeMap.find(fatherId);
 			if (iterUser == m_onlineNodeMap.end())
 				return;
@@ -3528,6 +3569,54 @@ void CMainFrame::RecvWebUserInfo(CWebUserObject* pWebUser, WEBUSER_INFO_NOTIFY_T
 			pUserList->RemoveNode(tempNode);
 		}
 	}
+	else if (type == NOTIFY_ID) //更新webuerid
+	{
+		//先删除 此sid所在的 node 
+		//pMySelfeNode->child
+
+		if (pWebUser->onlineinfo.talkstatus == TALK_STATUS_TALK)
+		{
+
+			UserListUI::Node* tempNode = pMySelfeNode->child(0);
+			for (int i = 0; i < tempNode->num_children(); i++)
+			{
+				UserListUI::Node* node = tempNode->child(i);
+				string sid = node->data()._sid;
+				if (strcmp(pWebUser->info.sid, sid.c_str()) == 0)
+				{
+					pUserList->RemoveNode(node);
+					break;
+				}
+			}
+
+			fatherNode = pMySelfeNode;
+			fatherId = m_manager->m_userInfo.UserInfo.uid;
+
+			fatherType = 0;
+		}
+		else
+		{
+			map<string, UserListUI::Node*>::iterator iterSid = m_visitorOnlineNode.find(pWebUser->info.sid);
+			if (iterSid != m_visitorOnlineNode.end())
+			{
+				UserListUI::Node* tempNode = iterSid->second;
+				m_visitorOnlineNode.erase(iterSid);
+
+				if (tempNode != NULL && tempNode->data()._level >= 0 && tempNode->data()._level <= 5)
+					pUserList->RemoveNode(tempNode);
+			}
+
+		
+			fatherNode = pOnlineNode;
+			fatherId = 0;
+
+			fatherType = 3;
+		}
+
+		
+	}
+	
+
 
 	textType = CheckIdForInvoteMyselfOrOther(pWebUser->webuserid);
 
@@ -3574,9 +3663,24 @@ void CMainFrame::RecvWebUserInfo(CWebUserObject* pWebUser, WEBUSER_INFO_NOTIFY_T
 		}
 		else if (pWebUser->onlineinfo.talkstatus == TALK_STATUS_NO)
 		{
-			AddFatherNode = fatherNode;
-			fatherId = 0;
+			//AddFatherNode = fatherNode;
+			//fatherId = 0;
+			return;
 		}
+	}
+
+	else  if (fatherType == 3)
+	{
+		if (pWebUser->onlineinfo.talkstatus == TALK_STATUS_AUTOINVITE)
+		{
+			AddFatherNode = fatherNode->child(0);
+		}
+		else if (pWebUser->onlineinfo.talkstatus == TALK_STATUS_REQUEST)
+		{
+			AddFatherNode = fatherNode->child(1);
+		}
+
+
 	}
 
 
@@ -3589,15 +3693,6 @@ void CMainFrame::RecvWebUserInfo(CWebUserObject* pWebUser, WEBUSER_INFO_NOTIFY_T
 	m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, addNode));
 	m_allVisitorUserMap.insert(pair<unsigned long, unsigned long>(pWebUser->webuserid, fatherId));
 
-	//0 更新用户 类型  微信 web
-	if (type == NOTIFY_IS_WX)
-	{
-	}
-	//1 更新用户名字
-	else if (type == NOTIFY_NAME)
-	{
-
-	}
 
 }
 
