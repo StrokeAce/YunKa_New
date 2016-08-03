@@ -1436,8 +1436,8 @@ void CMainFrame::SendMsgToGetList()
 	UserListUI::Node* pUserTalkNode = pMySelfeNode->child(0);
 
 	//这里查找有没有 没有接入的对话 
-	list<unsigned long>::iterator iter = m_manager->m_listEarlyChat.begin();
-	for (; iter != m_manager->m_listEarlyChat.end(); iter++)
+	list<unsigned long>::iterator iter;
+	for (iter = m_manager->m_listEarlyChat.begin(); iter != m_manager->m_listEarlyChat.end(); iter++)
 	{
 		unsigned long id = *iter;
 		if (id > 0)

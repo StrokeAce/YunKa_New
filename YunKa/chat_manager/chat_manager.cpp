@@ -1670,7 +1670,7 @@ int CChatManager::RecvFloatChatMsg(PACK_HEADER packhead, char *pRecvBuff, int le
 			pAssistUser->DownLoadFace(m_initConfig.webpage_DownloadHeadImage);
 
 			// 然后更新该坐席的最新信息
-			SendTo_GetUserInfo(packhead.uin);
+			SendGetUserInfo(packhead.uin);
 		}
 	}
 
@@ -1956,7 +1956,7 @@ int CChatManager::RecvFloatTransQuest(PACK_HEADER packhead, char *pRecvBuff, int
 	char msg[MAX_256_LEN];
 	if (pWebUser == NULL)
 	{
-		SendTo_GetWebUserChatInfo(packhead.random, RecvInfo.uAdminId, RecvInfo.chatid);
+		SendGetWebUserChatInfo(packhead.random, RecvInfo.uAdminId, RecvInfo.chatid);
 	}
 	else if (RecvInfo.uToKefu == m_userInfo.UserInfo.uid)//当前坐席是接受者，移动到转接中。。。
 	{
@@ -2087,7 +2087,7 @@ int CChatManager::RecvInviteRequest(PACK_HEADER packhead, char *pRecvBuff, int l
 			m_nNextInviteUid = packhead.uin;
 			m_nNextInviteWebuserUid = RecvInfo.uWebuin;
 
-			SendTo_GetWebUserChatInfo(packhead.random, RecvInfo.uAdminId, RecvInfo.chatid);
+			SendGetWebUserChatInfo(packhead.random, RecvInfo.uAdminId, RecvInfo.chatid);
 		}
 
 		g_WriteLog.WriteLog(C_LOG_ERROR, "RecvInviteRequest GetWebUserObjectByID(%u) failed", RecvInfo.uWebuin);
@@ -2243,7 +2243,7 @@ int CChatManager::RecvFloatRelease(PACK_HEADER packhead, char *pRecvBuff, int le
 	if (pWebUser == NULL)
 	{
 		g_WriteLog.WriteLog(C_LOG_ERROR, "RecvFloatRelease GetWebUserObjectByID(%u) failed", RecvInfo.webuin);
-		SendTo_GetWebUserChatInfo(packhead.random, RecvInfo.uAdminId, RecvInfo.chatid);
+		SendGetWebUserChatInfo(packhead.random, RecvInfo.uAdminId, RecvInfo.chatid);
 		goto RETURN;
 	}
 	pUser = GetUserObjectByUid(RecvInfo.uKefu);
@@ -2423,7 +2423,7 @@ int CChatManager::RecvFloatListChat(PACK_HEADER packhead, char *pRecvBuff, int l
 	{
 		LISTCHATINFO ListChatInfo = (LISTCHATINFO)(*iter);
 
-		SendTo_GetWebUserChatInfo(packhead.random, RecvInfo.uAdminId, ListChatInfo.chatid);
+		SendGetWebUserChatInfo(packhead.random, RecvInfo.uAdminId, ListChatInfo.chatid);
 
 		chaidlist += ListChatInfo.chatid;
 		chaidlist += ",";
@@ -2775,13 +2775,13 @@ int CChatManager::SendTo_GetAllUserInfo()
 		pUser = iter_user->second;
 		if (pUser != NULL && strlen(pUser->UserInfo.nickname) == NULL)
 		{
-			nError = SendTo_GetUserInfo(pUser->UserInfo.uid);
+			nError = SendGetUserInfo(pUser->UserInfo.uid);
 		}
 	}
 	return nError;
 }
 
-int CChatManager::SendTo_GetUserInfo(unsigned long uid)
+int CChatManager::SendGetUserInfo(unsigned long uid)
 {
 	if (!m_bLoginSuccess) 
 		return SYS_ERROR_BEFORE_LOGIN;
@@ -3234,6 +3234,7 @@ void CChatManager::RecvComSendWorkBillMsg(unsigned long senduid, unsigned long r
 			if (pWebUser == NULL)
 			{
 				pWebUser = AddWebUserObject(sid, thirdid, mobile, "", "", USER_STATUS_ONLINE, 0);
+				SendGetUserInfo(senduid);
 			}
 			else
 			{
@@ -3504,7 +3505,7 @@ RETURN:
 	return nError;
 }
 
-int CChatManager::SendTo_GetWebUserChatInfo(unsigned short gpid, unsigned long adminid, char *chatid)
+int CChatManager::SendGetWebUserChatInfo(unsigned short gpid, unsigned long adminid, char *chatid)
 {
 	int nError = 0;
 	COM_FLOAT_CHATINFO SendInfo(VERSION, gpid);
@@ -3513,7 +3514,7 @@ int CChatManager::SendTo_GetWebUserChatInfo(unsigned short gpid, unsigned long a
 	strcpy(SendInfo.chatid, chatid);
 
 	nError = SendPackTo(&SendInfo);
-	g_WriteLog.WriteLog(C_LOG_TRACE, "SendTo_GetWebUserChatInfo chatid:%s,gpid:%u", chatid, gpid);
+	g_WriteLog.WriteLog(C_LOG_TRACE, "SendGetWebUserChatInfo chatid:%s,gpid:%u", chatid, gpid);
 	return nError;
 }
 

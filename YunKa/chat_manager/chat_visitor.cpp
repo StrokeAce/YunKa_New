@@ -32,8 +32,6 @@ void CChatVisitor::OnReceive(void* wParam, void* lParam)
 	assert(len <= PACKMAXLEN);
 	char *pBuff = (char *)lParam;
 
-	g_VisitLog.WriteLog(C_LOG_TRACE, "recv:%s", pBuff);
-
 	if (IsXMLCommandStringExist(pBuff, "SYSTEM"))
 		SolveVisitorSystem(pBuff);
 	else if (IsXMLCommandStringExist(pBuff, "SCRIPTMSG"))

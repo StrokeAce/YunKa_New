@@ -196,10 +196,10 @@ public:
 	int StartLoginVisitor();
 
 	// 发送获取某个坐席信息的消息
-	int SendTo_GetUserInfo(unsigned long uid);
+	int SendGetUserInfo(unsigned long uid);
 
 	// 发送获取某个会话信息的消息
-	int SendTo_GetWebUserChatInfo(unsigned short gpid, unsigned long adminid, char *chatid);
+	int SendGetWebUserChatInfo(unsigned short gpid, unsigned long adminid, char *chatid);
 
 	//************************************
 	// Method:    SendTo_Msg
