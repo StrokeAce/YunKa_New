@@ -15,6 +15,7 @@
 
 
 #define   WM_SCREEN_CAPTURE_SUCCED             WM_USER+3200
+#define	  WM_GET_CEF_FOCUS_MSG                  WM_USER + 3300
 
 
 

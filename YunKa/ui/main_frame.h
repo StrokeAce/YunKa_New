@@ -31,8 +31,8 @@
 
 typedef struct SHORT_ANSWER_DATA
 {
-	char title[128];
-	char value[1024];
+	char title[256];
+	char value[10240];
 
 }SHORT_ANSWER_DATA;
 
@@ -41,7 +41,7 @@ typedef struct SHORT_ANSWER_DATA
 typedef struct SHORT_ANSWER_STRUCT
 {
 
-	char key[128];
+	char key[256];
 	vector<SHORT_ANSWER_DATA> m_value;
 
 }SHORT_ANSWER_STRUCT;

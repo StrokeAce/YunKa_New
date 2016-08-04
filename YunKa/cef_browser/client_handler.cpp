@@ -108,6 +108,8 @@ ClientHandler::ClientHandler()
   if (startup_url_.empty())
     startup_url_ = "about:blank";
 
+  m_createSucess = 0;
+
   mouse_cursor_change_disabled_ = command_line->HasSwitch(cefclient::kMouseCursorChangeDisabled);
 }
 
@@ -534,6 +536,8 @@ void ClientHandler::OnAfterCreated(CefRefPtr<CefBrowser> browser)
     browser_ = browser;
     browser_id_ = browser->GetIdentifier();
 	PostMessage(m_hWnd, ON_AFTER_CREATED, (WPARAM)&m_handlerName, 0);
+
+	m_createSucess = 1;
   } 
   else if (browser->IsPopup()) 
   {
@@ -656,6 +660,8 @@ void ClientHandler::OnLoadEnd(CefRefPtr<CefBrowser> browser,
 	if (browser != NULL)
 	{
 		PostMessage(m_hWnd, ON_AFTER_LOAD, (WPARAM)&m_handlerName, 0);
+
+		m_createSucess = 2;
 	}
 }
 

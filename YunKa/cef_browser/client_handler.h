@@ -15,6 +15,7 @@
 #include <include/cef_client.h>
 #include <include/wrapper/cef_helpers.h>
 #include <include/wrapper/cef_message_router.h>
+#include "..\ui_common\global_setting_define.h"
 
 using namespace std;
 
@@ -335,6 +336,15 @@ class ClientHandler : public CefClient,
 
   void MoveBrowser(RECT rect);
 
+  /*--cef()--*/
+  virtual CefRefPtr<CefFocusHandler> GetFocusHandler() {
+
+	  if (m_createSucess >= 2 && m_hWnd!=NULL)
+	      ::PostMessage(m_hWnd, WM_GET_CEF_FOCUS_MSG, 0, 0);
+
+	  return NULL;
+  }
+
   // 显示或隐藏窗口
   void ShowBrowser(int nCmdShow);
 
@@ -433,6 +443,7 @@ class ClientHandler : public CefClient,
   // when the number of windows reaches 0.
   static int browser_count_;
 
+  int m_createSucess;
   // 嵌入的主窗口句柄
   HWND m_hWnd;
   // 页面的名字

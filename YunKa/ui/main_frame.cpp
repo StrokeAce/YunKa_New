@@ -183,20 +183,25 @@ LRESULT CMainFrame::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	if (uMsg == WM_SHOWWINDOW)
 	{
 	}
-	if (uMsg == WM_MOUSEMOVE)
+	else if (uMsg == WM_MOUSEMOVE)
 		OnMouseMove(uMsg, wParam, lParam);
 
-	if (uMsg == WM_RBUTTONDOWN)
+	else if (uMsg == WM_RBUTTONDOWN)
 	{
-//		LRESULT lRes = __super::HandleMessage(uMsg, wParam, lParam);
-//		OnRButtonDown(uMsg, wParam, lParam);
-	//	return lRes;
 	}
 
-//	if (uMsg == WM_LBUTTONDBLCLK)
-//		OnLButtonDblClk(uMsg, wParam, lParam);
+	else if (uMsg == WM_KILLFOCUS)
+	{
+	}
+	else if (uMsg == WM_SETFOCUS)
+	{
+	}
 
-	if (uMsg == WM_KEYDOWN) // 发送消息框的Ctrl+V消息	
+	else if (uMsg == WM_LBUTTONDOWN)
+	{
+	}
+
+	else if (uMsg == WM_KEYDOWN) // 发送消息框的Ctrl+V消息	
 	{
 		if ((wParam == 'V' || wParam == 'v') && ::GetKeyState(VK_CONTROL) < 0)
 		{
@@ -225,7 +230,6 @@ LRESULT CMainFrame::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 			{
 				if (m_pSendEdit != NULL && m_pSendEdit->IsFocused())
 				{
-
 					OnBtnSendMessage(msg);
 					return true;
 				}
@@ -240,6 +244,9 @@ LRESULT CMainFrame::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 			}
 
 		}
+
+
+
 	}
 
 
@@ -406,6 +413,12 @@ LRESULT CMainFrame::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
 			::ShowWindow(this->m_hWnd, SW_SHOW);
 	}
 	
+	else if (uMsg == WM_GET_CEF_FOCUS_MSG)
+	{
+		CControlUI *control = static_cast<CHorizontalLayoutUI*>(m_PaintManager.FindControl(_T("HorizontalLayoutUI_MiddleButtonBar")));
+		if (control != NULL)
+			control->SetFocus();
+	}
 
 
 
@@ -1358,7 +1371,7 @@ void CMainFrame::ReplaceFaceId(string &msg)
 
 void CMainFrame::OnBtnSendMessage(TNotifyUI& msg)
 {
-	char getInput[MAX_1024_LEN] = {0};
+	char getInput[MAX_1024_LEN*10] = {0};
 	string msgId = m_manager->GetMsgId();
 	string sendMsgData;
 	MSG_RECV_TYPE sendUserType;
@@ -1801,6 +1814,10 @@ void CMainFrame::RecvMsg(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, string msgId,
 
 		CefString strCode(msgContent), strUrl("");
 		m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->ExecuteJavaScript(strCode, strUrl, 0);
+
+		//m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->
+
+	//	m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->IsFocused();
 	}
 	//预知消息
 	else if (msgType == MSG_TYPE_PREV)
@@ -5385,7 +5402,7 @@ void CMainFrame::RecvQuickReply(string quickReply)
 	//解析xml
 	CMarkupXml   xml((char*)quickReply.c_str());
 	m_savedShortAnswer.clear();
-	ParseGroup(xml,id,curitemid);
+    ParseGroup(xml,id,curitemid);
 
 	InitRightTalkList();
 
@@ -5491,6 +5508,7 @@ int CMainFrame::ParseGroupItem(CMarkupXml &xml, KEYWORDGROUP_INFO *pKeyWordGroup
 
 		m_answerData.m_value.push_back(data);
 
+#if 0
 		KEYWORD_INFO *pKeyInfo = AddKeyWordInfo(itemid, 0, 0, pKeyWordGroupInfo->userid, pKeyWordGroupInfo->id, type, title, memo);
 		//		if( is_shortcut != 0)
 		if (strlen(shotkey) > 0)
@@ -5500,6 +5518,7 @@ int CMainFrame::ParseGroupItem(CMarkupXml &xml, KEYWORDGROUP_INFO *pKeyWordGroup
 			strncpy(shotkey, xml.GetChildAttrib("keyboard").c_str(), MAX_256_LEN);
 		//	ParseHotKeyString(shotkey, (BOOL&)pKeyInfo->ctrl, (BOOL&)pKeyInfo->alt, (BOOL&)pKeyInfo->shift, pKeyInfo->code);
 		}
+#endif
 		num++;
 	}
 

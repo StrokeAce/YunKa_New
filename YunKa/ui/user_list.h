@@ -364,8 +364,8 @@ public:
 		parent->add_child(node);
 
 		return node;
-	}
-
+	}    
+	   
 	void SelectNode(Node* node)
 	{
 		if (!node) node = _root;
