@@ -1,26 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Window size="1220,700" caption="0,0,0,36" roundcorner="4,4"  mininfo="1024,700" roundcorner="6,6">
-
-<!-- 字体定义 -->
-    <Font name="微软雅黑" size="13" bold="true" italic="false" />
-    <Font name="微软雅黑" size="12" bold="true" italic="false" />
-    <Font name="微软雅黑" size="12" bold="false" italic="false" />
-    <Font name="微软雅黑" size="14" bold="true" italic="false" />
-    <Font name="微软雅黑" size="22" bold="true" italic="true" />
-    <Font name="方正舒体" size="38" bold="true" />
-    <Font name="宋体" size="12" />
-    <Font name="宋体" size="18" bold="true" />
-    <Font name="宋体" size="20" bold="true" />
-    <Font name="宋体" size="20" bold="true" />
-    <Font name="方正舒体" size="50" bold="true" />
+<Window size="1220,700" caption="0,0,0,85" roundcorner="4,4"  mininfo="1024,700" roundcorner="6,6">
 
 
-	<!-- 缺省样式 -->
-    <Include source="Default.xml" />
-
+<!-- 缺省样式 -->
+<Include source="Default.xml" />
 
 <Container>
-
 
 <!-- 暂时屏蔽 背景设置 -->
 <!-- VerticalLayout inset="3,0,3,3"  bkimage="file='bg.png' corner='4,48,4,4' mask='#FFFF00FF'" -->
@@ -28,7 +13,7 @@
 <VerticalLayout name="VerticalLayoutUI_MainFrame"    inset="4,0,4,4" bkcolor="#FF60B1FE" bordercolor="#FF1B4876" bordersize="2" borderround="5,5">
 
 <!-- 窗口栏 -->
-<HorizontalLayout name="HorizontalLayoutUI_TopFrame"   height="40" inset="2,2,0,0"> 
+<HorizontalLayout name="HorizontalLayoutUI_TopFrame"   height="60" inset="2,2,0,0"> 
 	<Include source="top.xml" />		
 </HorizontalLayout>
 
@@ -39,17 +24,16 @@
 
 
 <!-- 管理按钮显示 -->
-<HorizontalLayout name="HorizontalLayoutUI_ManagerBar"   height="80" > 
-	<Include source="manager.xml" />		
-</HorizontalLayout>
+<!--HorizontalLayout name="HorizontalLayoutUI_ManagerBar"   height="80" --> 
+<!--Include source="manager.xml" /-->		
+<!--/HorizontalLayout-->
 
 <!-- 显示一栏 状态 -->
 <!-- HorizontalLayout height="20"  bkcolor="#FFEBF5FF" /--> 
-<HorizontalLayout height="20"  bkcolor="#FFD3E5F6" /> 
+<!--HorizontalLayout height="20"  bkcolor="#FFD3E5F6" /--> 
 
 		
 <HorizontalLayout>
-
 
 
 <!-- 左侧显示 数列表 -->
