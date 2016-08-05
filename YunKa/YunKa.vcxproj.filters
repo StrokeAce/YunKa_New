@@ -576,6 +576,9 @@
     <ClInclude Include="ui\show_big_image_dlg.h">
       <Filter>ui</Filter>
     </ClInclude>
+    <ClInclude Include="ui\system_settings.h">
+      <Filter>ui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -810,6 +813,9 @@
       <Filter>ui</Filter>
     </ClCompile>
     <ClCompile Include="ui\show_big_image_dlg.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\system_settings.cpp">
       <Filter>ui</Filter>
     </ClCompile>
   </ItemGroup>

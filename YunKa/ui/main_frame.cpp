@@ -2399,8 +2399,27 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 	//系统设置
 	else if (controlName == L"menu_sys_set")
 	{
+		//if (m_hSystemSettings == NULL)
+		{
+			m_hSystemSettings = new CSystemSettings();
+			m_hSystemSettings->Create(m_hWnd, _T(""), UI_WNDSTYLE_DIALOG, 0, 0, 0, 0, 0, NULL);
+			m_hSystemSettings->CenterWindow();
 
+			RECT sysRect;
+			GetWindowRect(m_hWnd, &sysRect);
 
+			int cx = 800;
+			int cy = 500;
+			int x = (sysRect.right - cx) / 2;
+			int y = (sysRect.bottom - cy) / 2;
+
+			::SetWindowPos((HWND)m_hSystemSettings, NULL, x, y, cx, cy, NULL);
+			::ShowWindow((HWND)m_hSystemSettings, SW_SHOW);
+		}
+		//else
+		{
+			//m_hSystemSettings->ShowWnd(SW_SHOW);
+		}
 	}
 
 	//退出

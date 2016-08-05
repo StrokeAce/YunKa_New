@@ -3,26 +3,17 @@
 
 <!-- 管理栏 -->
 
-<!--VerticalLayout  bkcolor="#FFF8F8F8"    -->  
+<!--VerticalLayout  bkcolor="#FFF8F8F8"  bkcolor="#FFF8F8F8  -->  
 
-<VerticalLayout  bkcolor="#FFF8F8F8"> 
-<HorizontalLayout > 
-	<VerticalLayout bkcolor="#FFF8F8F8"   width="40"  />
-
-         <VerticalLayout  bkcolor="#FFF8F8F8"   width="900" >
-
-<HorizontalLayout  height="10" />
-
-<HorizontalLayout  >
-<Include  source="managerbutton.xml" />
-
-</HorizontalLayout  >
-
+<VerticalLayout  bkcolor="#FF60B1FE"> 
+  <HorizontalLayout > 
+	  <VerticalLayout bkcolor="#FF60B1FE"   width="20"  />
+    <VerticalLayout  bkcolor="#FF60B1FE"   width="900" >
+      <HorizontalLayout  >
+        <Include  source="managerbutton.xml" />
+      </HorizontalLayout  >
+    </VerticalLayout>
+    <VerticalLayout />
+  </HorizontalLayout>				
 </VerticalLayout>
-
-	<VerticalLayout />
-</HorizontalLayout>
-				
-</VerticalLayout>
-
 </manager>

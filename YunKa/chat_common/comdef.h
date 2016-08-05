@@ -553,6 +553,7 @@
 #define MAX_FCT_LEN					1000		//发送的文件数据校验表的长度
 #define MAX_FDT_LEN					1000		//发送的文件数据没一个包的长度
 
+#define MAX_64_LEN			64
 #define MAX_128_LEN			128 
 #define MAX_256_LEN			256 
 #define MAX_512_LEN			512 

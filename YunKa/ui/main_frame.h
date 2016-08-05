@@ -14,6 +14,7 @@
 #include "face_sel_dlg.h"
 #include "user_list.h"
 #include "show_big_image_dlg.h"
+#include "system_settings.h"
 
 
 #define MID_MANAGER_BUTTON_NUM    15
@@ -413,6 +414,7 @@ private:
 	CUserObject *m_recvUserObj;
 
 	CShowBigImageDlg *pShowImgDlg;
+	CSystemSettings *m_hSystemSettings;
 	//CShowBigImageDlg m_pShowImgDlg;
 
 	bool   m_wndShow;
