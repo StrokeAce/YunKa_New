@@ -231,7 +231,7 @@ void CSelectOnlineUserWnd::OnItemClick(TNotifyUI &msg)
 	{
 		if (m_pOnlineUserList->GetItemIndex(msg.pSender) != -1)
 		{
-			if (_tcscmp(msg.pSender->GetClass(), _T("ListLabelElement")) == 0)
+			if (_tcscmp(msg.pSender->GetClass(), _T("ListLabelElementUI")) == 0)
 			{
 
 				UserListUI::Node* node = (UserListUI::Node*)msg.pSender->GetTag();

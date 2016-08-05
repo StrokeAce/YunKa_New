@@ -95,7 +95,7 @@ public:
 	bool Add(CControlUI* pControl)
 	{
 		if (!pControl) return false;
-		if (_tcscmp(pControl->GetClass(), _T("ListLabelElement")) != 0) return false;
+		if (_tcscmp(pControl->GetClass(), _T("ListLabelElementUI")) != 0) return false;
 
 		return CListUI::Add(pControl);
 	}
@@ -103,7 +103,7 @@ public:
 	bool AddAt(CControlUI* pControl, int iIndex)
 	{
 		if (!pControl) return false;
-		if (_tcscmp(pControl->GetClass(), _T("ListLabelElement")) != 0) return false;
+		if (_tcscmp(pControl->GetClass(), _T("ListLabelElementUI")) != 0) return false;
 
 		return CListUI::AddAt(pControl, iIndex);
 	}
@@ -111,7 +111,7 @@ public:
 	bool Remove(CControlUI* pControl)
 	{
 		if (!pControl) return false;
-		if (_tcscmp(pControl->GetClass(), _T("ListLabelElement")) != 0) return false;
+		if (_tcscmp(pControl->GetClass(), _T("ListLabelElementUI")) != 0) return false;
 
 		if (reinterpret_cast<Node*>(static_cast<CListLabelElementUI*>(pControl->GetInterface(_T("ListLabelElement")))->GetTag()) == NULL)
 			return CListUI::Remove(pControl);
@@ -123,7 +123,7 @@ public:
 	{
 		CControlUI* pControl = GetItemAt(iIndex);
 		if (!pControl) return false;
-		if (_tcscmp(pControl->GetClass(), _T("ListLabelElement")) != 0) return false;
+		if (_tcscmp(pControl->GetClass(), _T("ListLabelElementUI")) != 0) return false;
 
 		if (reinterpret_cast<Node*>(static_cast<CListLabelElementUI*>(pControl->GetInterface(_T("ListLabelElement")))->GetTag()) == NULL)
 			return CListUI::RemoveAt(iIndex);
@@ -523,7 +523,7 @@ public:
 		Node* end = node->get_last_child();
 		for (int i = begin->data()._pListElement->GetIndex(); i <= end->data()._pListElement->GetIndex(); ++i) {
 			CControlUI* control = GetItemAt(i);
-			if (_tcscmp(control->GetClass(), _T("ListLabelElement")) == 0) {
+			if (_tcscmp(control->GetClass(), _T("ListLabelElementUI")) == 0) {
 				Node* local_parent = ((UserListUI::Node*)control->GetTag())->parent();
 				control->SetInternVisible(local_parent->data()._expand && local_parent->data()._pListElement->IsVisible());
 			}

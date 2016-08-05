@@ -966,7 +966,7 @@ void CMainFrame::OnItemClick(TNotifyUI &msg)
 	{
 		if (pUserList->GetItemIndex(msg.pSender) != -1)
 		{
-			if (_tcscmp(msg.pSender->GetClass(), _T("CListLabelElementU")) == 0)
+			if (_tcscmp(msg.pSender->GetClass(), _T("ListLabelElementUI")) == 0)
 			{
 				//显示 rightoption 和中间的聊天界面
 				HideWebBrowser();
@@ -990,7 +990,7 @@ void CMainFrame::OnItemActive(TNotifyUI &msg)
 	//if (pUserList->GetItemIndex(msg.pSender) != -1)
 	if (msg.pSender->GetName() == _T("userlist"))
 	{
-		if (_tcscmp(msg.pSender->GetClass(), _T("ListLabelElement")) == 0) 
+		if (_tcscmp(msg.pSender->GetClass(), _T("ListLabelElementUI")) == 0) 
 		{
 			UserListUI::Node* node = (UserListUI::Node*)msg.pSender->GetTag();
 			pUserList->ExpandNode(node, !node->data()._expand);
@@ -1006,7 +1006,7 @@ void CMainFrame::OnItemActive(TNotifyUI &msg)
 
 	else if (msg.pSender->GetName() == _T("talklist"))
 	{
-		if (_tcscmp(msg.pSender->GetClass(), _T("ListLabelElement")) == 0)
+		if (_tcscmp(msg.pSender->GetClass(), _T("ListLabelElementUI")) == 0)
 		{
 			UserListUI::Node* node = (UserListUI::Node*)msg.pSender->GetTag();
 			m_pTalkList->ExpandNode(node, !node->data()._expand);
