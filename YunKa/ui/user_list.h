@@ -385,7 +385,9 @@ public:
 		//node->data()._pListElement->Select(true);
 
 		node->data()._pListElement->SetText(node->data()._html_text);
-		node->data()._pListElement->SetBkImage(pStrName);
+		//node->data()._pListElement->SetBkImage(pStrName);
+
+		node->data()._pListElement->SetBkColor(0xFFFFFFFF);
 		Invalidate();
 	}
 

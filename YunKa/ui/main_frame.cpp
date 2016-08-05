@@ -3302,9 +3302,15 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 			if (m_pManagerBtn[i].m_pManagerBtn == NULL)
 			{
 				m_pManagerBtn[i].m_pManagerBtn = static_cast<CButtonUI*>(m_PaintManager.FindControl(nameString));
-				StrCpyW(m_pManagerBtn[i].normalImage, m_pManagerBtn[i].m_pManagerBtn->GetNormalImage());
-				StrCpyW(m_pManagerBtn[i].hotImage, m_pManagerBtn[i].m_pManagerBtn->GetHotImage());
-				StrCpyW(m_pManagerBtn[i].pushedImage, m_pManagerBtn[i].m_pManagerBtn->GetPushedImage());
+				//StrCpyW(m_pManagerBtn[i].normalImage, m_pManagerBtn[i].m_pManagerBtn->GetNormalImage());
+				//StrCpyW(m_pManagerBtn[i].hotImage, m_pManagerBtn[i].m_pManagerBtn->GetHotImage());
+				//StrCpyW(m_pManagerBtn[i].pushedImage, m_pManagerBtn[i].m_pManagerBtn->GetPushedImage());
+
+
+
+				StrCpyW(m_pManagerBtn[i].normalImage, m_pManagerBtn[i].m_pManagerBtn->GetHotImage());
+				StrCpyW(m_pManagerBtn[i].hotImage, m_pManagerBtn[i].m_pManagerBtn->GetNormalImage());
+				StrCpyW(m_pManagerBtn[i].pushedImage, m_pManagerBtn[i].m_pManagerBtn->GetNormalImage());
 			}
 			//筛选访客按钮
 			if (i == 5 || i >= 8)
