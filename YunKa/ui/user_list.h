@@ -21,6 +21,7 @@ public:
 		CDuiString _text;
 		string     _sid;
 		CListLabelElementUI* _pListElement;
+		CDuiString _html_text;
 	};
 
 	class Node
@@ -94,7 +95,7 @@ public:
 	bool Add(CControlUI* pControl)
 	{
 		if (!pControl) return false;
-		if (_tcscmp(pControl->GetClass(), _T("ListLabelElementUI")) != 0) return false;
+		if (_tcscmp(pControl->GetClass(), _T("ListLabelElement")) != 0) return false;
 
 		return CListUI::Add(pControl);
 	}
@@ -102,7 +103,7 @@ public:
 	bool AddAt(CControlUI* pControl, int iIndex)
 	{
 		if (!pControl) return false;
-		if (_tcscmp(pControl->GetClass(), _T("ListLabelElementUI")) != 0) return false;
+		if (_tcscmp(pControl->GetClass(), _T("ListLabelElement")) != 0) return false;
 
 		return CListUI::AddAt(pControl, iIndex);
 	}
@@ -110,7 +111,7 @@ public:
 	bool Remove(CControlUI* pControl)
 	{
 		if (!pControl) return false;
-		if (_tcscmp(pControl->GetClass(), _T("ListLabelElementUI")) != 0) return false;
+		if (_tcscmp(pControl->GetClass(), _T("ListLabelElement")) != 0) return false;
 
 		if (reinterpret_cast<Node*>(static_cast<CListLabelElementUI*>(pControl->GetInterface(_T("ListLabelElement")))->GetTag()) == NULL)
 			return CListUI::Remove(pControl);
@@ -122,7 +123,7 @@ public:
 	{
 		CControlUI* pControl = GetItemAt(iIndex);
 		if (!pControl) return false;
-		if (_tcscmp(pControl->GetClass(), _T("ListLabelElementUI")) != 0) return false;
+		if (_tcscmp(pControl->GetClass(), _T("ListLabelElement")) != 0) return false;
 
 		if (reinterpret_cast<Node*>(static_cast<CListLabelElementUI*>(pControl->GetInterface(_T("ListLabelElement")))->GetTag()) == NULL)
 			return CListUI::RemoveAt(iIndex);
@@ -230,12 +231,11 @@ public:
 				pListElement->SetInternVisible(false);
 		}
 
-		CDuiString html_text;
+		CDuiString html_text = L"";
 		html_text += _T("<x 6>");
 		for (int i = 0; i < node->data()._level; ++i) {
 			html_text += _T("<x 24>");
 		}
-
 
 
 		if (m_listName == _T("talklist") || m_listName == _T("onlineSelectList"))
@@ -244,7 +244,6 @@ public:
 				if (node->data()._expand) html_text += _T("<a><i tree_expand.png 2 1></a>");
 				else html_text += _T("<a><i tree_expand.png 2 0></a>");
 			}
-
 		}
 
 		//if (node->data()._level < 3) {
@@ -263,6 +262,8 @@ public:
 		}
 
 		pListElement->SetName(m_listName.GetData());
+
+		node->data()._html_text = html_text;
 
 		int index = 0;
 		if (parent->has_children()) {
@@ -312,7 +313,7 @@ public:
 				pListElement->SetInternVisible(false);
 		}
 
-		CDuiString html_text;
+		CDuiString html_text = L"";
 		html_text += _T("<x 6>");
 		for (int i = 0; i < node->data()._level; ++i) {
 			html_text += _T("<x 24>");
@@ -337,7 +338,7 @@ public:
 			pListElement->SetFixedHeight(24);
 		else if (node->data()._level == 1) pListElement->SetFixedHeight(24);
 		pListElement->SetTag((UINT_PTR)node);
-		if (node->data()._level == 0) {
+		if ( node->data()._level == 0) {
 			//pListElement->SetBkImage(_T("file='tree_top.png' corner='2,1,2,1' fade='100'"));
 			pListElement->SetBkImage(m_listBKImage.GetData());
 		}
@@ -355,6 +356,10 @@ public:
 		}
 		*/
 
+		node->data()._html_text = html_text;
+
+		//CListUI::SetBkImage()
+
 		index = dex;
 		if (!CListUI::AddAt(pListElement, index)) {
 			delete pListElement;
@@ -371,6 +376,17 @@ public:
 		if (!node) node = _root;
 
 		node->data()._pListElement->Select(true);
+	}
+
+	void SetNodeHighlight(Node* node, LPCTSTR pStrName)
+	{
+		if (!node) node = _root;
+
+		//node->data()._pListElement->Select(true);
+
+		node->data()._pListElement->SetText(node->data()._html_text);
+		node->data()._pListElement->SetBkImage(pStrName);
+		Invalidate();
 	}
 
 	int GetNodeIndex( Node* node)
@@ -481,7 +497,7 @@ public:
 		if (node->data()._expand == expand) return;
 		node->data()._expand = expand;
 
-		CDuiString html_text;
+		CDuiString html_text = L"";
 		html_text += _T("<x 6>");
 		for (int i = 0; i < node->data()._level; ++i) {
 			html_text += _T("<x 24>");
@@ -505,7 +521,7 @@ public:
 		Node* end = node->get_last_child();
 		for (int i = begin->data()._pListElement->GetIndex(); i <= end->data()._pListElement->GetIndex(); ++i) {
 			CControlUI* control = GetItemAt(i);
-			if (_tcscmp(control->GetClass(), _T("ListLabelElementUI")) == 0) {
+			if (_tcscmp(control->GetClass(), _T("ListLabelElement")) == 0) {
 				Node* local_parent = ((UserListUI::Node*)control->GetTag())->parent();
 				control->SetInternVisible(local_parent->data()._expand && local_parent->data()._pListElement->IsVisible());
 			}
