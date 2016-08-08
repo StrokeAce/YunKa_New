@@ -17,7 +17,7 @@
 #include "system_settings.h"
 
 
-#define MID_MANAGER_BUTTON_NUM    15
+#define MID_MANAGER_BUTTON_NUM    8
 #define MAX_PATH_LENGTH           512
 
 
@@ -355,6 +355,7 @@ public:
 	string		m_audioPath;			// 正在录音文件的路径
 	bool		m_bRecording;			// 正在录音
 
+	CDuiString m_defalutButtonImage;
 
 private:
 

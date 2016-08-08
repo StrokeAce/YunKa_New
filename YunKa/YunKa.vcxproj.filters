@@ -13,9 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="auth">
-      <UniqueIdentifier>{7592c42d-ced0-400c-a42e-ba9db551424a}</UniqueIdentifier>
-    </Filter>
     <Filter Include="cef_browser">
       <UniqueIdentifier>{2499800e-9351-433a-bf38-04e7545f2080}</UniqueIdentifier>
     </Filter>
@@ -54,6 +51,9 @@
     </Filter>
     <Filter Include="openssl">
       <UniqueIdentifier>{466fe7ab-9dc3-491e-8211-b3b15ba04e15}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cef_browser\auth">
+      <UniqueIdentifier>{7592c42d-ced0-400c-a42e-ba9db551424a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -121,13 +121,13 @@
       <Filter>timer</Filter>
     </ClInclude>
     <ClInclude Include="auth\sockbase.h">
-      <Filter>auth</Filter>
+      <Filter>cef_browser\auth</Filter>
     </ClInclude>
     <ClInclude Include="auth\http_parse.h">
-      <Filter>auth</Filter>
+      <Filter>cef_browser\auth</Filter>
     </ClInclude>
     <ClInclude Include="auth\auth_error.h">
-      <Filter>auth</Filter>
+      <Filter>cef_browser\auth</Filter>
     </ClInclude>
     <ClInclude Include="md5\md5.h">
       <Filter>md5</Filter>
@@ -139,7 +139,7 @@
       <Filter>log</Filter>
     </ClInclude>
     <ClInclude Include="auth\auth_client.h">
-      <Filter>auth</Filter>
+      <Filter>cef_browser\auth</Filter>
     </ClInclude>
     <ClInclude Include="chat_manager\chat_manager.h">
       <Filter>chat_manager</Filter>
@@ -597,13 +597,13 @@
       <Filter>log</Filter>
     </ClCompile>
     <ClCompile Include="auth\auth_client.cpp">
-      <Filter>auth</Filter>
+      <Filter>cef_browser\auth</Filter>
     </ClCompile>
     <ClCompile Include="auth\http_parse.cpp">
-      <Filter>auth</Filter>
+      <Filter>cef_browser\auth</Filter>
     </ClCompile>
     <ClCompile Include="auth\sockbase.cpp">
-      <Filter>auth</Filter>
+      <Filter>cef_browser\auth</Filter>
     </ClCompile>
     <ClCompile Include="cef_browser\binding_test.cpp">
       <Filter>cef_browser</Filter>

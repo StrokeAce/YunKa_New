@@ -61,6 +61,7 @@ CMainFrame::CMainFrame(CChatManager* manager) :m_manager(manager)
 
 	pShowImgDlg = NULL;
 	m_wndShow = 0;
+	m_defalutButtonImage = L"";
 
 }
 
@@ -461,6 +462,7 @@ void CMainFrame::Notify(TNotifyUI& msg)
 	else if (_tcsicmp(msg.sType, DUI_MSGTYPE_CLICK) == 0)
 	{
 		OnClick(msg);
+		OnSelectChanged(msg);
 	}
 
 	else if (_tcsicmp(msg.sType, DUI_MSGTYPE_TIMER) == 0)
@@ -469,7 +471,7 @@ void CMainFrame::Notify(TNotifyUI& msg)
 	}
 	else if (_tcsicmp(msg.sType, DUI_MSGTYPE_SELECTCHANGED) == 0)
 	{
-		OnSelectChanged(msg);
+
 	}
 
 	else if (_tcsicmp(msg.sType, DUI_MSGTYPE_ITEMACTIVATE) == 0)
@@ -772,6 +774,15 @@ void CMainFrame::OnPrepare(TNotifyUI& msg)
 	m_pRightCommonTypeEdit = static_cast<CEditUI*>(m_PaintManager.FindControl(_T("edit_right_type_2")));
 	m_pRightCommonFindEdit = static_cast<CEditUI*>(m_PaintManager.FindControl(_T("edit_right_type_3")));
 
+	CButtonUI* pButton = static_cast<CButtonUI*>(m_PaintManager.FindControl(_T("option_button_1")));
+	if (pButton != NULL)
+	{
+		if (m_defalutButtonImage.IsEmpty())
+			m_defalutButtonImage = pButton->GetNormalImage();
+
+		pButton->SetNormalImage(pButton->GetFocusedImage());
+	}
+
 	MoveAndRestoreRightFrameControl(1);
 		
 	//上层管理按钮 设置初始状态
@@ -926,8 +937,6 @@ void CMainFrame::OnSelectChanged(TNotifyUI &msg)
 {
 	WCHAR OptionBtnName[32] = { 0 };
 
-
-
 	CTabLayoutUI* pTabControl = static_cast<CTabLayoutUI*>(m_PaintManager.FindControl(_T("right_tab")));
 	//操作tab
 	if (pTabControl != NULL)
@@ -941,11 +950,19 @@ void CMainFrame::OnSelectChanged(TNotifyUI &msg)
 
 			if (_tcsicmp(msg.pSender->GetName(), OptionBtnName) == 0)
 			{
+
+				
+
 				if (pTabControl && pTabControl->GetCurSel() != i)
 				{
 					pTabControl->SelectItem(i);
 					m_curSelectOptionBtn = i;
 					ShowRightOptionFrameView(m_curSelectId, m_curSavedSid);
+
+					CButtonUI* pButton = static_cast<CButtonUI*>(m_PaintManager.FindControl(OptionBtnName));
+					if (pButton != NULL)
+						pButton->SetNormalImage(pButton->GetFocusedImage());
+					
 					break;
 				}
 			}
@@ -953,6 +970,20 @@ void CMainFrame::OnSelectChanged(TNotifyUI &msg)
 	}
 
 
+
+	for (int i = 0; i < 7; i++)
+	{
+		swprintf_s(OptionBtnName, _T("option_button_%d"), i + 1);
+		CButtonUI* pButton = static_cast<CButtonUI*>(m_PaintManager.FindControl(OptionBtnName));
+		if (pButton != NULL)
+		{
+			if (m_curSelectOptionBtn != i)
+			{
+				if (!m_defalutButtonImage.IsEmpty())
+				    pButton->SetNormalImage(m_defalutButtonImage);
+			}
+		}
+	}
 
 
 }
@@ -3320,26 +3351,29 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 			nameString.Format(_T("managerbutton_%d"), i + 1);
 			if (m_pManagerBtn[i].m_pManagerBtn == NULL)
 			{
-				m_pManagerBtn[i].m_pManagerBtn = static_cast<CButtonUI*>(m_PaintManager.FindControl(nameString));
-				//StrCpyW(m_pManagerBtn[i].normalImage, m_pManagerBtn[i].m_pManagerBtn->GetNormalImage());
-				//StrCpyW(m_pManagerBtn[i].hotImage, m_pManagerBtn[i].m_pManagerBtn->GetHotImage());
-				//StrCpyW(m_pManagerBtn[i].pushedImage, m_pManagerBtn[i].m_pManagerBtn->GetPushedImage());
+
+					m_pManagerBtn[i].m_pManagerBtn = static_cast<CButtonUI*>(m_PaintManager.FindControl(nameString));
+					StrCpyW(m_pManagerBtn[i].normalImage, m_pManagerBtn[i].m_pManagerBtn->GetNormalImage());
+					StrCpyW(m_pManagerBtn[i].hotImage, m_pManagerBtn[i].m_pManagerBtn->GetHotImage());
+					StrCpyW(m_pManagerBtn[i].pushedImage, m_pManagerBtn[i].m_pManagerBtn->GetPushedImage());
+				
+		
 
 
 
-				StrCpyW(m_pManagerBtn[i].normalImage, m_pManagerBtn[i].m_pManagerBtn->GetHotImage());
-				StrCpyW(m_pManagerBtn[i].hotImage, m_pManagerBtn[i].m_pManagerBtn->GetNormalImage());
-				StrCpyW(m_pManagerBtn[i].pushedImage, m_pManagerBtn[i].m_pManagerBtn->GetNormalImage());
+				//StrCpyW(m_pManagerBtn[i].normalImage, m_pManagerBtn[i].m_pManagerBtn->GetHotImage());
+				//StrCpyW(m_pManagerBtn[i].hotImage, m_pManagerBtn[i].m_pManagerBtn->GetNormalImage());
+				//StrCpyW(m_pManagerBtn[i].pushedImage, m_pManagerBtn[i].m_pManagerBtn->GetNormalImage());
 			}
 			//筛选访客按钮
-			if (i == 5 || i >= 8)
-			{
-				SetManagerButtonState(i,1);
-			}
-			else
-			{
-				SetManagerButtonState(i, 0);
-			}
+			//if (i == 3 || i >= 6)
+			//{
+			//	SetManagerButtonState(i,1);
+			//}
+			//else
+			//{
+			//	SetManagerButtonState(i, 0);
+			//}
 		}
 		return;
 	}
@@ -3355,14 +3389,14 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 
 		for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
 		{
-			if (i == 1 || i == 2|| i == 6 || i == 7)
-			{
-				SetManagerButtonState(i, 0);
-			}
-			else
-			{
+			//if (i == 1 || i == 2|| i == 4 || i == 5)
+			//{
+			//	SetManagerButtonState(i, 0);
+			//}
+			//else
+			//{
 				SetManagerButtonState(i, 1);
-			}
+			//}
 		}
 	}
 	else
@@ -3373,27 +3407,27 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 		case VISITOR_REQ_ING:
 			for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
 			{
-				if (i == 1 || i == 2 || i == 6 || i == 7)
-				{
-					SetManagerButtonState(i, 0);
-				}
-				else
-				{
-					SetManagerButtonState(i, 1);
-				}
+				//if (i == 1 || i == 2 || i == 4 || i == 5)
+				//{
+				//	SetManagerButtonState(i, 0);
+				//}
+				//else
+				//{
+				SetManagerButtonState(i, 1);
+				//}
 			}
 			break;
 		case VISITOR_TALKING_MYSELF:
 			for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
 			{
-				if (i == 0)
-				{
-					SetManagerButtonState(i, 0);
-				}
-				else
-				{
+				//if (i == 0)
+				//{
+				////	SetManagerButtonState(i, 0);
+				//}
+				//else
+				//{
 					SetManagerButtonState(i, 1);
-				}
+				//}
 			}
 
 			break;
@@ -3403,14 +3437,14 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 		case VISITOR_TALKING_HELP_OTHER:
 			for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
 			{
-				if (i==0||i == 1 || i == 2 || i == 6 || i == 7)
-				{
-					SetManagerButtonState(i, 0);
-				}
-				else
-				{
+				//if (i==0||i == 1 || i == 2 || i == 4 || i == 5)
+				//{
+				//	SetManagerButtonState(i, 0);
+				//}
+				//else
+				//{
 					SetManagerButtonState(i, 1);
-				}
+				//}
 			}
 			break;
 
@@ -3419,28 +3453,28 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 
 			for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
 			{
-				if ( i == 1 || i == 2 || i == 6 || i == 7)
-				{
-					SetManagerButtonState(i, 0);
-				}
-				else
-				{
+				//if ( i == 1 || i == 2 || i == 4 || i == 5)
+				//{
+				//	SetManagerButtonState(i, 0);
+				///}
+				//else
+				//{
 					SetManagerButtonState(i, 1);
-				}
+				//}
 			}
 			break;
 
 		case VISITOR_IN_TALK_ING:
 			for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
 			{
-				if (i == 5 || i >= 8)
-				{
+				///if (i == 3 || i >= 6)
+				//{
+				//	SetManagerButtonState(i, 1);
+				//}
+				//else
+				//{
 					SetManagerButtonState(i, 1);
-				}
-				else
-				{
-					SetManagerButtonState(i, 0);
-				}
+				//}
 			}
 			break;
 
@@ -3451,14 +3485,14 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 
 			for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
 			{
-				if (i == 0 || i == 1 || i == 2 || i == 6 || i == 7)
-				{
-					SetManagerButtonState(i, 0);
-				}
-				else
-				{
+				//if (i == 0 || i == 1 || i == 2 || i == 4 || i == 5)
+				//{
+				//	SetManagerButtonState(i, 0);
+				//}
+				//else
+				//{
 					SetManagerButtonState(i, 1);
-				}
+				//}
 			}
 
 			break;
@@ -3467,14 +3501,14 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 
 			for (int i = 0; i < MID_MANAGER_BUTTON_NUM; i++)
 			{
-				if (i == 5 || i >= 8)
-				{
-					SetManagerButtonState(i, 1);
-				}
-				else
-				{
-					SetManagerButtonState(i, 0);
-				}
+				//if (i == 3 || i >= 6)
+				//{
+				//	SetManagerButtonState(i, 1);
+				//}
+				//else
+				//{
+				//	SetManagerButtonState(i, 0);
+				//}
 			}
 			break;
 		}
@@ -5342,10 +5376,15 @@ void CMainFrame::SetManagerButtonState(int i,int type)
 	}
 	else
 	{
-		m_pManagerBtn[i].m_pManagerBtn->SetNormalImage(m_pManagerBtn[i].pushedImage);
-		m_pManagerBtn[i].m_pManagerBtn->SetHotImage(m_pManagerBtn[i].hotImage);
-		m_pManagerBtn[i].m_pManagerBtn->SetPushedImage(m_pManagerBtn[i].hotImage);
-		m_pManagerBtn[i].m_buttonState = 1;
+	
+
+			m_pManagerBtn[i].m_pManagerBtn->SetNormalImage(m_pManagerBtn[i].pushedImage);
+			m_pManagerBtn[i].m_pManagerBtn->SetHotImage(m_pManagerBtn[i].hotImage);
+			m_pManagerBtn[i].m_pManagerBtn->SetPushedImage(m_pManagerBtn[i].hotImage);
+			m_pManagerBtn[i].m_buttonState = 1;
+		
+
+	
 	}
 
 }
