@@ -7,7 +7,7 @@
 
 <VerticalLayout  bkcolor="#FF60B1FE"> 
   <HorizontalLayout > 
-	  <VerticalLayout bkcolor="#FF60B1FE"   width="20"  />
+	  <VerticalLayout bkcolor="#FF60B1FE"   width="40"  />
     <VerticalLayout  bkcolor="#FF60B1FE"   width="900" >
       <HorizontalLayout  >
         <Include  source="managerbutton.xml" />
