@@ -3831,8 +3831,9 @@ void CMainFrame::RecvWebUserInfo(CWebUserObject* pWebUser, WEBUSER_INFO_NOTIFY_T
 	pUserList->ExpandNode(AddFatherNode, true);
 	if (fatherType == 1)
 	    m_waitVizitorMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, addNode));
+	else
+		m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, addNode));
 
-	m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(pWebUser->webuserid, addNode));
 	m_allVisitorUserMap.insert(pair<unsigned long, unsigned long>(pWebUser->webuserid, fatherId));
 
 
@@ -3990,21 +3991,24 @@ void CMainFrame::RecvOnlineUsers(CGroupObject* pGroup)
 		CUserObject	*pUser = m_manager->GetUserObjectByUid(m_selectUserId);
 		CWebUserObject *pWebUser = m_manager->GetWebUserObjectByUid(m_curSelectId);
 
-		if (m_topWndType == 1)  //转接 
+		if (m_topWndType == 1 )  //转接 
 		{
-			if (m_curSelectId > 0)
+			if (m_curSelectId > 0 && m_selectUserId>0)
 			{
-				if (pUser != NULL && pWebUser != NULL)
-				    m_manager->SendTo_TransferRequestUser(pWebUser, 0);
+				if (pWebUser != NULL)
+					m_manager->SendTo_TransferRequestUser(pWebUser, m_selectUserId);
 			}
 		}
-		else if (m_topWndType == 2)  //邀请协助
+		else if (m_topWndType == 2 )  // 协助
 		{
-			if (pUser != NULL && pWebUser != NULL)
-				m_manager->SendTo_InviteUser(pWebUser, 0);
+			if (pWebUser != NULL && (m_curSelectId > 0 && m_selectUserId>0))
+				m_manager->SendTo_InviteUser(pWebUser, m_selectUserId);
 		}
-		else if (m_topWndType == 3)  //内部对话
+		else if (m_topWndType == 3 )  //内部对话
 		{
+			if (m_selectUserId <= 0)
+				return;
+
 			if (pUser == NULL)
 			{
 				list<CGroupObject *>::iterator iter = pGroup->m_ListGroupInfo.begin();
@@ -4025,6 +4029,9 @@ void CMainFrame::RecvOnlineUsers(CGroupObject* pGroup)
 					}
 				}
 			}
+
+			if (pUser == NULL)
+				return;
 
 			if (pUser->m_bFriend)
 			{
@@ -4142,7 +4149,8 @@ void CMainFrame::RecvUserInfo(CUserObject* pWebUser)
 
 		//获取会话消息
 		m_manager->SendTo_GetListChatInfo();
-		m_manager->StartLoginVisitor();	}
+		m_manager->StartLoginVisitor();	
+	}
 
 
 }
@@ -4481,21 +4489,20 @@ void CMainFrame::RecvReleaseChat(CWebUserObject* pWebUser)
 
 	map<unsigned long, UserListUI::Node*>::iterator iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
 	//没有找到
-	if (iter == m_allVisitorNodeMap.end())
+	if (iter != m_allVisitorNodeMap.end())
 	{
-		return;
+
+		tempNode = iter->second;
+		m_allVisitorNodeMap.erase(iter);
+
+		if (tempNode != NULL && tempNode->data()._level >= 0 && tempNode->data()._level <= 5)
+		{
+			//从坐席列表底下删除 然后加入等待列表
+			pUserList->RemoveNode(tempNode);
+		}
+
 	}
-	tempNode = iter->second;
-
-
-	m_allVisitorNodeMap.erase(iter);
-
-	if (tempNode != NULL && tempNode->data()._level >= 0 && tempNode->data()._level <= 5)
-	{
-		//从坐席列表底下删除 然后加入等待列表
-		pUserList->RemoveNode(tempNode);
-	}
-
+	
 
 	CWebUserObject *webuser = pWebUser;
 	webuser->onlineinfo.talkstatus = TALK_STATUS_REQUEST;
@@ -4518,6 +4525,12 @@ void CMainFrame::RecvInviteUser(CWebUserObject* pWebUser, CUserObject* pUser)
 {
 	//CUserObject	*pUser = m_manager->GetUserObjectByUid(9692111);
 	//CWebUserObject *pWebUser = m_manager->GetWebUserObjectByUid(m_curSelectId);
+	CDuiString text = L"";
+	unsigned long id = 0;
+	string sid;
+	WCHAR name[64] = { 0 };
+	ANSIToUnicode(pWebUser->info.name, name);
+
 
 	if (pUser == NULL || pWebUser == NULL)
 		return;
@@ -4525,8 +4538,6 @@ void CMainFrame::RecvInviteUser(CWebUserObject* pWebUser, CUserObject* pUser)
 	m_recvUserObj = pUser;
 
 	int type = -1;
-
-
 
 	//放入邀请列表
 	//
@@ -4546,28 +4557,35 @@ void CMainFrame::RecvInviteUser(CWebUserObject* pWebUser, CUserObject* pUser)
 
 	map<unsigned long, UserListUI::Node*>::iterator iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
 	//没有找到
-	if (iter == m_allVisitorNodeMap.end())
+	if (iter != m_allVisitorNodeMap.end())
 	{
-		return;
-	}
+		UserListUI::Node *tempNode = iter->second;
+		if (tempNode != NULL)
+		{
+			text = tempNode->data()._text;
+			id = tempNode->data()._uid;
+			sid = tempNode->data()._sid;
 
-	UserListUI::Node *tempNode = iter->second;
-	CDuiString text = L"";
-	unsigned long id = 0;
-	string sid;
-	if (tempNode != NULL)
+		}
+
+		//先在用户的对话列表中删除 
+		if (tempNode != NULL && tempNode->data()._level >= 0 && tempNode->data()._level <= 5)
+			pUserList->RemoveNode(tempNode);
+		m_allVisitorNodeMap.erase(iter);
+	}
+	else
 	{
-		text = tempNode->data()._text;
-		id = tempNode->data()._uid;
-		sid = tempNode->data()._sid;
-
+		if (pWebUser->m_bIsFrWX)
+		{
+			text.Format(_T("{x 4}{i user_wx.png 1 0}{x 4}%s"), name);
+		}
+		else
+		{
+			text.Format(_T("{x 4}{i user_web.png 1 0}{x 4}%s"), name);
+		}
+		id = pWebUser->webuserid;
+		sid = pWebUser->info.sid;
 	}
-
-	//先在用户的对话列表中删除 
-	if (tempNode != NULL && tempNode->data()._level >= 0 && tempNode->data()._level <= 5)
-		pUserList->RemoveNode(tempNode);
-	m_allVisitorNodeMap.erase(iter);
-
 
 	//然后显示 在邀请列表中
 	UserListUI::Node* ChildNode = pMySelfeNode->child(2);
@@ -4657,6 +4675,11 @@ void CMainFrame::ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, 
 //邀请  转接的 回调函数
 void CMainFrame::RecvTransferUser(CWebUserObject* pWebUser, CUserObject* pUser)
 {
+	CDuiString text = L"";
+	unsigned long id = 0;
+	string sid;
+	WCHAR name[64] = { 0 };
+	ANSIToUnicode(pWebUser->info.name, name);
 
 	int type = -1;
 
@@ -4681,32 +4704,41 @@ void CMainFrame::RecvTransferUser(CWebUserObject* pWebUser, CUserObject* pUser)
 
 	map<unsigned long, UserListUI::Node*>::iterator iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
 	//没有找到
-	if (iter == m_allVisitorNodeMap.end())
+	if (iter != m_allVisitorNodeMap.end())
 	{
-		return;
-	}
+		UserListUI::Node *tempNode = iter->second;
 
-	UserListUI::Node *tempNode = iter->second;
-	CDuiString text = L"";
-	unsigned long id = 0;
-	string sid;
-	if (tempNode != NULL)
+		if (tempNode != NULL)
+		{
+			text = tempNode->data()._text;
+			id = tempNode->data()._uid;
+			sid = tempNode->data()._sid;
+		}
+
+		//先在用户的对话列表中删除 
+		if (tempNode != NULL && tempNode->data()._level >= 0 && tempNode->data()._level <= 5)
+			pUserList->RemoveNode(tempNode);
+
+		m_allVisitorNodeMap.erase(iter);
+
+	}
+	else
 	{
-		text = tempNode->data()._text;
-		id = tempNode->data()._uid;
-		sid = tempNode->data()._sid;
+
+		if (pWebUser->m_bIsFrWX)
+		{
+			text.Format(_T("{x 4}{i user_wx.png 1 0}{x 4}%s"), name);
+		}
+		else
+		{
+			text.Format(_T("{x 4}{i user_web.png 1 0}{x 4}%s"), name);
+		}
+		id = pWebUser->webuserid;
+		sid = pWebUser->info.sid;
 	}
-
-	//先在用户的对话列表中删除 
-	if (tempNode != NULL && tempNode->data()._level >= 0 && tempNode->data()._level <= 5)
-		pUserList->RemoveNode(tempNode);
-
-	m_allVisitorNodeMap.erase(iter);
-
 
 	//然后显示 在转接列表中
 	UserListUI::Node* ChildNode = pMySelfeNode->child(1);
-
 
 	UserListUI::Node*currentNode = pUserList->AddNode(text, id,sid, ChildNode);
 
