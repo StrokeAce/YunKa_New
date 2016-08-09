@@ -3882,12 +3882,10 @@ void CMainFrame::OnActiveUser(unsigned long id,string sid)
 	}
 	if (type == 0)
 	{
-		CUserObject	*pUser = m_recvUserObj;
-
-		if (pUser == NULL || pWebUser == NULL)
+		if (pWebUser == NULL)
 			return;
 
-		m_manager->SendTo_InviteUserResult(pWebUser, pUser, true);
+		m_manager->SendTo_InviteUserResult(pWebUser, m_recvUserObj, true);
 		//然后加到对话中 
 		map<unsigned long, UserListUI::Node*>::iterator iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
 		//没有找到
@@ -3925,7 +3923,7 @@ void CMainFrame::OnActiveUser(unsigned long id,string sid)
 		//if (pUser == NULL || pWebUser == NULL)
 		//	return;
 
-		m_manager->SendTo_TransferUserResult(pWebUser, NULL, true);
+		m_manager->SendTo_TransferUserResult(pWebUser, true);
 		//然后加到对话中 
 		map<unsigned long, UserListUI::Node*>::iterator iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
 		//没有找到
@@ -4521,7 +4519,7 @@ void CMainFrame::RecvReleaseChat(CWebUserObject* pWebUser)
 
 
 //收到邀请协助的 申请  邀请协助的 回调函数
-void CMainFrame::RecvInviteUser(CWebUserObject* pWebUser, CUserObject* pUser)
+void CMainFrame::RecvInviteUser(CWebUserObject* pWebUser, unsigned long uid)
 {
 	//CUserObject	*pUser = m_manager->GetUserObjectByUid(9692111);
 	//CWebUserObject *pWebUser = m_manager->GetWebUserObjectByUid(m_curSelectId);
@@ -4531,11 +4529,10 @@ void CMainFrame::RecvInviteUser(CWebUserObject* pWebUser, CUserObject* pUser)
 	WCHAR name[64] = { 0 };
 	ANSIToUnicode(pWebUser->info.name, name);
 
-
-	if (pUser == NULL || pWebUser == NULL)
+	if (pWebUser == NULL)
 		return;
 
-	m_recvUserObj = pUser;
+	m_recvUserObj = uid;
 
 	int type = -1;
 
@@ -4609,7 +4606,7 @@ void CMainFrame::RecvInviteUser(CWebUserObject* pWebUser, CUserObject* pUser)
 
 //邀请协助 做的最后一次 回调
 
-void CMainFrame::ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, RESULT_STATUS status)
+void CMainFrame::ResultInviteUser(CWebUserObject* pWebUser, unsigned long uid, RESULT_STATUS status)
 {
 	map<unsigned long, UserListUI::Node*>::iterator iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
 	//没有找到
@@ -4673,7 +4670,7 @@ void CMainFrame::ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, 
 
 
 //邀请  转接的 回调函数
-void CMainFrame::RecvTransferUser(CWebUserObject* pWebUser, CUserObject* pUser)
+void CMainFrame::RecvTransferUser(CWebUserObject* pWebUser)
 {
 	CDuiString text = L"";
 	unsigned long id = 0;
@@ -4683,7 +4680,7 @@ void CMainFrame::RecvTransferUser(CWebUserObject* pWebUser, CUserObject* pUser)
 
 	int type = -1;
 
-	if (pUser == NULL || pWebUser == NULL)
+	if (pWebUser == NULL)
 		return;
 
 	//放入转接列表
@@ -5390,12 +5387,11 @@ void CMainFrame::RefuseChat()
 				break;
 
 			case TALK_STATUS_TRANSFER:
-				m_manager->SendTo_TransferUserResult(pWebUser, NULL, false);
+				m_manager->SendTo_TransferUserResult(pWebUser, false);
 				break;
 
 			case TALK_STATUS_INVITE:
-				pUser = m_recvUserObj;
-				m_manager->SendTo_InviteUserResult(pWebUser, pUser, false);
+				m_manager->SendTo_InviteUserResult(pWebUser, m_recvUserObj, false);
 				break;
 
 

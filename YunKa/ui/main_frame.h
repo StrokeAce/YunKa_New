@@ -201,11 +201,11 @@ public:    //主界面消息回调
 
 	virtual void ResultScreenCapture(string imagePath);
 
-	virtual void RecvInviteUser(CWebUserObject* pWebUser, CUserObject* pUser);
+	virtual void RecvInviteUser(CWebUserObject* pWebUser, unsigned long uid);
 
-	virtual void ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, RESULT_STATUS status);
+	virtual void ResultInviteUser(CWebUserObject* pWebUser, unsigned long uid, RESULT_STATUS status);
 
-	virtual void RecvTransferUser(CWebUserObject* pWebUser, CUserObject* pUser);
+	virtual void RecvTransferUser(CWebUserObject* pWebUser);
 
 	virtual void ResultTransferUser(CWebUserObject* pWebUser, CUserObject* pUser, RESULT_STATUS status);
 
@@ -412,7 +412,7 @@ private:
 	UserListUI::Node*  m_curClickItemNode;
 	string m_curSavedSid;
 	unsigned long m_savedClickId;
-	CUserObject *m_recvUserObj;
+	unsigned long m_recvUserObj;
 
 	CShowBigImageDlg *pShowImgDlg;
 	CSystemSettings *m_hSystemSettings;

@@ -1505,7 +1505,7 @@ int CChatManager::RecvFloatChatInfo(PACK_HEADER packhead, char *pRecvBuff, int l
 			pUser = GetUserObjectByUid(m_nNextInviteUid);
 			m_nNextInviteWebuserUid = 0;
 			m_nNextInviteUid = 0;
-			m_handlerMsgs->RecvInviteUser(pWebUser, pUser);
+			m_handlerMsgs->RecvInviteUser(pWebUser, m_nNextInviteUid);
 
 			char msg[MAX_256_LEN];
 			GetInviteChatSysMsg(msg, pUser, pWebUser, INVITE_HELP, &m_userInfo);
@@ -1596,7 +1596,7 @@ int CChatManager::RecvFloatChatInfo(PACK_HEADER packhead, char *pRecvBuff, int l
 				AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL,
 					MSG_DATA_TYPE_TEXT,	msg, 0, NULL, NULL);
 
-				m_handlerMsgs->RecvTransferUser(pWebUser,pAcceptUser);
+				m_handlerMsgs->RecvTransferUser(pWebUser);
 			}
 		}
 	}
@@ -1998,7 +1998,7 @@ int CChatManager::RecvFloatTransQuest(PACK_HEADER packhead, char *pRecvBuff, int
 		AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL, 
 			MSG_DATA_TYPE_TEXT,	msg, 0, NULL, NULL);
 		
-		m_handlerMsgs->RecvTransferUser(pWebUser, pAcceptUser);
+		m_handlerMsgs->RecvTransferUser(pWebUser);
 	}
 	if (packhead.uin == m_userInfo.UserInfo.uid)//当前坐席是发起转接者
 	{
@@ -2121,7 +2121,7 @@ int CChatManager::RecvInviteRequest(PACK_HEADER packhead, char *pRecvBuff, int l
 
 	if (RecvInfo.uInviteUser == m_userInfo.UserInfo.uid)
 	{
-		// 被别的客服邀请
+		// 自己被别人邀请
 		pWebUser->onlineinfo.talkstatus = TALK_STATUS_INVITE;
 		pWebUser->inviteuid = m_userInfo.UserInfo.uid;
 		if (!pWebUser->m_bNewComm)
@@ -2134,7 +2134,7 @@ int CChatManager::RecvInviteRequest(PACK_HEADER packhead, char *pRecvBuff, int l
 		GetInviteChatSysMsg(msg, pInviteUser, pWebUser, INVITE_HELP, pAcceptUser);
 		AddMsgToList(pWebUser, MSG_FROM_SYS, MSG_RECV_WEB, GetMsgId(), MSG_TYPE_NORMAL,
 			MSG_DATA_TYPE_TEXT, msg, 0, NULL, NULL);
-		m_handlerMsgs->RecvInviteUser(pWebUser, pInviteUser);
+		m_handlerMsgs->RecvInviteUser(pWebUser, packhead.uin);
 
 		char alertMsg[MAX_64_LEN];
 		sprintf(alertMsg, "收到会话协助请求");
@@ -2211,7 +2211,7 @@ int CChatManager::RecvInviteResult(PACK_HEADER packhead, char *pRecvBuff, int le
 				pWebUser->cTalkedSatus = HASTALKED;
 			}
 		}
-		m_handlerMsgs->ResultInviteUser(pWebUser, pAcceptUser, INVITE_REFUSE);
+		m_handlerMsgs->ResultInviteUser(pWebUser, packhead.uin, INVITE_REFUSE);
 		goto RETURN;
 	}
 	else//接受
@@ -2227,7 +2227,7 @@ int CChatManager::RecvInviteResult(PACK_HEADER packhead, char *pRecvBuff, int le
 		}
 
 		pWebUser->AddCommonTalkId(packhead.uin);
-		m_handlerMsgs->ResultInviteUser(pWebUser, pAcceptUser, INVITE_ACCEPT);
+		m_handlerMsgs->ResultInviteUser(pWebUser, packhead.uin, INVITE_ACCEPT);
 	}
 
 	//这里要考虑如何显示
@@ -3339,7 +3339,7 @@ void CChatManager::RecvComSendWorkBillMsg(unsigned long senduid, unsigned long r
 				sprintf(msg, "访客 %s 转移到 %s", pWebUser->info.name, m_userInfo.UserInfo.nickname);
 				AddMsgToList(pWebUser, MSG_FROM_SYS, MSG_RECV_WEB, GetMsgId(), MSG_TYPE_NORMAL,
 					MSG_DATA_TYPE_TEXT, msg, 0, NULL, NULL);
-				m_handlerMsgs->RecvTransferUser(pWebUser, &m_userInfo);
+				m_handlerMsgs->RecvTransferUser(pWebUser);
 
 				//KillTimer(TIMER_TRANS_TIMEOUT);
 				//SetTimer(TIMER_TRANS_TIMEOUT, 1000, NULL);
@@ -3474,7 +3474,7 @@ int CChatManager::RecvComTransRequest(unsigned long senduid, COM_SEND_MSG& RecvI
 		pWebUser->onlineinfo.talkstatus = TALK_STATUS_TRANSFER;
 		pWebUser->transferuid = m_userInfo.UserInfo.uid;
 
-		m_handlerMsgs->RecvTransferUser(pWebUser, pAcceptUser);
+		m_handlerMsgs->RecvTransferUser(pWebUser);
 
 		char alertMsg[MAX_64_LEN];
 		sprintf(alertMsg,"收到会话转接请求");
@@ -4298,14 +4298,14 @@ int CChatManager::SendTo_TransferRequestUser(CWebUserObject* pWebUser, unsigned 
 	return nError;
 }
 
-int CChatManager::SendTo_InviteUserResult(CWebUserObject* pWebUser, CUserObject* pUser, bool result)
+int CChatManager::SendTo_InviteUserResult(CWebUserObject* pWebUser, unsigned long uid, bool result)
 {
 	int nError = 0;
 	unsigned long recvuin = 0;
 
-	if (pUser)
+	if (uid != 0)
 	{
-		recvuin = pUser->UserInfo.uid;
+		recvuin = uid;
 	}
 	else
 	{
@@ -4780,7 +4780,7 @@ void CChatManager::Amr2Wav(string filePath)
 	}
 }
 
-int CChatManager::SendTo_TransferUserResult(CWebUserObject* pWebUser, CUserObject* pUser, bool bAccept)
+int CChatManager::SendTo_TransferUserResult(CWebUserObject* pWebUser, bool bAccept)
 {
 	if (bAccept)
 	{

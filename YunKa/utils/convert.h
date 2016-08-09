@@ -13,17 +13,6 @@
 #define REGBASE  "Software\\X-Maze\0"
 
 
-#ifdef _UNICODE	
-#define tstring wstring	
-#define tstringstream wstringstream
-#define _taccess _waccess
-#else	
-#define tstring string	
-#define tstringstream stringstream
-#define _taccess _access
-
-#endif
-
 //´úÂë×ª»»Àà
 class CConvert{
 public:
@@ -293,7 +282,7 @@ public:
 			if ((SizeLow<1024*1024)&&(SizeHigh==0))
 				result += ToString('K');
 			else
-                        if ((SizeLow<1024*1024*1024)&&(SizeHigh==0))
+            if ((SizeLow<1024*1024*1024)&&(SizeHigh==0))
 				result += ToString('M');
 			break;
 		}

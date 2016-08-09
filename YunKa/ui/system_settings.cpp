@@ -1,5 +1,5 @@
 #include "system_settings.h"
-
+#include <ShlObj.h>
 
 CSystemSettings::CSystemSettings()
 {
@@ -17,7 +17,7 @@ void CSystemSettings::Notify(TNotifyUI& msg)
 	}
 
 	if (msg.sType == DUI_MSGTYPE_CLICK)
-	{
+	{ 
 		if (msg.pSender->GetName() == L"close_button")
 		{
 			SaveSystemSettings();
@@ -26,6 +26,32 @@ void CSystemSettings::Notify(TNotifyUI& msg)
 		else if (msg.pSender->GetName() == L"reset_botton")
 		{
 			ResetAlertSettings();
+		}
+		else if (msg.pSender->GetName().Find(L"find_file") >= 0)
+		{
+			//string buttonName = 
+
+			TCHAR pszPath[MAX_1024_LEN];
+			BROWSEINFO bi;
+			bi.hwndOwner = GetHWND();
+			bi.pidlRoot = NULL;
+			bi.pszDisplayName = NULL;
+			bi.lpszTitle = TEXT("ÇëÑ¡ÔñÉùÒôÎÄ¼þ");
+			bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_STATUSTEXT | BIF_BROWSEINCLUDEFILES;;
+			bi.lpfn = NULL;
+			bi.lParam = 0;
+			bi.iImage = 0;
+
+			LPITEMIDLIST pidl = SHBrowseForFolder(&bi);
+			if (pidl == NULL)
+			{
+				return;
+			}
+
+			if (SHGetPathFromIDList(pidl, pszPath))
+			{
+				
+			}
 		}
 	}
 	else if (msg.sType == DUI_MSGTYPE_ITEMSELECT)
@@ -178,7 +204,6 @@ LRESULT CSystemSettings::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lP
 void CSystemSettings::OnPrepare(TNotifyUI& msg)
 {
 	COptionUI * pCheck;
-	CComboUI* pCombo;
 
 	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_visit_1")));
 	if (pCheck) pCheck->Selected(m_sysConfig->m_cAlertInfoList[0]->bTray);

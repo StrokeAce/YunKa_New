@@ -122,7 +122,7 @@ public:
 	// Parameter: pWebUser 邀请协助会话的聊天访客
 	// Parameter: pUser 被邀请的协助者
 	//************************************
-	virtual void RecvInviteUser(CWebUserObject* pWebUser, CUserObject* pUser) = 0;
+	virtual void RecvInviteUser(CWebUserObject* pWebUser, unsigned long uid) = 0;
 
 	//************************************
 	// Method:    ResultInviteUser
@@ -131,7 +131,7 @@ public:
 	// Parameter: pUser 被邀请的协助者
 	// Parameter: status 邀请协助的状态
 	//************************************
-	virtual void ResultInviteUser(CWebUserObject* pWebUser, CUserObject* pUser, RESULT_STATUS status) = 0;
+	virtual void ResultInviteUser(CWebUserObject* pWebUser, unsigned long uid, RESULT_STATUS status) = 0;
 
 	//************************************
 	// Method:    RecvTransferUser
@@ -139,7 +139,7 @@ public:
 	// Parameter: pWebUser 转接会话中的聊天访客
 	// Parameter: pUser 被邀请的转接者
 	//************************************
-	virtual void RecvTransferUser(CWebUserObject* pWebUser, CUserObject* pUser) = 0;
+	virtual void RecvTransferUser(CWebUserObject* pWebUser) = 0;
 
 	// 收到在线坐席信息列表
 	virtual void RecvOnlineUsers(CGroupObject* pGroup) = 0;
@@ -254,7 +254,7 @@ public:
 	// Parameter: pUser 邀请的坐席
 	// Parameter: bAccept 是否同意
 	//************************************
-	int SendTo_InviteUserResult(CWebUserObject* pWebUser, CUserObject* pUser, bool bAccept);
+	int SendTo_InviteUserResult(CWebUserObject* pWebUser, unsigned long uid, bool bAccept);
 
 	// 发起会话转接到其他坐席的请求
 	int SendTo_TransferRequestUser(CWebUserObject* pWebUser, unsigned long uid);
@@ -266,7 +266,7 @@ public:
 	// Parameter: pUser 邀请的坐席
 	// Parameter: bAccept 是否同意
 	//************************************
-	int SendTo_TransferUserResult(CWebUserObject* pWebUser, CUserObject* pUser, bool bAccept);
+	int SendTo_TransferUserResult(CWebUserObject* pWebUser, bool bAccept);
 
 	int SendTo_GetOnlineUser();
 
