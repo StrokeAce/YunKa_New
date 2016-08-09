@@ -115,10 +115,10 @@ struct LOGIN_INFO
 //提醒方式结构
 struct ALERT_INFO
 {
-	int type;
-	int tray;
-	int showwnd;
-	int sound;
+	ALERT_TYPE type;	// 提醒类型
+	int bTray;			// 是否托盘冒泡提示
+	int bShowwnd;		// 受否弹出窗口提示
+	int bSound;			// 是否声音提示
 	char soundfilename[MAX_FILENAME_LEN];
 };
 

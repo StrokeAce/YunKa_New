@@ -37,9 +37,7 @@ enum TREENODEENUM
 	OTHER_CHILD_2,   //转接中
 	OTHER_CHILD_3,   //邀请中
 	NODE_END = 20
-
 };
-
 
 enum VISITOR_TYPE
 {
@@ -152,6 +150,15 @@ enum WEBUSER_INFO_NOTIFY_TYPE
 	NOTIFY_NAME,	// 名字的更新
 	NOTIFY_IS_WX,	// 用户类型的更新
 	NOTIFY_ID		// 用户webuserid的更细
+};
+
+enum ALERT_TYPE
+{
+	ALERT_NEW_VISIT=1,
+	ALERT_NEW_CHAT,
+	ALERT_NEW_MSG,
+	ALERT_NEW_TRANSFER,
+	ALERT_NEW_OTHER
 };
 
 #endif

@@ -26,7 +26,7 @@
       
       <TabLayout name="right_frame_1">      
         <VerticalLayout name="right_frame_1_1" bkcolor="#FFFFFFFF">
-          <List height="230" name="domainlist" bkcolor="#FFFFFFFF" inset="5,15,0,0" itemshowhtml="true" vscrollbar="true" headerbkimage="file='list_header_bg.png'" itemalign="center" itembkcolor="#FFE2DDDF" itemaltbk="true" hscrollbar="false" menu="true">  
+          <List height="275" name="domainlist" bkcolor="#FFFFFFFF" inset="5,15,0,0" itemshowhtml="true" vscrollbar="true" headerbkimage="file='list_header_bg.png'" itemalign="center" itembkcolor="#FFE2DDDF" itemaltbk="true" hscrollbar="false" menu="true">  
             <ListHeader height="24" menu="true">  
               <ListHeaderItem text="选项" font="1" width="140" hotimage="file='mainframe\\tab_btn.png'" pushedimage="file='mainframe\\tab_btn.png'" sepimage="file='mainframe\\tab_btn.png'" sepwidth="1"/>  
               <ListHeaderItem text="托盘冒泡提示" font="1" width="120" hotimage="file='mainframe\\tab_btn.png'" pushedimage="file='mainframe\\tab_btn.png'" sepimage="file='mainframe\\tab_btn.png'" sepwidth="1"/>  
@@ -37,42 +37,51 @@
             <ListContainerElement height="45">
 					   <HorizontalLayout float="false" bkcolor="#FFFFFFFF">
 					   	<Label  float="true" align="center" name="show_type6" text="新到一个访客" font="1" pos="0, 0, 140, 45" />
-              <Option float="true" normalimage="file='systemsettings\\checkbox.png' dest='0,0,15,15'" hotimage="file='systemsettings\\checkbox_h.png' dest='0,0,15,15'" selectedimage="file='systemsettings\\checkbox_p.png' dest='0,0,15,15'" pos="175, 15, 190, 30"/>
-              <Option float="true" normalimage="file='systemsettings\\checkbox.png' dest='0,0,15,15'" hotimage="file='systemsettings\\checkbox_h.png' dest='0,0,15,15'" selectedimage="file='systemsettings\\checkbox_p.png' dest='0,0,15,15'" pos="300, 15, 315, 30"/>
-              <Option float="true" normalimage="file='systemsettings\\checkbox.png' dest='0,0,15,15'" hotimage="file='systemsettings\\checkbox_h.png' dest='0,0,15,15'" selectedimage="file='systemsettings\\checkbox_p.png' dest='0,0,15,15'" pos="420, 15, 435, 30"/>
+              <Option float="true" name="new_visit_1" normalimage="file='systemsettings\\checkbox.png' dest='0,0,15,15'" hotimage="file='systemsettings\\checkbox_h.png' dest='0,0,15,15'" selectedimage="file='systemsettings\\checkbox_p.png' dest='0,0,15,15'" pos="175, 15, 190, 30"/>
+              <Option float="true" name="new_visit_2" normalimage="file='systemsettings\\checkbox.png' dest='0,0,15,15'" hotimage="file='systemsettings\\checkbox_h.png' dest='0,0,15,15'" selectedimage="file='systemsettings\\checkbox_p.png' dest='0,0,15,15'" pos="300, 15, 315, 30"/>
+              <Option float="true" name="new_visit_3" normalimage="file='systemsettings\\checkbox.png' dest='0,0,15,15'" hotimage="file='systemsettings\\checkbox_h.png' dest='0,0,15,15'" selectedimage="file='systemsettings\\checkbox_p.png' dest='0,0,15,15'" pos="420, 15, 435, 30"/>
               <Combo name="right_type_1" float="true" normalimage="file='login\\Combo_nor.bmp' corner='2,2,24,2'" hotimage="file='login\\Combo_over.bmp' 	corner='2,2,24,2'" pushedimage="file='login\\Combo_over.bmp' corner='2,2,24,2'" textpadding="1,1,1,1" pos="510, 10, 620, 30" ></Combo>
 					   </HorizontalLayout>
 				    </ListContainerElement>
             <ListContainerElement height="45">
 					   <HorizontalLayout float="false" bkcolor="#FFFFFFFF">
 					   	<Label  float="true" align="center" name="show_type6" text="新到一个对话申请" font="1" pos="0, 0, 140, 45" />
-              <Option float="true" normalimage="file='systemsettings\\checkbox.png' dest='0,0,15,15'" hotimage="file='systemsettings\\checkbox_h.png' dest='0,0,15,15'" selectedimage="file='systemsettings\\checkbox_p.png' dest='0,0,15,15'" pos="175, 15, 190, 30"/>
-              <Option float="true" normalimage="file='systemsettings\\checkbox.png' dest='0,0,15,15'" hotimage="file='systemsettings\\checkbox_h.png' dest='0,0,15,15'" selectedimage="file='systemsettings\\checkbox_p.png' dest='0,0,15,15'" pos="300, 15, 315, 30"/>
-              <Option float="true" normalimage="file='systemsettings\\checkbox.png' dest='0,0,15,15'" hotimage="file='systemsettings\\checkbox_h.png' dest='0,0,15,15'" selectedimage="file='systemsettings\\checkbox_p.png' dest='0,0,15,15'" pos="420, 15, 435, 30"/>
+              <Option float="true" name="new_chat_1" normalimage="file='systemsettings\\checkbox.png' dest='0,0,15,15'" hotimage="file='systemsettings\\checkbox_h.png' dest='0,0,15,15'" selectedimage="file='systemsettings\\checkbox_p.png' dest='0,0,15,15'" pos="175, 15, 190, 30"/>
+              <Option float="true" name="new_chat_2" normalimage="file='systemsettings\\checkbox.png' dest='0,0,15,15'" hotimage="file='systemsettings\\checkbox_h.png' dest='0,0,15,15'" selectedimage="file='systemsettings\\checkbox_p.png' dest='0,0,15,15'" pos="300, 15, 315, 30"/>
+              <Option float="true" name="new_chat_3" normalimage="file='systemsettings\\checkbox.png' dest='0,0,15,15'" hotimage="file='systemsettings\\checkbox_h.png' dest='0,0,15,15'" selectedimage="file='systemsettings\\checkbox_p.png' dest='0,0,15,15'" pos="420, 15, 435, 30"/>
               <Combo name="right_type_1" float="true" normalimage="file='login\\Combo_nor.bmp' corner='2,2,24,2'" hotimage="file='login\\Combo_over.bmp' 	corner='2,2,24,2'" pushedimage="file='login\\Combo_over.bmp' corner='2,2,24,2'" textpadding="1,1,1,1" pos="510, 10, 620, 30" ></Combo>
 					   </HorizontalLayout>
 				    </ListContainerElement>
             <ListContainerElement height="45">
 					   <HorizontalLayout float="false" bkcolor="#FFFFFFFF">
 					   	<Label  float="true" align="center" name="show_type6" text="新到一条消息" font="1" pos="0, 0, 140, 45" />
-              <Option float="true" normalimage="file='systemsettings\\checkbox.png' dest='0,0,15,15'" hotimage="file='systemsettings\\checkbox_h.png' dest='0,0,15,15'" selectedimage="file='systemsettings\\checkbox_p.png' dest='0,0,15,15'" pos="175, 15, 190, 30"/>
-              <Option float="true" normalimage="file='systemsettings\\checkbox.png' dest='0,0,15,15'" hotimage="file='systemsettings\\checkbox_h.png' dest='0,0,15,15'" selectedimage="file='systemsettings\\checkbox_p.png' dest='0,0,15,15'" pos="300, 15, 315, 30"/>
-              <Option float="true" normalimage="file='systemsettings\\checkbox.png' dest='0,0,15,15'" hotimage="file='systemsettings\\checkbox_h.png' dest='0,0,15,15'" selectedimage="file='systemsettings\\checkbox_p.png' dest='0,0,15,15'" pos="420, 15, 435, 30"/>
+              <Option float="true" name="new_msg_1" normalimage="file='systemsettings\\checkbox.png' dest='0,0,15,15'" hotimage="file='systemsettings\\checkbox_h.png' dest='0,0,15,15'" selectedimage="file='systemsettings\\checkbox_p.png' dest='0,0,15,15'" pos="175, 15, 190, 30"/>
+              <Option float="true" name="new_msg_2" normalimage="file='systemsettings\\checkbox.png' dest='0,0,15,15'" hotimage="file='systemsettings\\checkbox_h.png' dest='0,0,15,15'" selectedimage="file='systemsettings\\checkbox_p.png' dest='0,0,15,15'" pos="300, 15, 315, 30"/>
+              <Option float="true" name="new_msg_3" normalimage="file='systemsettings\\checkbox.png' dest='0,0,15,15'" hotimage="file='systemsettings\\checkbox_h.png' dest='0,0,15,15'" selectedimage="file='systemsettings\\checkbox_p.png' dest='0,0,15,15'" pos="420, 15, 435, 30"/>
               <Combo name="right_type_1" float="true" normalimage="file='login\\Combo_nor.bmp' corner='2,2,24,2'" hotimage="file='login\\Combo_over.bmp' 	corner='2,2,24,2'" pushedimage="file='login\\Combo_over.bmp' corner='2,2,24,2'" textpadding="1,1,1,1" pos="510, 10, 620, 30" ></Combo>
 					   </HorizontalLayout>
 				    </ListContainerElement>
             <ListContainerElement height="45">
 					   <HorizontalLayout float="false" bkcolor="#FFFFFFFF">
 					   	<Label  float="true" align="center" name="show_type6" text="新到一个内部对话或转接" font="1" pos="0, 0, 140, 45" />
-              <Option float="true" normalimage="file='systemsettings\\checkbox.png' dest='0,0,15,15'" hotimage="file='systemsettings\\checkbox_h.png' dest='0,0,15,15'" selectedimage="file='systemsettings\\checkbox_p.png' dest='0,0,15,15'" pos="175, 15, 190, 30"/>
-              <Option float="true" normalimage="file='systemsettings\\checkbox.png' dest='0,0,15,15'" hotimage="file='systemsettings\\checkbox_h.png' dest='0,0,15,15'" selectedimage="file='systemsettings\\checkbox_p.png' dest='0,0,15,15'" pos="300, 15, 315, 30"/>
-              <Option float="true" normalimage="file='systemsettings\\checkbox.png' dest='0,0,15,15'" hotimage="file='systemsettings\\checkbox_h.png' dest='0,0,15,15'" selectedimage="file='systemsettings\\checkbox_p.png' dest='0,0,15,15'" pos="420, 15, 435, 30"/>
+              <Option float="true" name="new_transfer_1" normalimage="file='systemsettings\\checkbox.png' dest='0,0,15,15'" hotimage="file='systemsettings\\checkbox_h.png' dest='0,0,15,15'" selectedimage="file='systemsettings\\checkbox_p.png' dest='0,0,15,15'" pos="175, 15, 190, 30"/>
+              <Option float="true" name="new_transfer_2" normalimage="file='systemsettings\\checkbox.png' dest='0,0,15,15'" hotimage="file='systemsettings\\checkbox_h.png' dest='0,0,15,15'" selectedimage="file='systemsettings\\checkbox_p.png' dest='0,0,15,15'" pos="300, 15, 315, 30"/>
+              <Option float="true" name="new_transfer_3" normalimage="file='systemsettings\\checkbox.png' dest='0,0,15,15'" hotimage="file='systemsettings\\checkbox_h.png' dest='0,0,15,15'" selectedimage="file='systemsettings\\checkbox_p.png' dest='0,0,15,15'" pos="420, 15, 435, 30"/>
+              <Combo name="right_type_1" float="true" normalimage="file='login\\Combo_nor.bmp' corner='2,2,24,2'" hotimage="file='login\\Combo_over.bmp' 	corner='2,2,24,2'" pushedimage="file='login\\Combo_over.bmp' corner='2,2,24,2'" textpadding="1,1,1,1" pos="510, 10, 620, 30"></Combo>
+					   </HorizontalLayout>
+				    </ListContainerElement>
+            <ListContainerElement height="45">
+					   <HorizontalLayout float="false" bkcolor="#FFFFFFFF">
+					   	<Label  float="true" align="center" name="show_type6" text="其他提示" font="1" pos="0, 0, 140, 45" />
+              <Option float="true" name="new_other_1" normalimage="file='systemsettings\\checkbox.png' dest='0,0,15,15'" hotimage="file='systemsettings\\checkbox_h.png' dest='0,0,15,15'" selectedimage="file='systemsettings\\checkbox_p.png' dest='0,0,15,15'" pos="175, 15, 190, 30"/>
+              <Option float="true" name="new_other_2" normalimage="file='systemsettings\\checkbox.png' dest='0,0,15,15'" hotimage="file='systemsettings\\checkbox_h.png' dest='0,0,15,15'" selectedimage="file='systemsettings\\checkbox_p.png' dest='0,0,15,15'" pos="300, 15, 315, 30"/>
+              <Option float="true" name="new_other_3" normalimage="file='systemsettings\\checkbox.png' dest='0,0,15,15'" hotimage="file='systemsettings\\checkbox_h.png' dest='0,0,15,15'" selectedimage="file='systemsettings\\checkbox_p.png' dest='0,0,15,15'" pos="420, 15, 435, 30"/>
               <Combo name="right_type_1" float="true" normalimage="file='login\\Combo_nor.bmp' corner='2,2,24,2'" hotimage="file='login\\Combo_over.bmp' 	corner='2,2,24,2'" pushedimage="file='login\\Combo_over.bmp' corner='2,2,24,2'" textpadding="1,1,1,1" pos="510, 10, 620, 30"></Combo>
 					   </HorizontalLayout>
 				    </ListContainerElement>
           </List>
           <VerticalLayout>
-            <Button name="conformChatInsideBtn" text="恢复默认值" float="true" pos="500, 35, 580, 65" tooltip="点击这里恢复默认值" normalimage="mainframe\\button_nor.bmp" hotimage="mainframe\\button_over.bmp" pushedimage="mainframe\\button_down.bmp" />  
+            <Button name="reset_botton" text="恢复默认值" float="true" pos="500, 35, 580, 65" tooltip="点击这里恢复默认值" normalimage="mainframe\\button_nor.bmp" hotimage="mainframe\\button_over.bmp" pushedimage="mainframe\\button_down.bmp" />  
         </VerticalLayout>
         </VerticalLayout>
         

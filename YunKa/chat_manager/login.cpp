@@ -30,9 +30,17 @@ void CLogin::StartLogin(string loginName, string password, bool isAutoLogin, boo
 		return;
 	}
 
+	if (!IsNumber(loginName))
+	{
+		m_nLoginBy = LOGIN_BYSTRING;
+	}
+	else
+	{
+		m_nLoginBy = LOGIN_BYUID;
+	}
+
 	unsigned int uin(0);
-	unsigned short authPort = 80;
-	string authIp;
+	bool bAutoLogin = true;;
 
 	// 检查配置文件的认证地址(AuthAddr)来确定是否是自动定向(默认值是passport.tq.cn)方式去
 	// 认证和登录,即自动登录,否则就按修改后的地址去认证和登录,手动登录
@@ -43,7 +51,7 @@ void CLogin::StartLogin(string loginName, string password, bool isAutoLogin, boo
 		char getUrl[MAX_1024_LEN];		
 		CHttpLoad load;
 
-		if (IsNumber(loginName))
+		if (m_nLoginBy == LOGIN_BYUID)
 		{
 			uin = atol(loginName.c_str());
 			sprintf(getUrl, m_manager->m_initConfig.address_by_uin, uin);
@@ -56,14 +64,24 @@ void CLogin::StartLogin(string loginName, string password, bool isAutoLogin, boo
 		if (load.HttpLoad(string(getUrl), "", REQUEST_TYPE_GET, "", returnInfo))
 		{
 			char passport[MAX_128_LEN];
+			char tcpui[MAX_128_LEN];
 			char vip[MAX_128_LEN];
 			GetContentBetweenString(returnInfo.c_str(), "passport=", "monitor=", passport);
+			GetContentBetweenString(returnInfo.c_str(), "tcp_ui=", "http_ui=", tcpui);
 			GetContentBetweenString(returnInfo.c_str(), "vip=", "sysMessage_url=", vip);
 
-			authIp = passport;
+			string address = tcpui;
+			int pos = address.find(":");
+			m_manager->m_server = address.substr(0, pos).c_str();
+			string sPort = address.substr(pos + 1, address.length() - pos - 1);
+			m_manager->m_port = atol(sPort.c_str());
+
+			address = passport;
 			m_manager->m_vip = vip;
 
-			authIp = authIp.substr(0, authIp.length() - 1);
+			address = address.substr(0, address.length() - 1);
+			strcpy(m_manager->m_initConfig.sAuthAddr,address.c_str());
+			m_manager->m_initConfig.nAuthPort = 80;
 			m_manager->m_vip = m_manager->m_vip.substr(0, m_manager->m_vip.length() - 1);
 		}
 		else
@@ -76,16 +94,15 @@ void CLogin::StartLogin(string loginName, string password, bool isAutoLogin, boo
 	else
 	{
 		// 手动方式登录
-		if (IsNumber(loginName))
+		if (m_nLoginBy == LOGIN_BYUID)
 		{
 			uin = atol(loginName.c_str());
 		}
-		authIp = m_manager->m_initConfig.sAuthAddr;
-		authPort = m_manager->m_initConfig.nAuthPort;
+		bAutoLogin = false;
 	}
 
 	// 认证
-	int nState = GetTqAuthToken(uin, loginName.c_str(), password.c_str(), authIp.c_str(), authPort);
+	int nState = GetTqAuthToken(uin, loginName.c_str(), password.c_str(), bAutoLogin);
 	if (nState != 1)
 	{
 		char errorInfo[MAX_128_LEN];
@@ -96,15 +113,6 @@ void CLogin::StartLogin(string loginName, string password, bool isAutoLogin, boo
 	}
 
 	SetLoginProgress(20);
-
-	if (!IsNumber(loginName))
-	{
-		m_nLoginBy = LOGIN_BYSTRING;
-	}
-	else
-	{
-		m_nLoginBy = LOGIN_BYUID;
-	}
 
 	if (CheckLoginFlag(uin, loginName))
 	{
@@ -139,7 +147,7 @@ bool CLogin::CheckLoginInfo(string loginName, string password, bool isAutoLogin,
 	return true;
 }
 
-int CLogin::GetTqAuthToken(unsigned int &uin, const char *szStrid, const char *szPassWord,const char* ip, unsigned short port)
+int CLogin::GetTqAuthToken(unsigned int &uin, const char *szStrid, const char *szPassWord, bool bAutoLogin)
 {
 	int nlen = MAX_4096_LEN;
 	char recvbuf[MAX_4096_LEN] = { 0 };
@@ -147,7 +155,7 @@ int CLogin::GetTqAuthToken(unsigned int &uin, const char *szStrid, const char *s
 	char myip[100];
 
 	if (this->m_pTqAuthClient == NULL)
-		m_pTqAuthClient = new CTqAuthClient(ip, port, VERSION);
+		m_pTqAuthClient = new CTqAuthClient(m_manager->m_initConfig.sAuthAddr, m_manager->m_initConfig.nAuthPort, VERSION);
 	else if (strlen(m_szAuthtoken) > 0)
 	{
 		m_pTqAuthClient->Logout(m_szAuthtoken, recvbuf, nlen, butf8);
@@ -195,7 +203,8 @@ int CLogin::GetTqAuthToken(unsigned int &uin, const char *szStrid, const char *s
 		uin = atol(t.c_str());
 	}
 
-	if (p.GetPostBodyParams(recvbuf, "uilist", t))
+	// 手动登录的时候才使用认证返回的服务器地址
+	if (!bAutoLogin && p.GetPostBodyParams(recvbuf, "uilist", t))
 	{
 		char server[MAX_128_LEN];
 		if (GetContentBetweenString(t.c_str(), "TCP:", ",", server));

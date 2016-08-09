@@ -2,65 +2,43 @@
 <managerbutton>
 <!-- 管理按钮 -->
 
-<!-- 管理按钮   显示   按钮1-->
+<!-- 管理按钮   显示  筛选访客  按钮1-->
+ <control width="20" />
+ <Button name="managerbutton_1" maxwidth="60" maxheight="50" tooltip="筛选访客" normalimage="file='newimage\\find.png'" pushedimage="file='newimage\\find.png'"  
+hotimage="file='newimage\\find.png'" pos="20,10,80,60" />
 
- <Button name="managerbutton_1" maxwidth="60" maxheight="50" normalimage="file='mainframe\\manager_1.bmp' source='0,0,60,50' mask='#FFFF00FF'" hotimage="file='mainframe\\manager_2.bmp' source='0,0,60,50' mask='#FFFF00FF'" pushedimage="file='mainframe\\manager_3.bmp' source='0,0,60,50' mask='#FFFF00FF'"/>
-
-<!-- 管理按钮   显示   按钮2-->
-<Button name="managerbutton_2" maxwidth="60" maxheight="50" normalimage="file='mainframe\\manager_1.bmp' source='60,0,120,50' mask='#FFFF00FF'" hotimage="file='mainframe\\manager_2.bmp' source='60,0,120,50' mask='#FFFF00FF'" pushedimage="file='mainframe\\manager_3.bmp' source='60,0,120,50' mask='#FFFF00FF'"/>
-
+ <control width="20" />
+<!-- 管理按钮   内部对话  按钮2-->
+ <Button name="managerbutton_2" tooltip="内部对话"   maxwidth="60" maxheight="50" normalimage="file='newimage\\m_2.png'" pushedimage="file='newimage\\m_2.png'"  
+hotimage="file='newimage\\m_2.png'"  pos="100,10,160,60" />
+ 
 
 <!--按钮3-->
-<Button name="managerbutton_3" maxwidth="60" maxheight="50" normalimage="file='mainframe\\manager_1.bmp' source='120,0,180,50' mask='#FFFF00FF'" hotimage="file='mainframe\\manager_2.bmp' source='120,0,180,50' mask='#FFFF00FF'" pushedimage="file='mainframe\\manager_3.bmp' source='120,0,180,50' mask='#FFFF00FF'"/>
+ <control width="20" />
+ <Button name="managerbutton_3" tooltip="访客历史"   maxwidth="60" maxheight="50" normalimage="file='newimage\\m_3.png'" pushedimage="file='newimage\\m_3.png'"  
+hotimage="file='newimage\\m_3.png'" pos="180,10,240,60" />
 
 <!--按钮4-->
-<Button name="managerbutton_4" maxwidth="60" maxheight="50" normalimage="file='mainframe\\manager_1.bmp' source='180,0,240,50' mask='#FFFF00FF'" hotimage="file='mainframe\\manager_2.bmp' source='180,0,240,50' mask='#FFFF00FF'" pushedimage="file='mainframe\\manager_3.bmp' source='180,0,240,50' mask='#FFFF00FF'"/>
+ <control width="20" />
+ <Button name="managerbutton_4"  tooltip="访客来电"  maxwidth="60" maxheight="50" normalimage="file='newimage\\m_4.png'" pushedimage="file='newimage\\m_4.png'"  
+hotimage="file='newimage\\m_4.png'" pos="260,10,320,60" />
 
 
+ <control width="20" />
+ <Button name="managerbutton_5" tooltip="访客留言" maxwidth="60" maxheight="50" normalimage="file='newimage\\m_5.png'" pushedimage="file='newimage\\m_5.png'"  
+hotimage="file='newimage\\m_5.png'" pos="340,10,400,60" />
 
+ <control width="20" />
+ <Button name="managerbutton_6" tooltip="客户管理" maxwidth="60" maxheight="50" normalimage="file='newimage\\m_6.png'" pushedimage="file='newimage\\m_6.png'"  
+hotimage="file='newimage\\m_6.png'" pos="420,10,480,60" />
 
+ <control width="20" />
+ <Button name="managerbutton_7" tooltip="工单管理" maxwidth="60" maxheight="50" normalimage="file='newimage\\m_7.png'" pushedimage="file='newimage\\m_7.png'" 
+hotimage="file='newimage\\m_7.png'" pos="500,10,560,60" />
 
-
-
-<!--按钮5-->
-<Button name="managerbutton_5" maxwidth="60" maxheight="50" normalimage="file='mainframe\\manager_1.bmp' source='240,0,300,50' mask='#FFFF00FF'" hotimage="file='mainframe\\manager_2.bmp' source='240,0,300,50' mask='#FFFF00FF'" pushedimage="file='mainframe\\manager_3.bmp' source='240,0,300,50' mask='#FFFF00FF'"/>
-
-<!--按钮6-->
-<Button name="managerbutton_6" maxwidth="60" maxheight="50" normalimage="file='mainframe\\manager_1.bmp' source='300,0,360,50' mask='#FFFF00FF'" hotimage="file='mainframe\\manager_2.bmp' source='300,0,360,50' mask='#FFFF00FF'" pushedimage="file='mainframe\\manager_3.bmp' source='300,0,360,50' mask='#FFFF00FF'"/>
-
-<!--按钮7-->
-<Button name="managerbutton_7" maxwidth="60" maxheight="50" normalimage="file='mainframe\\manager_1.bmp' source='360,0,420,50' mask='#FFFF00FF'" hotimage="file='mainframe\\manager_2.bmp' source='360,0,420,50' mask='#FFFF00FF'" pushedimage="file='mainframe\\manager_3.bmp' source='360,0,420,50' mask='#FFFF00FF'"/>
-
-
-<!--按钮8-->
-<Button name="managerbutton_8" maxwidth="60" maxheight="50" normalimage="file='mainframe\\manager_1.bmp' source='420,0,480,50' mask='#FFFF00FF'" hotimage="file='mainframe\\manager_2.bmp' source='420,0,480,50' mask='#FFFF00FF'" pushedimage="file='mainframe\\manager_3.bmp' source='420,0,480,50' mask='#FFFF00FF'"/>
-
-
-<!--按钮9-->
-<Button name="managerbutton_9" maxwidth="60" maxheight="50" normalimage="file='mainframe\\manager_1.bmp' source='480,0,540,50' mask='#FFFF00FF'" hotimage="file='mainframe\\manager_2.bmp' source='480,0,540,50' mask='#FFFF00FF'" pushedimage="file='mainframe\\manager_3.bmp' source='480,0,540,50' mask='#FFFF00FF'"/>
-
-
-<!--按钮10-->
-<Button name="managerbutton_10" maxwidth="60" maxheight="50" normalimage="file='mainframe\\manager_1.bmp' source='540,0,600,50' mask='#FFFF00FF'" hotimage="file='mainframe\\manager_2.bmp' source='540,0,600,50' mask='#FFFF00FF'" pushedimage="file='mainframe\\manager_3.bmp' source='540,0,600,50' mask='#FFFF00FF'"/>
-
-<!--按钮11-->
-<Button name="managerbutton_11" maxwidth="60" maxheight="50" normalimage="file='mainframe\\manager_1.bmp' source='600,0,660,50' mask='#FFFF00FF'" hotimage="file='mainframe\\manager_2.bmp' source='600,0,660,50' mask='#FFFF00FF'" pushedimage="file='mainframe\\manager_3.bmp' source='600,0,660,50' mask='#FFFF00FF'"/>
-
-
-<!--按钮12-->
-<Button name="managerbutton_12" maxwidth="60" maxheight="50" normalimage="file='mainframe\\manager_1.bmp' source='660,0,720,50' mask='#FFFF00FF'" hotimage="file='mainframe\\manager_2.bmp' source='660,0,720,50' mask='#FFFF00FF'" pushedimage="file='mainframe\\manager_3.bmp' source='660,0,720,50' mask='#FFFF00FF'"/>
-
-
-<!--按钮13-->
-<Button name="managerbutton_13" maxwidth="60" maxheight="50" normalimage="file='mainframe\\manager_1.bmp' source='720,0,780,50' mask='#FFFF00FF'" hotimage="file='mainframe\\manager_2.bmp' source='720,0,780,50' mask='#FFFF00FF'" pushedimage="file='mainframe\\manager_3.bmp' source='720,0,780,50' mask='#FFFF00FF'"/>
-
-
-<!--按钮14-->
-<Button name="managerbutton_14" maxwidth="60" maxheight="50" normalimage="file='mainframe\\manager_1.bmp' source='780,0,840,50' mask='#FFFF00FF'" hotimage="file='mainframe\\manager_2.bmp' source='780,0,840,50' mask='#FFFF00FF'" pushedimage="file='mainframe\\manager_3.bmp' source='780,0,840,50' mask='#FFFF00FF'"/>
-
-
-<!--按钮15-->
-<Button name="managerbutton_15" maxwidth="60" maxheight="50" normalimage="file='mainframe\\manager_1.bmp' source='840,0,900,50' mask='#FFFF00FF'" hotimage="file='mainframe\\manager_2.bmp' source='840,0,900,50' mask='#FFFF00FF'" pushedimage="file='mainframe\\manager_3.bmp' source='840,0,900,50' mask='#FFFF00FF'"/>
+ <control width="20" />
+ <Button name="managerbutton_8" tooltip="管理中心"  maxwidth="60" maxheight="50" normalimage="file='newimage\\m_8.png'" pushedimage="file='newimage\\m_8.png'"  
+hotimage="file='newimage\\m_8.png'" pos="580,10,640,60"/>
 
 
 </managerbutton>

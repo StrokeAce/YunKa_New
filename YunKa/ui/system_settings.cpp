@@ -20,7 +20,12 @@ void CSystemSettings::Notify(TNotifyUI& msg)
 	{
 		if (msg.pSender->GetName() == L"close_button")
 		{
+			SaveSystemSettings();
 			Close();
+		}
+		else if (msg.pSender->GetName() == L"reset_botton")
+		{
+			ResetAlertSettings();
 		}
 	}
 	else if (msg.sType == DUI_MSGTYPE_ITEMSELECT)
@@ -161,12 +166,54 @@ LRESULT CSystemSettings::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lP
 	{
 		::ShowWindow(m_hWnd, SW_HIDE);
 	}
+	else if (uMsg == WM_MOUSEMOVE)
+	{
+		OnMouseMove(uMsg, wParam, lParam);
+		int a = 10;
+	}
+		
 	return 0;
 }
 
 void CSystemSettings::OnPrepare(TNotifyUI& msg)
 {
-	//CControlUI *PosWnd = static_cast<CHorizontalLayoutUI*>(m_PaintManager.FindControl(_T("show_image_control")));
+	COptionUI * pCheck;
+	CComboUI* pCombo;
+
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_visit_1")));
+	if (pCheck) pCheck->Selected(m_sysConfig->m_cAlertInfoList[0]->bTray);
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_visit_2")));
+	if (pCheck)  pCheck->Selected(m_sysConfig->m_cAlertInfoList[0]->bShowwnd);
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_visit_3")));
+	if (pCheck) pCheck->Selected(m_sysConfig->m_cAlertInfoList[0]->bSound);
+
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_chat_1")));
+	if (pCheck) pCheck->Selected(m_sysConfig->m_cAlertInfoList[1]->bTray);
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_chat_2")));
+	if (pCheck) pCheck->Selected(m_sysConfig->m_cAlertInfoList[1]->bShowwnd);
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_chat_3")));
+	if (pCheck) pCheck->Selected(m_sysConfig->m_cAlertInfoList[1]->bSound);
+
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_msg_1")));
+	if (pCheck) pCheck->Selected(m_sysConfig->m_cAlertInfoList[2]->bTray);
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_msg_2")));
+	if (pCheck) pCheck->Selected(m_sysConfig->m_cAlertInfoList[2]->bShowwnd);
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_msg_3")));
+	if (pCheck) pCheck->Selected(m_sysConfig->m_cAlertInfoList[2]->bSound);
+
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_transfer_1")));
+	if (pCheck) pCheck->Selected(m_sysConfig->m_cAlertInfoList[3]->bTray);
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_transfer_2")));
+	if (pCheck) pCheck->Selected(m_sysConfig->m_cAlertInfoList[3]->bShowwnd);
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_transfer_3")));
+	if (pCheck) pCheck->Selected(m_sysConfig->m_cAlertInfoList[3]->bSound);
+
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_other_1")));
+	if (pCheck) pCheck->Selected(m_sysConfig->m_cAlertInfoList[4]->bTray);
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_other_2")));
+	if (pCheck) pCheck->Selected(m_sysConfig->m_cAlertInfoList[4]->bShowwnd);
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_other_3")));
+	if (pCheck) pCheck->Selected(m_sysConfig->m_cAlertInfoList[4]->bSound);
 }
 
 LPCTSTR CSystemSettings::GetWindowClassName() const
@@ -224,3 +271,97 @@ void CSystemSettings::OnSelectChanged(TNotifyUI &msg)
 		}
 	}
 }
+
+LRESULT CSystemSettings::OnMouseMove(UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	int x = GET_X_LPARAM(lParam);
+	int y = GET_Y_LPARAM(lParam);
+
+	return 0;
+}
+
+void CSystemSettings::SaveSystemSettings()
+{
+	COptionUI * pCheck;
+
+	m_sysConfig->m_cAlertInfoList[0]->type = ALERT_NEW_VISIT;
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_visit_1")));
+	if (pCheck) m_sysConfig->m_cAlertInfoList[0]->bTray = pCheck->IsSelected();
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_visit_2")));
+	if (pCheck)  m_sysConfig->m_cAlertInfoList[0]->bShowwnd = pCheck->IsSelected();
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_visit_3")));
+	if (pCheck) m_sysConfig->m_cAlertInfoList[0]->bSound = pCheck->IsSelected();
+
+	m_sysConfig->m_cAlertInfoList[1]->type = ALERT_NEW_CHAT;
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_chat_1")));
+	if (pCheck) m_sysConfig->m_cAlertInfoList[1]->bTray = pCheck->IsSelected();
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_chat_2")));
+	if (pCheck) m_sysConfig->m_cAlertInfoList[1]->bShowwnd = pCheck->IsSelected();
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_chat_3")));
+	if (pCheck) m_sysConfig->m_cAlertInfoList[1]->bSound = pCheck->IsSelected();
+
+	m_sysConfig->m_cAlertInfoList[2]->type = ALERT_NEW_MSG;
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_msg_1")));
+	if (pCheck) m_sysConfig->m_cAlertInfoList[2]->bTray = pCheck->IsSelected();
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_msg_2")));
+	if (pCheck) m_sysConfig->m_cAlertInfoList[2]->bShowwnd = pCheck->IsSelected();
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_msg_3")));
+	if (pCheck) m_sysConfig->m_cAlertInfoList[2]->bSound = pCheck->IsSelected();
+
+	m_sysConfig->m_cAlertInfoList[3]->type = ALERT_NEW_TRANSFER;
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_transfer_1")));
+	if (pCheck) m_sysConfig->m_cAlertInfoList[3]->bTray = pCheck->IsSelected();
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_transfer_2")));
+	if (pCheck) m_sysConfig->m_cAlertInfoList[3]->bShowwnd = pCheck->IsSelected();
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_transfer_3")));
+	if (pCheck) m_sysConfig->m_cAlertInfoList[3]->bSound = pCheck->IsSelected();
+
+	m_sysConfig->m_cAlertInfoList[4]->type = ALERT_NEW_OTHER;
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_other_1")));
+	if (pCheck) m_sysConfig->m_cAlertInfoList[4]->bTray = pCheck->IsSelected();
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_other_2")));
+	if (pCheck) m_sysConfig->m_cAlertInfoList[4]->bShowwnd = pCheck->IsSelected();
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_other_3")));
+	if (pCheck) m_sysConfig->m_cAlertInfoList[4]->bSound = pCheck->IsSelected();
+}
+
+void CSystemSettings::ResetAlertSettings()
+{
+	COptionUI * pCheck;
+
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_visit_1")));
+	if (pCheck) pCheck->Selected(false);
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_visit_2")));
+	if (pCheck)  pCheck->Selected(false);
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_visit_3")));
+	if (pCheck) pCheck->Selected(true);
+
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_chat_1")));
+	if (pCheck) pCheck->Selected(false);
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_chat_2")));
+	if (pCheck) pCheck->Selected(false);
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_chat_3")));
+	if (pCheck) pCheck->Selected(true);
+
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_msg_1")));
+	if (pCheck) pCheck->Selected(false);
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_msg_2")));
+	if (pCheck) pCheck->Selected(false);
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_msg_3")));
+	if (pCheck) pCheck->Selected(true);
+
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_transfer_1")));
+	if (pCheck) pCheck->Selected(false);
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_transfer_2")));
+	if (pCheck) pCheck->Selected(false);
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_transfer_3")));
+	if (pCheck) pCheck->Selected(true);
+
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_other_1")));
+	if (pCheck) pCheck->Selected(false);
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_other_2")));
+	if (pCheck) pCheck->Selected(false);
+	pCheck = static_cast<COptionUI*>(m_PaintManager.FindControl(_T("new_other_3")));
+	if (pCheck) pCheck->Selected(false);
+}
+

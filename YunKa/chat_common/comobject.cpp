@@ -130,14 +130,16 @@ bool CSysConfigFile::ReadFile(ifstream& fout)
 	
 	DeleteAllAlertInfo();
 	Read(fout, count);
+	int type;
 	for (int i = 0; i < (int)count; i++)
 	{
 		ALERT_INFO *par = new ALERT_INFO();
-		Read(fout, par->type);
-		Read(fout, par->tray);
-		Read(fout, par->showwnd);
-		Read(fout, par->sound);
+		Read(fout, type);
+		Read(fout, par->bTray);
+		Read(fout, par->bShowwnd);
+		Read(fout, par->bSound);
 		Read(fout, par->soundfilename);
+		par->type = (ALERT_TYPE)type;
 		m_cAlertInfoList.push_back(par);
 	}
 
@@ -245,9 +247,9 @@ bool CSysConfigFile::WriteFile(ofstream& fin)
 	for (iter_alert; iter_alert != m_cAlertInfoList.end(); iter_alert++)
 	{
 		Write(fin, (*iter_alert)->type);
-		Write(fin, (*iter_alert)->tray);
-		Write(fin, (*iter_alert)->showwnd);
-		Write(fin, (*iter_alert)->sound);
+		Write(fin, (*iter_alert)->bTray);
+		Write(fin, (*iter_alert)->bShowwnd);
+		Write(fin, (*iter_alert)->bSound);
 		Write(fin, (*iter_alert)->soundfilename);
 	}
 
@@ -389,101 +391,94 @@ bool CSysConfigFile::SaveData(char *sFilename)
 	return true;
 }
 
-ALERT_INFO *CSysConfigFile::SetAllDefaultAlertInfo(int type)
+ALERT_INFO *CSysConfigFile::SetAllDefaultAlertInfo()
 {
 	DeleteAllAlertInfo();
 
 	string strPath = GetCurrentPath();
-	int pos;
-	if ((pos = strPath.rfind("\\")) != string::npos)
-		strPath = strPath.substr(0, pos);
 	strPath += "\\res\\sound";
 
 	ALERT_INFO *pInfo, *pRtn;
-
 	pRtn = NULL;
-	if (type == -1 || type == SOUND_USERONLINE)
+	
 	{
 		pInfo = new ALERT_INFO();
 		memset(pInfo, '\0', sizeof(ALERT_INFO));
-		pInfo->type = SOUND_USERONLINE;
-		pInfo->sound = 0;
-		pInfo->tray = 0;
-		pInfo->showwnd = 0;
-		sprintf(pInfo->soundfilename, "%s%s", strPath.c_str(), "\\online.wav");
-		m_cAlertInfoList.push_back(pInfo);
-
-		if (type != -1)
-		{
-			pRtn = pInfo;
-		}
-	}
-
-	if (type == -1 || type == SOUND_INVITE)
-	{
-		pInfo = new ALERT_INFO;
-		memset(pInfo, '\0', sizeof(ALERT_INFO));
-		pInfo->type = SOUND_INVITE;
-		pInfo->sound = 0;
-		pInfo->tray = 0;
-		pInfo->showwnd = 0;
+		pInfo->type = ALERT_NEW_VISIT;
+		pInfo->bSound = 1;
+		pInfo->bTray = 0;
+		pInfo->bShowwnd = 0;
 		sprintf(pInfo->soundfilename, "%s%s", strPath.c_str(), "\\invite.wav");
 		m_cAlertInfoList.push_back(pInfo);
-		if (type != -1)
-		{
-			pRtn = pInfo;
-		}
 	}
 
-	if (type == -1 || type == SOUND_MSG)
 	{
 		pInfo = new ALERT_INFO;
 		memset(pInfo, '\0', sizeof(ALERT_INFO));
-		pInfo->type = SOUND_MSG;
-		pInfo->sound = 0;
-		pInfo->tray = 0;
-		pInfo->showwnd = 0;
+		pInfo->type = ALERT_NEW_CHAT;
+		pInfo->bSound = 1;
+		pInfo->bTray = 0;
+		pInfo->bShowwnd = 0;
+		sprintf(pInfo->soundfilename, "%s%s", strPath.c_str(), "\\online.wav");
+		m_cAlertInfoList.push_back(pInfo);
+	}
+
+	{
+		pInfo = new ALERT_INFO;
+		memset(pInfo, '\0', sizeof(ALERT_INFO));
+		pInfo->type = ALERT_NEW_MSG;
+		pInfo->bSound = 1;
+		pInfo->bTray = 0;
+		pInfo->bShowwnd = 0;
 		sprintf(pInfo->soundfilename, "%s%s", strPath.c_str(), "\\msg.wav");
 		m_cAlertInfoList.push_back(pInfo);
-		if (type != -1)
-		{
-			pRtn = pInfo;
-		}
 	}
 
-	if (type == -1 || type == SOUND_RING)
 	{
 		pInfo = new ALERT_INFO;
 		memset(pInfo, '\0', sizeof(ALERT_INFO));
-		pInfo->type = SOUND_RING;
-		pInfo->sound = 1;
-		pInfo->tray = 1;
-		pInfo->showwnd = 0;
+		pInfo->type = ALERT_NEW_TRANSFER;
+		pInfo->bSound = 1;
+		pInfo->bTray = 0;
+		pInfo->bShowwnd = 0;
+		sprintf(pInfo->soundfilename, "%s%s", strPath.c_str(), "\\invite.wav");
+		m_cAlertInfoList.push_back(pInfo);
+	}
+
+	{
+		pInfo = new ALERT_INFO;
+		memset(pInfo, '\0', sizeof(ALERT_INFO));
+		pInfo->type = ALERT_NEW_OTHER;
+		pInfo->bSound = 0;
+		pInfo->bTray = 0;
+		pInfo->bShowwnd = 0;
 		sprintf(pInfo->soundfilename, "%s%s", strPath.c_str(), "\\ring.wav");
 		m_cAlertInfoList.push_back(pInfo);
-		if (type != -1)
-		{
-			pRtn = pInfo;
-		}
-	}
-
-	if (type == -1 || type == SOUND_ALERT)
-	{
-		pInfo = new ALERT_INFO;
-		memset(pInfo, '\0', sizeof(ALERT_INFO));
-		pInfo->type = SOUND_ALERT;
-		pInfo->sound = 1;
-		pInfo->tray = 1;
-		pInfo->showwnd = 0;
-		sprintf(pInfo->soundfilename, "%s%s", strPath.c_str(), "\\alert.wav");
-		m_cAlertInfoList.push_back(pInfo);
-		if (type != -1)
-		{
-			pRtn = pInfo;
-		}
 	}
 
 	return pRtn;
+}
+
+ALERT_INFO *CSysConfigFile::GetAlertInfo(ALERT_TYPE type)
+{
+	int i, len;
+
+	len = m_cAlertInfoList.size();
+	if (len == 0)
+	{
+		SetAllDefaultAlertInfo();
+	}
+
+	len = m_cAlertInfoList.size();
+	for (i = 0; i < len; i++)
+	{
+		ALERT_INFO *pInfo = m_cAlertInfoList[i];
+
+		if (pInfo->type == type)
+			return pInfo;
+	}
+
+	return NULL;
 }
 
 void CSysConfigFile::SetWndInitPos(bool bAlways)

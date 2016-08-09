@@ -893,18 +893,6 @@ typedef enum{
 #define OBJECT_WEBUSER		2 // web用户或者是微信用户
 #define OBJECT_GROUP		3
 
-//声音文件的类型
-#define SOUND_USERONLINE		0
-#define SOUND_USERMSG			1
-#define SOUND_SYSMSG			2
-#define SOUND_CALL				3
-#define SOUND_KEYCLICK			4
-#define SOUND_BACK				5
-#define SOUND_SUCCESS			6
-#define SOUND_FAIL				7
-#define SOUND_NUDGE				8
-#define SOUND_TIPS				9
-
 //系统进程间相互通知消息
 #define EVENT_OFFLINE		0			
 #define EVENT_ONLINE		1			

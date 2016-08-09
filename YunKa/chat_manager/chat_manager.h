@@ -245,7 +245,7 @@ public:
 	// Parameter: pWebUser 会话中的访客
 	// Parameter: pUser 邀请的坐席
 	//************************************
-	int SendTo_InviteUser(CWebUserObject* pWebUser, CUserObject* pAcceptUser);
+	int SendTo_InviteUser(CWebUserObject* pWebUser, unsigned long uid);
 
 	//************************************
 	// Method:    SendTo_InviteUserResult
@@ -257,7 +257,7 @@ public:
 	int SendTo_InviteUserResult(CWebUserObject* pWebUser, CUserObject* pUser, bool bAccept);
 
 	// 发起会话转接到其他坐席的请求
-	int SendTo_TransferRequestUser(CWebUserObject* pWebUser, CUserObject* pAcceptUser);
+	int SendTo_TransferRequestUser(CWebUserObject* pWebUser, unsigned long uid);
 
 	//************************************
 	// Method:    SendTo_InviteUserResult
@@ -582,6 +582,8 @@ public:
 	static DWORD WINAPI GetQuickReplyThread(void *arg);
 
 	bool SendFileToUser(IBaseObject* pUser, string strPathFile, string msgId, MSG_RECV_TYPE userType);
+
+	void SolveAlertInfo(ALERT_TYPE type, char* strPopTips);
 
 public:
 	int						m_nOnLineStatus;		// 是否在线,对于im服务器而言

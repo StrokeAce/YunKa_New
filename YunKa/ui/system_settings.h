@@ -27,9 +27,15 @@ public:
 	LRESULT HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 
 	void ShowWnd(int type);
+
+	CSysConfigFile* m_sysConfig;
 private:
 	virtual void OnSelectChanged(TNotifyUI &msg);
 	void OnPrepare(TNotifyUI& msg);
+	void SaveSystemSettings();
+	void ResetAlertSettings();
+
+	LRESULT OnMouseMove(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 private:
 	CPaintManagerUI m_PaintManager;

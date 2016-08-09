@@ -2499,6 +2499,7 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 		//if (m_hSystemSettings == NULL)
 		{
 			m_hSystemSettings = new CSystemSettings();
+			m_hSystemSettings->m_sysConfig = m_manager->m_sysConfig;
 			m_hSystemSettings->Create(m_hWnd, _T(""), UI_WNDSTYLE_DIALOG, 0, 0, 0, 0, 0, NULL);
 			m_hSystemSettings->CenterWindow();
 
@@ -3994,13 +3995,13 @@ void CMainFrame::RecvOnlineUsers(CGroupObject* pGroup)
 			if (m_curSelectId > 0)
 			{
 				if (pUser != NULL && pWebUser != NULL)
-				    m_manager->SendTo_TransferRequestUser(pWebUser, pUser);
+				    m_manager->SendTo_TransferRequestUser(pWebUser, 0);
 			}
 		}
 		else if (m_topWndType == 2)  //邀请协助
 		{
 			if (pUser != NULL && pWebUser != NULL)
-				m_manager->SendTo_InviteUser(pWebUser, pUser);
+				m_manager->SendTo_InviteUser(pWebUser, 0);
 		}
 		else if (m_topWndType == 3)  //内部对话
 		{

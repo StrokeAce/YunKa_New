@@ -488,15 +488,15 @@ void CChatVisitor::SolveVisitorSystemUp(char *pInitBuff)
 
 	if (pWebUser->IsDisplay(m_manager->m_sysConfig, m_manager->m_userInfo.UserInfo.uid))
 	{
-		string str;
+		char alertMsg[MAX_64_LEN];
 
 		switch (pWebUser->onlineinfo.talkstatus)
 		{
 		case TALK_STATUS_NO:
 		case TALK_STATUS_AUTOINVITE:
 		default:
-			str = pWebUser->info.name;
-			str += " 用户访问网页！";
+			sprintf(alertMsg,"%s 用户访问网页！",pWebUser->info.name);
+			m_manager->SolveAlertInfo(ALERT_NEW_OTHER, alertMsg);
 			break;
 		}
 

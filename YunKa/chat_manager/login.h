@@ -27,7 +27,7 @@ private:
 
 	bool CheckLoginInfo(string loginName, string password,bool isAutoLogin, bool isKeepPwd);
 
-	int GetTqAuthToken(unsigned int &uin, const char *szStrid, const char *szPassWord,const char* ip, unsigned short port);
+	int GetTqAuthToken(unsigned int &uin, const char *szStrid, const char *szPassWord, bool bAutoLogin);
 
 	bool LoginToRealServer(string strServer, int nPort, unsigned int uin);
 

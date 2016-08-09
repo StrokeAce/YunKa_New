@@ -6,11 +6,12 @@
 #include "comstruct.h"
 #include "wx_obj.h"
 
-#include <list>     
+#include <list>
+#include <vector>
 using namespace std;
 
 typedef list<LOGIN_INFO*> ListLoginedInfo;
-typedef list<ALERT_INFO*> ListAlertInfo;
+typedef vector<ALERT_INFO*> ListAlertInfo;
 typedef map<string, WEBUSER_URL_INFO*> MapWebUserFLag;
 
 class IBaseReceive
@@ -38,8 +39,8 @@ public:
 	void DeleteAllLoginInfo();
 	void DeleteAllAlertInfo();
 
-	ALERT_INFO *SetAllDefaultAlertInfo(int type = -1);
-	ALERT_INFO *CSysConfigFile::GetAlertInfo(int type);
+	ALERT_INFO *SetAllDefaultAlertInfo();
+	ALERT_INFO *GetAlertInfo(ALERT_TYPE type);
 
 public:
 	char m_sConfigname[MAX_FILENAME_LEN];
