@@ -225,7 +225,7 @@ public:
 		node->data()._pListElement = pListElement;
 		
 		//设置空间高度
-		//pListElement->SetAttribute(L"height", L"30");
+		//pListElement->SetAttribute(L"height", L"50");
 		if (parent != _root) {
 			if (!(parent->data()._expand && parent->data()._pListElement->IsVisible()))
 				pListElement->SetInternVisible(false);
@@ -307,7 +307,7 @@ public:
 		node->data()._pListElement = pListElement;
 		node->data()._sid = sid;
 		//设置空间高度
-		//pListElement->SetAttribute(L"height", L"30");
+		//pListElement->SetAttribute(L"height", L"50");
 		if (parent != _root) {
 			if (!(parent->data()._expand && parent->data()._pListElement->IsVisible()))
 				pListElement->SetInternVisible(false);

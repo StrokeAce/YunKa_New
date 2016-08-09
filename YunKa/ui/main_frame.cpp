@@ -888,9 +888,39 @@ void CMainFrame::OnClick(TNotifyUI& msg)
 		OnBtnSendMessage(msg);
 	else if (msg.pSender == m_pVoiceBtn)
 		OnBtnVoice(msg);
+	else if (msg.pSender->GetName() == _T("mid_button_1")) //接受
+	{
+		AcceptChat();
+	}
+	else if (msg.pSender->GetName() == _T("mid_button_2")) //结束
+	{
+		m_manager->SendTo_CloseChat(m_curSelectId, CHATCLOSE_USER);
+	}
+	else if (msg.pSender->GetName() == _T("mid_button_3")) //转接
+	{
+		m_topWndType = 1;
+		//获取在线坐席数
+		m_manager->SendTo_GetOnlineUser();
+	}
+	else if (msg.pSender->GetName() == _T("mid_button_4"))//屏蔽
+	{
 
+	}
+	else if (msg.pSender->GetName() == _T("mid_button_5"))//邀请评价
+	{
+	}
+	else if (msg.pSender->GetName() == _T("mid_button_6"))//释放
+	{
+		m_manager->SendTo_ReleaseChat(m_curSelectId);
+	}
+	else if (msg.pSender->GetName() == _T("mid_button_7")) //邀请协助
+	{
+		m_topWndType = 2;
+		//获取在线坐席数
+		m_manager->SendTo_GetOnlineUser();
+	}
 
-	if (msg.pSender->GetName() == _T("fileSendBtn"))
+	else if (msg.pSender->GetName() == _T("fileSendBtn"))
 	{
 		OnBtnSendFile(msg);
 	}
@@ -1950,65 +1980,103 @@ void CMainFrame::OnManagerButtonEvent(TNotifyUI& msg)
 	if (doEvent == -1)
 		return;
 
-	//接受
+	//接受    
+	//筛选访客
 	if (msg.pSender->GetName() == _T("managerbutton_1"))
 	{
-		AcceptChat();
-	}
+		//AcceptChat();
 
-	//转接
-	else if (msg.pSender->GetName() == _T("managerbutton_2"))
-	{
-		m_topWndType = 1;
-		//获取在线坐席数
-		m_manager->SendTo_GetOnlineUser();
-
-	}
-	//结束
-	else if (msg.pSender->GetName() == _T("managerbutton_3"))
-	{
-		m_manager->SendTo_CloseChat(m_curSelectId, CHATCLOSE_USER);
-
-	}
-
-	//屏蔽
-	else if (msg.pSender->GetName() == _T("managerbutton_4"))
-	{
-	}
-
-	//邀请评价
-	else if (msg.pSender->GetName() == _T("managerbutton_5"))
-	{
-	}
-
-
-	//筛选访客
-	else if (msg.pSender->GetName() == _T("managerbutton_6"))
-	{
-		CSelectVisitorWnd *dlg= new CSelectVisitorWnd();
+		CSelectVisitorWnd *dlg = new CSelectVisitorWnd();
 
 		dlg->Create(m_hWnd, _T(""), UI_WNDSTYLE_DIALOG, 0, 0, 0, 0, 0, NULL);
 		dlg->CenterWindow();
 		dlg->ShowModal();
-	}
 
-	//释放会话
-	else if (msg.pSender->GetName() == _T("managerbutton_7"))
-	{
-		m_manager->SendTo_ReleaseChat(m_curSelectId);
 
 	}
 
-	//邀请协助
-	else if (msg.pSender->GetName() == _T("managerbutton_8"))
+	//转接
+	//内部对话
+	else if (msg.pSender->GetName() == _T("managerbutton_2"))
 	{
+		//m_topWndType = 1;
+		//获取在线坐席数
+		//m_manager->SendTo_GetOnlineUser();
 
-		m_topWndType = 2;
+
+		m_topWndType = 3;
+
 		//获取在线坐席数
 		m_manager->SendTo_GetOnlineUser();
 
 
+	} 
+	//结束  
+	//访客历史
+	else if (msg.pSender->GetName() == _T("managerbutton_3"))
+	{
+		//m_manager->SendTo_CloseChat(m_curSelectId, CHATCLOSE_USER);
+
+		sprintf(sURL, m_manager->m_initConfig.webpage_SvrMsg, m_manager->m_vip.c_str(), m_manager->m_login->m_szAuthtoken);
+		ShowWebBrowser(sURL);
 	}
+
+	//屏蔽
+	//访客来电
+	else if (msg.pSender->GetName() == _T("managerbutton_4"))
+	{
+		sprintf(sURL, m_manager->m_initConfig.webpage_querywebphone, m_manager->m_vip.c_str(), m_manager->m_userInfo.UserInfo.uid, m_manager->m_login->m_szAuthtoken);
+		ShowWebBrowser(sURL);
+	}
+
+	//邀请评价
+	//访客留言
+	else if (msg.pSender->GetName() == _T("managerbutton_5"))
+	{
+		sprintf(sURL, m_manager->m_initConfig.webpage_note, m_manager->m_vip.c_str(), m_manager->m_userInfo.UserInfo.uid, m_manager->m_login->m_szAuthtoken);
+		ShowWebBrowser(sURL);
+	}
+
+
+	//筛选访客
+	//客户管理
+	else if (msg.pSender->GetName() == _T("managerbutton_6"))
+	{
+		//CSelectVisitorWnd *dlg= new CSelectVisitorWnd();
+
+		//dlg->Create(m_hWnd, _T(""), UI_WNDSTYLE_DIALOG, 0, 0, 0, 0, 0, NULL);
+		//dlg->CenterWindow();
+		//dlg->ShowModal();
+
+		sprintf(sURL, m_manager->m_initConfig.webpage_crm, m_manager->m_vip.c_str(), m_manager->m_login->m_szAuthtoken);
+		ShowWebBrowser(sURL);
+	}
+
+	//释放会话
+	//工单管理 
+	else if (msg.pSender->GetName() == _T("managerbutton_7"))
+	{
+		//m_manager->SendTo_ReleaseChat(m_curSelectId);
+
+		sprintf(sURL, m_manager->m_initConfig.webpage_workbillurl, m_manager->m_vip.c_str(), m_manager->m_login->m_szAuthtoken);
+		ShowWebBrowser(sURL);
+	}
+
+	//邀请协助
+	//管理中心
+	else if (msg.pSender->GetName() == _T("managerbutton_8"))
+	{
+		//m_topWndType = 2;
+		//获取在线坐席数
+		//m_manager->SendTo_GetOnlineUser();
+
+		sprintf(sURL, m_manager->m_initConfig.webpage_mgmt, m_manager->m_vip.c_str(), m_manager->m_login->m_szAuthtoken);
+		ShowWebBrowser(sURL);
+	}
+
+
+#if 0
+
 	//内部对话
 	else if (msg.pSender->GetName() == _T("managerbutton_9"))
 	{
@@ -2016,8 +2084,6 @@ void CMainFrame::OnManagerButtonEvent(TNotifyUI& msg)
 
 		//获取在线坐席数
 		m_manager->SendTo_GetOnlineUser();
-
-
 
 	}
 	//访客历史
@@ -2061,6 +2127,7 @@ void CMainFrame::OnManagerButtonEvent(TNotifyUI& msg)
 		ShowWebBrowser(sURL);
 	}
 
+#endif
 
 }
 
@@ -2382,8 +2449,7 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 	else if (controlName == L"menu_hide_main_wnd")
 	{
 		if (m_wndShow == 0)
-		{
-			
+		{		
 			m_wndShow = true;
 			m_frameSmallMenu.SetMenuType(1);
 			::ShowWindow(this->m_hWnd, SW_HIDE);
@@ -3365,15 +3431,6 @@ void CMainFrame::UpdateTopCenterButtonState(unsigned long id)
 				//StrCpyW(m_pManagerBtn[i].hotImage, m_pManagerBtn[i].m_pManagerBtn->GetNormalImage());
 				//StrCpyW(m_pManagerBtn[i].pushedImage, m_pManagerBtn[i].m_pManagerBtn->GetNormalImage());
 			}
-			//筛选访客按钮
-			//if (i == 3 || i >= 6)
-			//{
-			//	SetManagerButtonState(i,1);
-			//}
-			//else
-			//{
-			//	SetManagerButtonState(i, 0);
-			//}
 		}
 		return;
 	}
