@@ -3888,7 +3888,8 @@ void CMainFrame::OnActiveUser(unsigned long id,string sid)
 		if (pWebUser == NULL)
 			return;
 
-		m_manager->SendTo_InviteUserResult(pWebUser, m_recvUserObj, true);
+		unsigned long  userid = GetInviteUserid(pWebUser->webuserid);
+		m_manager->SendTo_InviteUserResult(pWebUser, userid, true);
 		//然后加到对话中 
 		map<unsigned long, UserListUI::Node*>::iterator iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
 		//没有找到
@@ -3922,10 +3923,6 @@ void CMainFrame::OnActiveUser(unsigned long id,string sid)
 	}
 	else if (type == 1)
 	{
-		//CUserObject	*pUser = m_recvUserObj;
-		//if (pUser == NULL || pWebUser == NULL)
-		//	return;
-
 		m_manager->SendTo_TransferUserResult(pWebUser, true);
 		//然后加到对话中 
 		map<unsigned long, UserListUI::Node*>::iterator iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
@@ -4535,7 +4532,10 @@ void CMainFrame::RecvInviteUser(CWebUserObject* pWebUser, unsigned long uid)
 	if (pWebUser == NULL)
 		return;
 
-	m_recvUserObj = uid;
+	if (pWebUser->webuserid == 0)
+		return;
+
+	InsertInviteUserid(pWebUser->webuserid, uid);
 
 	int type = -1;
 
@@ -4611,15 +4611,11 @@ void CMainFrame::RecvInviteUser(CWebUserObject* pWebUser, unsigned long uid)
 
 void CMainFrame::ResultInviteUser(CWebUserObject* pWebUser, unsigned long uid, RESULT_STATUS status)
 {
-	map<unsigned long, UserListUI::Node*>::iterator iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
-	//没有找到
-	if (iter == m_allVisitorNodeMap.end())
-	{
+	if (pWebUser == NULL || uid == 0)
 		return;
-	}
 
-
-	if (status == INVITE_ACCEPT)
+	map<unsigned long, UserListUI::Node*>::iterator iter = m_allVisitorNodeMap.find(pWebUser->webuserid);
+	if (iter != m_allVisitorNodeMap.end())
 	{
 		UserListUI::Node *tempNode = iter->second;
 
@@ -4628,8 +4624,10 @@ void CMainFrame::ResultInviteUser(CWebUserObject* pWebUser, unsigned long uid, R
 			pUserList->RemoveNode(tempNode);
 
 		m_allVisitorNodeMap.erase(iter);
+	}
 
-
+	if (status == INVITE_ACCEPT)
+	{
 		//然后在添加
 		CDuiString text;
 		WCHAR name[64] = { 0 };
@@ -4642,9 +4640,7 @@ void CMainFrame::ResultInviteUser(CWebUserObject* pWebUser, unsigned long uid, R
 		{
 			text.Format(_T("{x 4}{i gameicons.png 18 16}{i user_web.png 1 0}{x 4}%s"), name);
 		}
-
-		//if (pUser->UserInfo.uid != m_manager->m_userInfo.UserInfo.uid)
-		
+	
 		m_invoteMyselfList.push_back(pWebUser->webuserid);
 		UserListUI::Node *tempChildNode = pMySelfeNode->child(0);
 
@@ -5375,7 +5371,7 @@ void CMainFrame::AcceptChat()
 void CMainFrame::RefuseChat()
 {
 	CUserObject	*pUser = NULL;
-
+	unsigned long userid = 0;
 	if (m_curSelectId > 0)
 	{
 
@@ -5394,7 +5390,8 @@ void CMainFrame::RefuseChat()
 				break;
 
 			case TALK_STATUS_INVITE:
-				m_manager->SendTo_InviteUserResult(pWebUser, m_recvUserObj, false);
+				userid = GetInviteUserid(pWebUser->webuserid);
+				m_manager->SendTo_InviteUserResult(pWebUser, userid, false);
 				break;
 
 
@@ -5760,4 +5757,30 @@ void CMainFrame::DoRightShortAnswerList(string str)
 
 }
 
+
+void CMainFrame::InsertInviteUserid(unsigned long webUserid, unsigned long id)
+{
+
+	map<unsigned long, unsigned long >::iterator iter = m_recvUserObjMap.find(webUserid);
+	if (iter != m_recvUserObjMap.end())
+	{
+		m_recvUserObjMap.erase(iter);
+	}
+
+	m_recvUserObjMap.insert(pair<unsigned long, unsigned long >(webUserid, id));
+
+}
+
+unsigned long  CMainFrame::GetInviteUserid(unsigned long webUserid)
+{
+	unsigned long  id = 0;
+
+	map<unsigned long, unsigned long >::iterator iter = m_recvUserObjMap.find(webUserid);
+	if (iter != m_recvUserObjMap.end())
+	{
+		id = iter->second;
+	}
+
+	return id;
+}
 

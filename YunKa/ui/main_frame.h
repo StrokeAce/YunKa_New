@@ -270,6 +270,8 @@ public:
 	KEYWORD_INFO *CMainFrame::AddKeyWordInfo(unsigned long id, int sort, unsigned long compid,unsigned long uid, unsigned long groupid, unsigned char type,char *name, char *memo);
 
 	void CMainFrame::DoRightShortAnswerList(string str);
+	void CMainFrame::InsertInviteUserid(unsigned long webUserid, unsigned long id);
+	unsigned long  CMainFrame::GetInviteUserid(unsigned long webUserid);
 
 
 //接入聊天 相关处理
@@ -412,7 +414,7 @@ private:
 	UserListUI::Node*  m_curClickItemNode;
 	string m_curSavedSid;
 	unsigned long m_savedClickId;
-	unsigned long m_recvUserObj;
+	map<unsigned long, unsigned long >m_recvUserObjMap;
 
 	CShowBigImageDlg *pShowImgDlg;
 	CSystemSettings *m_hSystemSettings;
