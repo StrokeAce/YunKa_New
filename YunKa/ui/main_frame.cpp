@@ -63,6 +63,8 @@ CMainFrame::CMainFrame(CChatManager* manager) :m_manager(manager)
 	m_wndShow = 0;
 	m_defalutButtonImage = L"";
 
+	memset(&m_centerChatInfo, 0, sizeof(m_centerChatInfo));
+	memset(&m_rightRectMax, 0, sizeof(m_rightRectMax));
 }
 
 
@@ -547,6 +549,7 @@ void CMainFrame::MoveAndRestoreMsgWnd(int type)
 	RECT rc = { 0 }, rect = {0};
 	RECT sysRect;
 	CDuiString formatString;
+	int changeType = 0;
 
 	CControlUI *leftLayout = static_cast<CHorizontalLayoutUI*>(m_PaintManager.FindControl(_T("VerticalLayoutUI_LeftFrame")));
 	CControlUI *lineLayout = static_cast<CHorizontalLayoutUI*>(m_PaintManager.FindControl(_T("VerticalLayoutUI_LeftLine1")));
@@ -557,47 +560,76 @@ void CMainFrame::MoveAndRestoreMsgWnd(int type)
 	CControlUI *ShowRightWebWnd = static_cast<CHorizontalLayoutUI*>(m_PaintManager.FindControl(_T("right_tab")));
 
 
-	//m_pVisitorRelatedHandler.handler->CreateBrowser(this->m_hWnd, rect, "www.baidu.com", Handler_VisitorRelated);
+	CControlUI *optionButtonControl = static_cast<CHorizontalLayoutUI*>(m_PaintManager.FindControl(_T("right_option_button_HorizontalLayout")));
+
+	CButtonUI *button0 = static_cast<CButtonUI*>(m_PaintManager.FindControl(_T("option_button_5")));
+	CButtonUI *button1 = static_cast<CButtonUI*>(m_PaintManager.FindControl(_T("option_button_6")));
+	CButtonUI *button2 = static_cast<CButtonUI*>(m_PaintManager.FindControl(_T("option_button_7")));
 
 	if (type == 0) //max
 	{
+		GetWindowRect(this->m_hWnd, &sysRect);
+
+		if (sysRect.right >= 1280)
+			changeType = 1;
+
+		//设置按钮背景高度
+		if (changeType == 1)
+		    optionButtonControl->SetAttribute(L"height", L"26");
+
 		leftWidth = leftLayout->GetWidth();
 		leftWidth += lineLayout->GetWidth();
-		GetWindowRect(this->m_hWnd, &sysRect);
+		
 		int centerWidth = (sysRect.right - leftWidth) / 2;
 		int rightWidth = sysRect.right - leftWidth - centerWidth;
 
-		m_centerChatInfo.centerFrameWitdh = centerLayout->GetWidth();
-		m_centerChatInfo.showMsgWidth = ShowMsgWnd->GetWidth();
+		if (m_centerChatInfo.centerFrameWitdh == 0)
+		    m_centerChatInfo.centerFrameWitdh = centerLayout->GetWidth();
+		if (m_centerChatInfo.showMsgWidth == 0)
+		    m_centerChatInfo.showMsgWidth = ShowMsgWnd->GetWidth();
 
 		formatString.Format(_T("%d"), centerWidth);
 		centerLayout->SetAttribute(_T("width"), formatString);
 		formatString.Format(_T("%d"), rightWidth);
 		//rightLayout->SetAttribute(_T("width"), formatString);  //lxh 屏蔽掉 
 
+		//聊天框框
 		rc = ShowMsgWnd->GetPos();
 		rc.right = rc.left + centerWidth - 2;
 		m_pListMsgHandler.handler->MoveBrowser(rc);
 
-		if (m_rightRectWnd.left == 0)
+		//右侧的订单显示web
+		if (m_rightRectWnd.right == 0)
 			m_rightRectWnd = ShowRightWebWnd->GetPos();
 
 		rect.left = rc.right + 4;
 		rect.right = sysRect.right - 4;
-		rect.top += m_rightRectWnd.top;
+		if (changeType == 1)
+			rect.top += m_rightRectWnd.top-26;
+		else
+			rect.top += m_rightRectWnd.top - 26;
+
 		rect.bottom = sysRect.bottom - 4;
 		m_pVisitorRelatedHandler.handler->MoveBrowser(rect);
-		m_rightRectMax = rect;
+		if (m_rightRectMax.right == 0)
+		    m_rightRectMax = rect;
 
-
+		//管理中心显示web
 		rect.left = m_mainCenterAndRightRect.left;
 		rect.right = sysRect.right - 4;
 		rect.top = m_mainCenterAndRightRect.top;
 		rect.bottom = sysRect.bottom - 4;
-
 		m_pWebURLHandler.handler->MoveBrowser(rect);
 
-
+		//右侧 option 按钮移动
+		if (changeType == 1)
+		{
+			rect = button0->GetPos();
+			rc = { rect.right, rect.top, rect.right + 70, rect.top + 26 };
+			button1->SetPos(rc);
+			rc = { rc.right, rc.top, rc.right + 70, rc.top + 26 };
+			button2->SetPos(rc);
+		}
 	}
 	else
 	{
@@ -608,9 +640,20 @@ void CMainFrame::MoveAndRestoreMsgWnd(int type)
 		rc.right = rc.left + m_centerChatInfo.showMsgWidth;
 		m_pListMsgHandler.handler->MoveBrowser(rc);
 
+		//设置按钮背景高度
+		optionButtonControl->SetAttribute(L"height", L"52");
+
 		//rc = ShowRightWebWnd->GetPos();
 		m_pVisitorRelatedHandler.handler->MoveBrowser(m_rightRectWnd);
 		m_pWebURLHandler.handler->MoveBrowser(m_mainCenterAndRightRect);
+
+		//右侧 option 按钮移动
+		button0 = static_cast<CButtonUI*>(m_PaintManager.FindControl(_T("option_button_1")));
+		rect = button0->GetPos();
+		rc = { rect.left, rect.bottom, rect.left + 70, rect.bottom + 26 };
+		button1->SetPos(rc);
+		rc = { rc.right, rc.top, rc.right + 70, rc.top + 26 };
+		button2->SetPos(rc);
 	}
 }
 
@@ -3139,11 +3182,18 @@ void CMainFrame::OnBtnVoice(TNotifyUI& msg)
 void CMainFrame::MoveAndRestoreRightFrameControl(int type)
 {
 	int width = 0;
-	CHorizontalLayoutUI   *m_hLayout = static_cast<CHorizontalLayoutUI*>(m_PaintManager.FindControl(_T("HorizontalLayout_RightFrameOption")));
+
+	CControlUI *rightLayout = static_cast<CHorizontalLayoutUI*>(m_PaintManager.FindControl(_T("HorizontalLayout_RightFrameOption")));
+	if (rightLayout)
+		width = rightLayout->GetWidth()-15;
+	
 	
 	RECT rect = m_pRightCommonWordCombo->GetPos();
 	if (type == 1)
-		width = m_hLayout->GetWidth() - 10;
+	{
+		if (m_rightRectWnd.right > 0)
+		    width = m_rightRectWnd.right - m_rightRectWnd.left - 15;
+	}	
 	else
 		width = m_rightRectMax.right - m_rightRectMax.left - 15;
 
