@@ -2178,9 +2178,12 @@ void CMainFrame::ShowMySelfSendMsg(string strMsg, MSG_DATA_TYPE msgType, string 
 	}
 
 	//组合消息
+	string head;
+	head = "<img id=\"" + msgId + "_head\" class=\"head_image\" src=\"" + m_manager->m_userInfo.m_headPath + "\">";
+	f_covet.Gb2312ToUTF_8(head, head.c_str(), head.length());
 	string msgTime = GetTimeByMDAndHMS(0);
 	sprintf(strJsCode, "AppendMsgToHistory('%d', '%d', '%s', '%s', '%s', '%lu', '%s', '%s', '%s'); ",
-		MSG_FROM_SELF, msgType, name.c_str(), msgTime.c_str(), msg.c_str(), userId, m_manager->m_userInfo.m_headPath.c_str(), msgId.c_str(), imagePath.c_str());
+		MSG_FROM_SELF, msgType, name.c_str(), msgTime.c_str(), msg.c_str(), userId, head.c_str(), msgId.c_str(), imagePath.c_str());
 
 	if (m_pListMsgHandler.isLoaded)
 	{

@@ -5084,24 +5084,25 @@ void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RE
 			{
 				if (pWebUser->m_pWxUserInfo)
 				{
-					head = pWebUser->m_pWxUserInfo->headimgurl;
+					head = "<img class=\"head_image\" src=\"" + pWebUser->m_pWxUserInfo->headimgurl + "\">";
 				}
 				else
 				{
-					string strPath = FullPath("res\\headimage\\default.png");
-					StringReplace(strPath, "\\", "/");
-					convert.Gb2312ToUTF_8(head, strPath.c_str(), strPath.length());
+					string defaultPath = FullPath("res\\headimage\\default.png");
+					StringReplace(defaultPath, "\\", "/");
+					head = "<img id=\"" + msgId + "_head\" class=\"head_image\" src=\"" + defaultPath + "\">";
+					convert.Gb2312ToUTF_8(head, head.c_str(), head.length());
 				}
 				name = pWebUser->info.name;
 			}
 			else if (msgFrom == MSG_FROM_ASSIST)
 			{
-				head = pAssistUser->m_headPath;
+				head = "<img class=\"head_image\" src=\"" + pAssistUser->m_headPath + "\">";
 				name = pAssistUser->UserInfo.nickname;
 			}
 			else if (msgFrom == MSG_FROM_SELF)
 			{
-				head = m_userInfo.m_headPath;
+				head = "<img class=\"head_image\" src=\"" + m_userInfo.m_headPath + "\">";
 				name = m_userInfo.UserInfo.nickname;
 			}
 			else if (msgFrom == MSG_FROM_SYS)
@@ -5264,12 +5265,12 @@ void CChatManager::AddMsgToList(IBaseObject* pObj, MSG_FROM_TYPE msgFrom, MSG_RE
 			CUserObject* pUser = (CUserObject*)pObj;
 			if (msgFrom == MSG_FROM_CLIENT)
 			{
-				head = pUser->m_headPath;
+				head = "<img class=\"head_image\" src=\"" + pUser->m_headPath + "\">";
 				name = pUser->UserInfo.nickname;
 			}
 			else if (msgFrom == MSG_FROM_SELF)
 			{
-				head = m_userInfo.m_headPath;
+				head = "<img class=\"head_image\" src=\"" + m_userInfo.m_headPath + "\">";
 				name = m_userInfo.UserInfo.nickname;
 			}
 			else if (msgFrom == MSG_FROM_SYS)

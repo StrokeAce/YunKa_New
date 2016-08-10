@@ -132,11 +132,11 @@ function AppendMsgToHistory(msgFrom, msgDataType, sname, time, content, userId, 
 			head = head.replace(/\\/g, "\\\\");
 			if(msgDataType == 1)
 			{
-			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;<img class = 'head_image' src='" + head + "'></div><div class='msg_send_text'><div class='msg_text_background'>" + content + "</div></div></div>";
+			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;"+ head +"</div><div class='msg_send_text'><div class='msg_text_background'>" + content + "</div></div></div>";
 			}
 			else
 			{
-			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;<img class = 'head_image' src='" + head + "'></div><div class='msg_send_image'>" + content + "</div></div>";
+			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;"+ head +"</div><div class='msg_send_image'>" + content + "</div></div>";
 			}
 			break;
 		}
@@ -147,15 +147,15 @@ function AppendMsgToHistory(msgFrom, msgDataType, sname, time, content, userId, 
 			// 接收消息
 		    if (msgDataType == 1)
 			{
-		        lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "'>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_text'><div class='msg_text_background'>" + content + "</div></div></div>";
+		        lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'>"+ head +"&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_text'><div class='msg_text_background'>" + content + "</div></div></div>";
 		    }
 		    else if(msgDataType == 7)
 		    {
-		        lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "'>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_text'><div class='msg_link_background'>" + content + "</div></div></div>";
+		        lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'>"+ head +"&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_text'><div class='msg_link_background'>" + content + "</div></div></div>";
 		    }
 			else
 			{
-			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'><img class='head_image' src='" + head + "'>&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'>" + content + "</div></div>";
+			    lstmsg.innerHTML = "<div class='msg_recv clearfix'><div class='recv_name'>"+ head +"&nbsp;" + sname + "<font class='time'>" + time + "</font></div><div class='msg_recv_image'>" + content + "</div></div>";
 			}
 		}
 			break;
