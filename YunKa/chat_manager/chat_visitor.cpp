@@ -692,7 +692,7 @@ void CChatVisitor::RecvSrvRespVisitorInfo(CWebUserObject *pWebUser, WEBUSER_UPIN
 		return;
 
 	pWebUser->m_strInfoHtml = SolveVisitorInfoHtmlTxt(pWebUser, pInfo);
-	pWebUser->m_bIsGetInfo = true;
+	pWebUser->m_bIsGetInfo++;
 
 	//pWebUser = m_pCurSelectWebUser;
 	if (pWebUser == NULL)

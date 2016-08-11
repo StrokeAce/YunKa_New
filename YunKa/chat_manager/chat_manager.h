@@ -156,6 +156,8 @@ public:
 	// 收到辅助应答的配置内容
 	virtual void RecvQuickReply(string quickReply) = 0;
 
+	virtual void PopTrayTips(string strPopTips, string strTitle = "") = 0;
+
 };
 
 class CChatManager : public IBaseReceive
@@ -583,7 +585,9 @@ public:
 
 	bool SendFileToUser(IBaseObject* pUser, string strPathFile, string msgId, MSG_RECV_TYPE userType);
 
-	void SolveAlertInfo(ALERT_TYPE type, char* strPopTips);
+	void SolveAlertInfo(ALERT_TYPE type, string strPopTips);
+
+	void ReplaceHeadImage(CWebUserObject* pWebUser);
 
 public:
 	int						m_nOnLineStatus;		// 是否在线,对于im服务器而言

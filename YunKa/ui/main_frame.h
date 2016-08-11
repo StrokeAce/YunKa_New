@@ -219,6 +219,8 @@ public:    //主界面消息回调
 
 	virtual void RecvQuickReply(string quickReply);
 
+	virtual void PopTrayTips(string strPopTips, string strTitle = "");
+
 public:
 	//自己定义的操作函数
 	void OnBtnFont(TNotifyUI& msg);

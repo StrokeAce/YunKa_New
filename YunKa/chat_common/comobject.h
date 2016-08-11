@@ -258,7 +258,7 @@ public:
 	string					m_strPreSendMsg;
 	list<ONE_MSG_INFO>		m_strMsgs;
 	bool					m_bConnected;				// 该用户已经和你建立连接，可以通讯了
-	bool					m_bIsGetInfo;				// 是否已获取到信息
+	int						m_bIsGetInfo;				// 是否已获取到信息
 public:
 	string					m_strHistory;				//总的历史纪录的显示
 	string					m_strTotal;

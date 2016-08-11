@@ -23,6 +23,7 @@
 #include <process.h>
 #include <shlwapi.h>
 #include <functional>
+#include <shellapi.h>
 
 using namespace std;
 
@@ -3063,7 +3064,11 @@ WxMsgBase* CChatManager::ParseWxMsg(CWebUserObject* pWebUser, char* msg, CUserOb
 				m_handlerMsgs->RecvWebUserInfo(pWebUser, NOTIFY_NAME);
 			}
 			
-			pWebUser->m_bIsGetInfo = true;
+			pWebUser->m_bIsGetInfo++;
+			if (pWebUser->m_bIsGetInfo == 1)
+			{
+				ReplaceHeadImage(pWebUser);
+			}			
 			return NULL;
 		}
 		else if ("wxactoken" == pwxobj->MsgType)
@@ -5846,7 +5851,7 @@ void CChatManager::SetAllUserOffline()
 		{
 			pWebUserOb->onlineinfo.talkstatus = TALK_STATUS_NO;
 			pWebUserOb->info.userstatus = USER_STATUS_OFFLINE;
-			pWebUserOb->m_bIsGetInfo = false;
+			pWebUserOb->m_bIsGetInfo = 0;
 		}
 	}
 
@@ -6372,7 +6377,7 @@ DWORD WINAPI CChatManager::GetQuickReplyThread(void *arg)
 	return 0;
 }
 
-void CChatManager::SolveAlertInfo(ALERT_TYPE type, char* strPopTips)
+void CChatManager::SolveAlertInfo(ALERT_TYPE type, string strPopTips)
 {
 	ALERT_INFO *pAlert = m_sysConfig->GetAlertInfo(type);
 
@@ -6403,7 +6408,7 @@ void CChatManager::SolveAlertInfo(ALERT_TYPE type, char* strPopTips)
 	//end
 	if (pAlert->bTray)
 	{
-		//PopTrayTips(strPopTips, strTitle);
+		m_handlerMsgs->PopTrayTips(strPopTips, strTitle);
 	}
 
 	if (pAlert->bSound)
@@ -6411,3 +6416,21 @@ void CChatManager::SolveAlertInfo(ALERT_TYPE type, char* strPopTips)
 		sndPlaySoundA(pAlert->soundfilename, SND_ASYNC);
 	}
 }
+
+void CChatManager::ReplaceHeadImage(CWebUserObject* pWebUser)
+{
+	list<ONE_MSG_INFO>::iterator iter = pWebUser->m_strMsgs.begin();
+	for (iter; iter != pWebUser->m_strMsgs.end(); iter++)
+	{
+		int begin,end,type;
+		begin = iter->msg.find("head_image");
+		type = iter->msg.find("AppendMsgToHistory('2'");
+		if (begin > 0 && type >= 0)
+		{
+			end = iter->msg.find(">", begin);
+			iter->msg.replace(begin + 17, end - begin - 18, pWebUser->m_pWxUserInfo->headimgurl);
+		}
+	}
+
+}
+

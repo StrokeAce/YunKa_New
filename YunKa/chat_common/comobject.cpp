@@ -842,7 +842,7 @@ CWebUserObject::CWebUserObject()
 	m_nFlag = 0;
 
 	m_bConnected = false;
-	m_bIsGetInfo = false;
+	m_bIsGetInfo = 0;
 
 	m_onlinetime = 0;
 	m_bIsShow = false;

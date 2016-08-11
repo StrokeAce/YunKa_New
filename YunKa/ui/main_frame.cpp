@@ -14,6 +14,7 @@
 #include "select_visitor_wnd.h"
 #include <ShlObj.h>
 #include <GdiPlus.h>
+#include "../chat_common/commsg.h"
 
 
 
@@ -5807,6 +5808,29 @@ void CMainFrame::DoRightShortAnswerList(string str)
 
 }
 
+void CMainFrame::PopTrayTips(string strPopTips, string strTitle /*= ""*/)
+{
+	NOTIFYICONDATAA icondata;
+	memset(&icondata, '\0', sizeof(NOTIFYICONDATAA));
+	icondata.cbSize = sizeof(NOTIFYICONDATAA);
+	icondata.hWnd = m_hMainWnd;
+	icondata.uID = IDI_YUNKA;  //identifier
+	icondata.uCallbackMessage = WM_MSG_NOTIFYICON; //notification handler
+	icondata.uFlags = NIF_INFO;
+	icondata.uTimeout = 4000;
+	icondata.dwInfoFlags = NIIF_INFO;
+	strcpy(icondata.szInfo, strPopTips.c_str());
+	if (strTitle.empty())
+	{
+		_snprintf(icondata.szInfoTitle, sizeof(icondata.szInfoTitle) - 1, "%s 新消息", m_manager->m_initConfig.sProgrameNameMini);
+	}
+	else
+	{
+		_snprintf(icondata.szInfoTitle, sizeof(icondata.szInfoTitle) - 1, "%s %s", m_manager->m_initConfig.sProgrameNameMini, strTitle.c_str());
+	}
+
+	Shell_NotifyIconA(NIM_MODIFY, &icondata);
+}
 
 void CMainFrame::InsertInviteUserid(unsigned long webUserid, unsigned long id)
 {
