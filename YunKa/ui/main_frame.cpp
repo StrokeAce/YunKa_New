@@ -1487,6 +1487,27 @@ void CMainFrame::OnBtnSendMessage(TNotifyUI& msg)
 	if (sendUserType == MSG_RECV_ERROR || m_curSelectId <= 0)
 		return;
 
+	if (sendUserType == MSG_RECV_CLIENT)
+	{
+		CUserObject* pUser = m_manager->GetUserObjectByUid(m_curSelectId);
+		if (pUser == NULL || pUser->status == USER_STATUS_OFFLINE)
+		{
+			m_manager->AddMsgToList((IBaseObject*)pUser, MSG_FROM_SYS, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL,
+				MSG_DATA_TYPE_TEXT, "对方不在线", 0, NULL, NULL);
+			return;
+		}
+	}
+	else if (sendUserType == MSG_RECV_WEB || sendUserType == MSG_RECV_WX)
+	{
+		CWebUserObject* pWebUser = m_manager->GetWebUserObjectByUid(m_curSelectId);
+		if (pWebUser == NULL || pWebUser->info.userstatus == USER_STATUS_OFFLINE)
+		{
+			m_manager->AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL,
+				MSG_DATA_TYPE_TEXT, "访客已离开", 0, NULL, NULL);
+			return;
+		}
+	}
+
 	ITextServices * pTextServices = m_pSendEdit->GetTextServices();
 	tstring strText;
 	VectorStringData vecName;
@@ -2216,7 +2237,7 @@ void CMainFrame::ShowMySelfSendMsg(string strMsg, MSG_DATA_TYPE msgType, string 
 	}
 	else if (msgType == MSG_DATA_TYPE_FILE)
 	{
-		sprintf(contentMsg, "<img id=\"%s_image\" class=\"wait_image\" src=\"%s\"><span id=\"%s_span\" class=\"file_text\">%s</span>",
+		sprintf(contentMsg, "<img id=\"%s_image\" class=\"wait_image\" src=\"%s\"><span id=\"%s_span\" style=\"color:red\" class=\"msg_text_background\">%s</span>",
 			msgId.c_str(), imagePath.c_str(), msgId.c_str(), msg.c_str());
 		msg = contentMsg;
 	}
@@ -5830,6 +5851,8 @@ void CMainFrame::PopTrayTips(string strPopTips, string strTitle /*= ""*/)
 	}
 
 	Shell_NotifyIconA(NIM_MODIFY, &icondata);
+
+	
 }
 
 void CMainFrame::InsertInviteUserid(unsigned long webUserid, unsigned long id)

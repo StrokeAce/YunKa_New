@@ -2,7 +2,7 @@
 <Window size="800,600"  caption="0,0,0,30"  roundcorner="4,4" >
 
 
-<VerticalLayout inset="4,4,4,4" bkcolor="#FFF2F2F2">
+<VerticalLayout inset="4,4,4,4" bkcolor="#FF60B1FE">
 
 <HorizontalLayout height="26" inset="2,2,2,0"  >
 

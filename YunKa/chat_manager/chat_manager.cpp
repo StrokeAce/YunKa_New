@@ -4023,7 +4023,10 @@ int CChatManager::SendTo_Msg(unsigned long userId, MSG_RECV_TYPE userType, strin
 	if (userType == MSG_RECV_CLIENT)
 	{
 		CUserObject* pUser = GetUserObjectByUid(userId);
-		if (pUser == NULL) return nError;
+		if (pUser == NULL || pUser->status == USER_STATUS_OFFLINE )
+		{
+			return nError;
+		}
 		switch (msgDataType)
 		{
 		case MSG_DATA_TYPE_TEXT:
@@ -4050,7 +4053,10 @@ int CChatManager::SendTo_Msg(unsigned long userId, MSG_RECV_TYPE userType, strin
 	else if (userType == MSG_RECV_WEB || userType == MSG_RECV_WX)
 	{
 		CWebUserObject* pWebUser = GetWebUserObjectByUid(userId);
-		if (pWebUser == NULL) return nError;
+		if (pWebUser == NULL || pWebUser->info.userstatus == USER_STATUS_OFFLINE)
+		{
+			return nError;
+		}
 
 		switch (msgDataType)
 		{
@@ -4655,12 +4661,12 @@ void CChatManager::AfterUpload(unsigned long userId, MSG_RECV_TYPE userType, str
 			else if (userType == MSG_RECV_CLIENT)
 			{
 				char sSendTo[MAX_1024_LEN];
-				sprintf(sSendTo, "<span class=\"file_text\">收到文件 </span><a href=\"%s\">%s</a>", mediaID.c_str(), fileName.c_str());
+				sprintf(sSendTo, "<span class=\"file_text\">收到文件 </span><a href=\"%s\" target=\"_blank\">%s</a>", mediaID.c_str(), fileName.c_str());
 				if (SendMsg(pUser, sSendTo, 0) == SYS_SUCCESS)
 				{
 					char sSendTo[MAX_1024_LEN];
 					m_handlerMsgs->ResultSendMsg(msgId, true, pUser->UserInfo.uid, userType, msgDataType, mediaID);
-					sprintf(sSendTo, "<span class=\"file_text\">发送文件 </span><a href=\"%s\">%s</a>",	mediaID.c_str(), fileName.c_str());
+					sprintf(sSendTo, "<span class=\"file_text\">发送文件 </span><a  class=\"file_link\" href=\"%s\" target=\"_blank\">%s</a>",	mediaID.c_str(), fileName.c_str());
 					AddMsgToList((IBaseObject*)pUser, MSG_FROM_SELF, MSG_RECV_ERROR, msgId, MSG_TYPE_NORMAL,
 						msgDataType, sSendTo, 0, NULL, NULL);
 				}
@@ -5958,8 +5964,7 @@ bool CChatManager::ParseTextMsg(CWebUserObject* pWebUser, string content, CUserO
 		return true;
 	}
 	else if ((int)content.find("http:") > -1 && (int)content.find("收到文件") < 0 && ((int)content.find(".jpg") > -1 ||
-		(int)content.find(".jpeg") > -1 || (int)content.find(".bmp") > -1 ||
-		(int)content.find(".png") > -1))
+		(int)content.find(".jpeg") > -1 || (int)content.find(".bmp") > -1 ||(int)content.find(".png") > -1))
 	{
 		// web用户发来
 		char contentMsg[MAX_1024_LEN];

@@ -130,7 +130,7 @@ function AppendMsgToHistory(msgFrom, msgDataType, sname, time, content, userId, 
 		{
 			// 发送消息
 			head = head.replace(/\\/g, "\\\\");
-			if(msgDataType == 1)
+			if (msgDataType == 1)
 			{
 			    lstmsg.innerHTML = "<div class='msg_send clearfix'><div class='send_name'>" + sname + "&nbsp;"+ head +"</div><div class='msg_send_text'><div class='msg_text_background'>" + content + "</div></div></div>";
 			}
@@ -313,7 +313,7 @@ function ResultSendMsg(msgId, bSuccess, imagePath, filePath, recvUserType, msgDa
         {
             var spanId = msgId + "_span";
             var oSpan = document.getElementById(spanId);
-            oSpan.innerHTML = "<span class='file_text'>发送文件 </span><a href='" + filePath + "'>" + imagePath + "</a>";
+            oSpan.innerHTML = "<span class='file_text'>发送文件 </span><a href='" + filePath + "' target='_blank'>" + imagePath + "</a>";
         }        
     }
 }
