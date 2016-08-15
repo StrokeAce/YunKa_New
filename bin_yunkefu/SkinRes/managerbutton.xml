@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<managerbutton>
+<!-- 管理按钮 -->
+
+<!-- 管理按钮   显示  筛选访客  按钮1-->
+ <control width="20" />
+ <Button name="managerbutton_1" maxwidth="60" maxheight="50" tooltip="筛选访客" normalimage="file='newimage\\find.png'" pushedimage="file='newimage\\find.png'"  
+hotimage="file='newimage\\find.png'" pos="20,10,80,60" />
+
+ <control width="20" />
+<!-- 管理按钮   内部对话  按钮2-->
+ <Button name="managerbutton_2" tooltip="内部对话"   maxwidth="60" maxheight="50" normalimage="file='newimage\\m_2.png'" pushedimage="file='newimage\\m_2.png'"  
+hotimage="file='newimage\\m_2.png'"  pos="100,10,160,60" />
+ 
+
+<!--按钮3-->
+ <control width="20" />
+ <Button name="managerbutton_3" tooltip="访客历史"   maxwidth="60" maxheight="50" normalimage="file='newimage\\m_3.png'" pushedimage="file='newimage\\m_3.png'"  
+hotimage="file='newimage\\m_3.png'" pos="180,10,240,60" />
+
+<!--按钮4-->
+ <control width="20" />
+ <Button name="managerbutton_4"  tooltip="访客来电"  maxwidth="60" maxheight="50" normalimage="file='newimage\\m_4.png'" pushedimage="file='newimage\\m_4.png'"  
+hotimage="file='newimage\\m_4.png'" pos="260,10,320,60" />
+
+
+ <control width="20" />
+ <Button name="managerbutton_5" tooltip="访客留言" maxwidth="60" maxheight="50" normalimage="file='newimage\\m_5.png'" pushedimage="file='newimage\\m_5.png'"  
+hotimage="file='newimage\\m_5.png'" pos="340,10,400,60" />
+
+ <control width="20" />
+ <Button name="managerbutton_6" tooltip="客户管理" maxwidth="60" maxheight="50" normalimage="file='newimage\\m_6.png'" pushedimage="file='newimage\\m_6.png'"  
+hotimage="file='newimage\\m_6.png'" pos="420,10,480,60" />
+
+ <control width="20" />
+ <Button name="managerbutton_7" tooltip="工单管理" maxwidth="60" maxheight="50" normalimage="file='newimage\\m_7.png'" pushedimage="file='newimage\\m_7.png'" 
+hotimage="file='newimage\\m_7.png'" pos="500,10,560,60" />
+
+ <control width="20" />
+ <Button name="managerbutton_8" tooltip="管理中心"  maxwidth="60" maxheight="50" normalimage="file='newimage\\m_8.png'" pushedimage="file='newimage\\m_8.png'"  
+hotimage="file='newimage\\m_8.png'" pos="580,10,640,60"/>
+
+
+</managerbutton>

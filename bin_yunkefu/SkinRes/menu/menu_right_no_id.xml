@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Window>
+  <Font name="微软雅黑" size="12" bold="false" default="true" />
+  <Font name="微软雅黑" size="12" bold="true"/>
+    <Default name="Menu" value="inset=&quot;2,2,2,2&quot; itemtextpadding=&quot;30,0,0,0&quot; bkimage=&quot;file='menu\\menu_bk.png' restype='png' corner='30,8,8,8'&quot; hole=&quot;false&quot;" />
+  <Menu>
+       <MenuElement name="menu_right_find_visitor" text="查找访客" />
+       <MenuElement   name="menu_right_update_friend" text="更新好友对象"/>
+        
+       <MenuElement name="menu_right_set_filter" text="设置访客过滤条件" >
+       <MenuElement  name="menu_right_show_all"    text="显示全部">
+
+       <HorizontalLayout>
+          <Label name="label_right_set_filter_show_all" width="24"  bkimage=""  />
+          </HorizontalLayout>
+      </MenuElement>
+
+      <MenuElement name="MenuElement_right_my_history_visitor" text="只显示我的全部联系人" >
+          <HorizontalLayout>
+          <Label name="label_right_set_filter_show_my_visitor"  width="20"  bkimage=""  />
+          </HorizontalLayout>
+      </MenuElement>
+
+     <MenuElement name="MenuElement_right_all_history_visitor" text="只显示全部最近联系人" >
+          <HorizontalLayout>
+          <Label name="label_right_set_filter_show_all_history_visitor" width="20"  bkimage=""  />
+          </HorizontalLayout>
+      </MenuElement>
+
+     <MenuElement name="MenuElement_right_1_minute" text="只显示访问时间超过1分钟的客人" >
+          <HorizontalLayout>
+          <Label name="label_right_set_filter_1_minute_visitor" width="20"  bkimage=""  />
+          </HorizontalLayout>
+      </MenuElement>
+
+     <MenuElement name="MenuElement_right_3_minute" text="只显示访问时间超过3分钟的客人" >
+          <HorizontalLayout>
+          <Label name="label_right_set_filter_3_minute_visitor" width="20"  bkimage=""  />
+          </HorizontalLayout>
+      </MenuElement>
+
+
+     <MenuElement name="MenuElement_right_5_minute" text="只显示访问时间超过5分钟的客人" >
+          <HorizontalLayout>
+          <Label name="label_right_set_filter_5_minute_visitor" width="20"  bkimage=""  />
+          </HorizontalLayout>
+      </MenuElement>
+
+
+     <MenuElement  name="MenuElement_right_10_minute"  text="只显示访问时间超过10分钟的客人" >
+          <HorizontalLayout>
+          <Label name="label_right_set_filter_10_minute_visitor" width="20"  bkimage=""  />
+          </HorizontalLayout>
+      </MenuElement>
+
+
+     <MenuElement name="MenuElement_right_user_set" text="用户设置" >
+          <HorizontalLayout>
+          <Label name="label_right_set_filter_user" width="20"  bkimage=""  />
+          </HorizontalLayout>
+      </MenuElement>
+
+
+   </MenuElement>
+  </Menu>
+</Window>

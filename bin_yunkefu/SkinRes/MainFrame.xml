@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Window size="1010,680" caption="0,0,0,85" roundcorner="4,4"  mininfo="1010,700" roundcorner="6,6">
+
+
+<!-- 缺省样式 -->
+<Include source="Default.xml" />
+
+<Container>
+
+<!-- 暂时屏蔽 背景设置 -->
+<!-- VerticalLayout inset="3,0,3,3"  bkimage="file='bg.png' corner='4,48,4,4' mask='#FFFF00FF'" -->
+
+<VerticalLayout name="VerticalLayoutUI_MainFrame"    inset="4,0,4,4" bkcolor="#FF60B1FE" bordercolor="#FF1B4876" bordersize="2" borderround="5,5">
+
+<!-- 窗口栏 -->
+<HorizontalLayout name="HorizontalLayoutUI_TopFrame"   height="80" inset="2,2,0,0"> 
+	<Include source="top.xml" />		
+</HorizontalLayout>
+
+<!-- 分割栏 -->
+<!-- HorizontalLayout height="10" bkcolor="#FFEBF5FF" / --> 
+<!-- 暂时屏蔽掉分割栏 -->
+
+
+
+<!-- 管理按钮显示 -->
+<!--HorizontalLayout name="HorizontalLayoutUI_ManagerBar"   height="80" --> 
+<!--Include source="manager.xml" /-->		
+<!--/HorizontalLayout-->
+
+<!-- 显示一栏 状态 -->
+<!-- HorizontalLayout height="20"  bkcolor="#FFEBF5FF" /--> 
+<!--HorizontalLayout height="20"  bkcolor="#FFD3E5F6" /--> 
+
+		
+<HorizontalLayout>
+
+
+<!-- 左侧显示 数列表 -->
+<VerticalLayout width="270"  name="VerticalLayoutUI_LeftFrame"   bkcolor="#FFF8F8F8" >
+	<Include source="left.xml" />
+</VerticalLayout>
+
+
+<!--VerticalLayout width="2" bkcolor="#FF45FE22" /-->
+<VerticalLayout width="4" name="VerticalLayoutUI_LeftLine1"  bkcolor="#FFD3E5F6" />
+
+<VerticalLayout   name="VerticalLayoutUI_CenterRight_WebShow">
+<HorizontalLayout>
+<!-- 中间显示 聊天内容 -->
+<VerticalLayout name="VerticalLayoutUI_CenterFrame"    width="370"   bkcolor="#FFF8F8F8"  >
+	<Include source="center.xml" />
+</VerticalLayout>
+
+<!--VerticalLayout width="2" bkcolor="#FF45FE22" /-->
+<VerticalLayout name="VerticalLayoutUI_LeftLine2"  width="4"  bkcolor="#FFD3E5F6" />
+
+
+
+<!-- 右侧显示其它 -->
+<VerticalLayout    name="VerticalLayoutUI_RightFrame"   bkcolor="#FFF8F8F8"    >
+	<Include source="right.xml" />
+</VerticalLayout>
+
+</HorizontalLayout>
+</VerticalLayout>
+
+
+
+</HorizontalLayout>
+
+<!-- 底层状态栏   暂时不需要 先屏蔽掉 -->
+<!-- HorizontalLayout height="20"  bkcolor="#FFD2D6DD"-->
+<!--HorizontalLayout height="20"  bkcolor="#FFEBF5FF"-->
+<!--Include source="bottom.xml" /-->
+<!--/HorizontalLayout-->
+
+</VerticalLayout>
+
+</Container>
+</Window>

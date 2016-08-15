@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<center>
+<HorizontalLayout name="HorizontalLayoutUI_CenterTop" height="2"  bkcolor="#FFD3E5F6">
+
+</HorizontalLayout>
+
+<HorizontalLayout name="HorizontalLayoutUI_ShowMsg" height="420" bkcolor="#FFF8F8F8" inset="2,1,1,2">
+
+</HorizontalLayout>
+
+
+
+<!--  中间按钮显示栏 -->
+<!--  HorizontalLayout height="25" bkcolor="#FFFCFCFC" -->
+<HorizontalLayout  name="HorizontalLayoutUI_MiddleButtonBar"   height="27" inset="2,3,2,4"       bkimage="file='mainframe\\MidToolBarBg.png'">
+
+<!-- Option name="btnFont" width="24" height="20" maxheight="20" maxwidth="24" bkimage="file='mainframe\\icon_font.png' dest='2,0,22,20'" hotimage="file='mainframe\\aio_toolbar_highligh.png' corner='3,3,3,3'" selectedimage="file='mainframe\\aio_toolbar_down.png' corner='3,3,3,3'"  / -->
+					<Control width="10"/>
+          <Option name="btnFace" tooltip="表情"  width="24" height="20" maxheight="20" maxwidth="24" bkimage="file='mainframe\\icon_face.png' dest='2,0,22,20'" hotimage="file='mainframe\\aio_toolbar_highligh.png' corner='3,3,3,3'" selectedimage="file='mainframe\\aio_toolbar_down.png' corner='3,3,3,3'"  />
+					<Control width="10"/>
+					<Button name="screenshotsbtn" tooltip="截图"  width="20" height="20" maxheight="20" maxwidth="24" bkimage="file='mainframe\\icon_screenshots.png' dest='2,0,22,20'" hotimage="file='mainframe\\aio_toolbar_highligh.png' corner='3,3,3,3'" pushedimage="file='mainframe\\aio_toolbar_down.png' corner='3,3,3,3'"  />
+<Control width="10" />
+
+ <Button name="voiceSendBtn"  tooltip="发送语音" width="20" height="20" maxheight="20" maxwidth="24" bkimage="file='mainframe\\icon_voice.png' dest='0,0,20,20'" hotimage="file='mainframe\\aio_toolbar_highligh.png' corner='3,3,3,3'" pushedimage="file='mainframe\\aio_toolbar_down.png' corner='3,3,3,3'"  />
+
+<Control width="10"/>
+ <Button name="fileSendBtn"  tooltip="发送文件" width="20" height="20" maxheight="20" maxwidth="24" bkimage="file='mainframe\\icon_file.png' dest='0,0,20,20'" hotimage="file='mainframe\\aio_toolbar_highligh.png' corner='3,3,3,3'" pushedimage="file='mainframe\\aio_toolbar_down.png' corner='3,3,3,3'"  />
+
+  <Control width="10"/>
+  <Button name="mid_button_1"   tooltip="接受"  width="20" height="20" maxheight="20" maxwidth="24" bkimage="file='newimage\\h_1.png' " hotimage="file='newimage\\h_1.png' corner='3,3,3,3'" pushedimage="file='newimage\\h_1.png' corner='3,3,3,3'"  />
+
+  <Control width="10"/>
+  <Button name="mid_button_2"  tooltip="结束" width="20" height="20" maxheight="20" maxwidth="24" bkimage="file='newimage\\h_2.png' " hotimage="file='newimage\\h_2.png' corner='3,3,3,3'" pushedimage="file='newimage\\h_2.png' corner='3,3,3,3'"  />
+  <Control width="10"/>
+  <Button name="mid_button_3"   tooltip="转接" width="20" height="20" maxheight="20" maxwidth="24" bkimage="file='newimage\\h_3.png' " hotimage="file='newimage\\h_3.png' corner='3,3,3,3'" pushedimage="file='newimage\\h_3.png' corner='3,3,3,3'"  />
+
+  <Control width="10"/>
+  <Button name="mid_button_4"  tooltip="屏蔽" width="20" height="20" maxheight="20" maxwidth="24" bkimage="file='newimage\\h_4.png' " hotimage="file='newimage\\h_4.png' corner='3,3,3,3'" pushedimage="file='newimage\\h_4.png' corner='3,3,3,3'"  />
+
+  <Control width="10"/>
+  <Button name="mid_button_5"  tooltip="邀请评价" width="20" height="20" maxheight="20" maxwidth="24" bkimage="file='newimage\\h_5.png' " hotimage="file='newimage\\h_5.png' corner='3,3,3,3'" pushedimage="file='newimage\\h_5.png' corner='3,3,3,3'"  />
+
+  <Control width="10"/>
+  <Button name="mid_button_6"  tooltip="释放"  width="20" height="20" maxheight="20" maxwidth="24" bkimage="file='newimage\\h_6.png' " hotimage="file='newimage\\h_6.png' corner='3,3,3,3'" pushedimage="file='newimage\\h_6.png' corner='3,3,3,3'"  />
+
+  <Control width="10"/>
+  <Button name="mid_button_7"  tooltip="邀请协助"  width="20" height="20" maxheight="20" maxwidth="24" bkimage="file='newimage\\h_7.png' " hotimage="file='newimage\\h_7.png' corner='3,3,3,3'" pushedimage="file='newimage\\h_7.png' corner='3,3,3,3'"  />
+
+
+
+</HorizontalLayout>
+
+<HorizontalLayout  name="HorizontalLayoutUI_InputRichEdit"  bkcolor="#FFFEFDFC"  inset="5,0,0,0" >
+
+<!--RichEdit2 name="send_rich_edit" multiline="true" vscrollbar="true" autovscroll="true" rich="true" readonly="false" menu="true" inset="5,0,0,0"/-->
+
+			
+<RichEdit name="richSend" multiline="true" vscrollbar="true" autovscroll="true" enabled="true" rich="true" readonly="false" wantreturn="true" wantctrlreturn="false" menu="true"  inset="2,1,1,1" />		
+
+</HorizontalLayout>
+
+<!-- HorizontalLayout height="20"  bkcolor="#FFDEEEF6" /-->
+<HorizontalLayout height="36"  name="HorizontalLayoutUI_SendMsgButton"   bkcolor="#FFFEFDFC">
+
+<VerticalLayout />
+
+<VerticalLayout width="110">
+<Button name="sendMsgBtn" text="发送" float="true" font="3" pos="0,2,80,28" tooltip="" normalimage="mainframe\\button_send.png" hotimage="mainframe\\button_send.png" pushedimage="mainframe\button_send.png" />
+
+
+<Button name="sendMsgBtn_select" text="" float="true" font="3" pos="81,2,105,28"tooltip="" normalimage="mainframe\\button_select.png" hotimage="mainframe\\button_select.png" pushedimage="mainframe\\button_select.png" />
+
+</VerticalLayout>
+
+</HorizontalLayout>
+
+
+
+
+</center>
