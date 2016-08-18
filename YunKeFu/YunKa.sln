@@ -1,0 +1,48 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "YunKa", "YunKa.vcxproj", "{7FF54136-337D-4745-804F-B1D5AB465995}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DuiLib", "..\thirdlib\duilib\DuiLib.vcxproj", "{E106ACD7-4E53-4AEE-942B-D0DD426DB34E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ScreenCapture", "..\ScreenCapture\ScreenCapture.vcxproj", "{4834D41F-96E6-4236-826A-4B4A544CA87B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+		UnicodeDebug|Win32 = UnicodeDebug|Win32
+		UnicodeRelease|Win32 = UnicodeRelease|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7FF54136-337D-4745-804F-B1D5AB465995}.Debug|Win32.ActiveCfg = Debug|Win32
+		{7FF54136-337D-4745-804F-B1D5AB465995}.Debug|Win32.Build.0 = Debug|Win32
+		{7FF54136-337D-4745-804F-B1D5AB465995}.Release|Win32.ActiveCfg = Release|Win32
+		{7FF54136-337D-4745-804F-B1D5AB465995}.Release|Win32.Build.0 = Release|Win32
+		{7FF54136-337D-4745-804F-B1D5AB465995}.UnicodeDebug|Win32.ActiveCfg = Debug|Win32
+		{7FF54136-337D-4745-804F-B1D5AB465995}.UnicodeDebug|Win32.Build.0 = Debug|Win32
+		{7FF54136-337D-4745-804F-B1D5AB465995}.UnicodeRelease|Win32.ActiveCfg = Release|Win32
+		{7FF54136-337D-4745-804F-B1D5AB465995}.UnicodeRelease|Win32.Build.0 = Release|Win32
+		{E106ACD7-4E53-4AEE-942B-D0DD426DB34E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E106ACD7-4E53-4AEE-942B-D0DD426DB34E}.Debug|Win32.Build.0 = Debug|Win32
+		{E106ACD7-4E53-4AEE-942B-D0DD426DB34E}.Release|Win32.ActiveCfg = Release|Win32
+		{E106ACD7-4E53-4AEE-942B-D0DD426DB34E}.Release|Win32.Build.0 = Release|Win32
+		{E106ACD7-4E53-4AEE-942B-D0DD426DB34E}.UnicodeDebug|Win32.ActiveCfg = UnicodeDebug|Win32
+		{E106ACD7-4E53-4AEE-942B-D0DD426DB34E}.UnicodeDebug|Win32.Build.0 = UnicodeDebug|Win32
+		{E106ACD7-4E53-4AEE-942B-D0DD426DB34E}.UnicodeRelease|Win32.ActiveCfg = UnicodeRelease|Win32
+		{E106ACD7-4E53-4AEE-942B-D0DD426DB34E}.UnicodeRelease|Win32.Build.0 = UnicodeRelease|Win32
+		{4834D41F-96E6-4236-826A-4B4A544CA87B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4834D41F-96E6-4236-826A-4B4A544CA87B}.Debug|Win32.Build.0 = Debug|Win32
+		{4834D41F-96E6-4236-826A-4B4A544CA87B}.Release|Win32.ActiveCfg = Release|Win32
+		{4834D41F-96E6-4236-826A-4B4A544CA87B}.Release|Win32.Build.0 = Release|Win32
+		{4834D41F-96E6-4236-826A-4B4A544CA87B}.UnicodeDebug|Win32.ActiveCfg = Debug|Win32
+		{4834D41F-96E6-4236-826A-4B4A544CA87B}.UnicodeDebug|Win32.Build.0 = Debug|Win32
+		{4834D41F-96E6-4236-826A-4B4A544CA87B}.UnicodeRelease|Win32.ActiveCfg = Release|Win32
+		{4834D41F-96E6-4236-826A-4B4A544CA87B}.UnicodeRelease|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
