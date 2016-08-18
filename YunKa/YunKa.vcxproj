@@ -44,7 +44,7 @@
     <IncludePath>../thirdlib/duilib;../thirdlib/zlib/include;../thirdlib/libcef;../thirdlib/libcurl/include;.\;$(IncludePath)</IncludePath>
     <LibraryPath>../lib;$(LibraryPath)</LibraryPath>
     <OutDir>../bin</OutDir>
-    <IntDir>../Build/Debug/</IntDir>
+    <IntDir>Build/Debug/</IntDir>
     <EmbedManifest>true</EmbedManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -63,10 +63,10 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>./dui_ex;./ui;./ui_common;./auth;./log;./md5;./timer;./chat_manager;./utils;./http_load;./openssl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <PrecompiledHeaderOutputFile>../Build/Debug/$(TargetName).pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>../Build/Debug/</AssemblerListingLocation>
-      <ObjectFileName>../Build/Debug/</ObjectFileName>
-      <ProgramDataBaseFileName>../Build/Debug/</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>Build/Debug/$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>Build/Debug/</AssemblerListingLocation>
+      <ObjectFileName>Build/Debug/</ObjectFileName>
+      <ProgramDataBaseFileName>Build/Debug/</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
