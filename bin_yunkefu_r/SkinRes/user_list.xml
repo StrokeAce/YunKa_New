@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Window>
+  <ListContainerElement name="AddListContainnerE"  height="60" width="230">
+   <VerticalLayout>
+    <HorizontalLayout height="6" />
+    <HorizontalLayout height="48">
+
+      <VerticalLayout width="10" />
+      <VerticalLayout width="48">
+
+        <Label name="show_user_head_label" tooltip="" float="true" pos="0,0,48,48" height="48" width="48" bkimage="ykf\\user.png" />
+
+      </VerticalLayout>
+      <VerticalLayout width="10" />
+
+      <VerticalLayout>
+        <HorizontalLayout height="24">
+          <Label  pos="0,2,120,20"  name="nickname_label"   font="0" width="120" float="true" text="" />
+        </HorizontalLayout>
+        <HorizontalLayout>
+          <Label  pos="0,2,120,20"  name="history_chat_text_label"  font="0" width="110" float="true" text="" />
+        </HorizontalLayout>
+      </VerticalLayout>
+   
+      <VerticalLayout width="60">
+
+        <HorizontalLayout height="14" />
+
+        <HorizontalLayout >
+          <Label  pos="2,2,48,22" name="talk_time_label" font="0" float="true" text="" />
+        </HorizontalLayout>
+        
+      </VerticalLayout>
+      
+    </HorizontalLayout>
+
+    <HorizontalLayout height="6" />
+ </VerticalLayout>      
+  </ListContainerElement>
+</Window>
+
+
+

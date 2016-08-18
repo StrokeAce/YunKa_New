@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Window size="360,260"  caption="0,0,0,36"  roundcorner="4,4" >
+
+	<!-- 缺省样式 -->
+    <Include source="Default.xml" />
+
+<VerticalLayout inset="4,4,4,4" bkcolor="#FF60B1FE">
+
+<HorizontalLayout height="32" inset="2,2,2,0"  >
+    <Label text="设置过滤器" font="10" width="200" />
+    <Control />
+
+    <Button name="closeBtn_visitor" width="42" maxheight="18"     normalimage="file='mainframe\\frame_btn_close_normal.bmp' mask='#FFFF00FF'"     hotimage="file='mainframe\\frame_btn_close_hot.bmp' mask='#FFFF00FF'"     pushedimage="file='mainframe\\frame_btn_close_down.bmp' mask='#FFFF00FF'"/>
+
+</HorizontalLayout>
+
+
+<HorizontalLayout height="25" inset="2,2,2,0"  bkcolor="#FFF8F8F8"> 
+ <Label text="访客用户信息中" font="3" width="200"  />
+</HorizontalLayout>
+
+
+<HorizontalLayout  inset="2,2,2,0"  bkcolor="#FFF8F8F8"> 
+
+
+<VerticalLayout  width="110" >
+
+<Combo name="right_type_2" float="true" pos="5, 5, 100, 27"  normalimage="file='login\\Combo_nor.bmp' corner='2,2,24,2'" 
+hotimage="file='login\\Combo_over.bmp' corner='2,2,24,2'" 
+pushedimage="file='login\\Combo_over.bmp' corner='2,2,24,2'" textpadding="1,1,1,1" >
+</Combo>
+<Edit name="select_visitor_edit" text="包含" float="true" pos="6, 6, 78, 26" mouse="false"/>
+
+</VerticalLayout>
+
+<VerticalLayout>
+<RichEdit name="select_visitor_richedit" bordercolor="FF6E9EDB" bordersize="1"  pos="2,5,200,100" multiline="true" vscrollbar="true" autovscroll="true" enabled="true" rich="true" readonly="false" wantreturn="true" wantctrlreturn="false" menu="true"  inset="2,1,1,1" />
+
+
+ <Label text="多个过滤项，用逗号隔开" font="1" float="true" pos="2,105,200,125" />
+ <Label text="示例： 北京，海淀" font="1" float="true" pos="2,128,200,148" />		
+</VerticalLayout>
+
+
+
+</HorizontalLayout>
+
+
+<HorizontalLayout  height="40"    bkcolor="#FFF8F8F8">
+
+<Button name="conformSelectVisotorBtn" text="确定" float="true" pos="80, 10, 160, 35" tooltip="点击这里确定修改" normalimage="mainframe\\button_nor.bmp" hotimage="mainframe\\button_over.bmp" pushedimage="mainframe\\button_down.bmp" />
+
+<Button name="conformSelectVisotorBtn" text="取消" float="true" pos="200, 10, 280, 35" tooltip="点击这里取消修改" normalimage="mainframe\\button_nor.bmp" hotimage="mainframe\\button_over.bmp" pushedimage="mainframe\\button_down.bmp" />
+
+</HorizontalLayout>
+
+
+
+
+		
+</VerticalLayout>
+</Window>

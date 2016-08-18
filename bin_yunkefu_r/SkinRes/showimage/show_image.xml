@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Window size="800,600"  caption="0,0,0,30"  roundcorner="4,4" >
+
+
+<VerticalLayout inset="4,4,4,4" bkcolor="#FFF2F2F2">
+
+<HorizontalLayout height="26" inset="2,2,2,0"  >
+
+   <Control   width="765" />
+
+   <Button name="closeBtn_show_image"  width="25" maxheight="25"     normalimage="file='showimage\\close_1.bmp' mask='#FFFF00FF'"     hotimage="file='showimage\\close_1.bmp' mask='#FFFF00FF'"     pushedimage="file='showimage\\close_1.bmp' mask='#FFFF00FF'" />
+
+
+
+</HorizontalLayout>
+
+
+<HorizontalLayout inset="2,2,2,0" name="show_image_control"  bkcolor="#FFF2F2F2"> 
+ 
+
+
+
+</HorizontalLayout>
+
+
+
+
+		
+</VerticalLayout>
+</Window>
