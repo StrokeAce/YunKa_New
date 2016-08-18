@@ -45,13 +45,13 @@
     <IncludePath>../thirdlib/duilib;../thirdlib/zlib/include;../thirdlib/libcef;../thirdlib/libcurl/include;.\;$(IncludePath)</IncludePath>
     <LibraryPath>../lib;$(LibraryPath)</LibraryPath>
     <OutDir>../bin_yunkefu</OutDir>
-    <IntDir>../Build/Debug/</IntDir>
+    <IntDir>Build/Debug/</IntDir>
     <EmbedManifest>true</EmbedManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>../bin_yunkefu_r</OutDir>
-    <IntDir>../Build/Release/</IntDir>
+    <IntDir>Build/Release/</IntDir>
     <IncludePath>../thirdlib/duilib;../thirdlib/zlib/include;../thirdlib/libcef;../thirdlib/libcurl/include;.\;$(IncludePath)</IncludePath>
     <LibraryPath>../lib_r;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
@@ -64,10 +64,10 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>./dui_ex;./ui;./ui_common;./auth;./log;./md5;./timer;./chat_manager;./utils;./http_load;./openssl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <PrecompiledHeaderOutputFile>../Build/Debug/$(TargetName).pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>../Build/Debug/</AssemblerListingLocation>
-      <ObjectFileName>../Build/Debug/</ObjectFileName>
-      <ProgramDataBaseFileName>../Build/Debug/</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>Build/Debug/$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>Build/Debug/</AssemblerListingLocation>
+      <ObjectFileName>Build/Debug/</ObjectFileName>
+      <ProgramDataBaseFileName>Build/Debug/</ProgramDataBaseFileName>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -86,10 +86,10 @@
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>./dui_ex;./ui;./ui_common;./auth;./log;./md5;./timer;./chat_manager;./utils;./http_load;./openssl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <PrecompiledHeaderOutputFile>../Build/Release/$(TargetName).pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>../Build/Release/</AssemblerListingLocation>
-      <ObjectFileName>../Build/Release/</ObjectFileName>
-      <ProgramDataBaseFileName>../Build/Release/</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>Build/Release/$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>Build/Release/</AssemblerListingLocation>
+      <ObjectFileName>Build/Release/</ObjectFileName>
+      <ProgramDataBaseFileName>Build/Release/</ProgramDataBaseFileName>
       <AdditionalOptions>/D "_CRT_SECURE_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
