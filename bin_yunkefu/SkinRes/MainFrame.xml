@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Window size="1010,680" caption="0,0,0,85" roundcorner="4,4"  mininfo="1010,700" roundcorner="6,6">
+<Window size="790,560" caption="0,0,0,25" roundcorner="4,4"  mininfo="790,560" sizebox="3,3,3,3" roundcorner="3,3">
 
 
 <!-- 缺省样式 -->
@@ -8,74 +8,232 @@
 <Container>
 
 <!-- 暂时屏蔽 背景设置 -->
-<!-- VerticalLayout inset="3,0,3,3"  bkimage="file='bg.png' corner='4,48,4,4' mask='#FFFF00FF'" -->
+  <HorizontalLayout name="HorizontalLayoutUI_MainFrame"  bkimage="ykf\\bj.png" bkcolor="#FFFAFAFA" bordercolor="#FFF0F0F0" bordersize="0" borderround="3,3" inset="0,0,0,0">
+    
+    <!-- left -->
+    <VerticalLayout  width="73">
+      <HorizontalLayout height="25" />
+      <HorizontalLayout height="63">
+        <Control width="2" />
+        <Button name="myself_head_image_btn" tooltip="" float="true" pos="5,0,65,60" height="60" width="60" normalimage="ykf\\user.png" hotimage="ykf\\user.png" pushedimage="ykf\\user.png" />    
+      </HorizontalLayout>
 
-<VerticalLayout name="VerticalLayoutUI_MainFrame"    inset="4,0,4,4" bkcolor="#FF60B1FE" bordercolor="#FF1B4876" bordersize="2" borderround="5,5">
+      <Control height="2" />
+      <HorizontalLayout height="20">
+        <Label  pos="2,2,68,20" font="0" float="true" name="show_myself_info_lable" text="9692****...." width="65"/>
+      </HorizontalLayout>
+           
+      <Control height="20" />
+      <HorizontalLayout height="50">
+        <Button name="chat_list_button" bkimage="ykf\\Comment.png" tooltip="消息列表" pos="12,2,60,50" float="true" />
+      </HorizontalLayout>
+      
+      <Control height="20" />
+      <HorizontalLayout height="50">
+        <Button name="friend_list_button" bkimage="ykf\\Profile.png" tooltip="通讯录" pos="12,2,60,50" float="true" />
+      </HorizontalLayout>
+      
+      <HorizontalLayout>
+        
+      </HorizontalLayout>
+        
+      
+      <HorizontalLayout height="110">
+        <VerticalLayout> 
+           <HorizontalLayout height="38">
+              <Button name="add_other_button" bkimage="ykf\\add.png" tooltip="添加" pos="20,2,56,38" float="true" />
+           </HorizontalLayout>
+           <Control height="15" />
+           <HorizontalLayout height="38">
+              <Button name="system_set_button" bkimage="ykf\\set.png" tooltip="设置" pos="20,2,56,38" float="true" />
+           </HorizontalLayout>
+        </VerticalLayout>    
+      </HorizontalLayout>
+    
+      
+    </VerticalLayout>
 
-<!-- 窗口栏 -->
-<HorizontalLayout name="HorizontalLayoutUI_TopFrame"   height="80" inset="2,2,0,0"> 
-	<Include source="top.xml" />		
-</HorizontalLayout>
+    <!-- 中间和右边 -->
+    <VerticalLayout>
+      
+      <!-- 中间和右边  标题栏部分 -->
+      <HorizontalLayout  height="23">
+        
+        <VerticalLayout  width="230" bkcolor="FFF0F0F0">
+        </VerticalLayout>
+      
+        <VerticalLayout   bkcolor="FFFFFFFF">
+          <HorizontalLayout height="3" />
+          <HorizontalLayout height="20">
+            <VerticalLayout />
+              <VerticalLayout width="70">
+                <HorizontalLayout>
+                  <Button name="minBtn" tooltip="最小化" height="20" width="20" normalimage="ykf\\mini_btn.png" hotimage="ykf\\mini_click_btn.png" pushedimage="ykf\\mini_click_btn.png" />        
+                  <Control width="4" />
+                  <Button name="maxBtn" tooltip="最大化" height="20" width="20" normalimage="ykf\\max_btn.png" hotimage="ykf\\max_click_btn.png" pushedimage="ykf\\max_click_btn.png" />
+                  <Control width="4" />
+                  <Button name="restoreBtn" visible="false" tooltip="恢复" height="20" width="20" normalimage="ykf\\restore.png" hotimage="ykf\\restore_click_btn.png" pushedimage="ykf\\restore.png" />
+                  <Button name="closeBtn" tooltip="关闭" height="20" width="20" normalimage="ykf\\close_btn.png" hotimage="ykf\\close_click_btn.png" pushedimage="ykf\\close_click_btn.png" />
+                </HorizontalLayout>
+              </VerticalLayout>
+            </HorizontalLayout>
+         </VerticalLayout> 
+      
+      </HorizontalLayout>
+      
+      <!-- 中间和右边 全部部分 -->
+      <HorizontalLayout>
+         <TabLayout name="left_button_tab_frame">
+           <!-- tab 1-->
+           <HorizontalLayout>
+             <VerticalLayout>
+               <!-- 中间和右边  上半部分 -->
+               <HorizontalLayout  height="60">
+                  <!-- left -->
+                  <VerticalLayout  width="230" bkcolor="FFF0F0F0">
+                     <HorizontalLayout>
 
-<!-- 分割栏 -->
-<!-- HorizontalLayout height="10" bkcolor="#FFEBF5FF" / --> 
-<!-- 暂时屏蔽掉分割栏 -->
+                      </HorizontalLayout>
+                  </VerticalLayout>
+        
+                  <!-- right-->
+                  <VerticalLayout   bkcolor="FFFFFFFF">  
+                    <HorizontalLayout>
+       
+                    </HorizontalLayout>      
+                 </VerticalLayout>     
+               </HorizontalLayout>
+      
+               <!-- 上半部的划线部分-->
+               <HorizontalLayout   height="1" bkcolor="FFEBEBEB"  />
+      
+               <!-- 中间和右边  下半部分 -->
+               <HorizontalLayout>
+                  <!-- left -->
+                  <VerticalLayout  width="230" bkcolor="FFF0F0F0">
+                    <HorizontalLayout height="30" inset="2,1,3,1">
+                      <VerticalLayout width="75">
+                         <Button name="chat_msg_btn" bkimage="ykf\\chat.png" tooltip="消息" pos="25,3,50,28" float="true" />
+                      </VerticalLayout>
+
+                      <VerticalLayout>
+                         <Button name="wait_in_talk_btn" bkimage="ykf\\wait.png" tooltip="待接入" pos="25,3,50,28" float="true" />
+                      </VerticalLayout>
+
+                      <VerticalLayout width="75">
+                         <Button name="invote_user_btn" bkimage="ykf\\invote.png" tooltip="辅助" pos="25,3,50,28" float="true" />
+                      </VerticalLayout>     
+                    </HorizontalLayout>
+          
+                     <!-- 划线 将按钮和  列表区分开-->
+                     <HorizontalLayout   height="1" bkcolor="FFEBEBEB"  />
+          
+                     <HorizontalLayout>    
+                       <TabLayout name="mid_left_tab_frame">
+              
+                        <HorizontalLayout>
+                           <UserList name="MyUserList" header="hidden" itemshowhtml="true" vscrollbar="true"  autovscroll="true" menu="true" />
+                        </HorizontalLayout>
+
+                        <HorizontalLayout>
+                           <UserList name="WaitUserList" header="hidden" itemshowhtml="true" vscrollbar="true"/>
+                        </HorizontalLayout>
+
+                        <HorizontalLayout>
+                           <UserList name="InvoteUserList" header="hidden" itemshowhtml="true" vscrollbar="true"/>
+                        </HorizontalLayout>
+
+                        <HorizontalLayout>
+                           <UserList name="HostUserList" header="hidden" itemshowhtml="true" vscrollbar="true"/>
+                        </HorizontalLayout>
+                        <HorizontalLayout>
+                           <UserList name="OtherUserList" header="hidden" itemshowhtml="true" vscrollbar="true"/>
+                        </HorizontalLayout>
+              
+                       </TabLayout>
+                     </HorizontalLayout>
+
+                  </VerticalLayout>
+        
+                  <!-- right -->
+                  <VerticalLayout   bkcolor="FFFFFFFF">  
+                    <HorizontalLayout   name="SHOW_MSG_HorizontalLayout_Frame">
+                  
+                    </HorizontalLayout>
+                    <!-- 划线 -->
+                    <HorizontalLayout   height="1" bkcolor="FFEBEBEB"  />
+                    <HorizontalLayout height="5" />
+                    <HorizontalLayout height="25" inset="2,1,2,2">
+                    
+                      <Control width="18"/>
+                      <Button name="faceBtn" tooltip="表情" height="20" width="20" bkimage="ykf\\face.png" />   
+                      <Control width="18"/>
+                      <Button name="screenShotsBtn" tooltip="截图" height="20" width="20" bkimage="ykf\\cut.png" />   
+                      <Control width="18"/>
+                      <Button name="voiceSendBtn" tooltip="语音" height="20" width="20" bkimage="ykf\\voice.png" />   
+                      <Control width="18"/>
+                      <Button name="fileSendBtn" tooltip="发送文件" height="20" width="20" bkimage="ykf\\file.png" />
+
+                      <Control width="18"/>
+                      <Button name="releaseChatBtn" tooltip="释放会话" height="20" width="20" bkimage="ykf\\release.png" />
+
+                      <Control width="18"/>
+                      <Button name="closeChatBtn" tooltip="结束会话" height="20" width="20" bkimage="ykf\\close_chat.png" />
 
 
+                    </HorizontalLayout>
+                    <HorizontalLayout height="3" />
+                    <HorizontalLayout height="70">     			
+                        <RichEdit name="richSend" multiline="true" vscrollbar="true" autovscroll="true" enabled="true" rich="true" readonly="false" wantreturn="true" wantctrlreturn="false" menu="true"  inset="2,2,2,2" />	       
+                    </HorizontalLayout>
+                    
+                    <HorizontalLayout height="35">
+                      <VerticalLayout />
+                      <VerticalLayout width="80">
+                        <Button name="sendMsgBtn" text="发送" float="true" font="5"  tooltip="发送" pos="0,3,70,28" hottextcolor="FF59B2A5" pushedtextcolor="FF59B2A5"  bkimage="ykf\\wcl.png" />
+                      </VerticalLayout>
+                    
+                    </HorizontalLayout>
+               
+                  </VerticalLayout>
+     
+                </HorizontalLayout>
+             
+             </VerticalLayout>
+           </HorizontalLayout>
+            
+           <!-- tab 2-->
+           <HorizontalLayout>
+             <VerticalLayout  width="230" bkcolor="FFF0F0F0">
+             </VerticalLayout>
+      
+             <VerticalLayout   bkcolor="FFFFFFFF"> 
+             </VerticalLayout>
+           
+           </HorizontalLayout>
+           
+           <!-- tab 3-->
+           <HorizontalLayout>
+             <VerticalLayout  width="230" bkcolor="FFF0F0F0">
+             </VerticalLayout>
+      
+             <VerticalLayout   bkcolor="FFFFFFFF"> 
+             </VerticalLayout>
+             
+           </HorizontalLayout>
+      
+         </TabLayout>
+      
+      </HorizontalLayout>
+        
+    </VerticalLayout>
+ 
+  </HorizontalLayout>
 
-<!-- 管理按钮显示 -->
-<!--HorizontalLayout name="HorizontalLayoutUI_ManagerBar"   height="80" --> 
-<!--Include source="manager.xml" /-->		
-<!--/HorizontalLayout-->
 
-<!-- 显示一栏 状态 -->
-<!-- HorizontalLayout height="20"  bkcolor="#FFEBF5FF" /--> 
-<!--HorizontalLayout height="20"  bkcolor="#FFD3E5F6" /--> 
-
-		
-<HorizontalLayout>
-
-
-<!-- 左侧显示 数列表 -->
-<VerticalLayout width="270"  name="VerticalLayoutUI_LeftFrame"   bkcolor="#FFF8F8F8" >
-	<Include source="left.xml" />
-</VerticalLayout>
-
-
-<!--VerticalLayout width="2" bkcolor="#FF45FE22" /-->
-<VerticalLayout width="4" name="VerticalLayoutUI_LeftLine1"  bkcolor="#FFD3E5F6" />
-
-<VerticalLayout   name="VerticalLayoutUI_CenterRight_WebShow">
-<HorizontalLayout>
-<!-- 中间显示 聊天内容 -->
-<VerticalLayout name="VerticalLayoutUI_CenterFrame"    width="370"   bkcolor="#FFF8F8F8"  >
-	<Include source="center.xml" />
-</VerticalLayout>
-
-<!--VerticalLayout width="2" bkcolor="#FF45FE22" /-->
-<VerticalLayout name="VerticalLayoutUI_LeftLine2"  width="4"  bkcolor="#FFD3E5F6" />
-
-
-
-<!-- 右侧显示其它 -->
-<VerticalLayout    name="VerticalLayoutUI_RightFrame"   bkcolor="#FFF8F8F8"    >
-	<Include source="right.xml" />
-</VerticalLayout>
-
-</HorizontalLayout>
-</VerticalLayout>
-
-
-
-</HorizontalLayout>
-
-<!-- 底层状态栏   暂时不需要 先屏蔽掉 -->
-<!-- HorizontalLayout height="20"  bkcolor="#FFD2D6DD"-->
-<!--HorizontalLayout height="20"  bkcolor="#FFEBF5FF"-->
-<!--Include source="bottom.xml" /-->
-<!--/HorizontalLayout-->
-
-</VerticalLayout>
-
-</Container>
+  </Container>
 </Window>
+  
+  
+  
+ 
