@@ -50,7 +50,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>../bin_r</OutDir>
+    <OutDir>../bin_yunkefu_r</OutDir>
     <IntDir>../Build/Release/</IntDir>
     <IncludePath>../thirdlib/duilib;../thirdlib/zlib/include;../thirdlib/libcef;../thirdlib/libcurl/include;.\;$(IncludePath)</IncludePath>
     <LibraryPath>../lib_r;$(LibraryPath)</LibraryPath>
