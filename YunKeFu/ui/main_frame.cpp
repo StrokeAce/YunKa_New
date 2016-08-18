@@ -1423,7 +1423,7 @@ void CMainFrame::RecvUserInfo(CUserObject* pWebUser)
 
 		//获取会话消息
 		m_manager->SendTo_GetListChatInfo();
-		//m_manager->StartLoginVisitor();	
+		m_manager->StartLoginVisitor();	
 	}
 }
 
