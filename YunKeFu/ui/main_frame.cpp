@@ -459,7 +459,7 @@ void CMainFrame::OnPrepare(TNotifyUI& msg)
 
 	//表情包初始化
 	CDuiString strPath = GetCurrentPathW();
-	strPath  += _T("SkinRes\\Face\\FaceConfig.xml");
+	strPath  += _T("\\SkinRes\\Face\\FaceConfig.xml");
 	m_faceList.LoadConfigFile(strPath.GetData());
 
 	//发送框编辑栏
