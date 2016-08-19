@@ -266,6 +266,13 @@ LRESULT WindowImplBase::OnSysCommand(UINT uMsg, WPARAM wParam, LPARAM lParam, BO
 	return lRes;
 }
 
+void WindowImplBase::OnCreateShadow(HWND hwnd)
+{
+
+
+}
+
+
 LRESULT WindowImplBase::OnCreate(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
 	LONG styleValue = ::GetWindowLong(*this, GWL_STYLE);
@@ -275,6 +282,10 @@ LRESULT WindowImplBase::OnCreate(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& 
 	::GetClientRect(*this, &rcClient);
 	::SetWindowPos(*this, NULL, rcClient.left, rcClient.top, rcClient.right - rcClient.left, \
 		rcClient.bottom - rcClient.top, SWP_FRAMECHANGED);
+
+
+	//lxh 2016-08-19 add shadow Window
+	OnCreateShadow(m_hWnd);
 
 	m_PaintManager.Init(m_hWnd);
 	m_PaintManager.AddPreMessageFilter(this);
