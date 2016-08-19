@@ -106,6 +106,17 @@ CControlUI* CMainFrame::CreateControl(LPCTSTR pstrClass)
 	return NULL;
 }
 
+
+void CMainFrame::OnCreateShadow(HWND hwnd)
+{
+
+	m_WndShadow.Create(m_hWnd);
+	m_WndShadow.SetSize(3);
+	m_WndShadow.SetPosition(0, 0);
+
+}
+
+
 void CMainFrame::OnFinalMessage(HWND hWnd)
 {
 

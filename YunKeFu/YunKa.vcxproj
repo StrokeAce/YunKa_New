@@ -258,6 +258,7 @@
     <ClInclude Include="ui\ui_menu.h" />
     <ClInclude Include="ui\ui_user_list.h" />
     <ClInclude Include="ui\user_list.h" />
+    <ClInclude Include="ui\WndShadow.h" />
     <ClInclude Include="ui\xml_document.h" />
     <ClInclude Include="ui_common\common_utility.h" />
     <ClInclude Include="ui_common\global_setting.h" />
@@ -351,6 +352,7 @@
     <ClCompile Include="ui\ui_menu.cpp" />
     <ClCompile Include="ui\ui_user_list.cpp" />
     <ClCompile Include="ui\user_list.cpp" />
+    <ClCompile Include="ui\WndShadow.cpp" />
     <ClCompile Include="ui\xml_document.cpp" />
     <ClCompile Include="ui_common\common_utility.cpp" />
     <ClCompile Include="ui_common\global_setting.cpp" />

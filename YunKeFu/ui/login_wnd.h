@@ -7,7 +7,7 @@
 #include "chat_manager.h"
 #include "main_frame.h"
 
-
+#include "WndShadow.h"
 
 
 
@@ -58,6 +58,7 @@ public:
 private:
 	CPaintManagerUI m_pm;
 
+	CWndShadow m_WndShadow;
 
 	//CSmallMenu m_hLoginMenu;
 

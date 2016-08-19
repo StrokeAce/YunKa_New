@@ -16,6 +16,9 @@
 #include "show_big_image_dlg.h"
 #include "system_settings.h"
 #include "ui_user_list.h"
+#include "WndShadow.h"
+
+
 
 
 #define MID_MANAGER_BUTTON_NUM    8
@@ -145,6 +148,10 @@ public:
 	virtual LRESULT HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
 	virtual LRESULT HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 	virtual LRESULT OnClose(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
+
+	virtual void OnCreateShadow(HWND hwnd);
+
+
 
 	virtual void OnClick(TNotifyUI& msg);
 	//virtual void OnSelectChanged(TNotifyUI &msg);
@@ -376,7 +383,7 @@ public:
 	CDuiString m_defalutButtonImage;
 
 private:
-
+	CWndShadow m_WndShadow;
 	CSmallMenu m_frameSmallMenu;
 
 	CEditUI *m_pRightCommonWordEdit, *m_pRightCommonTypeEdit , *m_pRightCommonFindEdit;

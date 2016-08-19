@@ -156,6 +156,10 @@ LRESULT CLoginWnd::OnCreate(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHand
 	styleValue &= ~WS_CAPTION;
 	::SetWindowLong(*this, GWL_STYLE, styleValue | WS_CLIPSIBLINGS | WS_CLIPCHILDREN);
 
+	m_WndShadow.Create(m_hWnd);
+	m_WndShadow.SetSize(4);
+	m_WndShadow.SetPosition(0, 0);
+
 	m_pm.Init(m_hWnd);
 	m_pm.AddPreMessageFilter(this);
 	CDialogBuilder builder;

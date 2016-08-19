@@ -10,6 +10,7 @@
 #include "chat_manager.h"
 #include "cef_browser/cefclient.h"
 #include "common_utility.h"
+#include "WndShadow.h"
 
 
 CefRefPtr<ClientApp> m_cefApp;
@@ -31,6 +32,8 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 	m_cefApp = new ClientApp();
 	if (!(m_cefApp->Init(hInstance) < 0))
 		return FALSE;
+
+	CWndShadow::Initialize(hInstance);
 
 
 	wstring strFileName = ZYM::CPath::GetAppPath() + _T("ImageOleCtrl.dll");
