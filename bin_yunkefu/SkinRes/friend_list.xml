@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Window>
-  <ListContainerElement name="AddListContainnerFriendList"  height="60" width="230">
+  <ListContainerElement name="AddListContainnerFriendList"  height="60" >
    <VerticalLayout>
     <HorizontalLayout height="6" />
     <HorizontalLayout height="48">
