@@ -63,6 +63,8 @@ CMainFrame::CMainFrame(CChatManager* manager) :m_manager(manager)
 	pShowImgDlg = NULL;
 	m_wndShow = 0;
 	m_defalutButtonImage = L"";
+	m_pSystSettingsDlg = NULL;
+	m_pOperTipsDlg = NULL;
 
 	memset(&m_centerChatInfo, 0, sizeof(m_centerChatInfo));
 	memset(&m_rightRectMax, 0, sizeof(m_rightRectMax));
@@ -204,7 +206,17 @@ LRESULT CMainFrame::HandleMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 	else if (uMsg == WM_LBUTTONDOWN)
 	{
 	}
+	else if (uMsg == WM_MOVE)
+	{
+		if (m_pOperTipsDlg)
+		{
+			CPoint point;
+			point.x = GET_X_LPARAM(lParam) + 278;
+			point.y = GET_Y_LPARAM(lParam) + 82;
+			m_pOperTipsDlg->MoveWnd(point);
 
+		}
+	}
 	else if (uMsg == WM_KEYDOWN) // 发送消息框的Ctrl+V消息	
 	{
 		if ((wParam == 'V' || wParam == 'v') && ::GetKeyState(VK_CONTROL) < 0)
@@ -337,7 +349,10 @@ LRESULT CMainFrame::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
 
 		OnFaceCtrlSel(uMsg, wParam, lParam);
 	}
-
+	if (uMsg == WM_TIMER)
+	{
+		OnWndTimer(uMsg, wParam, lParam, bHandled);
+	}	
 	else if (uMsg == WM_SCREEN_CAPTURE_SUCCED) //截图完成后的消息操作
 	{
 		OnCtrlVEvent();
@@ -435,7 +450,6 @@ LRESULT CMainFrame::HandleCustomMessage(UINT uMsg, WPARAM wParam, LPARAM lParam,
 
 LRESULT CMainFrame::OnMouseMove(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-
 	int x = GET_X_LPARAM(lParam);
 	int y = GET_Y_LPARAM(lParam);
 
@@ -597,7 +611,21 @@ void CMainFrame::MoveAndRestoreMsgWnd(int type)
 		//聊天框框
 		rc = ShowMsgWnd->GetPos();
 		rc.right = rc.left + centerWidth - 2;
-		m_pListMsgHandler.handler->MoveBrowser(rc);
+		m_pListMsgHandler.handler->MoveBrowser(rc);	
+
+		// 提示框
+		CPoint startPoint;
+		CPoint endPoint;
+		startPoint.x = rc.left;
+		startPoint.y = rc.top;
+		endPoint.x = rc.right;
+		endPoint.y = rc.top + 25;
+		ClientToScreen(m_hWnd, &startPoint);
+		ClientToScreen(m_hWnd, &endPoint);
+		if (m_pOperTipsDlg)
+		{
+			m_pOperTipsDlg->ShowWnd(SW_MAXIMIZE, startPoint, endPoint);
+		}
 
 		//右侧的订单显示web
 		if (m_rightRectWnd.right == 0)
@@ -640,6 +668,20 @@ void CMainFrame::MoveAndRestoreMsgWnd(int type)
 		rc = ShowMsgWnd->GetPos();
 		rc.right = rc.left + m_centerChatInfo.showMsgWidth;
 		m_pListMsgHandler.handler->MoveBrowser(rc);
+
+		// 提示框
+		CPoint startPoint;
+		CPoint endPoint;
+		startPoint.x = rc.left;
+		startPoint.y = rc.top;
+		endPoint.x = rc.right;
+		endPoint.y = rc.top + 25;
+		ClientToScreen(m_hWnd, &startPoint);
+		ClientToScreen(m_hWnd, &endPoint);
+		if (m_pOperTipsDlg)
+		{
+			m_pOperTipsDlg->ShowWnd(SW_MINIMIZE, startPoint, endPoint);
+		}
 
 		//设置按钮背景高度
 		optionButtonControl->SetAttribute(L"height", L"52");
@@ -2564,12 +2606,12 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 	//系统设置
 	else if (controlName == L"menu_sys_set")
 	{
-		//if (m_hSystemSettings == NULL)
+		//if (m_pSystSettingsDlg == NULL)
 		{
-			m_hSystemSettings = new CSystemSettings();
-			m_hSystemSettings->m_sysConfig = m_manager->m_sysConfig;
-			m_hSystemSettings->Create(m_hWnd, _T(""), UI_WNDSTYLE_DIALOG, 0, 0, 0, 0, 0, NULL);
-			m_hSystemSettings->CenterWindow();
+			m_pSystSettingsDlg = new CSystemSettings();
+			m_pSystSettingsDlg->m_sysConfig = m_manager->m_sysConfig;
+			m_pSystSettingsDlg->Create(m_hWnd, _T(""), UI_WNDSTYLE_DIALOG, 0, 0, 0, 0, 0, NULL);
+			m_pSystSettingsDlg->CenterWindow();
 
 			RECT sysRect;
 			GetWindowRect(m_hWnd, &sysRect);
@@ -2579,12 +2621,12 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 			int x = (sysRect.right - cx) / 2;
 			int y = (sysRect.bottom - cy) / 2;
 
-			::SetWindowPos((HWND)m_hSystemSettings, NULL, x, y, cx, cy, NULL);
-			::ShowWindow((HWND)m_hSystemSettings, SW_SHOW);
+			::SetWindowPos((HWND)m_pSystSettingsDlg, NULL, x, y, cx, cy, NULL);
+			::ShowWindow((HWND)m_pSystSettingsDlg, SW_SHOW);
 		}
 		//else
 		{
-			//m_hSystemSettings->ShowWnd(SW_SHOW);
+			//m_pSystSettingsDlg->ShowWnd(SW_SHOW);
 		}
 	}
 
@@ -3189,6 +3231,7 @@ void CMainFrame::OnBtnVoice(TNotifyUI& msg)
 	if (sendUserType == MSG_RECV_ERROR || m_curSelectId <= 0 || sendUserType == MSG_RECV_WEB || sendUserType == MSG_RECV_CLIENT)
 	{
 		// 提示不能给该类型用户发语音消息
+		ShowOperationTips(_T("离线用户不能发语音消息"));
 	}
 	else
 	{
@@ -5881,3 +5924,63 @@ unsigned long  CMainFrame::GetInviteUserid(unsigned long webUserid)
 	return id;
 }
 
+void CMainFrame::ShowOperationTips(CDuiString strTips)
+{
+	RECT rc = { 0 };
+	CPoint startPoint;
+	CPoint endPoint;
+
+	if (m_pOperTipsDlg == NULL)
+	{
+		m_pOperTipsDlg = new COperationTips();
+		m_pOperTipsDlg->Create(m_hWnd, _T(""), UI_WNDSTYLE_DIALOG, 0, 0, 0, 0, 0, NULL);
+	}
+
+	CControlUI *showMsg = static_cast<CHorizontalLayoutUI*>(m_PaintManager.FindControl(_T("HorizontalLayoutUI_ShowMsg")));
+	if (showMsg)
+	{
+		rc = showMsg->GetPos();
+		startPoint.x = rc.left;
+		startPoint.y = rc.top;
+		endPoint.x = rc.right;
+		endPoint.y = rc.top + 25;
+		ClientToScreen(m_hWnd, &startPoint);
+		ClientToScreen(m_hWnd, &endPoint);
+	}
+
+	m_pOperTipsDlg->ShowWnd(SW_SHOW, startPoint, endPoint, strTips);
+	SetTimer(m_hWnd, TIMER_TIPS, 2000, NULL);
+}
+
+void CMainFrame::ShowRecordVoice(string strTips)
+{
+	CControlUI *showTip = static_cast<CHorizontalLayoutUI*>(m_PaintManager.FindControl(_T("HorizontalLayoutUI_ShowTip")));
+	CControlUI *showMsg = static_cast<CHorizontalLayoutUI*>(m_PaintManager.FindControl(_T("HorizontalLayoutUI_ShowMsg")));
+	if (showTip && showMsg && showTip->GetHeight() == 0)
+	{
+		RECT rc = { 0 };
+		CDuiString formatString;
+		int height;
+
+		rc = showMsg->GetPos();
+		rc.bottom -= 25;
+		height = rc.bottom - rc.top;
+		formatString.Format(_T("%d"), height);
+		showMsg->SetAttribute(L"height", formatString);
+		m_pListMsgHandler.handler->MoveBrowser(rc);
+		showTip->SetAttribute(L"height", L"25");
+	}
+}
+
+LRESULT CMainFrame::OnWndTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
+{
+	if (wParam == TIMER_TIPS)
+	{
+		CPoint startPoint;
+		CPoint endPoint;
+		m_pOperTipsDlg->ShowWnd(SW_HIDE, startPoint, endPoint);
+		KillTimer(m_hWnd, TIMER_TIPS);
+	}
+	
+	return 0;
+}

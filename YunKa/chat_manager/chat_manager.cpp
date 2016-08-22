@@ -2409,7 +2409,7 @@ int CChatManager::RecvFloatCloseChat(PACK_HEADER packhead, char *pRecvBuff, int 
 		AddMsgToList((IBaseObject*)pWebUser, MSG_FROM_SYS, MSG_RECV_ERROR, GetMsgId(), MSG_TYPE_NORMAL,
 			MSG_DATA_TYPE_TEXT,	strMsg.c_str(), 0, NULL, NULL);
 
-		if (!pWebUser->IsOnline())//这里是不是该用户彻底离线了
+		if (!pWebUser->m_bIsFrWX && !pWebUser->IsOnline())//这里是不是该用户彻底离线了
 		{
 			g_WriteLog.WriteLog(C_LOG_TRACE, "RecvFloatCloseChat 坐席离线(%u)访客离线", packhead.uin);
 
@@ -5683,9 +5683,34 @@ bool CChatManager::RepickChatCon(string url, string& strRet, unsigned long &uin,
 
 int CChatManager::SendTo_GetOnlineUser()
 {
-	m_hGetOnlineUserThread = CreateThread(NULL, 0, GetOnlineUserThread, this, CREATE_SUSPENDED, NULL);
+	//m_hGetOnlineUserThread = CreateThread(NULL, 0, GetOnlineUserThread, this, CREATE_SUSPENDED, NULL);
+	//ResumeThread(m_hGetOnlineUserThread);
+
+	m_hGetOnlineUserThread = CreateThread(NULL, 0, GetVisitorInfoThread, this, CREATE_SUSPENDED, NULL);
 	ResumeThread(m_hGetOnlineUserThread);
 	return 0;
+}
+
+DWORD WINAPI CChatManager::GetVisitorInfoThread(void *arg)
+{
+	CChatManager *pManager = (CChatManager *)arg;
+
+	pManager->GetVisitorInfo();
+
+	return 0;
+}
+
+void CChatManager::GetVisitorInfo()
+{
+	char strURL[MAX_1024_LEN];
+	string strHtml = "";
+
+	sprintf(strURL, "http://webservice.tq.cn/Servers/services/ServerNew?wsdl");
+	CHttpLoad httpLoad;
+	if (httpLoad.HttpLoad(string(strURL), "", REQUEST_TYPE_GET, "", strHtml))
+	{
+		int a = 10;
+	}
 }
 
 DWORD WINAPI CChatManager::GetOnlineUserThread(void *arg)

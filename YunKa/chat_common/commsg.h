@@ -21,6 +21,7 @@
 #define TIMER_SENDVIDEO		19	//间隔一秒的定时器，用于ping mutiping idleoffline
 #define TIMER_AUTOLOGIN		20	//自动登录
 #define TIMER_LOGIN			21	//登录
+#define TIMER_TIPS			22	//操作提示条的延时关闭
 #define TIMER_DOWNLISTEN	50	//文件下载服务器监听等待时间定时器
 #define TIMER_VISITOR_ACCEPT 80
 #define TIMER_TRANS_TIMEOUT 81 //转接会话超时处理 gxl

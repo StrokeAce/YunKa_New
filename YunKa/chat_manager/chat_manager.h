@@ -157,7 +157,6 @@ public:
 	virtual void RecvQuickReply(string quickReply) = 0;
 
 	virtual void PopTrayTips(string strPopTips, string strTitle = "") = 0;
-
 };
 
 class CChatManager : public IBaseReceive
@@ -564,6 +563,10 @@ public:
 	string ReplaceToken(string srcStr, string replaceStr);
 
 	void AddToken(WxUserInfo* userInfo,string token);
+
+	static DWORD WINAPI GetVisitorInfoThread(void *arg);
+
+	void GetVisitorInfo();
 
 	static DWORD WINAPI GetOnlineUserThread(void *arg);
 

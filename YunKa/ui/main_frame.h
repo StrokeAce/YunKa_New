@@ -15,6 +15,7 @@
 #include "user_list.h"
 #include "show_big_image_dlg.h"
 #include "system_settings.h"
+#include "operation_tips.h"
 
 
 #define MID_MANAGER_BUTTON_NUM    8
@@ -148,6 +149,7 @@ public:
 
 
 	LRESULT OnMouseMove(UINT uMsg, WPARAM wParam, LPARAM lParam);
+	LRESULT OnWndTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 
 	DWORD GetBkColor();
 	void SetBkColor(DWORD dwBackColor);
@@ -305,8 +307,9 @@ public:
 	void CMainFrame::HideWebBrowser();
 
 	CODE_RECORD_AUDIO StartRecordAudio();
-
 	void CancelRecordAudio();
+	void ShowOperationTips(CDuiString strTips); // 在聊天记录下方显示横条，做提示栏用
+	void ShowRecordVoice(string strTips); // 在聊天记录下方显示横条，做提示栏用
 
 protected:
 
@@ -419,8 +422,8 @@ private:
 	map<unsigned long, unsigned long >m_recvUserObjMap;
 
 	CShowBigImageDlg *pShowImgDlg;
-	CSystemSettings *m_hSystemSettings;
-	//CShowBigImageDlg m_pShowImgDlg;
+	CSystemSettings *m_pSystSettingsDlg;
+	COperationTips* m_pOperTipsDlg;
 
 	bool   m_wndShow;
 

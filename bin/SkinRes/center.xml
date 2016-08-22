@@ -4,10 +4,12 @@
 
 </HorizontalLayout>
 
-<HorizontalLayout name="HorizontalLayoutUI_ShowMsg" height="420" bkcolor="#FFF8F8F8" inset="2,1,1,2">
-
-</HorizontalLayout>
-
+<VerticalLayout height="420">
+  <HorizontalLayout name="HorizontalLayoutUI_ShowMsg" height="420" bkcolor="#FFF8F8F8" inset="2,1,1,2">
+  </HorizontalLayout>
+  <HorizontalLayout name="HorizontalLayoutUI_ShowTip" height="0" bkcolor="#FF60B1FE" inset="0,0,0,0">
+  </HorizontalLayout>
+</VerticalLayout>
 
 
 <!--  中间按钮显示栏 -->
