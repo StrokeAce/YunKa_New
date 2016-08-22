@@ -111,7 +111,8 @@ void CMainFrame::OnCreateShadow(HWND hwnd)
 {
 
 	m_WndShadow.Create(m_hWnd);
-	m_WndShadow.SetSize(3);
+	m_WndShadow.SetSize(4);
+	m_WndShadow.SetDarkness(40);
 	m_WndShadow.SetPosition(0, 0);
 
 }

@@ -3,8 +3,8 @@
 
 
 
-const int kFriendListItemNormalHeight      = 60;
-const int kFriendListItemSelectedHeight    = 60;
+const int kUserListItemNormalHeight      = 60;
+const int kUserListItemSelectedHeight    = 60;
 
 
 const TCHAR* const kLogoButtonControlName = _T("logo");
@@ -13,7 +13,7 @@ const TCHAR* const kNickNameControlName = _T("nickname");
 const TCHAR* const kDescriptionControlName = _T("description");
 const TCHAR* const kOperatorPannelControlName = _T("operation");
 
-double CalculateDelay2(double state)
+static double CalculateDelay(double state)
 {
 	return pow(state, 2);
 }
@@ -133,7 +133,7 @@ void CUIUserList::DoEvent(TEventUI& event)
 		{
 			--delay_left_;
 			SIZE sz = GetScrollPos();
-			LONG lDeltaY = (LONG)(CalculateDelay2((double)delay_left_ / delay_number_) * delay_deltaY_);
+			LONG lDeltaY = (LONG)(CalculateDelay((double)delay_left_ / delay_number_) * delay_deltaY_);
 			if ((lDeltaY > 0 && sz.cy != 0) || (lDeltaY < 0 && sz.cy != GetScrollRange().cy))
 			{
 				sz.cy -= lDeltaY;
@@ -151,7 +151,7 @@ void CUIUserList::DoEvent(TEventUI& event)
 	{
 		LONG lDeltaY = 0;
 		if (delay_number_ > 0)
-			lDeltaY = (LONG)(CalculateDelay2((double)delay_left_ / delay_number_) * delay_deltaY_);
+			lDeltaY = (LONG)(CalculateDelay((double)delay_left_ / delay_number_) * delay_deltaY_);
 		switch (LOWORD(event.wParam))
 		{
 		case SB_LINEUP:
@@ -263,7 +263,7 @@ void CUIUserList::AddUser(UserListItemInfo *info)
 		pListElement = static_cast<CListContainerElementUI*>(m_dlgBuilder.Create((UINT)0, &m_paint_manager_));
 	}
 
-	pListElement->SetFixedHeight(kFriendListItemNormalHeight);
+	pListElement->SetFixedHeight(kUserListItemNormalHeight);
 
 	//CListContainerElementUI* pListElement = new CListContainerElementUI;
 	if (pListElement == NULL)
@@ -459,7 +459,7 @@ void CUIUserList::AddUser(UserListItemInfo *info)
 		}
 	}
 
-	pListElement->SetFixedHeight(kFriendListItemNormalHeight);
+	pListElement->SetFixedHeight(kUserListItemNormalHeight);
 
 	pListElement->SetTag(index);
 

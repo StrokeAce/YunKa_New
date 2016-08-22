@@ -503,5 +503,9 @@ char *FormatTime(time_t lTime, char *lpFmt)
 }
 
 
+inline double MyPow(double state) {
+	return pow(state, 2);
+}
+
 
 

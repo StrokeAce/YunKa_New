@@ -4,7 +4,7 @@
 #pragma once
 
 
-inline double CalculateDelay(double state) {
+inline static double  CalculateDelay(double state) {
 	return pow(state, 2);
 }
 
