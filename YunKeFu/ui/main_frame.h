@@ -174,6 +174,7 @@ public:
 	void CMainFrame::AddChatList(UserListItemInfo *info);
 	void CMainFrame::CreateFriendMenu();
 	UserListItemInfo *CMainFrame::GetOneUserItemInfo(unsigned long uid, string sid);
+	UserListItemInfo *CMainFrame::GetChatUserItemInfo(unsigned long uid);
 	void CMainFrame::RemoveOneUser(UserListItemInfo* getInfo);
 	void CMainFrame::OnActiveUser(UserListItemInfo *info);
 	void CMainFrame::OnMoveUserPos(UserListItemInfo *info, int nextType);

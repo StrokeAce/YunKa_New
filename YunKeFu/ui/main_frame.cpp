@@ -1215,6 +1215,30 @@ void CMainFrame::AddChatList(UserListItemInfo *info)
 
 }
 
+UserListItemInfo *CMainFrame::GetChatUserItemInfo(unsigned long uid)
+{
+
+	UserListItemInfo *info = NULL;
+	list<UserListItemInfo *>::iterator iter;
+
+	if (uid != 0)
+	{
+		iter = m_pInChatList.begin();
+		for (; iter != m_pInChatList.end(); iter++)
+		{
+			if ((*iter)->_uid == uid)
+			{
+				info = *iter;
+				break;
+			}
+		}
+	}
+	
+	return info;
+
+}
+
+
 
 UserListItemInfo *CMainFrame::GetOneUserItemInfo(unsigned long uid, string sid)
 {
@@ -2403,17 +2427,28 @@ void CMainFrame::OnItemActive(TNotifyUI &msg)
 				}
 			}
 
-			UserListItemInfo *data = new UserListItemInfo;
-			data->type = 3;
-			data->_uid = info->_uid;
-			data->nickName = info->_name;
-			data->userImage = GetCurrentPathW();
-			data->userImage += _T("\\res\\headimage\\host.png");
-			AddChatList(data);
 
-
-
+			UserListItemInfo *data = NULL;
+			data = GetChatUserItemInfo(info->_uid);
+	
+			if (data == NULL)
+			{
+				UserListItemInfo *data = new UserListItemInfo;
+				data->type = 3;
+				data->_uid = info->_uid;
+				data->nickName = info->_name;
+				data->userImage = GetCurrentPathW();
+				data->userImage += _T("\\res\\headimage\\host.png");
+				AddChatList(data);
+			}
+			
 			OnItemClickEvent(m_savedClickId, 0);
+
+
+
+
+
+	
 
 
 
