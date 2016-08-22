@@ -53,4 +53,6 @@ extern void ReplaceImageId(string &msg);
 
 extern char *FormatTime(time_t lTime, char *lpFmt);
 
+extern int FindFileExist(char *str);
+
 #endif

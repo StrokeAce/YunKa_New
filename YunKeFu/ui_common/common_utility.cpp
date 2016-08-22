@@ -7,6 +7,7 @@
 #include <Windows.h>
 #include <Psapi.h>
 #include <ShellAPI.h>
+#include <Shlwapi.h>
 
 using namespace std;
 
@@ -508,4 +509,13 @@ inline double MyPow(double state) {
 }
 
 
+
+//查看指定文件是否存在
+int FindFileExist(char *str)
+{
+	WCHAR path[1024] = { 0 };
+
+	ANSIToUnicode(str, path);
+	return PathFileExists(path);
+}
 
