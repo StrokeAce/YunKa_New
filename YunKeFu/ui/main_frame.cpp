@@ -25,7 +25,9 @@
 CMainFrame::CMainFrame(CChatManager* manager) :m_manager(manager)
 {
 
-	pMyChatList = pWaitChatList = pInvoteChatList = NULL;
+	pMyChatList = pWaitChatList = NULL;
+	pFriendMenu = NULL;
+	pFriendList = NULL;
 
 
 
@@ -97,11 +99,14 @@ CControlUI* CMainFrame::CreateControl(LPCTSTR pstrClass)
 	//	return new UserListUI;
 
 	if (_tcscmp(pstrClass, _T("UserList")) == 0)
-	{
-
 		return new CUIUserList(m_PaintManager);
 
-	}
+	if (_tcscmp(pstrClass, _T("FriendMenu")) == 0)
+		return new CUIFriendMenu(m_PaintManager);
+
+	if (_tcscmp(pstrClass, _T("FriendList")) == 0)
+		return new CUIFriendList(m_PaintManager);
+	
 
 	return NULL;
 }
@@ -454,7 +459,11 @@ void CMainFrame::OnPrepare(TNotifyUI& msg)
 
 	pMyChatList  = static_cast<CUIUserList*>(m_PaintManager.FindControl(_T("MyUserList")));
 	pWaitChatList = static_cast<CUIUserList*>(m_PaintManager.FindControl(_T("WaitUserList")));
-	pInvoteChatList = static_cast<CUIUserList*>(m_PaintManager.FindControl(_T("InvoteUserList")));
+
+
+	pFriendMenu = static_cast<CUIFriendMenu*>(m_PaintManager.FindControl(_T("FriendMenuName")));
+	pFriendList = static_cast<CUIFriendList*>(m_PaintManager.FindControl(_T("FriendListName")));
+	CreateFriendMenu();
 
 	//聊天框中间栏按钮
 	m_pFaceBtn = static_cast<CButtonUI*>(m_PaintManager.FindControl(_T("faceBtn")));
@@ -532,27 +541,36 @@ void CMainFrame::OnItemClick(TNotifyUI &msg)
 {
 	m_savedClickId = 0;
 
-	if (msg.pSender->GetName() == _T("AddListContainnerE"))
+	if (msg.pSender->GetName() == _T("AddListContainnerChatUser"))  //AddListContainnerLeftMenu    AddListContainnerFriendList
 	{
-		if (1)
+		if (_tcscmp(msg.pSender->GetClass(), _T("ListContainerElementUI")) == 0)
 		{
-			if (_tcscmp(msg.pSender->GetClass(), _T("ListContainerElementUI")) == 0)
-			{
-				//显示 rightoption 和中间的聊天界面
-				//HideWebBrowser();
+			//显示 rightoption 和中间的聊天界面
+			//HideWebBrowser();
 
-				UserListItemInfo *info = (UserListItemInfo *)msg.pSender->GetTag();
+			UserListItemInfo *info = (UserListItemInfo *)msg.pSender->GetTag();
+
+
+
+			m_savedClickId = info->_uid;
+			//m_curClickItemNode = node;
+			//CDuiString str = node->data()._text;
+			//m_savedClickId = node->data()._uid;
+			//m_curSavedSid = node->data()._sid;
+
+			OnItemClickEvent(m_savedClickId, 0);
+		}
+		
+	}
+
+	if (msg.pSender->GetName() == _T("AddListContainnerLeftMenu"))  //AddListContainnerLeftMenu    AddListContainnerFriendList
+	{
+		if (_tcscmp(msg.pSender->GetClass(), _T("ListContainerElementUI")) == 0)
+		{
 
 			
 
-				m_savedClickId = info->_uid;
-				//m_curClickItemNode = node;
-				//CDuiString str = node->data()._text;
-				//m_savedClickId = node->data()._uid;
-				//m_curSavedSid = node->data()._sid;
 
-				OnItemClickEvent(m_savedClickId, 0);
-			}
 		}
 	}
 
@@ -1037,22 +1055,12 @@ void CMainFrame::CheckIdForUerOrWebuser(unsigned long id,string sid,CWebUserObje
 }
 
 
+
 void CMainFrame::OnButtonDoChanged(TNotifyUI &msg)
 {
 	CTabLayoutUI* pTabControl = NULL;
 
 	if (msg.pSender->GetName() == _T("chat_msg_btn"))
-	{
-		pTabControl = static_cast<CTabLayoutUI*>(m_PaintManager.FindControl(_T("mid_left_tab_frame")));
-		if (pTabControl != NULL)
-		{
-			if (pTabControl->GetCurSel() != 0)
-			{
-				pTabControl->SelectItem(0);
-			}
-		}
-	}
-	else if (msg.pSender->GetName() == _T("wait_in_talk_btn"))
 	{
 		pTabControl = static_cast<CTabLayoutUI*>(m_PaintManager.FindControl(_T("mid_left_tab_frame")));
 		if (pTabControl != NULL)
@@ -1063,15 +1071,14 @@ void CMainFrame::OnButtonDoChanged(TNotifyUI &msg)
 			}
 		}
 	}
-
-	else if (msg.pSender->GetName() == _T("invote_user_btn"))
+	else if (msg.pSender->GetName() == _T("wait_in_talk_btn"))
 	{
 		pTabControl = static_cast<CTabLayoutUI*>(m_PaintManager.FindControl(_T("mid_left_tab_frame")));
 		if (pTabControl != NULL)
 		{
-			if (pTabControl->GetCurSel() != 2)
+			if (pTabControl->GetCurSel() != 0)
 			{
-				pTabControl->SelectItem(2);
+				pTabControl->SelectItem(0);
 			}
 		}
 	}
@@ -1084,6 +1091,7 @@ void CMainFrame::OnButtonDoChanged(TNotifyUI &msg)
 			if (pTabControl->GetCurSel() != 0)
 			{
 				pTabControl->SelectItem(0);
+				m_pListMsgHandler.handler->ShowBrowser(SW_SHOW);
 			}
 		}
 	}
@@ -1096,6 +1104,9 @@ void CMainFrame::OnButtonDoChanged(TNotifyUI &msg)
 			if (pTabControl->GetCurSel() != 1)
 			{
 				pTabControl->SelectItem(1);
+
+				m_pListMsgHandler.handler->ShowBrowser(SW_HIDE);
+
 			}
 		}
 	}
@@ -1176,20 +1187,30 @@ void CMainFrame::AddChatList(UserListItemInfo *info)
 {
 	if (info->type == 0)
 	{
+		info->smallText = L"";
 		pWaitChatList->AddUser(info);
 		
 		m_pWaitList.push_back(info);
 	}
 	else if (info->type == 1)
 	{
+		info->smallText = L"";
 		pMyChatList->AddUser(info);
 
 		m_pMyselfList.push_back(info);
 	}
 	else if (info->type == 2)
 	{
-		pInvoteChatList->AddUser(info);
+		info->smallText = L"(协助)";
+		pMyChatList->AddUser(info);
 		m_pInvoteList.push_back(info);
+	}
+
+	else if (info->type == 3)
+	{
+		info->smallText = L"(同事)";
+		pMyChatList->AddUser(info);
+		m_pInChatList.push_back(info);
 	}
 
 }
@@ -1304,14 +1325,14 @@ void CMainFrame::RemoveOneUser(UserListItemInfo* getInfo)
 	}
 	else if (getInfo->type == 2)
 	{
-		pInvoteChatList->Remove((CControlUI*)getInfo->plistElement);
+		pMyChatList->Remove((CControlUI*)getInfo->plistElement);
 
 		iter = m_pInvoteList.begin();
 		for (; iter != m_pInvoteList.end(); iter++)
 		{
 			if ((*iter) == getInfo)
 			{
-				m_pMyselfList.remove(*iter);
+				m_pInvoteList.remove(*iter);
 				break;
 			}
 		}
@@ -1427,7 +1448,7 @@ void CMainFrame::RecvShareListCount(int len)
 //回调过来的 坐席信息
 void CMainFrame::RecvUserInfo(CUserObject* pWebUser)
 {
-	//AddHostUserList(pUserList, pWebUser);
+	AddHostUserList(pWebUser);
 	m_recordListCount += 1;
 
 	if (m_recordListCount == m_userListCount)
@@ -1444,12 +1465,36 @@ void CMainFrame::RecvUserInfo(CUserObject* pWebUser)
 // 坐席上线消息
 void CMainFrame::RecvOnline(IBaseObject* pObj)
 {
+	if (pObj->m_nEMObType == OBJECT_USER)
+	{
+		CUserObject* pUser = (CUserObject*)pObj;
+		HostUserOnlineAndOffline(pUser, true);
+	}
+
+	else if (pObj->m_nEMObType == OBJECT_WEBUSER)
+	{
+		//CWebUserObject* pWebUser = (CWebUserObject*)pObj;
+
+		//VisitorUserOnlineAndOffline(pWebUser, true);
+	}
 
 }
 
 // 坐席下线消息
 void CMainFrame::RecvOffline(IBaseObject* pObj)
 {
+	if (pObj->m_nEMObType == OBJECT_USER)
+	{
+		CUserObject* pUser = (CUserObject*)pObj;
+		HostUserOnlineAndOffline(pUser, false);
+	}
+
+	else if (pObj->m_nEMObType == OBJECT_WEBUSER)
+	{
+		//CWebUserObject* pWebUser = (CWebUserObject*)pObj;
+
+		//VisitorUserOnlineAndOffline(pWebUser, true);
+	}
 
 }
 // 收到一个会话消息
@@ -1457,6 +1502,7 @@ void CMainFrame::RecvChatInfo(CWebUserObject* pWebUser, CUserObject* pUser)
 {
 	CDuiString text;
 	WCHAR name[64] = { 0 };
+	WCHAR headImage[1024] = { 0 };
 	UserListItemInfo *item = new UserListItemInfo;
 	CDuiString path = GetCurrentPathW();
 
@@ -1477,6 +1523,13 @@ void CMainFrame::RecvChatInfo(CWebUserObject* pWebUser, CUserObject* pUser)
 	}
 	item->_uid = pWebUser->webuserid;
 
+	/*
+	if (FindFileExist((char*)pWebUser->m_pWxUserInfo->headimgurl.c_str()) == 1 && !pWebUser->m_pWxUserInfo->headimgurl.empty())
+	{
+		ANSIToUnicode(pWebUser->m_pWxUserInfo->headimgurl.c_str(), headImage);
+		item->userImage = headImage;
+	}
+	*/
 
 	//先判断类型
 	//为接收的用户 在等待列表
@@ -1538,6 +1591,11 @@ void CMainFrame::RecvAcceptChat(CWebUserObject* pWebUser, CUserObject* pUser)
 			}
 			else
 				OnMoveUserPos(info, 2);			
+		}
+
+		else if (info->type == 1 || info->type == 2)
+		{
+			OnMoveUserPos(info, 0);
 		}
 	}
 
@@ -2291,7 +2349,7 @@ void CMainFrame::ResultSendMsg(string msgId, bool bSuccess, unsigned long userId
 void CMainFrame::OnItemActive(TNotifyUI &msg)
 {
 
-	if (msg.pSender->GetName() == _T("AddListContainnerE"))
+	if (msg.pSender->GetName() == _T("AddListContainnerChatUser"))
 	{
 		if (_tcscmp(msg.pSender->GetClass(), _T("ListContainerElementUI")) == 0) 
 		{
@@ -2313,15 +2371,52 @@ void CMainFrame::OnItemActive(TNotifyUI &msg)
 		}
 	}
 
-	else if (msg.pSender->GetName() == _T("talklist"))
+	else if (msg.pSender->GetName() == _T("AddListContainnerFriendList"))
 	{
-		if (_tcscmp(msg.pSender->GetClass(), _T("ListLabelElementUI")) == 0)
+		if (_tcscmp(msg.pSender->GetClass(), _T("ListContainerElementUI")) == 0)
 		{
-			//UserListUI::Node* node = (UserListUI::Node*)msg.pSender->GetTag();
-			//m_pTalkList->ExpandNode(node, !node->data()._expand);
-			//string sidText = node->data()._sid;
 
-			//DoRightShortAnswerList(sidText);
+			FriendListItemInfo *info = (FriendListItemInfo *)msg.pSender->GetTag();
+			
+
+
+			m_savedClickId = info->_uid;
+
+			//OnItemClickEvent(m_savedClickId, 0);
+
+			CTabLayoutUI *pTabControl = static_cast<CTabLayoutUI*>(m_PaintManager.FindControl(_T("left_button_tab_frame")));
+			if (pTabControl != NULL)
+			{
+				if (pTabControl->GetCurSel() != 0)
+				{
+					pTabControl->SelectItem(0);
+					m_pListMsgHandler.handler->ShowBrowser(SW_SHOW);
+				}
+			}
+
+			pTabControl = static_cast<CTabLayoutUI*>(m_PaintManager.FindControl(_T("mid_left_tab_frame")));
+			if (pTabControl != NULL)
+			{
+				if (pTabControl->GetCurSel() != 1)
+				{
+					pTabControl->SelectItem(1);
+				}
+			}
+
+			UserListItemInfo *data = new UserListItemInfo;
+			data->type = 3;
+			data->_uid = info->_uid;
+			data->nickName = info->_name;
+			data->userImage = GetCurrentPathW();
+			data->userImage += _T("\\res\\headimage\\host.png");
+			AddChatList(data);
+
+
+
+			OnItemClickEvent(m_savedClickId, 0);
+
+
+
 		}
 	}
 }
@@ -2335,16 +2430,17 @@ void CMainFrame::OnMoveUserPos(UserListItemInfo *info,int nextType)
 		return;
 	}
 
-	if (info->type == 0 && nextType == 1)
+	if (info->type == 0 && (nextType == 1 || nextType == 2))
 	{
 		RemoveOneUser(info);
 
-		info->type = 1;
+		info->type = nextType;
 
 		AddChatList(info);
 	}
 
-	else if (info->type == 1 && nextType == 0)
+
+	else if ((info->type == 1 || info->type == 2) && nextType == 0)
 	{
 		RemoveOneUser(info);
 
@@ -2518,6 +2614,21 @@ void CMainFrame::OnItemClickEvent(unsigned long id, int type)
 
 }
 
+void CMainFrame::ShowFriendFrame(int index)
+{
+
+	CTabLayoutUI *pTabControl = static_cast<CTabLayoutUI*>(m_PaintManager.FindControl(_T("friend_menu_tab_control")));
+	if (pTabControl != NULL)
+	{
+		if (pTabControl->GetCurSel() != 0)
+		{
+			pTabControl->SelectItem(0);
+		}
+	}
+
+
+}
+
 
 void CMainFrame::ChangeShowUserMsgWnd(unsigned long id)
 {
@@ -2573,6 +2684,132 @@ void CMainFrame::ShowClearMsg()
 		m_pListMsgHandler.handler->GetBrowser()->GetMainFrame()->ExecuteJavaScript(strCode, strUrl, 0);
 
 	}
+
+}
+
+
+void CMainFrame::CreateFriendMenu()
+{
+	FriendMenuItemInfo *pfMenu = new FriendMenuItemInfo;
+	
+	pfMenu->_image = GetCurrentPathW();
+	pfMenu->_image += _T("\\res\\headimage\\group.png");
+	pfMenu->_name = _T("联系人");
+	pfMenu->_menuIndex = 1;
+
+	pFriendMenu->AddUser(pfMenu);
+
+}
+
+
+
+void CMainFrame::HostUserOnlineAndOffline(CUserObject* pUser, bool type)
+{
+	int findResult = 0;
+	WCHAR showName[128] = L"";
+	char name[128] = "";
+
+	FriendListItemInfo *info=NULL;
+
+	list<FriendListItemInfo *>::iterator iter = m_pHostUserList.begin();
+	for (; iter != m_pHostUserList.end(); iter++)
+	{
+		if (pUser->UserInfo.uid == (*iter)->_uid)
+		{
+			findResult = 1;
+			info = *iter;
+			break;
+		}
+	}
+
+	if (findResult == 1)
+	{
+		info = new FriendListItemInfo;
+		info->_uid = pUser->UserInfo.uid;
+		info->_image = GetCurrentPathW();
+		info->_image += _T("\\res\\headimage\\host.png");
+	}
+
+
+	if (type == true)
+	{
+
+		if (pUser->status == USER_STATUS_ONLINE)  //当前坐席是离线状态 同时过来的状态是上线状态
+		{
+			info->type = 1;
+			sprintf(name, "%s(在线)", pUser->UserInfo.nickname);
+			ANSIToUnicode(name,showName);
+			info->_name = showName;
+
+			if (findResult == 1)
+			{
+				pFriendList->UpdateUserInfo(info);
+			}
+			else
+			{
+				pFriendList->AddUser(info);
+			}
+		}
+	}
+	else
+	{
+
+		if (pUser->status == USER_STATUS_OFFLINE)  //当前坐席是在线状态 同时过来的状态是离线状态
+		{
+
+			info->type = 0;
+			sprintf(name, "%s(离线)", pUser->UserInfo.nickname);
+			ANSIToUnicode(name, showName);
+			info->_name = showName;
+
+			if (findResult == 1)
+			{
+				pFriendList->UpdateUserInfo(info);
+			}
+			else
+			{
+				pFriendList->AddUser(info);
+			}
+		}
+
+	}
+}
+
+
+
+void CMainFrame::AddHostUserList(CUserObject *pUser)
+{
+	WCHAR showName[128] = L"";
+	char name[128] = "";
+
+	FriendListItemInfo *info = NULL;
+
+	info = new FriendListItemInfo;
+	info->_uid = pUser->UserInfo.uid;
+	info->_image = GetCurrentPathW();
+	info->_image += _T("\\res\\headimage\\host.png");
+
+
+	if (pUser->status == USER_STATUS_OFFLINE)                       //离线
+	{
+		info->type = 0;
+		sprintf(name, "%s(离线)", pUser->UserInfo.nickname);
+		ANSIToUnicode(name, showName);
+		info->_name = showName;
+
+	}
+	else  if (pUser->status == USER_STATUS_ONLINE)                   //在线
+	{
+		info->type = 1;
+		sprintf(name, "%s(在线)",pUser->UserInfo.nickname);
+		ANSIToUnicode(name, showName);
+		info->_name = showName;
+
+	}
+
+	pFriendList->AddUser(info);
+
+	m_pHostUserList.push_back(info);
 
 }
 
@@ -3275,111 +3512,6 @@ void CMainFrame::AddMyselfToList(UserListUI * ptr, CUserObject *user)
 }
 
 
-
-void CMainFrame::AddHostUserList(UserListUI * ptr, CUserObject *user)
-{
-	CDuiString nameString,taklString,changeString,acceptString,inTalkString;
-	CDuiString onlineString;
-	CDuiString strTemp;
-	int index = 0;
-
-	UserListUI::Node* pUserNameNode = NULL;
-	UserListUI::Node* pUserTalkNode = NULL;
-	UserListUI::Node* pUserChangeNode = NULL;
-	UserListUI::Node* pUserAcceptNode = NULL;
-	UserListUI::Node* pUserInTalkNode = NULL;
-
-	if (user->status == USER_STATUS_OFFLINE)  //离线
-	{
-		onlineString = _T("(离线)");
-
-		strTemp = AnsiToUnicode(user->UserInfo.nickname);
-		//nameString.Format(_T("{x 4}{i gameicons.png 18 0}{x 4} %s %s"), strTemp.GetData(), onlineString);
-		nameString.Format(_T("{x 4}{i user_client.png 1 0} %s %s"), strTemp.GetData(), onlineString);
-
-
-		if (m_pLastOfflineNode == NULL) // 第一个主节点 显示 名称 在线状态
-		{
-
-			if (m_pLastOnlineNode == NULL)
-				index = pUserList->GetNodeIndex(pMySelfeNode);
-			else
-				index = pUserList->GetNodeIndex(m_pLastOnlineNode);
-
-			pUserNameNode = ptr->AddNode(nameString, user->UserInfo.uid,index);
-			m_pLastOfflineNode = pUserNameNode;
-		}
-		else
-		{
-			index = pUserList->GetNodeIndex(m_pLastOfflineNode);
-			pUserNameNode = ptr->AddNode(nameString, user->UserInfo.uid,index);
-			m_pLastOfflineNode = pUserNameNode;
-		}
-
-
-	}
-	else  if (user->status == USER_STATUS_ONLINE)                   //在线
-	{
-		onlineString = _T("(在线)");
-
-		strTemp = AnsiToUnicode(user->UserInfo.nickname);
-		//nameString.Format(_T("{x 4}{i gameicons.png 18 0}{x 4} %s %s"), strTemp.GetData(), onlineString);
-		nameString.Format(_T("{x 4}{i user_client.png 1 0}{x 4} %s %s"), strTemp.GetData(), onlineString);
-
-
-		if (m_pLastOnlineNode == NULL) // 第一个主节点 显示 名称 在线状态
-		{
-			index = pUserList->GetNodeIndex(pMySelfeNode);
-			pUserNameNode = ptr->AddNode(nameString, user->UserInfo.uid, index);
-			m_pLastOnlineNode = pUserNameNode;
-		}
-		else
-		{
-			index = pUserList->GetNodeIndex(m_pLastOnlineNode);
-			pUserNameNode = ptr->AddNode(nameString, user->UserInfo.uid, index);
-			m_pLastOnlineNode = pUserNameNode;
-		}
-
-
-
-		//m_upUser.push_back(user);
-	}
-
-
-	pUserList->SetNodeHighlight(pUserNameNode, L"E:\\YunKa\\bin\\SkinRes\\mainframe\\tree_select.bmp");
-
-	taklString.Format(_T("{x 4}{i gameicons.png 18 10}{x 4}对话中"));
-	//pUserTalkNode = pUserList->AddNode(taklString, user->UserInfo.uid,"", pUserNameNode);
-	pUserTalkNode = pUserList->AddNode(taklString, 0, "", pUserNameNode);
-
-	changeString.Format(_T("{x 4}{i gameicons.png 18 10}{x 4}转接中"));
-	//pUserChangeNode = pUserList->AddNode(changeString, user->UserInfo.uid,"", pUserNameNode);
-	pUserChangeNode = pUserList->AddNode(changeString, 0, "", pUserNameNode);
-
-
-	acceptString.Format(_T("{x 4}{i gameicons.png 18 10}{x 4}邀请中"));
-	//pUserAcceptNode = pUserList->AddNode(acceptString, user->UserInfo.uid,"", pUserNameNode);
-	pUserAcceptNode = pUserList->AddNode(acceptString, 0, "", pUserNameNode);
-
-
-	if (user->status == USER_STATUS_OFFLINE)    //离线
-	{
-		m_offlineNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
-
-		//m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
-
-		pUserList->ExpandNode(pUserNameNode, false);
-
-	}
-	else  if (user->status == USER_STATUS_ONLINE) //在线
-	{
-		m_onlineNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
-		//m_allVisitorNodeMap.insert(pair<unsigned long, UserListUI::Node*>(user->UserInfo.uid, pUserNameNode));
-		pUserList->ExpandNode(pUserNameNode, true);
-		
-	}
-
-}
 
 
 
@@ -5751,84 +5883,6 @@ TREENODEENUM  CMainFrame::CheckIdForNodeType(unsigned long id)
 
 
 
-
-
-void CMainFrame::HostUserOnlineAndOffline(CUserObject* pUser, bool type)
-{
-	int index = 0;
-	if (type == true)
-	{
-
-		if (pUser->status == USER_STATUS_ONLINE)  //当前坐席是离线状态 同时过来的状态是上线状态
-		{
-			//先删除当前的离线坐席 list 再添加上线的坐席状态
-
-			map<unsigned long, UserListUI::Node*>::iterator  iter = m_offlineNodeMap.find(pUser->UserInfo.uid);
-			if (iter == m_offlineNodeMap.end())
-				return;
-
-			UserListUI::Node* tempNode = iter->second;
-
-
-			//先删除
-			if (tempNode != NULL && tempNode->data()._level >= 0 && tempNode->data()._level <= 5)
-				pUserList->RemoveNode(tempNode);
-
-			m_offlineNodeMap.erase(iter);
-
-			if (m_onlineNodeMap.size() > 0)
-			{
-				iter = m_onlineNodeMap.end();
-				iter--;
-
-				UserListUI::Node* mapNode = iter->second;
-				index = pUserList->GetNodeIndex(mapNode);
-			}
-			else
-				index = pUserList->GetNodeIndex(pMySelfeNode);
-
-			//再添加
-			AddHostUserList(pUserList, pUser, index);
-		}
-
-	}
-	else
-	{
-		int index = 0;
-		if (pUser->status == USER_STATUS_OFFLINE)  //当前坐席是在线状态 同时过来的状态是离线状态
-		{
-			//先删除当前的在线 坐席 list   再添加离线的坐席状态
-
-			map<unsigned long, UserListUI::Node*>::iterator  iter = m_onlineNodeMap.find(pUser->UserInfo.uid);
-			if (iter == m_onlineNodeMap.end())
-				return;
-
-
-			UserListUI::Node* tempNode = iter->second;
-			//先删除
-			if (tempNode != NULL && tempNode->data()._level >= 0 && tempNode->data()._level <= 5)
-				pUserList->RemoveNode(tempNode);
-
-			m_onlineNodeMap.erase(iter);
-
-
-			if (m_offlineNodeMap.size() > 0)
-			{
-				iter = m_offlineNodeMap.end();
-				iter--;
-
-				UserListUI::Node* mapNode = iter->second;
-				index = pUserList->GetNodeIndex(mapNode);
-			}
-			else
-				index = pUserList->GetNodeIndex(pMySelfeNode);
-
-			//再添加
-			AddHostUserList(pUserList, pUser, index);
-		}
-
-	}
-}
 
 void CMainFrame::VisitorUserOnlineAndOffline(CWebUserObject* pWebUser, bool type)
 {

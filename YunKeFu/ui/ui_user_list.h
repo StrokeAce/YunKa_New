@@ -11,8 +11,8 @@ typedef struct UserListItemStruct
 	std::string   _sid;
 	CDuiString  userImage;
 	CDuiString nickName;
-	CDuiString talkMsg;
-	CDuiString time;
+	CDuiString smallText;
+	CDuiString rightText;
 
 	CListContainerElementUI* plistElement;
 }UserListItemInfo;

@@ -1,34 +1,33 @@
-#ifndef __UI_FRIEND_LIST_H
-#define __UI_FRIEND_LIST_H
+#ifndef __UI_FRIEND_MENU_H
+#define __UI_FRIEND_MENU_H
 
 #pragma once
 #include <string>
 
-typedef struct FriendListItemStruct
+typedef struct FriendMenuItemStruct
 {
-	int type;
+	int _menuIndex;
 
-	unsigned long  _uid;
 	CDuiString    _name;
 	CDuiString    _image;
 
 	CListContainerElementUI* plistElement;
-}FriendListItemInfo;
+}FriendMenuItemInfo;
 
 
-class CUIFriendList : public CListUI
+class CUIFriendMenu : public CListUI
 {
 
 public:
 	enum { SCROLL_TIMERID = 10 };
 
-	CUIFriendList(CPaintManagerUI& paint_manager);
-	~CUIFriendList();
+	CUIFriendMenu(CPaintManagerUI& paint_manager);
+	~CUIFriendMenu();
 
 public:
-	void AddUser(FriendListItemInfo *info);
-	void CUIFriendList::UpdateUserInfo(FriendListItemInfo *info);
-	void CUIFriendList::UpdateUserInfo(FriendListItemInfo *info, int type);
+	void AddUser(FriendMenuItemInfo *info);
+	void CUIFriendMenu::UpdateUserInfo(FriendMenuItemInfo info);
+	void CUIFriendMenu::UpdateUserInfo(FriendMenuItemInfo info, int type);
 
 	bool Remove(CControlUI* pControl);
 

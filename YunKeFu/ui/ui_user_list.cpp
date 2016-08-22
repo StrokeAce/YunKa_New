@@ -216,8 +216,8 @@ void CUIUserList::UpdateUserInfo(UserListItemInfo info, int type)
 
 	else if (type == 3)
 	{
-		pLabelUI = static_cast<CButtonUI*>(m_paint_manager_.FindSubControlByName(pListElement, _T("history_chat_text_label")));
-		html_text = info.talkMsg;
+		pLabelUI = static_cast<CButtonUI*>(m_paint_manager_.FindSubControlByName(pListElement, _T("show_small_text_label")));
+		html_text = info.smallText;
 		if (pLabelUI != NULL)
 		{
 			pLabelUI->SetShowHtml(true);
@@ -227,8 +227,8 @@ void CUIUserList::UpdateUserInfo(UserListItemInfo info, int type)
 
 	else if (type == 4)
 	{
-		pLabelUI = static_cast<CButtonUI*>(m_paint_manager_.FindSubControlByName(pListElement, _T("talk_time_label")));
-		html_text = info.time;
+		pLabelUI = static_cast<CButtonUI*>(m_paint_manager_.FindSubControlByName(pListElement, _T("show_right_text_label")));
+		html_text = info.rightText;
 		if (pLabelUI != NULL)
 		{
 			pLabelUI->SetShowHtml(true);
@@ -296,18 +296,18 @@ void CUIUserList::AddUser(UserListItemInfo *info)
 	}
 
 
-	CLabelUI* labelMsg = static_cast<CButtonUI*>(m_paint_manager_.FindSubControlByName(pListElement, _T("history_chat_text_label")));
+	CLabelUI* labelMsg = static_cast<CButtonUI*>(m_paint_manager_.FindSubControlByName(pListElement, _T("show_small_text_label")));
 	if (labelMsg != NULL)
 	{
-		html_text = info->talkMsg;
+		html_text = info->smallText;
 		labelMsg->SetShowHtml(true);
 		labelMsg->SetText(html_text);
 	}
 
-	CLabelUI* labelTime = static_cast<CButtonUI*>(m_paint_manager_.FindSubControlByName(pListElement, _T("talk_time_label")));
+	CLabelUI* labelTime = static_cast<CButtonUI*>(m_paint_manager_.FindSubControlByName(pListElement, _T("show_right_text_label")));
 	if (labelTime != NULL)
 	{
-		html_text = info->time;
+		html_text = info->rightText;
 		labelTime->SetShowHtml(true);
 		labelTime->SetText(html_text);
 	}

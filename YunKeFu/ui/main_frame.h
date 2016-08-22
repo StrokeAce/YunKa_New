@@ -17,7 +17,8 @@
 #include "system_settings.h"
 #include "ui_user_list.h"
 #include "WndShadow.h"
-
+#include "ui_friend_menu.h"
+#include "ui_friend_list.h"
 
 
 
@@ -166,26 +167,34 @@ public:
 
 	void OnItemActive(TNotifyUI &msg);
 	void CMainFrame::OnButtonDoChanged(TNotifyUI &msg);
+
 	
 public:
 
 	void CMainFrame::AddChatList(UserListItemInfo *info);
-
+	void CMainFrame::CreateFriendMenu();
 	UserListItemInfo *CMainFrame::GetOneUserItemInfo(unsigned long uid, string sid);
 	void CMainFrame::RemoveOneUser(UserListItemInfo* getInfo);
 	void CMainFrame::OnActiveUser(UserListItemInfo *info);
 	void CMainFrame::OnMoveUserPos(UserListItemInfo *info, int nextType);
 
+	void CMainFrame::ShowFriendFrame(int index);
+
+	void AddHostUserList(CUserObject *pUser);
+
 public:
 
 	CUIUserList* pMyChatList;
 	CUIUserList* pWaitChatList;
-	CUIUserList* pInvoteChatList;
+	CUIFriendMenu* pFriendMenu;
+	CUIFriendList* pFriendList;
 
+	list<FriendListItemInfo *>m_pHostUserList;
 
 	list<UserListItemInfo *>m_pMyselfList;
 	list<UserListItemInfo *>m_pWaitList;
 	list<UserListItemInfo *>m_pInvoteList;
+	list<UserListItemInfo *>m_pInChatList;
 
 
 public:    //主界面消息回调
@@ -257,7 +266,7 @@ public:
 
 //操作树列表的操作
 	void SendMsgToGetList();
-	void AddHostUserList(UserListUI * ptr, CUserObject *user);
+
 	void AddHostUserList(UserListUI * ptr, CUserObject *user, int pos);
 	void AddOnlineVisitor(UserListUI * ptr, CUserObject *user, int index);
 	void AddMyselfToList(UserListUI * ptr, CUserObject *user);

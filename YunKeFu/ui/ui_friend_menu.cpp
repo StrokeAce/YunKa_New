@@ -1,10 +1,10 @@
 #include "../stdafx.h"
-#include "ui_friend_list.h"
+#include "ui_friend_menu.h"
 
 
 
-const int kFriendListItemNormalHeight      = 60;
-const int kFriendListItemSelectedHeight    = 60;
+const int kFriendMenuItemNormalHeight      = 60;
+const int kFriendMenuItemSelectedHeight    = 60;
 
 
 
@@ -25,7 +25,7 @@ static bool OnLogoButtonEvent(void* event) {
 }
 
 
-CUIFriendList::CUIFriendList(CPaintManagerUI& paint_manager)
+CUIFriendMenu::CUIFriendMenu(CPaintManagerUI& paint_manager)
 	:m_paint_manager_(paint_manager)
 	, delay_deltaY_(0)
 	, delay_number_(0)
@@ -36,14 +36,14 @@ CUIFriendList::CUIFriendList(CPaintManagerUI& paint_manager)
 
 }
 
-CUIFriendList::~CUIFriendList()
+CUIFriendMenu::~CUIFriendMenu()
 {
 
 }
 
 
 
-bool CUIFriendList::Add(CControlUI* pControl)
+bool CUIFriendMenu::Add(CControlUI* pControl)
 {
 
 	if (!pControl)
@@ -56,7 +56,7 @@ bool CUIFriendList::Add(CControlUI* pControl)
 }
 
 
-bool CUIFriendList::AddAt(CControlUI* pControl, int iIndex)
+bool CUIFriendMenu::AddAt(CControlUI* pControl, int iIndex)
 {
 	if (!pControl)
 		return false;
@@ -67,7 +67,7 @@ bool CUIFriendList::AddAt(CControlUI* pControl, int iIndex)
 	return CListUI::AddAt(pControl, iIndex);
 }
 
-bool CUIFriendList::Remove(CControlUI* pControl)
+bool CUIFriendMenu::Remove(CControlUI* pControl)
 {
 	if (!pControl) return false;
 	if (_tcscmp(pControl->GetClass(), _T("ListContainerElementUI")) != 0) return false;
@@ -76,7 +76,7 @@ bool CUIFriendList::Remove(CControlUI* pControl)
 	return CListUI::Remove(pControl);
 }
 
-bool CUIFriendList::RemoveAt(int iIndex)
+bool CUIFriendMenu::RemoveAt(int iIndex)
 {
 	CControlUI* pControl = GetItemAt(iIndex);
 	if (!pControl) return false;
@@ -86,12 +86,12 @@ bool CUIFriendList::RemoveAt(int iIndex)
 
 }
 
-void CUIFriendList::RemoveAll()
+void CUIFriendMenu::RemoveAll()
 {
 	CListUI::RemoveAll();
 }
 
-void CUIFriendList::DoEvent(TEventUI& event)
+void CUIFriendMenu::DoEvent(TEventUI& event)
 {
 	if (!IsMouseEnabled() && event.Type > UIEVENT__MOUSEBEGIN && event.Type < UIEVENT__MOUSEEND)
 	{
@@ -154,9 +154,9 @@ void CUIFriendList::DoEvent(TEventUI& event)
 	CListUI::DoEvent(event);
 }
 
-void CUIFriendList::UpdateUserInfo(FriendListItemInfo *info, int type)
+void CUIFriendMenu::UpdateUserInfo(FriendMenuItemInfo info, int type)
 {
-	CListContainerElementUI* pListElement = info->plistElement;
+	CListContainerElementUI* pListElement = info.plistElement;
 	CDuiString html_text;
 	TCHAR szBuf[MAX_PATH] = { 0 };
 
@@ -164,19 +164,19 @@ void CUIFriendList::UpdateUserInfo(FriendListItemInfo *info, int type)
 
 	if (type == 1)
 	{
-		pLabelUI = static_cast<CLabelUI*>(m_paint_manager_.FindSubControlByName(pListElement, _T("show_friend_image")));
+		pLabelUI = static_cast<CLabelUI*>(m_paint_manager_.FindSubControlByName(pListElement, _T("show_menu_group_image")));
 		if (pLabelUI != NULL)
 		{
-			pLabelUI->SetBkImage(info->_image.GetData());
+			pLabelUI->SetBkImage(info._image.GetData());
 		}
 
 	}
 	else if (type == 2)
 	{
-		_stprintf_s(szBuf, MAX_PATH - 1, _T("%s"), info->_name.GetData());
+		_stprintf_s(szBuf, MAX_PATH - 1, _T("%s"), info._name.GetData());
 		html_text += szBuf;
 
-		pLabelUI = static_cast<CLabelUI*>(m_paint_manager_.FindSubControlByName(pListElement, _T("show_name_text")));
+		pLabelUI = static_cast<CLabelUI*>(m_paint_manager_.FindSubControlByName(pListElement, _T("show_group_name_text")));
 		if (pLabelUI != NULL)
 		{
 			//	nick_name->SetFixedWidth(0);
@@ -186,12 +186,10 @@ void CUIFriendList::UpdateUserInfo(FriendListItemInfo *info, int type)
 
 	}
 
-
-
 }
 
 
-void CUIFriendList::UpdateUserInfo(FriendListItemInfo *info)
+void CUIFriendMenu::UpdateUserInfo(FriendMenuItemInfo info)
 {
 	UpdateUserInfo(info,1);
 	UpdateUserInfo(info, 2);
@@ -200,7 +198,7 @@ void CUIFriendList::UpdateUserInfo(FriendListItemInfo *info)
 }
 
 
-void CUIFriendList::AddUser(FriendListItemInfo *info)
+void CUIFriendMenu::AddUser(FriendMenuItemInfo *info)
 {
 	CListContainerElementUI* pListElement = NULL;
 
@@ -215,7 +213,7 @@ void CUIFriendList::AddUser(FriendListItemInfo *info)
 		pListElement = static_cast<CListContainerElementUI*>(m_dlgBuilder.Create((UINT)0, &m_paint_manager_));
 	}
 
-	pListElement->SetFixedHeight(kFriendListItemNormalHeight);
+	pListElement->SetFixedHeight(kFriendMenuItemNormalHeight);
 
 	//CListContainerElementUI* pListElement = new CListContainerElementUI;
 	if (pListElement == NULL)
