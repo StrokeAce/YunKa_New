@@ -207,7 +207,7 @@ int CLogin::GetTqAuthToken(unsigned int &uin, const char *szStrid, const char *s
 	if (!bAutoLogin && p.GetPostBodyParams(recvbuf, "uilist", t))
 	{
 		char server[MAX_128_LEN];
-		if (GetContentBetweenString(t.c_str(), "TCP:", ",", server));
+		if (GetContentBetweenString(t.c_str(), "TCP:", ",", server))
 		{
 			string info = server;
 			int pos = info.find(":");

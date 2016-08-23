@@ -17,16 +17,14 @@
 #include "chat_history_msg.h"
 #include "http_unit.h"
 #include "code_convert.h"
-#include "mmsystem.h"
+#include <mmsystem.h>
 #include <cctype>
 #include <algorithm>
 #include <process.h>
 #include <shlwapi.h>
 #include <functional>
-#include <shellapi.h>
 
 using namespace std;
-
 
 CChatManager::CChatManager()
 {
