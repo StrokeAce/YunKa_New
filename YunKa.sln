@@ -17,8 +17,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JpegLib", "YunKa\jpeglib\Jp
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MenuDemo", "D:\duilib\duilib\MenuDemo\MenuDemo.vcxproj", "{11A20D10-E0D7-447F-A546-8E4662C115C5}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChatManager", "ChatManager\ChatManager.vcxproj", "{FA6E64B7-6409-4C87-9439-73576F799261}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -98,16 +96,6 @@ Global
 		{11A20D10-E0D7-447F-A546-8E4662C115C5}.UnicodeDebug|Win32.Build.0 = UnicodeDebug|Win32
 		{11A20D10-E0D7-447F-A546-8E4662C115C5}.UnicodeRelease|Win32.ActiveCfg = UnicodeRelease|Win32
 		{11A20D10-E0D7-447F-A546-8E4662C115C5}.UnicodeRelease|Win32.Build.0 = UnicodeRelease|Win32
-		{FA6E64B7-6409-4C87-9439-73576F799261}.Debug|Win32.ActiveCfg = Debug|Win32
-		{FA6E64B7-6409-4C87-9439-73576F799261}.Debug|Win32.Build.0 = Debug|Win32
-		{FA6E64B7-6409-4C87-9439-73576F799261}.Release|Win32.ActiveCfg = Release|Win32
-		{FA6E64B7-6409-4C87-9439-73576F799261}.Release|Win32.Build.0 = Release|Win32
-		{FA6E64B7-6409-4C87-9439-73576F799261}.Template|Win32.ActiveCfg = Release|Win32
-		{FA6E64B7-6409-4C87-9439-73576F799261}.Template|Win32.Build.0 = Release|Win32
-		{FA6E64B7-6409-4C87-9439-73576F799261}.UnicodeDebug|Win32.ActiveCfg = Debug|Win32
-		{FA6E64B7-6409-4C87-9439-73576F799261}.UnicodeDebug|Win32.Build.0 = Debug|Win32
-		{FA6E64B7-6409-4C87-9439-73576F799261}.UnicodeRelease|Win32.ActiveCfg = Release|Win32
-		{FA6E64B7-6409-4C87-9439-73576F799261}.UnicodeRelease|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

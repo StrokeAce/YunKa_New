@@ -234,7 +234,6 @@
     <ClInclude Include="openssl\x509.h" />
     <ClInclude Include="openssl\x509v3.h" />
     <ClInclude Include="openssl\x509_vfy.h" />
-    <ClInclude Include="operation_tips.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -248,6 +247,7 @@
     <ClInclude Include="ui\main_frame.h" />
     <ClInclude Include="ui\menu_wnd.h" />
     <ClInclude Include="ui\observer_impl_base.hpp" />
+    <ClInclude Include="ui\operation_tips.h" />
     <ClInclude Include="ui\rich_edit_util.h" />
     <ClInclude Include="ui\select_online_user_wnd.h" />
     <ClInclude Include="ui\select_visitor_wnd.h" />
@@ -328,7 +328,6 @@
     <ClCompile Include="log\winlog.cpp" />
     <ClCompile Include="md5\md5.cpp" />
     <ClCompile Include="openssl\applink.c" />
-    <ClCompile Include="operation_tips.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -340,6 +339,7 @@
     <ClCompile Include="ui\gif_image.cpp" />
     <ClCompile Include="ui\login_wnd.cpp" />
     <ClCompile Include="ui\main_frame.cpp" />
+    <ClCompile Include="ui\operation_tips.cpp" />
     <ClCompile Include="ui\rich_edit_util.cpp" />
     <ClCompile Include="ui\select_online_user_wnd.cpp" />
     <ClCompile Include="ui\select_visitor_wnd.cpp" />
