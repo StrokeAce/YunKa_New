@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Window>
-  <ListContainerElement name="AddListContainnerE"  height="60" width="230">
+  <ListContainerElement name="AddListContainnerChatUser"  height="60" width="230">
    <VerticalLayout>
     <HorizontalLayout height="6" />
     <HorizontalLayout height="48">
@@ -15,10 +15,10 @@
 
       <VerticalLayout>
         <HorizontalLayout height="24">
-          <Label  pos="0,2,120,20"  name="nickname_label"   font="0" width="120" float="true" text="" />
+          <Label  pos="0,2,120,20"  name="nickname_label"   font="1" width="120" float="true" text="" />
         </HorizontalLayout>
         <HorizontalLayout>
-          <Label  pos="0,2,120,20"  name="history_chat_text_label"  font="0" width="110" float="true" text="" />
+          <Label  pos="0,2,120,20"  name="show_small_text_label"  font="0" width="110" float="true" text="" />
         </HorizontalLayout>
       </VerticalLayout>
    
@@ -27,7 +27,7 @@
         <HorizontalLayout height="14" />
 
         <HorizontalLayout >
-          <Label  pos="2,2,48,22" name="talk_time_label" font="0" float="true" text="" />
+          <Label  pos="2,2,48,22" name="show_right_text_label" font="0" float="true" text="" />
         </HorizontalLayout>
         
       </VerticalLayout>

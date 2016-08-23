@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Window>
+  <ListContainerElement name="AddListContainnerFriendList"  height="60" >
+   <VerticalLayout>
+    <HorizontalLayout height="6" />
+    <HorizontalLayout height="48">
+
+      <VerticalLayout width="10" />
+      <VerticalLayout width="48">
+
+        <Label name="show_friend_image" tooltip="" float="true" pos="0,0,48,48" height="48" width="48" bkimage="ykf\\user.png" />
+
+      </VerticalLayout>
+      <VerticalLayout width="10" />
+
+      <VerticalLayout>
+        <HorizontalLayout height="12" >
+        </HorizontalLayout>
+        <HorizontalLayout>
+          <Label  pos="0,2,120,20"  name="show_name_text"  font="0" width="140" float="true" text="" />
+        </HorizontalLayout>
+        <HorizontalLayout height="12" >
+        </HorizontalLayout>
+      </VerticalLayout>
+   
+      <VerticalLayout width="20">
+      </VerticalLayout>
+      
+    </HorizontalLayout>
+
+    <HorizontalLayout height="6" />
+ </VerticalLayout>      
+  </ListContainerElement>
+</Window>
+
+
+
