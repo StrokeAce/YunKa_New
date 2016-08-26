@@ -15,10 +15,10 @@
 
       <VerticalLayout>
         <HorizontalLayout height="24">
-          <Label  pos="0,2,120,20"  name="nickname_label"   font="1" width="120" float="true" text="" />
+          <Label  pos="0,2,180,20"  name="nickname_label" endellipsis="true"   font="1" width="180" float="true" text="" />
         </HorizontalLayout>
         <HorizontalLayout>
-          <Label  pos="0,2,120,20"  name="show_small_text_label"  font="0" width="110" float="true" text="" />
+          <Label  pos="0,2,120,20"  name="show_small_text_label"  endellipsis="true"   font="0" width="110" float="true" text="" />
         </HorizontalLayout>
       </VerticalLayout>
    

@@ -20,7 +20,7 @@
 
       <Control height="2" />
       <HorizontalLayout height="20">
-        <Label  pos="2,2,68,20" font="0" float="true" name="show_myself_info_lable" text="9692****...." width="65"/>
+        <Label  pos="2,2,70,20" font="0" float="true" align="center" name="show_myself_info_lable" text="" endellipsis="true"    width="68"/>
       </HorizontalLayout>
            
       <Control height="20" />
@@ -38,12 +38,8 @@
       </HorizontalLayout>
         
       
-      <HorizontalLayout height="110">
+      <HorizontalLayout height="65">
         <VerticalLayout> 
-           <HorizontalLayout height="38">
-              <Button name="add_other_button" bkimage="ykf\\add.png" tooltip="添加" pos="20,2,56,38" float="true" />
-           </HorizontalLayout>
-           <Control height="15" />
            <HorizontalLayout height="38">
               <Button name="system_set_button" bkimage="ykf\\set.png" tooltip="设置" pos="20,2,56,38" float="true" />
            </HorizontalLayout>
@@ -59,7 +55,7 @@
       <!-- 中间和右边  标题栏部分 -->
       <HorizontalLayout  height="23">
         
-        <VerticalLayout  width="230" bkcolor="FFF0F0F0">
+        <VerticalLayout  width="230"  bkcolor="FFF0F0F0" >
         </VerticalLayout>
       
         <VerticalLayout   bkcolor="FFFFFFFF">
@@ -84,34 +80,19 @@
       <!-- 中间和右边 全部部分 -->
       <HorizontalLayout>
          <TabLayout name="left_button_tab_frame">
-           <!-- tab 1-->
+           <!-- tab 1  消息页面    -->
            <HorizontalLayout>
-             <VerticalLayout>
-               <!-- 中间和右边  上半部分 -->
+             <!-- 左边 -->
+             <VerticalLayout  width="230" bkcolor="FFF0F0F0" >
                <HorizontalLayout  height="60">
-                  <!-- left -->
-                  <VerticalLayout  width="230" bkcolor="FFF0F0F0">
-                     <HorizontalLayout>
-
-                      </HorizontalLayout>
-                  </VerticalLayout>
-        
-                  <!-- right-->
-                  <VerticalLayout   bkcolor="FFFFFFFF">  
-                    <HorizontalLayout>
-       
-                    </HorizontalLayout>      
-                 </VerticalLayout>     
-               </HorizontalLayout>
-      
-               <!-- 上半部的划线部分-->
+                  <!-- left 上半部分-->
+           
+               </HorizontalLayout> 
+               <!-- 左边上半部的划线部分-->
                <HorizontalLayout   height="1" bkcolor="FFEBEBEB"  />
-      
-               <!-- 中间和右边  下半部分 -->
-               <HorizontalLayout>
-                  <!-- left -->
-                  <VerticalLayout  width="230" bkcolor="FFF0F0F0">
-                    <HorizontalLayout height="30" inset="2,1,3,1">
+
+               <!-- 左边显示 按钮 切换部分-->
+               <HorizontalLayout name="Left_HorizontalLayoutFrame_WND"  height="30" inset="2,1,3,1">
                       
                       <VerticalLayout width="115">
 
@@ -123,46 +104,53 @@
                         <Button name="chat_msg_btn" bkimage="file='ykf\\chat.png' dest='45,3,70,28'" tooltip="消息" pos="0,0,115,30" float="true" />
                      </VerticalLayout>
 
-                    </HorizontalLayout>
-          
-                     <!-- 划线 将按钮和  列表区分开-->
-                     <HorizontalLayout   height="1" bkcolor="FFEBEBEB"  />
-          
-                     <HorizontalLayout>    
-                       <TabLayout name="mid_left_tab_frame">
-
-                         <HorizontalLayout>
-                           <UserList name="WaitUserList" header="hidden" itemshowhtml="true" vscrollbar="true"/>
-                         </HorizontalLayout>
-
-
-                         <HorizontalLayout>
-                           <UserList name="MyUserList" header="hidden" itemshowhtml="true" vscrollbar="true"  autovscroll="true" menu="true" />
-                        </HorizontalLayout>
-
-                      
-
-                        <HorizontalLayout>
-                           <UserList name="HostUserList" header="hidden" itemshowhtml="true" vscrollbar="true"/>
-                        </HorizontalLayout>
-                        <HorizontalLayout>
-                           <UserList name="OtherUserList" header="hidden" itemshowhtml="true" vscrollbar="true"/>
-                        </HorizontalLayout>
-              
-                       </TabLayout>
-                     </HorizontalLayout>
-
-                  </VerticalLayout>
-        
-                  <!-- right -->
-                  <VerticalLayout   bkcolor="FFFFFFFF">  
-                    <HorizontalLayout   name="SHOW_MSG_HorizontalLayout_Frame">
+                </HorizontalLayout>
+               
+               <!-- 左边显示 列表 部分-->
+               <HorizontalLayout>
+                 <TabLayout name="mid_left_tab_frame">
+                   <HorizontalLayout>
+                      <UserList name="WaitUserList" header="hidden" itemshowhtml="true" vscrollbar="true"  autovscroll="true" menu="true" />
+                   </HorizontalLayout>
+                   
+                   <HorizontalLayout>
+                      <UserList name="MyUserList" header="hidden" itemshowhtml="true" vscrollbar="true"  autovscroll="true" menu="true" />
+                   </HorizontalLayout>
                   
-                    </HorizontalLayout>
-                    <!-- 划线 -->
-                    <HorizontalLayout   height="1" bkcolor="FFEBEBEB"  />
-                    <HorizontalLayout height="5" />
-                    <HorizontalLayout height="25" inset="2,1,2,2">
+                </TabLayout>
+              </HorizontalLayout>
+             
+              </VerticalLayout>
+                 
+             <!-- 右边 -->
+             <VerticalLayout>
+               <TabLayout name="right_show_msg_tablayout">
+                 <!-- right_show_msg_tablayout  tab  1  -->
+                 <VerticalLayout>
+                   <!-- 右边  上半部分 -->
+                   <HorizontalLayout  height="60">
+                   <!-- right-->
+                     <VerticalLayout   bkcolor="FFFFFFFF">  
+                       <HorizontalLayout>
+       
+                       </HorizontalLayout>      
+                     </VerticalLayout>     
+                   </HorizontalLayout>
+      
+                   <!-- 右边 上半部的划线部分-->
+                   <HorizontalLayout   height="1" bkcolor="FFEBEBEB"  />
+      
+                   <!-- 右边  下半部分 -->
+                   <HorizontalLayout>  
+                     <!-- right -->
+                     <VerticalLayout   bkcolor="FFFFFFFF">  
+                       <HorizontalLayout   name="SHOW_MSG_HorizontalLayout_Frame">
+                  
+                       </HorizontalLayout>
+                       <!-- 划线 -->
+                       <HorizontalLayout  name="Line_HorizontalLayout_Mid" height="1" bkcolor="FFEBEBEB"  />
+                       <HorizontalLayout height="5" />
+                       <HorizontalLayout height="25" inset="2,1,2,2">
                     
                       <Control width="18"/>
                       <Button name="faceBtn" tooltip="表情" height="20" width="20" bkimage="ykf\\face.png" />   
@@ -173,6 +161,10 @@
                       <Control width="18"/>
                       <Button name="fileSendBtn" tooltip="发送文件" height="20" width="20" bkimage="ykf\\file.png" />
 
+                         
+                      <Control width="18"/>
+                      <Button name="transferChatBtn" tooltip="转接会话" height="20" width="20" bkimage="ykf\\arrow_right.png" />
+                         
                       <Control width="18"/>
                       <Button name="releaseChatBtn" tooltip="释放会话" height="20" width="20" bkimage="ykf\\release.png" />
 
@@ -181,27 +173,50 @@
 
 
                     </HorizontalLayout>
-                    <HorizontalLayout height="3" />
-                    <HorizontalLayout height="70">     			
-                        <RichEdit name="richSend" multiline="true" vscrollbar="true" autovscroll="true" enabled="true" rich="true" readonly="false" wantreturn="true" wantctrlreturn="false" menu="true"  inset="2,2,2,2" />	       
-                    </HorizontalLayout>
+                       <HorizontalLayout height="3" />
+                       <HorizontalLayout height="70">     			
+                          <RichEdit name="richSend" multiline="true" vscrollbar="true" autovscroll="true" enabled="true" rich="true" readonly="false" wantreturn="true" wantctrlreturn="false" menu="true"  inset="2,2,2,2" />	       
+                       </HorizontalLayout>
                     
-                    <HorizontalLayout height="35">
-                      <VerticalLayout />
-                      <VerticalLayout width="80">
+                       <HorizontalLayout height="35">
+                         <VerticalLayout />
+                           <VerticalLayout width="80">
                         <Button name="sendMsgBtn" text="发送" float="true" font="5"  tooltip="发送" pos="0,3,70,28" hottextcolor="FF59B2A5" pushedtextcolor="FF59B2A5"  bkimage="ykf\\wcl.png" />
                       </VerticalLayout>
                     
-                    </HorizontalLayout>
+                       </HorizontalLayout>
                
-                  </VerticalLayout>
+                     </VerticalLayout>
      
-                </HorizontalLayout>
-             
+                   </HorizontalLayout>  
+                 
+                 </VerticalLayout>  
+                 
+                 <!-- right_show_msg_tablayout  tab  2  -->
+                 <VerticalLayout bkcolor="#FFFFFFFF">
+                   <!-- right 上半部分-->
+                   <HorizontalLayout  height="60">
+                       
+                        <Label  pos="20,10,200,50" font="23" float="true" name="check_msg_answer_label" text="验证消息" />
+                 
+                   </HorizontalLayout> 
+                   <!-- right 的划线部分-->
+                   <HorizontalLayout   height="1" bkcolor="FFEBEBEB"  />
+                   <!-- right 下半  部分-->
+                   <HorizontalLayout>
+                   
+           
+                   </HorizontalLayout> 
+                   
+               
+                 </VerticalLayout>                   
+               </TabLayout> 
+                                                            
              </VerticalLayout>
+           
            </HorizontalLayout>
             
-           <!-- tab 2-->
+           <!-- tab 2  联系人页面  -->
            <HorizontalLayout>
              <VerticalLayout  width="230" bkcolor="FFF0F0F0">
                <!-- 中间和右边  上半部分 -->
@@ -213,7 +228,7 @@
 
                 <HorizontalLayout>
                   
-                    <FriendMenu name="FriendMenuName" header="hidden" itemshowhtml="true" vscrollbar="true"  autovscroll="true" menu="true" />
+                    <MenuList name="FriendMenuName" header="hidden" itemshowhtml="true" vscrollbar="true"  autovscroll="true" menu="true" />
           
                 </HorizontalLayout>
                
@@ -221,20 +236,71 @@
       
              <VerticalLayout   bkcolor="FFFFFFFF">
 
-              <TabLayout name="friend_menu_tab_control">              
+              <TabLayout name="friend_menu_tab_control">    
+                <!-- tab    1 -->
                 <HorizontalLayout>
                   <VerticalLayout>
-                     <HorizontalLayout height="61">
+                     <HorizontalLayout height="60">
+                         
+                        <Label  pos="20,10,200,50" font="23" float="true" name="show_friend_list_top_label" text="协助对象" />
+                        
                      </HorizontalLayout>
-                     <HorizontalLayout inset="1,1,1,10">                  
-                       <FriendList name="FriendListName" header="hidden" itemshowhtml="true" vscrollbar="true"  autovscroll="true" menu="true" />                      
+                     <!-- 划线部分-->
+                     <HorizontalLayout   height="1" bkcolor="FFEBEBEB"  />
+                     <HorizontalLayout>   
+                       <VerticalLayout>
+                         <HorizontalLayout>                    
+                          <FriendList name="FriendListName" header="hidden" itemshowhtml="true" vscrollbar="true"  autovscroll="true" menu="true" />                      
+                         </HorizontalLayout> 
+                         <HorizontalLayout height="10" />  
+                       </VerticalLayout>
+                       
+                       <VerticalLayout width="40">
+                       </VerticalLayout>
                      </HorizontalLayout>
                   </VerticalLayout>
                 </HorizontalLayout>
 
+                <!-- tab    2 -->
                 <HorizontalLayout>
+                  <VerticalLayout>
+                    <!--  上半 部分 -->
+                    <HorizontalLayout height="30">
+                      
+                        <Button name="return_friend_list_button" align="right" text="返回" bkimage="file='ykf\\thc_backl.png' dest='20,6,27,16'" tooltip="返回" pos="20,2,80,28" float="true" />
+
+                    </HorizontalLayout>
+                     <!--  下半 部分 -->
+                    <HorizontalLayout   name="show_right_frend_info_H">
+                      <VerticalLayout name="show_right_frend_info_left" />
+                      <VerticalLayout width="170">
+                        <HorizontalLayout  name="show_right_frend_info_top" height="50">
+                          
+                        </HorizontalLayout>
+                        
+                        <!-- 显示联系人信息  -->
+                        <HorizontalLayout>
+                          <Label  pos="40,20,128,108"   bkimage="ykf\\user.png"   float="true" name="show_friend_info_name" />
+                          <Label  pos="20,118,148,138"      float="true" name="show_friend_info_name"   endellipsis="true"  />
+                          <Label  pos="20,148,148,168"  text="账号"  float="true" name="show_friend_info_id" />
+                          <Label  pos="20,178,148,198"   text="部门" float="true" name="show_friend_info_group" />
+                          <Label  pos="20,208,148,228"   text="手机" float="true" name="show_friend_info_tel_number" />                        
+                          <Button name="show_send_msg_wnd_button" align="center" text="发送消息" bkimage="ykf\\ldown.png"  pos="20,320,148,350" float="true" />                       
+                        </HorizontalLayout>
+                        
+                        <HorizontalLayout name="show_right_frend_info_bottom" height="80">
+                
+                        </HorizontalLayout>
+                        
+                      </VerticalLayout>
+                      <VerticalLayout name="show_right_frend_info_right" />
+                      
+                    </HorizontalLayout>
+                  
+                  </VerticalLayout>                                          
                 </HorizontalLayout>
 
+                <!-- tab    3 -->
                 <HorizontalLayout>
                 </HorizontalLayout>
               </TabLayout>
@@ -243,7 +309,62 @@
            
            </HorizontalLayout>
            
-           <!-- tab 3-->
+           <!-- tab 3  点击头像革新信息页面  -->
+           <HorizontalLayout>
+             <VerticalLayout  width="230" bkcolor="FFF0F0F0">
+               <HorizontalLayout>                   
+                 <MenuList name="UserSetMenu" header="hidden" itemshowhtml="true" vscrollbar="true"  autovscroll="true" menu="true" />  
+               </HorizontalLayout>
+             </VerticalLayout>
+      
+             <VerticalLayout   bkcolor="FFFFFFFF"> 
+               <!-- set tab -->
+               <TabLayout name="left_set_sys_info_tab">
+                 <!-- set tab1  个人资料 -->
+                 <HorizontalLayout>
+                   <VerticalLayout />
+                   <VerticalLayout width="170">
+                       <HorizontalLayout height="15" />
+                       <HorizontalLayout height="150">
+                         <Label  pos="30,10,120,100"   text="" float="true" bkimage="ykf\\user.png" />
+                         <Label  pos="30,110,120,140" font="22" name="show_top_user_name_lable"  text="" float="true"  /> 
+                         
+                       </HorizontalLayout>
+                       <HorizontalLayout height="40" />
+                       <HorizontalLayout>
+                         
+                         <Label  pos="20,20,150,40"  text="账号"  float="true" name="show_user_id"   endellipsis="true"  />
+                         <Label  pos="20,50,150,70"  text="姓名"    float="true" name="show_user_name"   endellipsis="true"  />
+                         <Label  pos="20,80,150,100"  text="性别"    float="true" name="show_user_sex"   endellipsis="true"  />
+                         <Label  pos="20,110,150,130"   text="部门" float="true" name="show_user_group"  endellipsis="true"   />
+                         <Label  pos="20,140,150,160"   text="邮箱" float="true" name="show_user_email"  endellipsis="true"    />
+                         <Label  pos="20,170,150,190"   text="手机" float="true" name="show_tel_number"  endellipsis="true"   />                        
+                         <Button name="show_user_edit_button" align="center" text="编辑" bkimage="ykf\\ldown.png"  pos="20,220,150,250" float="true" />                                  
+                       </HorizontalLayout>
+                   </VerticalLayout>
+                   <VerticalLayout />
+                                  
+                 </HorizontalLayout>
+                 
+                 <!-- set tab2  常规设置 -->
+                 <HorizontalLayout>
+                   
+                 
+                 </HorizontalLayout>
+                 
+                   <!-- set tab3  账号安全 -->
+                 <HorizontalLayout>
+                   
+                 
+                 </HorizontalLayout>
+             
+           
+               </TabLayout>
+             </VerticalLayout>
+             
+           </HorizontalLayout>
+           
+           <!-- tab 4 设置页面  -->
            <HorizontalLayout>
              <VerticalLayout  width="230" bkcolor="FFF0F0F0">
              </VerticalLayout>
@@ -252,6 +373,7 @@
              </VerticalLayout>
              
            </HorizontalLayout>
+        
       
          </TabLayout>
       

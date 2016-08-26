@@ -17,7 +17,7 @@
         <HorizontalLayout height="12" >
         </HorizontalLayout>
         <HorizontalLayout>
-          <Label  pos="0,2,120,20"  name="show_name_text"  font="0" width="140" float="true" text="" />
+          <Label  pos="0,2,180,20"  name="show_name_text"  font="0" width="180" endellipsis="true"   float="true" text="" />
         </HorizontalLayout>
         <HorizontalLayout height="12" >
         </HorizontalLayout>
