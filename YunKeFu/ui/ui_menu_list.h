@@ -1,36 +1,33 @@
-#ifndef __UI_USER_LIST_H
-#define __UI_USER_LIST_H
+#ifndef __UI_FRIEND_MENU_H
+#define __UI_FRIEND_MENU_H
 
 #pragma once
 #include <string>
 
-typedef struct UserListItemStruct
+typedef struct MenuItemStruct
 {
+	int _menuIndex;
 	int type;
-	unsigned long _uid;
-	std::string   _sid;
-	CDuiString  userImage;
-	CDuiString nickName;
-	CDuiString smallText;
-	CDuiString rightText;
+	CDuiString    _name;
+	CDuiString    _image;
 
 	CListContainerElementUI* plistElement;
-}UserListItemInfo;
+}MenuItemInfo;
 
 
-class CUIUserList : public CListUI
+class CUIMenuList : public CListUI
 {
 
 public:
 	enum { SCROLL_TIMERID = 10 };
 
-	CUIUserList(CPaintManagerUI& paint_manager);
-	~CUIUserList();
+	CUIMenuList(CPaintManagerUI& paint_manager);
+	~CUIMenuList();
 
 public:
-	void AddUser(UserListItemInfo *info);
-	void CUIUserList::UpdateUserInfo(UserListItemInfo *info);
-	void CUIUserList::UpdateUserInfo(UserListItemInfo *info, int type);
+	void AddUser(MenuItemInfo *info);
+	void CUIMenuList::UpdateUserInfo(MenuItemInfo info);
+	void CUIMenuList::UpdateUserInfo(MenuItemInfo info, int type);
 
 	bool Remove(CControlUI* pControl);
 

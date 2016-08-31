@@ -26,7 +26,7 @@ CMainFrame::CMainFrame(CChatManager* manager) :m_manager(manager)
 {
 
 	pMyChatList = pWaitChatList = NULL;
-	pFriendMenu = NULL;
+	pFriendMenu = pLeftSetMenu =  NULL;
 	pFriendList = NULL;
 
 
@@ -74,6 +74,8 @@ CMainFrame::CMainFrame(CChatManager* manager) :m_manager(manager)
 
 	memset(&m_centerChatInfo, 0, sizeof(m_centerChatInfo));
 	memset(&m_rightRectMax, 0, sizeof(m_rightRectMax));
+
+	m_savedSelectFriendInfo = NULL;
 }
 
 
@@ -101,8 +103,8 @@ CControlUI* CMainFrame::CreateControl(LPCTSTR pstrClass)
 	if (_tcscmp(pstrClass, _T("UserList")) == 0)
 		return new CUIUserList(m_PaintManager);
 
-	if (_tcscmp(pstrClass, _T("FriendMenu")) == 0)
-		return new CUIFriendMenu(m_PaintManager);
+	if (_tcscmp(pstrClass, _T("MenuList")) == 0)
+		return new CUIMenuList(m_PaintManager);
 
 	if (_tcscmp(pstrClass, _T("FriendList")) == 0)
 		return new CUIFriendList(m_PaintManager);
@@ -176,7 +178,7 @@ LRESULT CMainFrame::OnSysCommand(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& 
 			pControl = static_cast<CControlUI*>(m_PaintManager.FindControl(_T("restoreBtn")));
 			if (pControl) pControl->SetVisible(true);
 			
-			//MoveAndRestoreMsgWnd(0);
+			MoveAndRestoreMsgWnd(0);
 			//MoveAndRestoreRightFrameControl(0);
 		}
 		else {
@@ -185,7 +187,7 @@ LRESULT CMainFrame::OnSysCommand(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& 
 			pControl = static_cast<CControlUI*>(m_PaintManager.FindControl(_T("restoreBtn")));
 			if (pControl) pControl->SetVisible(false);
 
-			//MoveAndRestoreMsgWnd(1);
+			MoveAndRestoreMsgWnd(1);
 			//MoveAndRestoreRightFrameControl(1);
 		}
 	}
@@ -456,22 +458,7 @@ void CMainFrame::Notify(TNotifyUI& msg)
 
 void CMainFrame::OnPrepare(TNotifyUI& msg)
 {
-
-	pMyChatList  = static_cast<CUIUserList*>(m_PaintManager.FindControl(_T("MyUserList")));
-	pWaitChatList = static_cast<CUIUserList*>(m_PaintManager.FindControl(_T("WaitUserList")));
-
-
-	pFriendMenu = static_cast<CUIFriendMenu*>(m_PaintManager.FindControl(_T("FriendMenuName")));
-	pFriendList = static_cast<CUIFriendList*>(m_PaintManager.FindControl(_T("FriendListName")));
-	CreateFriendMenu();
-
-	//聊天框中间栏按钮
-	m_pFaceBtn = static_cast<CButtonUI*>(m_PaintManager.FindControl(_T("faceBtn")));
-	m_pScreenBtn = static_cast<CButtonUI*>(m_PaintManager.FindControl(_T("screenShotsBtn")));
-	pSendMsgBtn = static_cast<CButtonUI*>(m_PaintManager.FindControl(_T("sendMsgBtn")));
-
-	m_pVoiceBtn = static_cast<CButtonUI*>(m_PaintManager.FindControl(_T("voiceSendBtn")));
-	m_pSendFileBtn = static_cast<CButtonUI*>(m_PaintManager.FindControl(_T("fileSendBtn")));
+	InitControl();
 
 	//cef窗口
 	InitLibcef();
@@ -536,7 +523,6 @@ void CMainFrame::OnTimer(TNotifyUI& msg)
 
 
 
-
 void CMainFrame::OnItemClick(TNotifyUI &msg)
 {
 	m_savedClickId = 0;
@@ -550,15 +536,25 @@ void CMainFrame::OnItemClick(TNotifyUI &msg)
 
 			UserListItemInfo *info = (UserListItemInfo *)msg.pSender->GetTag();
 
+			if (info->type == -1)
+			{
+
+				ShowMsgFrame(1);
+
+			}
+			else
+			{
+			
+				m_savedClickId = info->_uid;
+				//m_curClickItemNode = node;
+				//CDuiString str = node->data()._text;
+				//m_savedClickId = node->data()._uid;
+				//m_curSavedSid = node->data()._sid;
+				ShowMsgFrame(0);
+				OnItemClickEvent(m_savedClickId, 0);
+			}
 
 
-			m_savedClickId = info->_uid;
-			//m_curClickItemNode = node;
-			//CDuiString str = node->data()._text;
-			//m_savedClickId = node->data()._uid;
-			//m_curSavedSid = node->data()._sid;
-
-			OnItemClickEvent(m_savedClickId, 0);
 		}
 		
 	}
@@ -567,10 +563,41 @@ void CMainFrame::OnItemClick(TNotifyUI &msg)
 	{
 		if (_tcscmp(msg.pSender->GetClass(), _T("ListContainerElementUI")) == 0)
 		{
+			MenuItemInfo *info = (MenuItemInfo *)msg.pSender->GetTag();
+			if (info->type == 1)
+			{
+				CTabLayoutUI *pTabControl = static_cast<CTabLayoutUI*>(m_PaintManager.FindControl(_T("left_set_sys_info_tab")));
+				if (pTabControl)
+				{
+					pTabControl->SelectItem(2-info->_menuIndex);
+				}
 
+			}
+			else if (info->type == 0)
+			{
+
+			}
+
+		}
+	}
+
+	if (msg.pSender->GetName() == _T("AddListContainnerFriendList"))  //AddListContainnerLeftMenu    AddListContainnerFriendList
+	{
+		if (_tcscmp(msg.pSender->GetClass(), _T("ListContainerElementUI")) == 0)
+		{
+			m_savedSelectFriendInfo = (FriendListItemInfo *)msg.pSender->GetTag();
+
+			ShowFriendFrame(1);
+
+			CLabelUI 	*label = static_cast<CLabelUI*>(m_PaintManager.FindControl(_T("show_friend_info_name")));
+			if (label)
+				label->SetText(m_savedSelectFriendInfo->_name);
+			CDuiString showData;
+			showData.Format(L"账号    %d", m_savedSelectFriendInfo->_uid);
+			label = static_cast<CLabelUI*>(m_PaintManager.FindControl(_T("show_friend_info_id")));
+			if (label)
+				label->SetText(showData.GetData());
 			
-
-
 		}
 	}
 
@@ -583,15 +610,15 @@ void CMainFrame::OnItemClick(TNotifyUI &msg)
 void CMainFrame::OnClick(TNotifyUI& msg)
 {
 	if (msg.pSender == m_pFaceBtn)
-		OnBtnFace(msg);
+		OnBtnFace(msg); //	表情
 	else if (msg.pSender == m_pScreenBtn)
-		OnBtnScreen(msg);
+		OnBtnScreen(msg);  //截图
 	else  if (msg.pSender == pSendMsgBtn)
-		OnBtnSendMessage(msg);
+		OnBtnSendMessage(msg);//发送消息
 	else if (msg.pSender == m_pVoiceBtn)
-		OnBtnVoice(msg);
+		OnBtnVoice(msg); //声音
 	else if (msg.pSender == m_pSendFileBtn)
-		OnBtnSendFile(msg);
+		OnBtnSendFile(msg); //发送文件
 
 	if (msg.pSender->GetName() == DEF_CLOSE_WND_BUTTON)
 	{
@@ -613,18 +640,28 @@ void CMainFrame::OnClick(TNotifyUI& msg)
 		OnMaxBtn(msg);
 	}
 
+	//转接会话
+	else  if (msg.pSender->GetName() == _T("transferChatBtn"))
+	{
+		m_manager->SendTo_ReleaseChat(m_curSelectId);
+	}
+	//释放会话
 	else  if (msg.pSender->GetName() == _T("releaseChatBtn"))
 	{
 		m_manager->SendTo_ReleaseChat(m_curSelectId);
 	}
-
+	//关闭会话
 	else  if (msg.pSender->GetName() == _T("closeChatBtn"))
 	{
 		m_manager->SendTo_CloseChat(m_curSelectId, CHATCLOSE_USER);
 	}
-
-
-
+	else  if (msg.pSender->GetName() == _T("return_friend_list_button"))
+		ShowFriendFrame(0);
+	
+	else if (msg.pSender->GetName() == _T("show_send_msg_wnd_button"))
+	{
+		OnJoinMsgWndBtn(msg);
+	}
 
 	else
 	    OnButtonDoChanged(msg);
@@ -634,6 +671,55 @@ void CMainFrame::OnClick(TNotifyUI& msg)
 }
 
 
+
+void CMainFrame::OnJoinMsgWndBtn(TNotifyUI& msg)
+{
+
+	m_savedClickId = m_savedSelectFriendInfo->_uid;
+
+
+	ShowMsgFrame(0);
+
+	CTabLayoutUI *pTabControl = static_cast<CTabLayoutUI*>(m_PaintManager.FindControl(_T("left_button_tab_frame")));
+	if (pTabControl != NULL)
+	{
+		if (pTabControl->GetCurSel() != 0)
+		{
+			pTabControl->SelectItem(0);
+			m_pListMsgHandler.handler->ShowBrowser(SW_SHOW);
+		}
+	}
+
+	pTabControl = static_cast<CTabLayoutUI*>(m_PaintManager.FindControl(_T("mid_left_tab_frame")));
+	if (pTabControl != NULL)
+	{
+		if (pTabControl->GetCurSel() != 1)
+		{
+			pTabControl->SelectItem(1);
+		}
+	}
+
+
+	UserListItemInfo *data = NULL;
+	data = GetChatUserItemInfo(m_savedSelectFriendInfo->_uid);
+
+	if (data == NULL)
+	{
+		UserListItemInfo *data = new UserListItemInfo;
+		data->type = 3;
+		data->_uid = m_savedSelectFriendInfo->_uid;
+		data->nickName = m_savedSelectFriendInfo->_name;
+		data->userImage = GetCurrentPathW();
+		data->userImage += _T("\\res\\headimage\\host.png");
+		AddChatList(data);
+
+		data->plistElement->Select(true);
+	}
+
+	OnItemClickEvent(m_savedClickId, 0);
+
+
+}
 
 
 void CMainFrame::OnMaxBtn(TNotifyUI& msg)
@@ -746,28 +832,7 @@ void CMainFrame::OnMenuEvent(CDuiString controlName)
 	//系统设置
 	else if (controlName == L"menu_sys_set")
 	{
-		//if (m_hSystemSettings == NULL)
-		{
-			m_hSystemSettings = new CSystemSettings();
-			m_hSystemSettings->m_sysConfig = m_manager->m_sysConfig;
-			m_hSystemSettings->Create(m_hWnd, _T(""), UI_WNDSTYLE_DIALOG, 0, 0, 0, 0, 0, NULL);
-			m_hSystemSettings->CenterWindow();
-
-			RECT sysRect;
-			GetWindowRect(m_hWnd, &sysRect);
-
-			int cx = 800;
-			int cy = 500;
-			int x = (sysRect.right - cx) / 2;
-			int y = (sysRect.bottom - cy) / 2;
-
-			::SetWindowPos((HWND)m_hSystemSettings, NULL, x, y, cx, cy, NULL);
-			::ShowWindow((HWND)m_hSystemSettings, SW_SHOW);
-		}
-		//else
-		{
-		//m_hSystemSettings->ShowWnd(SW_SHOW);
-		}
+		ShowSysSettingWnd();
 	}
 
 	//退出
@@ -1110,7 +1175,9 @@ void CMainFrame::OnButtonDoChanged(TNotifyUI &msg)
 			}
 		}
 	}
-	else if (msg.pSender->GetName() == _T("myself_head_image_btn"))
+
+	//暂时 将系统设置 和点击头像设置 界面合成为一个 预留tab3 
+	else if (msg.pSender->GetName() == _T("myself_head_image_btn") || msg.pSender->GetName() == _T("system_set_button"))
 	{
 		pTabControl = static_cast<CTabLayoutUI*>(m_PaintManager.FindControl(_T("left_button_tab_frame")));
 		if (pTabControl != NULL)
@@ -1118,13 +1185,29 @@ void CMainFrame::OnButtonDoChanged(TNotifyUI &msg)
 			if (pTabControl->GetCurSel() != 2)
 			{
 				pTabControl->SelectItem(2);
+				m_pListMsgHandler.handler->ShowBrowser(SW_HIDE);
+
+				if (msg.pSender->GetName() == _T("myself_head_image_btn"))
+				{
+					CTabLayoutUI *pTabControl = static_cast<CTabLayoutUI*>(m_PaintManager.FindControl(_T("left_set_sys_info_tab")));
+					if (pTabControl)
+					{
+						pTabControl->SelectItem(0);
+					}
+					pLeftSetMenu->SelectItem(0, true);
+				}
+				   
+
 			}
 		}
 	}
 
 
+
 	
-	
+
+
+
 
 }
 
@@ -1403,19 +1486,19 @@ void CMainFrame::InitLibcef(void)
 		string localUrl = GetCurrentPath();
 		localUrl += ("\\html\\list.html");
 		CCodeConvert f_covet;
-		string utfUrl;
+		string utfUrl;   
 		f_covet.Gb2312ToUTF_8(utfUrl, localUrl.c_str(), localUrl.length());
 
 
 		CControlUI *ShowMsgWnd = static_cast<CHorizontalLayoutUI*>(m_PaintManager.FindControl(_T("SHOW_MSG_HorizontalLayout_Frame")));
 
-		RECT rect, padRect;
-		rect = ShowMsgWnd->GetPos();
-		padRect = ShowMsgWnd->GetPadding();
-		int width = ShowMsgWnd->GetWidth();
-		int height = ShowMsgWnd->GetHeight();
+		RECT rect  = ShowMsgWnd->GetPos();
 
+		rect.right -= 5;
+	
 		m_pListMsgHandler.handler->CreateBrowser(this->m_hWnd, rect, utfUrl, Handler_ListMsg);
+		m_msgWndRect = rect;
+
 	}
 
 
@@ -2400,61 +2483,14 @@ void CMainFrame::OnItemActive(TNotifyUI &msg)
 		if (_tcscmp(msg.pSender->GetClass(), _T("ListContainerElementUI")) == 0)
 		{
 
-			FriendListItemInfo *info = (FriendListItemInfo *)msg.pSender->GetTag();
 			
-
-
-			m_savedClickId = info->_uid;
-
-			//OnItemClickEvent(m_savedClickId, 0);
-
-			CTabLayoutUI *pTabControl = static_cast<CTabLayoutUI*>(m_PaintManager.FindControl(_T("left_button_tab_frame")));
-			if (pTabControl != NULL)
-			{
-				if (pTabControl->GetCurSel() != 0)
-				{
-					pTabControl->SelectItem(0);
-					m_pListMsgHandler.handler->ShowBrowser(SW_SHOW);
-				}
-			}
-
-			pTabControl = static_cast<CTabLayoutUI*>(m_PaintManager.FindControl(_T("mid_left_tab_frame")));
-			if (pTabControl != NULL)
-			{
-				if (pTabControl->GetCurSel() != 1)
-				{
-					pTabControl->SelectItem(1);
-				}
-			}
-
-
-			UserListItemInfo *data = NULL;
-			data = GetChatUserItemInfo(info->_uid);
-	
-			if (data == NULL)
-			{
-				UserListItemInfo *data = new UserListItemInfo;
-				data->type = 3;
-				data->_uid = info->_uid;
-				data->nickName = info->_name;
-				data->userImage = GetCurrentPathW();
-				data->userImage += _T("\\res\\headimage\\host.png");
-				AddChatList(data);
-			}
-			
-			OnItemClickEvent(m_savedClickId, 0);
-
-
-
-
-
-	
 
 
 
 		}
 	}
 }
+
 
 
 void CMainFrame::OnMoveUserPos(UserListItemInfo *info,int nextType)
@@ -2655,11 +2691,40 @@ void CMainFrame::ShowFriendFrame(int index)
 	CTabLayoutUI *pTabControl = static_cast<CTabLayoutUI*>(m_PaintManager.FindControl(_T("friend_menu_tab_control")));
 	if (pTabControl != NULL)
 	{
-		if (pTabControl->GetCurSel() != 0)
+		if (pTabControl->GetCurSel() != index)
 		{
-			pTabControl->SelectItem(0);
+			pTabControl->SelectItem(index);
+
+			pTabControl->Invalidate();
+			if (index == 0)
+			{
+				m_savedSelectFriendInfo->plistElement->Select(false);
+			}
 		}
 	}
+
+
+}
+
+void CMainFrame::ShowMsgFrame(int index)
+{
+
+	CTabLayoutUI *pTabControl = static_cast<CTabLayoutUI*>(m_PaintManager.FindControl(_T("right_show_msg_tablayout")));
+	if (pTabControl != NULL)
+	{
+		if (pTabControl->GetCurSel() != index)
+		{
+			pTabControl->SelectItem(index);
+			if (index == 0)
+				m_pListMsgHandler.handler->ShowBrowser(SW_SHOW);
+			else
+				m_pListMsgHandler.handler->ShowBrowser(SW_HIDE);
+
+		}
+	
+
+	}
+
 
 
 }
@@ -2723,16 +2788,93 @@ void CMainFrame::ShowClearMsg()
 }
 
 
-void CMainFrame::CreateFriendMenu()
+void CMainFrame::InitControl()
 {
-	FriendMenuItemInfo *pfMenu = new FriendMenuItemInfo;
-	
+	CDuiString showText;
+	WCHAR buf[128] = L"";
+
+	pMyChatList = static_cast<CUIUserList*>(m_PaintManager.FindControl(_T("MyUserList")));
+	pWaitChatList = static_cast<CUIUserList*>(m_PaintManager.FindControl(_T("WaitUserList")));
+	pFriendMenu = static_cast<CUIMenuList*>(m_PaintManager.FindControl(_T("FriendMenuName")));
+	pFriendList = static_cast<CUIFriendList*>(m_PaintManager.FindControl(_T("FriendListName")));
+
+	pLeftSetMenu = static_cast<CUIMenuList*>(m_PaintManager.FindControl(_T("UserSetMenu")));
+
+	//聊天框中间栏按钮
+	m_pFaceBtn = static_cast<CButtonUI*>(m_PaintManager.FindControl(_T("faceBtn")));
+	m_pScreenBtn = static_cast<CButtonUI*>(m_PaintManager.FindControl(_T("screenShotsBtn")));
+	pSendMsgBtn = static_cast<CButtonUI*>(m_PaintManager.FindControl(_T("sendMsgBtn")));
+
+	m_pVoiceBtn = static_cast<CButtonUI*>(m_PaintManager.FindControl(_T("voiceSendBtn")));
+	m_pSendFileBtn = static_cast<CButtonUI*>(m_PaintManager.FindControl(_T("fileSendBtn")));
+
+	MenuItemInfo *pfMenu = new MenuItemInfo;
 	pfMenu->_image = GetCurrentPathW();
 	pfMenu->_image += _T("\\res\\headimage\\group.png");
 	pfMenu->_name = _T("联系人");
 	pfMenu->_menuIndex = 1;
-
+	pfMenu->type = 0;
 	pFriendMenu->AddUser(pfMenu);
+
+	for (int i = 0; i < 3;i++)
+	{
+		MenuItemInfo *setInfo = new MenuItemInfo;
+		setInfo->_image = GetCurrentPathW();
+
+
+
+		if (i == 0)
+		{
+			setInfo->_image += _T("\\SkinRes\\ykf\\user_safe.png");
+			setInfo->_name = _T("账号安全");
+		}
+		else if (i == 1)
+		{
+			setInfo->_image += _T("\\SkinRes\\ykf\\user_set.png");
+			setInfo->_name = _T("常规设置");
+		}
+
+		else if (i == 2)
+		{
+	
+			setInfo->_image += _T("\\SkinRes\\ykf\\user_info.png");
+			setInfo->_name = _T("个人资料");
+		}
+		
+
+	
+		setInfo->type = 1;
+		setInfo->_menuIndex = i ;
+		pLeftSetMenu->AddUser(setInfo);
+	}
+
+
+	UserListItemInfo *info = new UserListItemInfo;	
+    info->nickName = L"验证消息";
+	info->type = -1;
+	info->userImage = GetCurrentPathW();
+	info->userImage += _T("\\res\\headimage\\msg.png");
+
+	pMyChatList->AddUser(info);
+
+	showText.Format(L"%d", m_manager->m_userInfo.UserInfo.uid);
+	CLabelUI  *showNameLabel = static_cast<CLabelUI*>(m_PaintManager.FindControl(_T("show_myself_info_lable")));
+	if (showNameLabel)
+		showNameLabel->SetText(showText.GetData());
+
+	showText.Format(L"账号    %d", m_manager->m_userInfo.UserInfo.uid);
+	showNameLabel = static_cast<CLabelUI*>(m_PaintManager.FindControl(_T("show_user_id")));
+	if (showNameLabel)
+		showNameLabel->SetText(showText.GetData());
+
+	ANSIToUnicode(m_manager->m_userInfo.UserInfo.nickname, buf);
+	showText.Format(L"姓名    %s", buf);
+	showNameLabel = static_cast<CLabelUI*>(m_PaintManager.FindControl(_T("show_user_name")));
+	if (showNameLabel)
+		showNameLabel->SetText(showText.GetData());
+
+
+
 
 }
 
@@ -2741,10 +2883,13 @@ void CMainFrame::CreateFriendMenu()
 void CMainFrame::HostUserOnlineAndOffline(CUserObject* pUser, bool type)
 {
 	int findResult = 0;
+	int chatResult = 0;
 	WCHAR showName[128] = L"";
 	char name[128] = "";
 
-	FriendListItemInfo *info=NULL;
+	FriendListItemInfo *info = NULL;
+
+	UserListItemInfo *userInfo = NULL;
 
 	list<FriendListItemInfo *>::iterator iter = m_pHostUserList.begin();
 	for (; iter != m_pHostUserList.end(); iter++)
@@ -2757,7 +2902,19 @@ void CMainFrame::HostUserOnlineAndOffline(CUserObject* pUser, bool type)
 		}
 	}
 
-	if (findResult == 1)
+	list<UserListItemInfo *>::iterator userIter =  m_pInChatList.begin();
+	for (; userIter != m_pInChatList.end(); iter++)
+	{
+		if (pUser->UserInfo.uid == (*iter)->_uid)
+		{
+			chatResult = 1;
+			userInfo = *userIter;
+			break;
+		}
+	}
+
+
+	if (findResult == 0)
 	{
 		info = new FriendListItemInfo;
 		info->_uid = pUser->UserInfo.uid;
@@ -2784,6 +2941,13 @@ void CMainFrame::HostUserOnlineAndOffline(CUserObject* pUser, bool type)
 			{
 				pFriendList->AddUser(info);
 			}
+
+			if (chatResult == 1)
+			{
+				userInfo->nickName = showName;
+				pMyChatList->UpdateUserInfo(userInfo);
+			}
+			
 		}
 	}
 	else
@@ -2804,6 +2968,12 @@ void CMainFrame::HostUserOnlineAndOffline(CUserObject* pUser, bool type)
 			else
 			{
 				pFriendList->AddUser(info);
+			}
+
+			if (chatResult == 1)
+			{
+				userInfo->nickName = showName;
+				pMyChatList->UpdateUserInfo(userInfo);
 			}
 		}
 
@@ -2849,121 +3019,81 @@ void CMainFrame::AddHostUserList(CUserObject *pUser)
 }
 
 
+void CMainFrame::ShowSysSettingWnd()
+{
+
+	m_hSystemSettings = new CSystemSettings();
+	m_hSystemSettings->m_sysConfig = m_manager->m_sysConfig;
+	m_hSystemSettings->Create(m_hWnd, _T(""), UI_WNDSTYLE_DIALOG, 0, 0, 0, 0, 0, NULL);
+	m_hSystemSettings->CenterWindow();
+
+	RECT sysRect;
+	GetWindowRect(m_hWnd, &sysRect);
+
+	int cx = 800;
+	int cy = 500;
+	int x = (sysRect.right - cx) / 2;
+	int y = (sysRect.bottom - cy) / 2;
+
+	::SetWindowPos((HWND)m_hSystemSettings, NULL, x, y, cx, cy, NULL);
+	::ShowWindow((HWND)m_hSystemSettings, SW_SHOW);
+		
+	
+
+}
 
 
-#if 0
 
 void CMainFrame::MoveAndRestoreMsgWnd(int type)
 {
 	int leftWidth = 0;
-	RECT rc = { 0 }, rect = {0};
+	RECT rc = { 0 }, rect = { 0 };
 	RECT sysRect;
 	CDuiString formatString;
-	int changeType = 0;
+	CPoint cpoint;
 
-	CControlUI *leftLayout = static_cast<CHorizontalLayoutUI*>(m_PaintManager.FindControl(_T("VerticalLayoutUI_LeftFrame")));
-	CControlUI *lineLayout = static_cast<CHorizontalLayoutUI*>(m_PaintManager.FindControl(_T("VerticalLayoutUI_LeftLine1")));
-	CControlUI *centerLayout = static_cast<CHorizontalLayoutUI*>(m_PaintManager.FindControl(_T("VerticalLayoutUI_CenterFrame")));
-	CControlUI *rightLayout = static_cast<CHorizontalLayoutUI*>(m_PaintManager.FindControl(_T("VerticalLayoutUI_RightFrame")));
-	CControlUI *ShowMsgWnd = static_cast<CHorizontalLayoutUI*>(m_PaintManager.FindControl(_T("HorizontalLayoutUI_ShowMsg")));
+	CControlUI *ShowMsgWnd = static_cast<CHorizontalLayoutUI*>(m_PaintManager.FindControl(_T("SHOW_MSG_HorizontalLayout_Frame")));
+	
 
-	CControlUI *ShowRightWebWnd = static_cast<CHorizontalLayoutUI*>(m_PaintManager.FindControl(_T("right_tab")));
+	CControlUI *ShowLeftWnd = static_cast<CHorizontalLayoutUI*>(m_PaintManager.FindControl(_T("Left_HorizontalLayoutFrame_WND")));
 
 
-	CControlUI *optionButtonControl = static_cast<CHorizontalLayoutUI*>(m_PaintManager.FindControl(_T("right_option_button_HorizontalLayout")));
-
-	CButtonUI *button0 = static_cast<CButtonUI*>(m_PaintManager.FindControl(_T("option_button_5")));
-	CButtonUI *button1 = static_cast<CButtonUI*>(m_PaintManager.FindControl(_T("option_button_6")));
-	CButtonUI *button2 = static_cast<CButtonUI*>(m_PaintManager.FindControl(_T("option_button_7")));
+	
 
 	if (type == 0) //max
 	{
 		GetWindowRect(this->m_hWnd, &sysRect);
+		rect = ShowLeftWnd->GetPos();
+		if (m_leftWndRect.right == 0)
+			m_leftWndRect = rect;
 
-		if (sysRect.right >= 1280)
-			changeType = 1;
+		rect.left = rect.right; 
+		rect.right = sysRect.right - 5;
 
-		//设置按钮背景高度
-		if (changeType == 1)
-		    optionButtonControl->SetAttribute(L"height", L"26");
+		rect.bottom = sysRect.bottom - 139;
 
-		leftWidth = leftLayout->GetWidth();
-		leftWidth += lineLayout->GetWidth();
-		
-		int centerWidth = (sysRect.right - leftWidth) / 2;
-		int rightWidth = sysRect.right - leftWidth - centerWidth;
 
-		if (m_centerChatInfo.centerFrameWitdh == 0)
-		    m_centerChatInfo.centerFrameWitdh = centerLayout->GetWidth();
-		if (m_centerChatInfo.showMsgWidth == 0)
-		    m_centerChatInfo.showMsgWidth = ShowMsgWnd->GetWidth();
+		m_pListMsgHandler.handler->MoveBrowser(rect);
 
-		formatString.Format(_T("%d"), centerWidth);
-		centerLayout->SetAttribute(_T("width"), formatString);
-		formatString.Format(_T("%d"), rightWidth);
-		//rightLayout->SetAttribute(_T("width"), formatString);  //lxh 屏蔽掉 
 
-		//聊天框框
-		rc = ShowMsgWnd->GetPos();
-		rc.right = rc.left + centerWidth - 2;
-		m_pListMsgHandler.handler->MoveBrowser(rc);
-
-		//右侧的订单显示web
-		if (m_rightRectWnd.right == 0)
-			m_rightRectWnd = ShowRightWebWnd->GetPos();
-
-		rect.left = rc.right + 4;
-		rect.right = sysRect.right - 4;
-		if (changeType == 1)
-			rect.top += m_rightRectWnd.top-26;
-		else
-			rect.top += m_rightRectWnd.top - 26;
-
-		rect.bottom = sysRect.bottom - 4;
-		m_pVisitorRelatedHandler.handler->MoveBrowser(rect);
-		if (m_rightRectMax.right == 0)
-		    m_rightRectMax = rect;
-
-		//管理中心显示web
-		rect.left = m_mainCenterAndRightRect.left;
-		rect.right = sysRect.right - 4;
-		rect.top = m_mainCenterAndRightRect.top;
-		rect.bottom = sysRect.bottom - 4;
-		m_pWebURLHandler.handler->MoveBrowser(rect);
-
-		//右侧 option 按钮移动
-		if (changeType == 1)
-		{
-			rect = button0->GetPos();
-			rc = { rect.right, rect.top, rect.right + 70, rect.top + 26 };
-			button1->SetPos(rc);
-			rc = { rc.right, rc.top, rc.right + 70, rc.top + 26 };
-			button2->SetPos(rc);
-		}
 	}
 	else
 	{
-		formatString.Format(_T("%d"), m_centerChatInfo.centerFrameWitdh);
-		centerLayout->SetAttribute(_T("width"), formatString);
 
-		rc = ShowMsgWnd->GetPos();
-		rc.right = rc.left + m_centerChatInfo.showMsgWidth;
-		m_pListMsgHandler.handler->MoveBrowser(rc);
 
-		//设置按钮背景高度
-		optionButtonControl->SetAttribute(L"height", L"52");
 
-		//rc = ShowRightWebWnd->GetPos();
-		m_pVisitorRelatedHandler.handler->MoveBrowser(m_rightRectWnd);
-		m_pWebURLHandler.handler->MoveBrowser(m_mainCenterAndRightRect);
+		cpoint.x = m_msgWndRect.left;
+		cpoint.y = m_msgWndRect.top;
 
-		//右侧 option 按钮移动
-		button0 = static_cast<CButtonUI*>(m_PaintManager.FindControl(_T("option_button_1")));
-		rect = button0->GetPos();
-		rc = { rect.left, rect.bottom, rect.left + 70, rect.bottom + 26 };
-		button1->SetPos(rc);
-		rc = { rc.right, rc.top, rc.right + 70, rc.top + 26 };
-		button2->SetPos(rc);
+		ClientToScreen(this->m_hWnd, &cpoint);
+		rect.left = cpoint.x;
+		rect.right = rect.left + (m_msgWndRect.right - m_msgWndRect.left);
+		rect.top = cpoint.y;
+		rect.bottom = rect.top + (m_msgWndRect.bottom - m_msgWndRect.top);
+
+
+		m_pListMsgHandler.handler->MoveBrowser(m_msgWndRect);
+		
 	}
 }
 
@@ -2971,6 +3101,12 @@ void CMainFrame::MoveAndRestoreMsgWnd(int type)
 
 
 
+
+
+
+
+
+#if 0
 
 
 

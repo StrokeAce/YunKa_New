@@ -17,7 +17,7 @@
 #include "system_settings.h"
 #include "ui_user_list.h"
 #include "WndShadow.h"
-#include "ui_friend_menu.h"
+#include "ui_menu_list.h"
 #include "ui_friend_list.h"
 
 
@@ -172,7 +172,7 @@ public:
 public:
 
 	void CMainFrame::AddChatList(UserListItemInfo *info);
-	void CMainFrame::CreateFriendMenu();
+	void CMainFrame::InitControl();
 	UserListItemInfo *CMainFrame::GetOneUserItemInfo(unsigned long uid, string sid);
 	UserListItemInfo *CMainFrame::GetChatUserItemInfo(unsigned long uid);
 	void CMainFrame::RemoveOneUser(UserListItemInfo* getInfo);
@@ -180,15 +180,26 @@ public:
 	void CMainFrame::OnMoveUserPos(UserListItemInfo *info, int nextType);
 
 	void CMainFrame::ShowFriendFrame(int index);
-
+	void CMainFrame::ShowMsgFrame(int index);
+	void CMainFrame::ShowSysSettingWnd();
 	void AddHostUserList(CUserObject *pUser);
+	void CMainFrame::OnJoinMsgWndBtn(TNotifyUI& msg);
 
 public:
 
-	CUIUserList* pMyChatList;
-	CUIUserList* pWaitChatList;
-	CUIFriendMenu* pFriendMenu;
-	CUIFriendList* pFriendList;
+	CUIUserList* pMyChatList;      //用户栏 列表
+	CUIUserList* pWaitChatList;    //等待列表
+	CUIMenuList* pFriendMenu;    //联系人按钮列表
+	CUIFriendList* pFriendList;    //联系人列表
+
+	CUIMenuList* pLeftSetMenu;    //左侧设置 按钮列表
+	
+	FriendListItemInfo *m_savedSelectFriendInfo;  //联系人切换时的 信息存储
+
+	HandlerInfo m_pListMsgHandler; // 显示消息列表
+
+
+	RECT m_msgWndRect,m_leftWndRect;
 
 	list<FriendListItemInfo *>m_pHostUserList;
 
@@ -413,7 +424,7 @@ private:
 	CRichEditUI* m_pSendEdit;
 
 
-	HandlerInfo m_pListMsgHandler; // 消息列表
+
 	HandlerInfo m_pWebURLHandler; // 访客历史 访客来电 访客留言 客户管理 统计分析 
 	HandlerInfo m_pVisitorRelatedHandler;;
 

@@ -182,9 +182,9 @@ void CUIUserList::DoEvent(TEventUI& event)
 	CListUI::DoEvent(event);
 }
 
-void CUIUserList::UpdateUserInfo(UserListItemInfo info, int type)
+void CUIUserList::UpdateUserInfo(UserListItemInfo *info, int type)
 {
-	CListContainerElementUI* pListElement = info.plistElement;
+	CListContainerElementUI* pListElement = info->plistElement;
 	CDuiString html_text;
 	TCHAR szBuf[MAX_PATH] = { 0 };
 
@@ -195,13 +195,13 @@ void CUIUserList::UpdateUserInfo(UserListItemInfo info, int type)
 		pLabelUI = static_cast<CLabelUI*>(m_paint_manager_.FindSubControlByName(pListElement, _T("show_user_head_label")));
 		if (pLabelUI != NULL)
 		{
-			pLabelUI->SetBkImage(info.userImage.GetData());
+			pLabelUI->SetBkImage(info->userImage.GetData());
 		}
 
 	}
 	else if (type == 2)
 	{
-		_stprintf_s(szBuf, MAX_PATH - 1, _T("%s"), info.nickName);
+		_stprintf_s(szBuf, MAX_PATH - 1, _T("%s"), info->nickName);
 		html_text += szBuf;
 
 		pLabelUI = static_cast<CLabelUI*>(m_paint_manager_.FindSubControlByName(pListElement, _T("nickname_label")));
@@ -217,7 +217,7 @@ void CUIUserList::UpdateUserInfo(UserListItemInfo info, int type)
 	else if (type == 3)
 	{
 		pLabelUI = static_cast<CButtonUI*>(m_paint_manager_.FindSubControlByName(pListElement, _T("show_small_text_label")));
-		html_text = info.smallText;
+		html_text = info->smallText;
 		if (pLabelUI != NULL)
 		{
 			pLabelUI->SetShowHtml(true);
@@ -228,7 +228,7 @@ void CUIUserList::UpdateUserInfo(UserListItemInfo info, int type)
 	else if (type == 4)
 	{
 		pLabelUI = static_cast<CButtonUI*>(m_paint_manager_.FindSubControlByName(pListElement, _T("show_right_text_label")));
-		html_text = info.rightText;
+		html_text = info->rightText;
 		if (pLabelUI != NULL)
 		{
 			pLabelUI->SetShowHtml(true);
@@ -238,7 +238,7 @@ void CUIUserList::UpdateUserInfo(UserListItemInfo info, int type)
 }
 
 
-void CUIUserList::UpdateUserInfo(UserListItemInfo info)
+void CUIUserList::UpdateUserInfo(UserListItemInfo *info)
 {
 	UpdateUserInfo(info,1);
 	UpdateUserInfo(info, 2);
