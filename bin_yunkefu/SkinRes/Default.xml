@@ -13,7 +13,6 @@
   <Font name="微软雅黑" size="15" bold="false" italic="false" />
   <Font name="微软雅黑" size="16" bold="false" italic="false" />
   <Font name="微软雅黑" size="15" bold="true" italic="false" />
-  
   <Font name="微软雅黑" size="13" bold="true" italic="false" />
   <Font name="微软雅黑" size="12" bold="true" italic="false" />
   <Font name="微软雅黑" size="12" bold="false" italic="false" />
@@ -23,8 +22,8 @@
   <Font name="宋体" size="12" />
   <Font name="宋体" size="18" bold="true" />
   <Font name="宋体" size="20" bold="true" />
-  <Font name="宋体" size="20" bold="true" />
-  <Font name="方正舒体" size="50" bold="true" />
+  <Font name="宋体" size="15" bold="true" />
+  <Font name="宋体" size="22" bold="true" />
 
 
 	<Default name="VScrollBar" value="button1normalimage=&quot;file='Scrollbar\scroll.png' source='0,0,16,16'&quot; button1hotimage=&quot;file='Scrollbar\scroll.png' source='0,0,16,16' mask='#FFFF00FF'&quot; button1pushedimage=&quot;file='Scrollbar\scroll.png' source='0,16,16,32' mask='#FFFF00FF'&quot; button1disabledimage=&quot;file='Scrollbar\scroll.png' source='0,0,16,16' mask='#FFFF00FF'&quot; button2normalimage=&quot;file='Scrollbar\scroll.png' source='0,32,16,48' mask='#FFFF00FF'&quot; button2hotimage=&quot;file='Scrollbar\scroll.png' source='0,32,16,48' mask='#FFFF00FF'&quot; button2pushedimage=&quot;file='Scrollbar\scroll.png' source='0,48,16,64' mask='#FFFF00FF'&quot; button2disabledimage=&quot;file='Scrollbar\scroll.png' source='0,32,16,48' mask='#FFFF00FF'&quot; thumbnormalimage=&quot;file='Scrollbar\scroll.png' source='0,64,16,80' corner='2,2,2,2' mask='#FFFF00FF'&quot; thumbhotimage=&quot;file='Scrollbar\scroll.png' source='0,64,16,80' corner='2,2,2,2' mask='#FFFF00FF'&quot; thumbpushedimage=&quot;ffile='Scrollbar\scroll.png' source='0,64,16,80' corner='2,2,2,2' mask='#FFFF00FF'&quot; thumbdisabledimage=&quot;file='Scrollbar\scroll.png' source='0,64,16,80' corner='2,2,2,2' mask='#FFFF00FF'&quot; railnormalimage=&quot;file='Scrollbar\scroll.png' source='0,80,16,96' corner='2,2,2,2' mask='#FFFF00FF'&quot; railhotimage=&quot;file='Scrollbar\scroll.png' source='0,80,16,96' corner='2,2,2,2' mask='#FFFF00FF'&quot; railpushedimage=&quot;file='Scrollbar\scroll.png' source='0,96,16,112' corner='2,2,2,2' mask='#FFFF00FF'&quot; raildisabledimage=&quot;file='Scrollbar\scroll.png' source='0,80,16,96' corner='2,2,2,2' mask='#FFFF00FF'&quot; bknormalimage=&quot;file='Scrollbar\scroll.png' source='0,128,16,146' corner='2,2,2,2' mask='#FFFF00FF'&quot; bkhotimage=&quot;file='Scrollbar\scroll.png' source='0,128,16,146' corner='2,2,2,2' mask='#FFFF00FF'&quot; bkpushedimage=&quot;file='Scrollbar\scroll.png' source='0,128,16,146' corner='2,2,2,2' mask='#FFFF00FF'&quot; bkdisabledimage=&quot;file='Scrollbar\scroll.png' source='0,128,16,146' corner='2,2,2,2' mask='#FFFF00FF'&quot; " />
