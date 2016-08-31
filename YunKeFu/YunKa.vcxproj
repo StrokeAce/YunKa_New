@@ -255,8 +255,8 @@
     <ClInclude Include="ui\system_settings.h" />
     <ClInclude Include="ui\ui_crack.h" />
     <ClInclude Include="ui\ui_friend_list.h" />
-    <ClInclude Include="ui\ui_friend_menu.h" />
     <ClInclude Include="ui\ui_menu.h" />
+    <ClInclude Include="ui\ui_menu_list.h" />
     <ClInclude Include="ui\ui_user_list.h" />
     <ClInclude Include="ui\user_list.h" />
     <ClInclude Include="ui\WndShadow.h" />
@@ -350,8 +350,8 @@
     <ClCompile Include="ui\system_settings.cpp" />
     <ClCompile Include="ui\ui_crack.cpp" />
     <ClCompile Include="ui\ui_friend_list.cpp" />
-    <ClCompile Include="ui\ui_friend_menu.cpp" />
     <ClCompile Include="ui\ui_menu.cpp" />
+    <ClCompile Include="ui\ui_menu_list.cpp" />
     <ClCompile Include="ui\ui_user_list.cpp" />
     <ClCompile Include="ui\user_list.cpp" />
     <ClCompile Include="ui\WndShadow.cpp" />
